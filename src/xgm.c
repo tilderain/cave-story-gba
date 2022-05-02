@@ -6,8 +6,8 @@
 extern const uint8_t smp_null[0x100];
 
 // Variables
-extern volatile uint16_t xgmTempo;
-extern volatile uint16_t xgmTempoDef;
+static volatile uint16_t xgmTempo;
+static volatile uint16_t xgmTempoDef;
 extern volatile int16_t xgmTempoCnt;
 
 // default command and status value

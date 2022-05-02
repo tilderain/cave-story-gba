@@ -3,13 +3,13 @@
 #include "string.h"
 #include "vdp.h"
 
-extern uint32_t v_err_reg[8+8];
-extern uint32_t v_err_pc;
-extern uint32_t v_err_addr;
-extern uint16_t v_err_ext1;
-extern uint16_t v_err_ext2;
-extern uint16_t v_err_sr;
-extern uint8_t v_err_type;
+static uint32_t v_err_reg[8+8];
+static uint32_t v_err_pc;
+static uint32_t v_err_addr;
+static uint16_t v_err_ext1;
+static uint16_t v_err_ext2;
+static uint16_t v_err_sr;
+static uint8_t v_err_type;
 
 static const char *dieMsg = NULL;
 static const char *dieFile = NULL;

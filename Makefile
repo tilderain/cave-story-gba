@@ -90,7 +90,7 @@ MUSIC		:=
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork
 
-CFLAGS	:=	-g -Wall -Wno-unused-variable -O2\
+CFLAGS	:=	-g -Wall -Wno-unused-variable -Wno-unused-function -O2\
 		-mcpu=arm7tdmi -mtune=arm7tdmi\
 		$(ARCH)
 

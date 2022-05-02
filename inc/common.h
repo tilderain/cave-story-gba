@@ -55,8 +55,8 @@ static uint8_t FPS;
 // depending on region. To try and keep the speed of the game (mostly) the same,
 // a table for time and speed are used. On PAL, the values just match the index,
 // and on NTSC they are roughly index*5/6 for speed and index*6/5 for time respectively.
-extern const uint16_t *time_tab;
-extern const int16_t *speed_tab;
+static const uint16_t *time_tab;
+static const int16_t *speed_tab;
 
 extern const uint16_t time_tab_ntsc[0x400];
 extern const int16_t speed_tab_ntsc[0x400];

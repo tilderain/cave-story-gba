@@ -5,7 +5,7 @@
 
 #define USED        1
 
-extern uint32_t _bss_end;
+static uint32_t _bss_end;
 
 static uint16_t* s_free;
 static uint16_t* s_heap;

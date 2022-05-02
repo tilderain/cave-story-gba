@@ -1,3 +1,4 @@
+#pragma once
 /*
  * "Stage" refers to a level map. SGDK has a "Map" structure that is not used here,
  * so stage was chosen to avoid conflict

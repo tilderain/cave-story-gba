@@ -68,9 +68,9 @@ extern Entity *inactiveList;
 // References whichever entity is a boss otherwise it is NULL
 extern Entity *bossEntity;
 
-extern Entity *pieces[10]; // List for bosses to keep track of parts
+static Entity *pieces[10]; // List for bosses to keep track of parts
 
-extern Entity *water_entity;
+static Entity *water_entity;
 // Heightmaps for slope tiles
 extern const uint8_t heightmap[4][16];
 

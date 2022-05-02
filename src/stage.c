@@ -44,14 +44,14 @@ Current currents[4];
 uint8_t currentsCount = 0;
 uint8_t currentsTimer = 0;
 
-void stage_load_tileset();
-void stage_load_blocks();
+static void stage_load_tileset();
+static void stage_load_blocks();
 
-void stage_draw_block(uint16_t x, uint16_t y);
-void stage_draw_screen();
-void stage_draw_screen_credits();
-void stage_draw_background();
-void stage_draw_moonback();
+static void stage_draw_block(uint16_t x, uint16_t y);
+static void stage_draw_screen();
+static void stage_draw_screen_credits();
+static void stage_draw_background();
+static void stage_draw_moonback();
 
 void stage_load(uint16_t id) {
 	vdp_set_display(FALSE);
@@ -499,7 +499,7 @@ void stage_draw_background() {
 	}
 }
 
-void stage_draw_moonback() {
+static void stage_draw_moonback() {
 	const uint32_t *topTiles, *btmTiles;
 	const uint16_t *topMap, *btmMap;
 	if(stageBackgroundType == 1) {
