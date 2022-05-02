@@ -1,45 +1,14 @@
-MARSDEV ?= ${HOME}/mars
-MARSBIN  = $(MARSDEV)/m68k-elf/bin
-TOOLSBIN = $(MARSDEV)/bin
+#---------------------------------------------------------------------------------
+.SUFFIXES:
+#---------------------------------------------------------------------------------
 
-TARGET = doukutsu
-
-CC   = $(MARSBIN)/m68k-elf-gcc
-AS   = $(MARSBIN)/m68k-elf-as
-LD   = $(MARSBIN)/m68k-elf-ld
-NM   = $(MARSBIN)/m68k-elf-nm
-OBJC = $(MARSBIN)/m68k-elf-objcopy
-
-# Z80 Assembler to build XGM driver
-ASMZ80   = $(TOOLSBIN)/sjasm
-# SGDK Tools
-BINTOS   = bin/bintos
-RESCOMP  = bin/rescomp
-WAVTORAW = bin/wavtoraw
-XGMTOOL  = bin/xgmtool
-# Sik's Tools
-MDTILER  = $(TOOLSBIN)/mdtiler
-SLZ      = $(TOOLSBIN)/slz
-UFTC     = $(TOOLSBIN)/uftc
-# Cave Story Tools
-TSCOMP   = bin/tscomp
-PATCHROM = bin/patchrom
-
-# Some files needed are in a versioned directory
-GCC_VER := $(shell $(CC) -dumpversion)
-PLUGIN   = $(MARSDEV)/m68k-elf/libexec/gcc/m68k-elf/$(GCC_VER)
-LTO_SO   = liblto_plugin.so
-ifeq ($(OS),Windows_NT)
-    LTO_SO = liblto_plugin-0.dll
+ifeq ($(strip $(DEVKITARM)),)
+$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
-INCS     = -Isrc -Ires -Iinc
-LIBS     = -L$(MARSDEV)/m68k-elf/lib/gcc/m68k-elf/$(GCC_VER)
-CCFLAGS  = -m68000 -Wall -Wextra -std=c99 -ffreestanding -fcommon -mshort
-OPTIONS  =
-ASFLAGS  = -m68000 --register-prefix-optional
-LDFLAGS  = -T mdssf.ld -nostdlib
-Z80FLAGS = -isrc/xgm
+include $(DEVKITARM)/gba_rules
+
+
 
 # Stage layout files to compress
 PXMS  = $(wildcard res/Stage/*.pxm)
@@ -94,180 +63,175 @@ ASMO  = $(RESS:.res=.o)
 ASMO += $(Z80S:.s80=.o)
 ASMO += $(CS:%.c=asmout/%.s)
 
-.SECONDARY: $(TARGET)-en.elf
+# SGDK Tools
+BINTOS   = bin/bintos
+RESCOMP  = bin/rescomp
+WAVTORAW = bin/wavtoraw
+XGMTOOL  = bin/xgmtool
+# Sik's Tools
+MDTILER  = $(TOOLSBIN)/mdtiler
+SLZ      = $(TOOLSBIN)/slz
+UFTC     = $(TOOLSBIN)/uftc
 
-.PHONY: all pal sega release asm debug translate prereq main-build
-
-all: release
-pal: release
-
-sega: OPTIONS += -DSEGA_LOGO
-sega: release
-
-release: OPTIONS += -O3 -fno-web -fno-gcse -fno-unit-at-a-time -fomit-frame-pointer
-release: OPTIONS += -fshort-enums -flto -fuse-linker-plugin
-release: main-build symbol.txt
-
-asm: OPTIONS += -O3 -fno-web -fno-gcse -fno-unit-at-a-time -fomit-frame-pointer
-asm: OPTIONS += -fshort-enums -fverbose-asm
-asm: prereq head-gen asm-dir $(PATS) $(ASMO)
-
-# Gens-KMod, BlastEm and UMDK support GDB tracing, enabled by this target
-debug: OPTIONS = -g -Og -DDEBUG -DKDEBUG
-debug: main-build symbol.txt
-
-translate: $(PATCHROM) $(TL_TSBS)
-translate: $(TARGET)-es.bin $(TARGET)-fr.bin $(TARGET)-de.bin $(TARGET)-it.bin
-translate: $(TARGET)-pt.bin $(TARGET)-br.bin $(TARGET)-ja.bin $(TARGET)-zh.bin
-translate: $(TARGET)-ko.bin
-
-main-build: prereq head-gen $(TARGET)-en.bin
-
-prereq: $(BINTOS) $(RESCOMP) $(XGMTOOL) $(WAVTORAW) $(TSCOMP)
-prereq: $(CPXMS) $(XGCS) $(PCMS) $(CTSETS) $(ZOBJ) $(TSBS)
-
-# Cross reference symbol.txt with the addresses displayed in the crash handler
-symbol.txt: $(TARGET)-en.bin
-	$(NM) --plugin=$(PLUGIN)/$(LTO_SO) -n $(TARGET)-en.elf > symbol.txt
-
-boot.o:
-	$(AS) $(ASFLAGS) boot.s -o $@
-
-$(TARGET)-en.bin: $(TARGET)-en.elf
-	@echo "Stripping ELF header, pad to 512K"
-	@$(OBJC) -O binary $< temp.bin
-	@dd if=temp.bin of=$@ bs=524288 conv=sync
-	@rm -f temp.bin
-
-%.elf: boot.o $(PATS) $(OBJS)
-	$(CC) -o $@ $(LDFLAGS) boot.o $(OBJS) $(LIBS)
-
-%.o: %.c
-	@echo "CC $<"
-	@$(CC) $(CCFLAGS) $(OPTIONS) $(INCS) -c $< -o $@
-
-%.o: %.s 
-	@echo "AS $<"
-	@$(AS) $(ASFLAGS) $< -o $@
 
 %.s: %.res
 	$(RESCOMP) $< $@
+#---------------------------------------------------------------------------------
+# TARGET is the name of the output
+# BUILD is the directory where object files & intermediate files will be placed
+# SOURCES is a list of directories containing source code
+# INCLUDES is a list of directories containing extra header files
+# DATA is a list of directories containing binary data
+# GRAPHICS is a list of directories containing files to be processed by grit
+#
+# All directories are specified relative to the project directory where
+# the makefile is found
+#
+#---------------------------------------------------------------------------------
+TARGET		:= $(notdir $(CURDIR))
+BUILD		:= build
+SOURCES		:= src
+INCLUDES	:= inc res
+DATA		:=
+MUSIC		:=
 
-%.o80: %.s80
-	$(ASMZ80) $(Z80FLAGS) $< $@ out.lst
+#---------------------------------------------------------------------------------
+# options for code generation
+#---------------------------------------------------------------------------------
+ARCH	:=	-mthumb -mthumb-interwork
 
-# Old SGDK tools
-bin:
-	mkdir -p bin
+CFLAGS	:=	-g -Wall -O2\
+		-mcpu=arm7tdmi -mtune=arm7tdmi\
+		$(ARCH)
 
-$(BINTOS): bin
-	cc tools/bintos/src/*.c -o $@
-	
-$(RESCOMP): bin
-	cc tools/rescomp/src/*.c -Itools/rescomp/inc -o $@
+CFLAGS	+=	$(INCLUDE)
 
-$(XGMTOOL): bin
-	cc tools/xgmtool/src/*.c -Itools/xgmtool/inc -o $@ -lm
+CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
-$(WAVTORAW): bin
-	cc tools/wavtoraw/src/*.c -o $@ -lm
+ASFLAGS	:=	-g $(ARCH)
+LDFLAGS	=	-g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-# Cave Story tools
-$(TSCOMP): bin
-	cc tools/tscomp/tscomp.c -o $@
-
-$(PATCHROM): bin
-	cc tools/patchrom/patchrom.c -o $@
-
-# For asm target
-asm-dir:
-	mkdir -p asmout/src/{ai,db,xgm}
-
-asmout/%.s: %.c
-	$(CC) $(CCFLAGS) $(OPTIONS) $(INCS) -S $< -o $@
-
-# Compression of stage layouts
-%.cpxm: %.pxm
-	$(SLZ) -c "$<" "$@"
-
-%.pat: %.mdt
-	$(MDTILER) -b "$<"
-
-# Compression of tilesets
-%.uftc: %.pat
-	$(UFTC) -c "$<" "$@"
-
-%.pat: %.png
-	$(MDTILER) -t "$<" "$@"
-
-# Convert VGM
-%.xgc: %.vgm
-	$(XGMTOOL) "$<" "$@" -s
-
-# Convert WAV
-%.pcm: %.wav
-	$(WAVTORAW) "$<" "$@" 14000
-
-# Convert TSC
-res/tsc/en/%.tsb: res/tsc/en/%.txt
-	$(TSCOMP) -l=en "$<"
-res/tsc/ja/%.tsb: res/tsc/ja/%.txt
-	$(TSCOMP) -l=ja "$<"
-res/tsc/es/%.tsb: res/tsc/es/%.txt
-	$(TSCOMP) -l=es "$<"
-res/tsc/pt/%.tsb: res/tsc/pt/%.txt
-	$(TSCOMP) -l=pt "$<"
-res/tsc/fr/%.tsb: res/tsc/fr/%.txt
-	$(TSCOMP) -l=fr "$<"
-res/tsc/it/%.tsb: res/tsc/it/%.txt
-	$(TSCOMP) -l=it "$<"
-res/tsc/de/%.tsb: res/tsc/de/%.txt
-	$(TSCOMP) -l=de "$<"
-res/tsc/br/%.tsb: res/tsc/br/%.txt
-	$(TSCOMP) -l=br "$<"
-res/tsc/zh/%.tsb: res/tsc/zh/%.txt
-	$(TSCOMP) -l=zh "$<"
-res/tsc/ko/%.tsb: res/tsc/ko/%.txt
-	$(TSCOMP) -l=ko "$<"
-
-# Generate patches
-res/patches/$(TARGET)-%.patch: res/patches/$(TARGET)-%.s
-	$(AS) $(ASFLAGS) "$<" -o "temp.o"
-	$(LD) $(LDFLAGS) "temp.o" -o "temp.elf"
-	$(OBJC) -O binary "temp.elf" "$@"
-
-# Apply patches
-$(TARGET)-ja.bin: res/patches/$(TARGET)-ja.patch
-	$(PATCHROM) $(TARGET)-en.bin "$<" "$@"
-$(TARGET)-es.bin: res/patches/$(TARGET)-es.patch
-	$(PATCHROM) $(TARGET)-en.bin "$<" "$@"
-$(TARGET)-fr.bin: res/patches/$(TARGET)-fr.patch
-	$(PATCHROM) $(TARGET)-en.bin "$<" "$@"
-$(TARGET)-de.bin: res/patches/$(TARGET)-de.patch
-	$(PATCHROM) $(TARGET)-en.bin "$<" "$@"
-$(TARGET)-it.bin: res/patches/$(TARGET)-it.patch
-	$(PATCHROM) $(TARGET)-en.bin "$<" "$@"
-$(TARGET)-pt.bin: res/patches/$(TARGET)-pt.patch
-	$(PATCHROM) $(TARGET)-en.bin "$<" "$@"
-$(TARGET)-br.bin: res/patches/$(TARGET)-br.patch
-	$(PATCHROM) $(TARGET)-en.bin "$<" "$@"
-$(TARGET)-zh.bin: res/patches/$(TARGET)-zh.patch
-	$(PATCHROM) $(TARGET)-en.bin "$<" "$@"
-$(TARGET)-ko.bin: res/patches/$(TARGET)-ko.patch
-	$(PATCHROM) $(TARGET)-en.bin "$<" "$@"
+#---------------------------------------------------------------------------------
+# any extra libraries we wish to link with the project
+#---------------------------------------------------------------------------------
+LIBS	:= -lmm -lgba
 
 
-.PHONY: head-gen clean
+#---------------------------------------------------------------------------------
+# list of directories containing libraries, this must be the top level containing
+# include and lib
+#---------------------------------------------------------------------------------
+LIBDIRS	:=	$(LIBGBA)
 
-head-gen:
-	rm -f inc/ai_gen.h
-	python aigen.py
+#---------------------------------------------------------------------------------
+# no real need to edit anything past this point unless you need to add additional
+# rules for different file extensions
+#---------------------------------------------------------------------------------
 
+
+ifneq ($(BUILD),$(notdir $(CURDIR)))
+#---------------------------------------------------------------------------------
+
+export OUTPUT	:=	$(CURDIR)/$(TARGET)
+
+export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
+			$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)/ai) \
+			$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)/db) \
+			$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)/res) \
+			$(foreach dir,$(DATA),$(CURDIR)/$(dir)) \
+			$(foreach dir,$(GRAPHICS),$(CURDIR)/$(dir))
+
+export DEPSDIR	:=	$(CURDIR)/$(BUILD)
+
+CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
+CFILES	+=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/ai/*.c)))
+CFILES	+=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/db/*.c)))
+CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
+SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s))) 
+RESFILES	:=	$(foreach dir,res,$(notdir $(wildcard $(dir)/*.res))) 
+BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
+
+ifneq ($(strip $(MUSIC)),)
+	export AUDIOFILES	:=	$(foreach dir,$(notdir $(wildcard $(MUSIC)/*.*)),$(CURDIR)/$(MUSIC)/$(dir))
+	BINFILES += soundbank.bin
+endif
+
+#---------------------------------------------------------------------------------
+# use CXX for linking C++ projects, CC for standard C
+#---------------------------------------------------------------------------------
+ifeq ($(strip $(CPPFILES)),)
+#---------------------------------------------------------------------------------
+	export LD	:=	$(CC)
+#---------------------------------------------------------------------------------
+else
+#---------------------------------------------------------------------------------
+	export LD	:=	$(CXX)
+#---------------------------------------------------------------------------------
+endif
+#---------------------------------------------------------------------------------
+
+export OFILES_BIN := $(addsuffix .o,$(BINFILES))
+
+export OFILES_SOURCES := $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o) 
+ 
+export OFILES := $(OFILES_BIN) $(OFILES_SOURCES) 
+
+export HFILES := $(addsuffix .h,$(subst .,_,$(BINFILES)))
+
+export INCLUDE	:=	$(foreach dir,$(INCLUDES),-iquote $(CURDIR)/$(dir)) \
+					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+					-I$(CURDIR)/$(BUILD)
+
+export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
+
+.PHONY: $(BUILD) clean
+
+#---------------------------------------------------------------------------------
+$(BUILD):
+	@[ -d $@ ] || mkdir -p $@
+	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+
+#---------------------------------------------------------------------------------
 clean:
-	rm -f $(CPXMS) $(XGCS) $(PCMS) $(PATS) $(MAPS) $(PTSETS) $(CTSETS) $(ZOBJ) $(OBJS)
-	rm -f $(TSBS) $(TL_TSBS)
-	rm -f $(TARGET)-*.bin $(TARGET)-en.elf symbol.txt boot.o temp.elf temp.o
-	rm -f res/patches/*.patch
-	rm -f src/xgm/z80_xgm.s src/xgm/z80_xgm.o80 src/xgm/z80_xgm.h out.lst
-	rm -f res/resources.h res/resources.s inc/ai_gen.h
-	rm -rf asmout
+	@echo clean ...
+	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).gba
+
+
+#---------------------------------------------------------------------------------
+else
+
+#---------------------------------------------------------------------------------
+# main targets
+#---------------------------------------------------------------------------------
+
+$(OUTPUT).gba	:	$(OUTPUT).elf
+
+$(OUTPUT).elf	:	$(OFILES)
+
+$(OFILES_SOURCES) : $(HFILES)
+
+#---------------------------------------------------------------------------------
+# The bin2o rule should be copied and modified
+# for each extension used in the data directories
+#---------------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------------
+# rule to build soundbank from music files
+#---------------------------------------------------------------------------------
+soundbank.bin soundbank.h : $(AUDIOFILES)
+#---------------------------------------------------------------------------------
+	@mmutil $^ -osoundbank.bin -hsoundbank.h
+
+#---------------------------------------------------------------------------------
+# This rule links in binary data with the .bin extension
+#---------------------------------------------------------------------------------
+%.bin.o	%_bin.h :	%.bin
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	@$(bin2o)
+
+
+-include $(DEPSDIR)/*.d
+#---------------------------------------------------------------------------------------
+endif
+#---------------------------------------------------------------------------------------

@@ -1,8 +1,8 @@
 // Pre calculated camera bounds values to speed up entity_on_screen()
-int32_t camera_xmin, camera_ymin;
-uint32_t camera_xsize, camera_ysize;
+static int32_t camera_xmin, camera_ymin;
+static uint32_t camera_xsize, camera_ysize;
 
-struct {
+static struct {
 	int32_t x, y; // Fixed point units
 	Entity *target; // Player, boss, NPC, or NULL
 	// Offset is the point relative to the target's position

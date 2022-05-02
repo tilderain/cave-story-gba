@@ -1,9 +1,13 @@
-#define SYS_hardReset() __asm__("move   #0x2700,%sr\n\t" \
-                                "move.l (0),%a7\n\t"     \
-                                "jmp    _hard_reset")
+#pragma once
+//GBATODO
+#define SYS_hardReset() //__asm__("move   #0x2700,%sr\n\t" \
+                        //        "move.l (0),%a7\n\t"     \
+                        //        "jmp    _hard_reset")
 
-#define enable_ints __asm__("move #0x2500,%sr")
-#define disable_ints __asm__("move #0x2700,%sr")
+//GBATODO
+#define enable_ints //__asm__("move #0x2500,%sr")
+#define disable_ints // __asm__("move #0x2700,%sr")
+
 
 // bool and stdint types
 #define FALSE   0
@@ -43,16 +47,16 @@ typedef uint32_t u32;
 #define SCREEN_HALF_W 160
 
 // On PAL the screen height is 16 pixels more, so these can't be constants
-uint8_t SCREEN_HEIGHT;
-uint8_t SCREEN_HALF_H;
-uint8_t FPS;
+static uint8_t SCREEN_HEIGHT;
+static uint8_t SCREEN_HALF_H;
+static uint8_t FPS;
 
 // The original Cave Story is 50 FPS, and an MD can either run at 50 or 60 FPS
 // depending on region. To try and keep the speed of the game (mostly) the same,
 // a table for time and speed are used. On PAL, the values just match the index,
 // and on NTSC they are roughly index*5/6 for speed and index*6/5 for time respectively.
-const uint16_t *time_tab;
-const int16_t *speed_tab;
+extern const uint16_t *time_tab;
+extern const int16_t *speed_tab;
 
 extern const uint16_t time_tab_ntsc[0x400];
 extern const int16_t speed_tab_ntsc[0x400];
@@ -76,8 +80,8 @@ extern const int16_t speed_tab_pal[0x400];
 #define SPEED_12(x) (speed_tab[(x) >> 2] << 2)
 
 // Div/mod tables to help math when displaying digits
-const uint8_t div10[0x400];
-const uint8_t mod10[0x400];
+extern const uint8_t div10[0x400];
+extern const uint8_t mod10[0x400];
 
 // Direction
 enum CSDIR { DIR_LEFT, DIR_UP, DIR_RIGHT, DIR_DOWN, DIR_CENTER };
@@ -101,12 +105,12 @@ static inline uint8_t mddir(uint8_t dir) {
 #define A_UP	0xC0
 
 // Sine & cosine lookup tables
-const int16_t sin[0x100];
-const int16_t cos[0x100];
+extern const int16_t sin[0x100];
+extern const int16_t cos[0x100];
 // Above tables but every value multiplied by 1.5, quick reference:
 // <<1 == *3, <<2 == *6, <<3 == *12, <<4 == *24, <<5 == *48
-const int16_t sin2[0x100];
-const int16_t cos2[0x100];
+extern const int16_t sin2[0x100];
+extern const int16_t cos2[0x100];
 
 // Unit conversions
 // Bit shifting "CSF" is how NXEngine converts units. I kind of like it better than my way
@@ -231,9 +235,9 @@ typedef struct {
 } SpriteDefinition;
 
 // VBlank stuff
-extern volatile uint8_t vblank;
+static volatile uint8_t vblank;
 
 // Prevents incomplete sprite list from being sent to VDP (flickering)
-volatile uint8_t ready;
+static volatile uint8_t ready;
 
 void aftervsync();

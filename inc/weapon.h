@@ -1,3 +1,4 @@
+#pragma once
 // Number of different weapon types
 #define WEAPON_COUNT 14
 // Maximum number of weapons the player can carry in their inventory

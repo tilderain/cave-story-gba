@@ -22,39 +22,39 @@ enum BoosterState {
 	BOOST_08
 };
 
-uint8_t currentWeapon; // Index 0-7 of which slot in the array the currently used weapon is
-const uint8_t spur_time[2][4];
+static uint8_t currentWeapon; // Index 0-7 of which slot in the array the currently used weapon is
+extern const uint8_t spur_time[2][4];
 
 // The player is an entity, as to better interact with entities & physics
 // Not all variables in Entity are used but most are
-Entity player;
-VDPSprite playerSprite;
+static Entity player;
+static VDPSprite playerSprite;
 
 //uint8_t playerShow;
-uint8_t playerIFrames;
-uint8_t playerMoveMode;
-uint8_t lookingDown;
+static uint8_t playerIFrames;
+static uint8_t playerMoveMode;
+static uint8_t lookingDown;
 // Max health - current health is player.health (Entity)
-uint16_t playerMaxHealth;
+static uint16_t playerMaxHealth;
 // When this is TRUE, quote can not be controlled by player input
-uint8_t controlsLocked;
+static uint8_t controlsLocked;
 // What is currently equipped (see the flags at the top of this file)
-uint16_t playerEquipment;
+static uint16_t playerEquipment;
 // What items the player has and will show up in the inventory screen
-uint8_t playerInventory[MAX_ITEMS];
+static uint8_t playerInventory[MAX_ITEMS];
 
-uint8_t shoot_cooldown, mgun_chargetime, playerNoBump;
+static uint8_t shoot_cooldown, mgun_chargetime, playerNoBump;
 
-Entity *playerPlatform;
-uint8_t playerPlatformTime;
+static Entity *playerPlatform;
+static uint8_t playerPlatformTime;
 
-uint8_t playerBoosterFuel, playerBoostState, lastBoostState;
+static uint8_t playerBoosterFuel, playerBoostState, lastBoostState;
 
-uint16_t mapNameTTL;
+static uint16_t mapNameTTL;
 
-uint8_t iSuckAtThisGameSHIT;
+static uint8_t iSuckAtThisGameSHIT;
 
-uint8_t missileEmptyFlag;
+static uint8_t missileEmptyFlag;
 
 // Initialize everything for the player, sets default values on game start
 void player_init();
