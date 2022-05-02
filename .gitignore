@@ -19,3 +19,4 @@ src/boot/rom_head.bin
 src/xgm/z80_xgm.h
 .DS_Store
 /build
+*.gba

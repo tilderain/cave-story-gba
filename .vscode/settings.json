@@ -1,5 +1,6 @@
 {
 	"files.associations": {
-		"common.h": "c"
+		"common.h": "c",
+		"gba.h": "c"
 	}
 }

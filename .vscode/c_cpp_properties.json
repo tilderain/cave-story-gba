@@ -4,7 +4,8 @@
             "name": "MegaDrive",
             "includePath": [
                 "${workspaceRoot}/inc",
-                "${workspaceRoot}/res"
+                "${workspaceRoot}/res",
+                "/opt/devkitpro/libgba/include/**"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
