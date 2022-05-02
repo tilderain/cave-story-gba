@@ -6,7 +6,7 @@
 #include "bank_data.h"
 
 extern const uint32_t TILE_BLANK[8];
-extern const uint16_t BLANK_DATA[0x80];
+static const uint16_t BLANK_DATA[0x80];
 const uint16_t PAL_FadeOut[64] = {
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0xEEE,
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

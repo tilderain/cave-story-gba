@@ -45,15 +45,6 @@ XGCS  = $(VGMS:.vgm=.xgc)
 WAVS  = $(wildcard res/sfx/*.wav)
 PCMS  = $(WAVS:.wav=.pcm)
 
-RESS  = res/resources.res
-CS    = $(wildcard src/*.c)
-CS   += $(wildcard src/ai/*.c)
-CS   += $(wildcard src/db/*.c)
-SS    = $(wildcard src/*.s)
-SS   += $(wildcard src/xgm/*.s)
-OBJS  = $(RESS:.res=.o)
-OBJS += $(CS:.c=.o)
-OBJS += $(SS:.s=.o)
 
 # Z80 source for XGM driver
 ZSRC  = $(wildcard src/xgm/*.s80)
@@ -65,7 +56,7 @@ ASMO += $(CS:%.c=asmout/%.s)
 
 # SGDK Tools
 BINTOS   = bin/bintos
-RESCOMP  = bin/rescomp
+RESCOMP  = ../bin/rescomp
 WAVTORAW = bin/wavtoraw
 XGMTOOL  = bin/xgmtool
 # Sik's Tools
@@ -74,8 +65,6 @@ SLZ      = $(TOOLSBIN)/slz
 UFTC     = $(TOOLSBIN)/uftc
 
 
-%.s: %.res
-	$(RESCOMP) $< $@
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
 # BUILD is the directory where object files & intermediate files will be placed
@@ -92,6 +81,7 @@ TARGET		:= $(notdir $(CURDIR))
 BUILD		:= build
 SOURCES		:= src
 INCLUDES	:= inc res
+RESOURCES   := res
 DATA		:=
 MUSIC		:=
 
@@ -100,7 +90,7 @@ MUSIC		:=
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork
 
-CFLAGS	:=	-g -Wall -O2\
+CFLAGS	:=	-g -Wall -Wno-unused-variable -O2\
 		-mcpu=arm7tdmi -mtune=arm7tdmi\
 		$(ARCH)
 
@@ -137,7 +127,7 @@ export OUTPUT	:=	$(CURDIR)/$(TARGET)
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 			$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)/ai) \
 			$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)/db) \
-			$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)/res) \
+			$(foreach dir,$(RESOURCES),$(CURDIR)/$(dir)) \
 			$(foreach dir,$(DATA),$(CURDIR)/$(dir)) \
 			$(foreach dir,$(GRAPHICS),$(CURDIR)/$(dir))
 
@@ -148,7 +138,7 @@ CFILES	+=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/ai/*.c)))
 CFILES	+=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/db/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s))) 
-RESFILES	:=	$(foreach dir,res,$(notdir $(wildcard $(dir)/*.res))) 
+SFILES		+=	$(foreach dir,$(RESOURCES),$(notdir $(wildcard $(dir)/*.s))) 
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 
 ifneq ($(strip $(MUSIC)),)
@@ -170,7 +160,7 @@ else
 endif
 #---------------------------------------------------------------------------------
 
-export OFILES_BIN := $(addsuffix .o,$(BINFILES))
+export OFILES_BIN := $(addsuffix .o,$(BINFILES)) 
 
 export OFILES_SOURCES := $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o) 
  
@@ -204,12 +194,16 @@ else
 # main targets
 #---------------------------------------------------------------------------------
 
+
+
 $(OUTPUT).gba	:	$(OUTPUT).elf
 
 $(OUTPUT).elf	:	$(OFILES)
 
 $(OFILES_SOURCES) : $(HFILES)
 
+res/resources.s: 
+	$(RESCOMP) ../res/resources.res
 #---------------------------------------------------------------------------------
 # The bin2o rule should be copied and modified
 # for each extension used in the data directories
