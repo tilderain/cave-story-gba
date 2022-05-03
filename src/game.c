@@ -25,12 +25,14 @@
 
 #include "gamemode.h"
 
+#include "gba.h"
+
 // Initializes or re-initializes the game after "try again"
 void game_reset(uint8_t load);
 
 void game_main(uint8_t load) {
 	gamemode = GM_GAME;
-	
+
 	vdp_colors(0, PAL_FadeOut, 64);
 	//vdp_color(15, 0x000);
 	// This is the SGDK font with a blue background for the message window
@@ -151,11 +153,12 @@ void game_main(uint8_t load) {
 				effects_update();
                 PF_BGCOLOR(0xE0E);
 				if(!gameFrozen) {
-					player_update();
-					entities_update(TRUE);
+					//GBATODO
+				//	player_update();
+					//entities_update(TRUE);
 				} else {
-					player_draw();
-					entities_draw();
+					//player_draw();
+					//entities_draw();
 				}
 				// Restore controller locking if it was locked
 				joystate = lockstate;
@@ -179,7 +182,7 @@ void game_reset(uint8_t load) {
 	hud_create();
 	// Default sprite sheets
 	sheets_load_stage(255, TRUE, TRUE);
-	
+
 	gameFrozen = FALSE;
 	if(load >= 4) {
 		system_load_levelselect(load - 4);

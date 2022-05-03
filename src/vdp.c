@@ -5,6 +5,8 @@
 #include "resources.h"
 #include "bank_data.h"
 
+#include "gba_systemcalls.h"
+
 extern const uint32_t TILE_BLANK[8];
 static const uint16_t BLANK_DATA[0x80];
 const uint16_t PAL_FadeOut[64] = {
@@ -90,9 +92,7 @@ void vdp_init() {
 }
 
 void vdp_vsync() {
-	vblank = 0;
-    while(!vblank);
-    vblank = 0;
+	VBlankIntrWait();
 }
 
 // Register stuff
@@ -330,7 +330,14 @@ void vdp_font_pal(uint16_t pal) {
 	font_pal = pal;
 }
 
+#include "gba.h"
+
 void vdp_puts(uint16_t plan, const char *str, uint16_t x, uint16_t y) {
+	//GBATODO
+	char text[128];
+	sprintf(text, "%s    \n", str);
+	iprintf(text);
+	return;
 	uint32_t addr = plan + ((x + (y << PLAN_WIDTH_SFT)) << 1);
 	*vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);
 	for(uint16_t i = 0; i < 64 && *str; ++i) {
@@ -351,6 +358,9 @@ void vdp_puts(uint16_t plan, const char *str, uint16_t x, uint16_t y) {
 }
 
 void vdp_text_clear(uint16_t plan, uint16_t x, uint16_t y, uint16_t len) {
+	//GBATODO
+	iprintf("\x1b[2J");
+	return;
     uint32_t addr = plan + ((x + (y << PLAN_WIDTH_SFT)) << 1);
 	*vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);
 	while(len--) *vdp_data_port = 0;

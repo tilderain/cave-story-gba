@@ -23,6 +23,8 @@
 
 #include "gamemode.h"
 
+#include "gba.h"
+
 #define OPTIONS		4
 #define SAVES		22
 #define ANIM_SPEED	7
@@ -50,10 +52,11 @@ uint8_t titlescreen_main() {
 	vdp_map_clear(VDP_PLAN_B);
 	vdp_sprites_clear();
 	// Check save data, only enable continue if save data exists
-	if(system_checkdata() != SRAM_INVALID) {
-		besttime = system_load_counter(); // 290.rec data
-		system_load_config();
-	}
+	//GBATODO
+	//if(system_checkdata() != SRAM_INVALID) {
+		//besttime = system_load_counter(); // 290.rec data
+		//system_load_config();
+	//}
 	// Change character & song based on 290.rec value
 	tpal = PAL1;
 	if(besttime <= 3*3000) {
@@ -108,6 +111,9 @@ uint8_t titlescreen_main() {
 	song_play(tsong);
 	oldstate = ~0;
 	while(!joy_pressed(btn[cfg_btn_jump]) && !joy_pressed(btn[cfg_btn_pause])) {
+		
+		//iprintf("titlescreen %d %d \n", joystate, joy_pressed(btn[cfg_btn_jump]));
+
 		for(uint8_t i = 0; i < 2; i++) {
 			if(!cheatEnable[i]) {
 				if(joy_pressed(cheat[i][cheatEntry[i]])) {
@@ -150,6 +156,8 @@ uint8_t titlescreen_main() {
 		ready = TRUE;
 		vdp_vsync(); aftervsync();
 	}
+		//GBATODO remove this
+		vdp_text_clear(VDP_PLAN_A, 13, 12, 13);
 	if(cheatEnable[0] && (joystate&BUTTON_A) && joy_pressed(btn[cfg_btn_pause])) {
 		cursor = 0;
 		

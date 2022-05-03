@@ -4,6 +4,14 @@
 #include "vdp.h"
 #include "joy.h"
 
+#include "gba.h"
+
+/*const uint16_t btn[12] = {
+	BUTTON_A, BUTTON_B, BUTTON_START, BUTTON_START,
+	BUTTON_RIGHT, BUTTON_LEFT, BUTTON_UP, BUTTON_DOWN,
+	BUTTON_Z, BUTTON_Y, BUTTON_X, BUTTON_MODE
+};*/
+
 const uint16_t btn[12] = {
 	BUTTON_UP, BUTTON_DOWN, BUTTON_LEFT, BUTTON_RIGHT,
 	BUTTON_B, BUTTON_C, BUTTON_A, BUTTON_START,
@@ -15,6 +23,9 @@ const char btnName[12][4] = {
 	"B", "C", "A", "St",
 	"Z", "Y", "X", "Md"
 };
+
+uint8_t joytype = JOY_TYPE_PAD6;
+uint16_t joystate, oldstate = 0;
 
 void joy_init() {
 	joystate = oldstate = 0;
@@ -35,6 +46,12 @@ void joy_init() {
 }
 
 void joy_update() {
+	
+	scanKeys();
+	//iprintf("joy_update %d %d\n", joystate, oldstate);
+	oldstate = keysHeld();
+	joystate = keysDown();
+	return;
 	volatile uint8_t *pb = (volatile uint8_t*) 0xa10003;
     // On hardware, the C button did not work, but it did in emulators
     // Making this volatile fixed it for...reasons?

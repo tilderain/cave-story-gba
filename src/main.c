@@ -15,6 +15,8 @@
 #include "vdp.h"
 #include "xgm.h"
 
+#include "gba.h"
+
 void aftervsync() {
 	disable_ints;
     z80_request();
@@ -37,13 +39,20 @@ void aftervsync() {
 }
 
 int main() {
+	irqInit();
+	irqEnable(IRQ_VBLANK);
+	consoleDemoInit();
+	
+	//nocash_puts("BRUH");
     setRandomSeed(0xC427); // initiate random number generator
     mem_init();
     vdp_init();
-	xgm_init();
-	if(system_checkdata() != SRAM_INVALID) {
-		system_load_config();
-	}
+	//xgm_init();
+
+	//GBATODO
+	//if(system_checkdata() != SRAM_INVALID) {
+//		system_load_config();
+	//}
     DMA_init(0, 0);
 	joy_init();
 	enable_ints;

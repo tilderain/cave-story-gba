@@ -53,6 +53,8 @@ static void stage_draw_screen_credits();
 static void stage_draw_background();
 static void stage_draw_moonback();
 
+#include "gba.h"
+
 void stage_load(uint16_t id) {
 	vdp_set_display(FALSE);
 	oldstate = ~0;
@@ -128,7 +130,8 @@ void stage_load(uint16_t id) {
     z80_release();
     enable_ints;
 
-	stage_load_entities(); // Create entities defined in the stage's PXE
+	//GBATODO
+	//stage_load_entities(); // Create entities defined in the stage's PXE
 	// For rooms where the boss is always loaded
 	if(stageID == STAGE_WATERWAY_BOSS) {
 		bossEntity = entity_create(0, 0, 360 + BOSS_IRONHEAD, 0);
@@ -201,8 +204,74 @@ void stage_load_tileset() {
 	}
 }
 
+void decompress_slz(uint8_t *in, uint8_t *out) {
+   // Retrieve uncompressed size
+   uint16_t size = in[0] << 8 | in[1];
+   in += 2;
+   
+   // To store the tokens
+   uint8_t num_tokens = 1;
+   uint8_t tokens;
+   
+   // Go through all compressed data until we're done decompressing
+   while (size != 0) {
+      // Need more tokens?
+      num_tokens--;
+      if (num_tokens == 0) {
+         tokens = *in++;
+         num_tokens = 8;
+      }
+      
+      // Compressed string?
+      if (tokens & 0x80) {
+         // Get distance and length
+         uint16_t dist = in[0] << 8 | in[1];
+         uint8_t len = dist & 0x0F;
+         dist = dist >> 4;
+         in += 2;
+         
+         // Discount string length from size
+         size -= len + 3;
+         
+         // Copy string using Duff's device
+         // Code looks crazy, doesn't it? :)
+         uint8_t *ptr = out - dist - 3;
+         switch (len) {
+            case 15: *out++ = *ptr++;
+            case 14: *out++ = *ptr++;
+            case 13: *out++ = *ptr++;
+            case 12: *out++ = *ptr++;
+            case 11: *out++ = *ptr++;
+            case 10: *out++ = *ptr++;
+            case  9: *out++ = *ptr++;
+            case  8: *out++ = *ptr++;
+            case  7: *out++ = *ptr++;
+            case  6: *out++ = *ptr++;
+            case  5: *out++ = *ptr++;
+            case  4: *out++ = *ptr++;
+            case  3: *out++ = *ptr++;
+            case  2: *out++ = *ptr++;
+            case  1: *out++ = *ptr++;
+            case  0: *out++ = *ptr++;
+                     *out++ = *ptr++;
+                     *out++ = *ptr++;
+         }
+      }
+      
+      // Uncompressed byte?
+      else {
+         // Store byte as-is
+         *out++ = *in++;
+         size--;
+      }
+      
+      // Go for next token
+      tokens += tokens;
+   }
+}
+
 void stage_load_blocks() {
-    slz_unpack(stage_info[stageID].PXM, stagePXM);
+    decompress_slz(stage_info[stageID].PXM, stagePXM);
     stageWidth = stagePXM[4] | (stagePXM[5] << 8);
     stageHeight = stagePXM[6] | (stagePXM[7] << 8);
 	// Multiplication table for stage rows

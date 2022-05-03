@@ -22,6 +22,8 @@
 #include "entity.h"
 #include "ai.h"
 
+#include "gba.h"
+
 /* Linked List Macros */
 
 #define LIST_PUSH(list, obj) ({                                                                \
@@ -127,8 +129,9 @@ Entity *entity_destroy(Entity *e) {
 }
 
 void entities_clear() {
-	LIST_CLEAR(entityList);
-	LIST_CLEAR(inactiveList);
+	//GBATODO
+	//LIST_CLEAR(entityList);
+	//LIST_CLEAR(inactiveList);
 }
 
 uint16_t entities_count_active() {

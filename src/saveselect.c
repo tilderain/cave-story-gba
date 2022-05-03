@@ -26,6 +26,8 @@
 
 #include "gamemode.h"
 
+#include "gba.h"
+
 #define ANIM_SPEED	7
 #define ANIM_FRAMES	4
 #define OPTIONS (SRAM_FILE_MAX + 2)
@@ -190,8 +192,8 @@ uint8_t saveselect_main() {
 	vdp_puts(VDP_PLAN_A, "Delete", 16, 25);
 	
 	vdp_set_display(TRUE);
-	
-	oldstate = ~0;
+
+	joystate = 0; oldstate = 0;
 	while(TRUE) {
 		if(joy_pressed(btn[cfg_btn_jump]) || joy_pressed(btn[cfg_btn_pause])) { // Confirm action
 			if(cursor < SRAM_FILE_MAX) {

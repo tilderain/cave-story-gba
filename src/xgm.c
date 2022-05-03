@@ -30,9 +30,9 @@ static uint16_t z80_bus_taken() {
 
 void z80_request() {
     // take bus and end reset
-    *z80_halt_port = 0x0100;
+    /**z80_halt_port = 0x0100;
     *z80_reset_port = 0x0100;
-    while(*z80_halt_port & 0x0100);
+    while(*z80_halt_port & 0x0100);*/
 }
 
 void z80_release() {
@@ -138,7 +138,7 @@ void xgm_init() {
     z80_reset_start();
     z80_release();
     // wait bus released
-    while(z80_bus_taken());
+    //while(z80_bus_taken());
     z80_reset_end();
 	// reset sound chips
 	ym2612_reset();
@@ -154,9 +154,9 @@ void xgm_init() {
 	z80_smp_table[3] = sizeof(smp_null) >> 16;
 	z80_release();
 	// wait bus released
-	while(z80_bus_taken());
+	//while(z80_bus_taken());
 	// just wait for it
-	while(!xgm_get_ready()) while(z80_bus_taken());
+	//while(!xgm_get_ready()) while(z80_bus_taken());
 	// Tempo
 	xgmTempo = 60;
 	xgmTempoDef = pal_mode ? 50 : 60;

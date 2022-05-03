@@ -81,7 +81,8 @@ uint16_t mem_get_used() {
 
 void free(void *ptr) {
     // valid block --> mark block as no more used
-    if(ptr) ((uint16_t*)ptr)[-1] &= ~USED;
+		//GBATODO
+    //if(ptr) ((uint16_t*)ptr)[-1] &= ~USED;
 }
 
 void* malloc(uint16_t size) {

@@ -22,6 +22,8 @@
 
 #include "gamemode.h"
 
+#include "gba.h"
+
 void intro_main() {
 	gamemode = GM_INTRO;
 	// Init some subsystems used
@@ -38,13 +40,13 @@ void intro_main() {
 	//vdp_puts(VDP_PLAN_A, "Studio Pixel Presents", 10, 8);
     vdp_puts(VDP_PLAN_A, "Based on the Work of", 10, 6);
     vdp_puts(VDP_PLAN_A, "    Studio Pixel    ", 10, 8);
-	
 	uint16_t timer = 0;
 	oldstate = ~0;
-	while(++timer <= TIME_10(400) && !joy_pressed(BUTTON_C) && !joy_pressed(BUTTON_START)) {
+	//GBATODO
+	while(timer++ < 20) {
 		if(timer == TIME_8(150)) {
-            vdp_text_clear(VDP_PLAN_A, 10, 6, 20);
-            vdp_text_clear(VDP_PLAN_A, 10, 8, 20);
+            //vdp_text_clear(VDP_PLAN_A, 10, 6, 20);
+            //vdp_text_clear(VDP_PLAN_A, 10, 8, 20);
 		}
 		camera_update();
 		tsc_update();
@@ -54,7 +56,11 @@ void intro_main() {
 		vdp_vsync();
 		aftervsync();
 	}
+	vdp_text_clear(VDP_PLAN_A, 10, 8, 20);
 	vdp_fade(NULL, PAL_FadeOut, 4, FALSE);
-	entities_clear();
-	effects_clear();
+	//GBATODO
+	//entities_clear();
+	//effects_clear();
+
+
 }

@@ -1,6 +1,7 @@
 {
 	"files.associations": {
 		"common.h": "c",
-		"gba.h": "c"
+		"gba.h": "c",
+		"joy.h": "c"
 	}
 }

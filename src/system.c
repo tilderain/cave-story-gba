@@ -21,6 +21,8 @@
 
 #include "system.h"
 
+#include "gba.h"
+
 // ASCII string "CSMD" used as a sort of checksum to verify save data exists
 #define STR_CSMD 0x43534D44
 // When save data is not found "TEST" is written to verify SRAM is usable
@@ -381,7 +383,6 @@ void system_load(uint8_t index) {
 	disable_ints;
 	z80_request();
 	SRAM_enableRO();
-	
 	// Start of save data in SRAM
 	uint16_t loc_start = SRAM_FILE_START + SRAM_FILE_LEN * sram_file;
 	// Checksum failed?
