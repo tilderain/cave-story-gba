@@ -56,6 +56,8 @@ static void stage_draw_moonback();
 #include "gba.h"
 
 void stage_load(uint16_t id) {
+
+	iprintf("Loading stage %d\n", id);
 	vdp_set_display(FALSE);
 	oldstate = ~0;
 	// Prevents an issue where a column of the previous map would get drawn over the new one
