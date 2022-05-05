@@ -47,9 +47,9 @@ typedef uint32_t u32;
 #define SCREEN_HALF_W 160
 
 // On PAL the screen height is 16 pixels more, so these can't be constants
-static uint8_t SCREEN_HEIGHT;
-static uint8_t SCREEN_HALF_H;
-static uint8_t FPS;
+extern uint8_t SCREEN_HEIGHT;
+extern uint8_t SCREEN_HALF_H;
+extern uint8_t FPS;
 
 // The original Cave Story is 50 FPS, and an MD can either run at 50 or 60 FPS
 // depending on region. To try and keep the speed of the game (mostly) the same,
@@ -248,9 +248,9 @@ typedef struct {
 } SpriteDefinition;
 
 // VBlank stuff
-static volatile uint8_t vblank;
+extern volatile uint8_t vblank;
 
 // Prevents incomplete sprite list from being sent to VDP (flickering)
-static volatile uint8_t ready;
+extern volatile uint8_t ready;
 
 void aftervsync();

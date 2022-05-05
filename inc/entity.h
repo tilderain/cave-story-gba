@@ -68,13 +68,13 @@ extern Entity *inactiveList;
 // References whichever entity is a boss otherwise it is NULL
 extern Entity *bossEntity;
 
-static Entity *pieces[10]; // List for bosses to keep track of parts
+extern Entity *pieces[10]; // List for bosses to keep track of parts
 
-static Entity *water_entity;
+extern Entity *water_entity;
 // Heightmaps for slope tiles
 extern const uint8_t heightmap[4][16];
 
-static uint16_t entity_active_count;
+extern uint16_t entity_active_count;
 extern uint8_t moveMeToFront;
 
 // Deletes entities based on a criteria, scripts sometimes call the bottom 2

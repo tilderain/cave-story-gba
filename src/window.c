@@ -67,6 +67,9 @@ uint16_t showingItem = 0;
 
 uint8_t blinkTime = 0;
 
+uint8_t windowOnTop = 0;
+
+
 void window_clear_text();
 void window_draw_face();
 

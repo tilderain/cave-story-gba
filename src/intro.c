@@ -42,7 +42,6 @@ void intro_main() {
     vdp_puts(VDP_PLAN_A, "    Studio Pixel    ", 10, 8);
 	uint16_t timer = 0;
 	joystate = oldstate = 0;
-	//GBATODO
 	while(++timer <= TIME_10(400) && !joy_pressed(BUTTON_C) && !joy_pressed(BUTTON_START)) {
 		if(timer == TIME_8(150)) {
             vdp_text_clear(VDP_PLAN_A, 10, 6, 20);
@@ -58,9 +57,8 @@ void intro_main() {
 	}
 	vdp_text_clear(VDP_PLAN_A, 10, 8, 20);
 	vdp_fade(NULL, PAL_FadeOut, 4, FALSE);
-	//GBATODO
-	//entities_clear();
-	//effects_clear();
+	entities_clear();
+	effects_clear();
 
 
 }

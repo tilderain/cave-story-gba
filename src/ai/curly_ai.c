@@ -15,6 +15,10 @@ uint8_t curly_reachptimer = 0;
 uint8_t curly_look = 0;
 uint16_t curly_tryjumptime = 0;
 
+uint16_t curly_target_time = 0;
+int32_t curly_target_x = 0;
+int32_t curly_target_y = 0;
+
 static void CaiJUMP(Entity *e) {
 	if (e->grounded) {
 		moveMeToFront = TRUE;

@@ -4,6 +4,7 @@
 		"gba.h": "c",
 		"joy.h": "c",
 		"maxmod.h": "c",
-		"sram.h": "c"
+		"sram.h": "c",
+		"variant": "cpp"
 	}
 }

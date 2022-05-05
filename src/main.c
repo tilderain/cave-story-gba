@@ -20,6 +20,10 @@
 #include "soundbank.h"
 #include "soundbank_bin.h"
 
+
+volatile uint8_t ready = 0;
+volatile uint8_t vblank = 0;
+
 void aftervsync() {
 	disable_ints;
     z80_request();

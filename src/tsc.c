@@ -156,6 +156,22 @@ uint16_t bossHealth;
 
 uint16_t lastAmmoNum = 0;
 
+// Number of events loaded by tsc_load(), for debugging
+uint8_t tscEventCount = 0;
+
+uint8_t tscState = 0;
+
+uint8_t inFade = 0;
+
+// As teleporter locations are made available to the player, this list is populated
+// with which event is called when selecting a particular area.
+// This is in the header so that system_save() can write the values to SRAM
+uint16_t teleportEvent[8] = {0};
+
+// True while boss health is being displayed in the corner
+uint8_t showingBossHealth = 0;
+
+
 uint8_t tsc_load(Event *eventList, const uint8_t *TSC, uint8_t max);
 
 void tsc_show_teleport_menu();

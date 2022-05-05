@@ -27,6 +27,11 @@ uint16_t mapbuf[64];
 // Alternates between drawing row and column each frame when moving diagonally
 uint8_t diag_tick;
 
+int32_t camera_xmin, camera_ymin = 0;
+uint32_t camera_xsize, camera_ysize = 0;
+
+cameraStruct camera = {NULL};
+
 void camera_init() {
 	camera.target = &player;
     camera.x_offset = 0;

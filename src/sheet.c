@@ -24,6 +24,15 @@
 	} \
 }
 
+uint8_t sheet_num = 0;
+Sheet sheets[MAX_SHEETS] = {NULL};
+
+// Avoids MULU in entity update
+uint8_t frameOffset[MAX_SHEETS][16] = {NULL};
+
+uint16_t tiloc_index = 0;
+uint8_t tilocs[MAX_TILOCS] = {NULL};
+
 void sheets_load_weapon(Weapon *w) {
 	if(!w) return;
 	w->sheet = sheet_num;

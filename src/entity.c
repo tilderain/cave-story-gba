@@ -61,6 +61,12 @@ const uint8_t heightmap[4][16] = {
 	{ 0x7,0x7,0x6,0x6,0x5,0x5,0x4,0x4,0x3,0x3,0x2,0x2,0x1,0x1,0x0,0x0 },
 };
 
+Entity *pieces[10] = {NULL}; // List for bosses to keep track of parts
+
+Entity *water_entity = NULL;
+
+uint16_t entity_active_count = 0;
+
 uint8_t moveMeToFront = FALSE;
 
 Entity *entityList = NULL, *inactiveList = NULL, *bossEntity = NULL;
@@ -130,8 +136,8 @@ Entity *entity_destroy(Entity *e) {
 
 void entities_clear() {
 	//GBATODO
-	//LIST_CLEAR(entityList);
-	//LIST_CLEAR(inactiveList);
+	LIST_CLEAR(entityList);
+	LIST_CLEAR(inactiveList);
 }
 
 uint16_t entities_count_active() {

@@ -52,6 +52,40 @@ uint8_t ledge_time;
 
 VDPSprite airTankSprite;
 
+
+uint8_t currentWeapon = 0; // Index 0-7 of which slot in the array the currently used weapon is
+
+// The player is an entity, as to better interact with entities & physics
+// Not all variables in Entity are used but most are
+Entity player = {NULL};
+VDPSprite playerSprite = {NULL};
+
+//uint8_t playerShow;
+uint8_t playerIFrames = 0;
+uint8_t playerMoveMode = 0;
+uint8_t lookingDown = 0;
+// Max health - current health is player.health (Entity)
+uint16_t playerMaxHealth = 0;
+// When this is TRUE, quote can not be controlled by player input
+uint8_t controlsLocked = 0;
+// What is currently equipped (see the flags at the top of this file)
+uint16_t playerEquipment = 0;
+// What items the player has and will show up in the inventory screen
+uint8_t playerInventory[MAX_ITEMS] = {NULL};
+
+uint8_t shoot_cooldown, mgun_chargetime, playerNoBump = 0;
+
+Entity *playerPlatform = NULL;
+uint8_t playerPlatformTime = 0;
+
+uint8_t playerBoosterFuel, playerBoostState, lastBoostState = 0;
+
+uint16_t mapNameTTL = 0;
+
+uint8_t iSuckAtThisGameSHIT = 0;
+
+uint8_t missileEmptyFlag = 0;
+
 static void player_update_booster();
 static void player_update_interaction();
 static void player_update_air_display();

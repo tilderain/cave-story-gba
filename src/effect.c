@@ -26,6 +26,8 @@ static struct {
 	int16_t xoff, yoff;
 } damageFollow[MAX_DAMAGE];
 
+uint8_t dqueued = 0;
+
 // Create a memory buffer of 4 tiles containing a string like "+3" or "-127"
 // Then copy to VRAM via DMA transfer
 uint32_t dtiles[4][8];

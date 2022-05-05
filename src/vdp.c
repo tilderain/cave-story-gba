@@ -47,6 +47,10 @@ static uint16_t sprite_ymax;
 // Font vars
 static uint16_t font_pal;
 
+uint8_t pal_mode = 0;
+
+uint8_t SCREEN_HEIGHT = 0;
+
 void vdp_init() {
 		return;
 	// Store pal_mode and adjust some stuff based on it

@@ -127,25 +127,25 @@ enum StageIndex {
 // Index of current stage in db/stage.c
 extern uint16_t stageID;
 // Size of the stage - how many blocks wide/high
-static uint16_t stageWidth, stageHeight;
+extern uint16_t stageWidth, stageHeight;
 // A multiplication lookup table for each row of stageBlocks
 // Removes all mulu.w and __mulsi3 instructions in entity stage collision
 extern uint16_t *stageTable;
 // Copy of level layout data loaded into RAM
 // This takes up extra space, but there are times where scripts make modifications to the
 // level layout (allowing player to reach some areas) so it is necessary to do this
-static uint8_t stagePXM[];
-static uint8_t stageBlocks[];
+extern uint8_t stagePXM[];
+extern uint8_t stageBlocks[];
 extern const uint8_t *stagePXA;
 // Which tileset (db/tileset.c) is used by the current stage
-static uint8_t stageTileset;
+extern uint8_t stageTileset;
 // Prepares to draw off-screen tiles when stage_update() is later called
 // Camera calls this each time it scrolls past 1 block length (16 pixels)
-static int8_t morphingRow, morphingColumn;
+extern int8_t morphingRow, morphingColumn;
 
 extern uint8_t stageBackground;
-static uint16_t backScrollTimer;
-static uint8_t stageBackgroundType;
+extern uint16_t backScrollTimer;
+extern uint8_t stageBackgroundType;
 
 static inline uint8_t stage_get_block(uint16_t x, uint16_t y) {
 	return stageBlocks[stageTable[y] + x];

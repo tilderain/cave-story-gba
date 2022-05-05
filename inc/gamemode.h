@@ -13,9 +13,9 @@ enum GameMode {
 	GM_CREDITS // End credits
 };
 
-static uint8_t gamemode;
-static uint8_t paused;
-static uint8_t gameFrozen;
+extern uint8_t gamemode;
+extern uint8_t paused;
+extern uint8_t gameFrozen;
 
 // Sega screen
 void splash_main();

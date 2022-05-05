@@ -23,6 +23,8 @@
 
 #include "stage.h"
 
+#include "gba.h"
+
 // Could fit under the Oside map (192 tile gap)
 #define TILE_MOONINDEX (TILE_TSINDEX + 32*8)
 // Another tile gap, fits under both Almond and Cave
@@ -43,6 +45,23 @@ typedef struct {
 Current currents[4];
 uint8_t currentsCount = 0;
 uint8_t currentsTimer = 0;
+
+uint16_t stageWidth, stageHeight = 0;
+// A multiplication lookup table for each row of stageBlocks
+// Removes all mulu.w and __mulsi3 instructions in entity stage collision
+// Copy of level layout data loaded into RAM
+// This takes up extra space, but there are times where scripts make modifications to the
+// level layout (allowing player to reach some areas) so it is necessary to do this
+EWRAM_DATA uint8_t stagePXM[8] = {NULL};
+EWRAM_DATA uint8_t stageBlocks[17924] = {NULL};
+// Which tileset (db/tileset.c) is used by the current stage
+ uint8_t stageTileset = 0;
+// Prepares to draw off-screen tiles when stage_update() is later called
+// Camera calls this each time it scrolls past 1 block length (16 pixels)
+ int8_t morphingRow, morphingColumn = 0;
+
+ uint16_t backScrollTimer = 0;
+ uint8_t stageBackgroundType = 0;
 
 static void stage_load_tileset();
 static void stage_load_blocks();
@@ -135,7 +154,7 @@ void stage_load(uint16_t id) {
     enable_ints;
 
 	//GBATODO
-	//stage_load_entities(); // Create entities defined in the stage's PXE
+	stage_load_entities(); // Create entities defined in the stage's PXE
 	// For rooms where the boss is always loaded
 	if(stageID == STAGE_WATERWAY_BOSS) {
 		bossEntity = entity_create(0, 0, 360 + BOSS_IRONHEAD, 0);
