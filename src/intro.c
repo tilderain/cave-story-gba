@@ -43,10 +43,10 @@ void intro_main() {
 	uint16_t timer = 0;
 	joystate = oldstate = 0;
 	//GBATODO
-	while(timer++ < 20) {
+	while(++timer <= TIME_10(400) && !joy_pressed(BUTTON_C) && !joy_pressed(BUTTON_START)) {
 		if(timer == TIME_8(150)) {
-            //vdp_text_clear(VDP_PLAN_A, 10, 6, 20);
-            //vdp_text_clear(VDP_PLAN_A, 10, 8, 20);
+            vdp_text_clear(VDP_PLAN_A, 10, 6, 20);
+            vdp_text_clear(VDP_PLAN_A, 10, 8, 20);
 		}
 		camera_update();
 		tsc_update();
