@@ -40,7 +40,7 @@ void splash_main() {
 	blg->linkedEntity = entity_create(pixel_to_sub(SCREEN_HALF_W), pixel_to_sub(SCREEN_HALF_H), OBJ_SEGALOGO, 0);
 	
 	uint16_t timer = 0;
-	oldstate = ~0;
+	oldstate = 0;
 	while(++timer <= TIME(250) && !joy_pressed(BUTTON_C) && !joy_pressed(BUTTON_START)) {
 		entities_update(TRUE);
 		effects_update(); // Draw Smoke
