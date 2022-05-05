@@ -162,11 +162,11 @@ void game_main(uint8_t load) {
                 PF_BGCOLOR(0xE0E);
 				if(!gameFrozen) {
 					//GBATODO
-				//	player_update();
-					//entities_update(TRUE);
+					player_update();
+					entities_update(TRUE);
 				} else {
-					//player_draw();
-					//entities_draw();
+					player_draw();
+					entities_draw();
 				}
 				// Restore controller locking if it was locked
 				joystate = lockstate;
