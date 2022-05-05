@@ -2,6 +2,8 @@
 	"files.associations": {
 		"common.h": "c",
 		"gba.h": "c",
-		"joy.h": "c"
+		"joy.h": "c",
+		"maxmod.h": "c",
+		"sram.h": "c"
 	}
 }

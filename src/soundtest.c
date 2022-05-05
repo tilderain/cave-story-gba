@@ -27,7 +27,7 @@ enum { STOPPED, PLAYING, PAUSED };
 void draw_track_info(uint8_t track) {
 	DRAW_BYTE(track, 2, 6);
 	vdp_text_clear(VDP_PLAN_A, 5, 6, 33);
-	vdp_puts(VDP_PLAN_A, song_info[track].name, 5, 6);
+	vdp_puts(VDP_PLAN_A, song_info_xm[track].name, 5, 6);
 }
 
 void draw_status(uint8_t status) {

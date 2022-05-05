@@ -19,4 +19,4 @@ typedef __gnuc_va_list va_list;
 
 uint16_t strlen(const char *str);
 uint16_t strnlen(const char *str, uint16_t maxlen);
-uint16_t sprintf(char *buffer,const char *fmt, ...) __attribute__ ((format (printf, 2, 3)));
+//uint16_t sprintf(char *buffer,const char *fmt, ...) __attribute__ ((format (printf, 2, 3)));

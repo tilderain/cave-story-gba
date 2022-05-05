@@ -83,7 +83,7 @@ SOURCES		:= src
 INCLUDES	:= inc res
 RESOURCES   := res
 DATA		:=
-MUSIC		:=
+MUSIC		:= maxmod_data
 
 #---------------------------------------------------------------------------------
 # options for code generation

@@ -16,6 +16,9 @@
 #include "xgm.h"
 
 #include "gba.h"
+#include <maxmod.h>
+#include "soundbank.h"
+#include "soundbank_bin.h"
 
 void aftervsync() {
 	disable_ints;
@@ -40,13 +43,19 @@ void aftervsync() {
 
 int main() {
 	irqInit();
+
+	irqSet( IRQ_VBLANK, mmVBlank );
 	irqEnable(IRQ_VBLANK);
+
+    mmInitDefault( (mm_addr)soundbank_bin, 8 );
+	
+
 	consoleDemoInit();
 	
 	//nocash_puts("BRUH");
     setRandomSeed(0xC427); // initiate random number generator
-    mem_init();
-    vdp_init();
+    //mem_init();
+    //vdp_init();
 	//xgm_init();
 
 	//GBATODO
@@ -66,7 +75,7 @@ int main() {
 	}
     // let's the fun go on !
     
-    sound_init();
+    //sound_init();
 	
 	// Error Tests
 	//__asm__("move.w (1),%d0"); // Address Error

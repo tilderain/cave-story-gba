@@ -78,7 +78,7 @@ uint16_t mem_get_used() {
     }
     return res;
 }
-
+/*
 void free(void *ptr) {
     // valid block --> mark block as no more used
 		//GBATODO
@@ -118,3 +118,4 @@ void* malloc(uint16_t size) {
     // return block
     return p;
 }
+*/

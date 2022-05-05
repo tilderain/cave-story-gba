@@ -29,6 +29,7 @@ uint16_t joystate, oldstate = 0;
 
 void joy_init() {
 	joystate = oldstate = 0;
+	return;
     /* set the port bits direction */
     volatile uint8_t *pb = (volatile uint8_t*) 0xa10009;
     *pb = 0x40;

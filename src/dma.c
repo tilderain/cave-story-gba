@@ -63,6 +63,7 @@ void DMA_clearQueue()
 
 void DMA_flushQueue()
 {
+	return;
     uint16_t i;
     volatile uint32_t *pl;
     uint32_t *info;
@@ -244,11 +245,13 @@ uint16_t DMA_queueDma(uint8_t location, uint32_t from, uint16_t to, uint16_t len
 
 void DMA_waitCompletion()
 {
+	return;
     while(GET_VDPSTATUS(VDP_DMABUSY_FLAG));
 }
 
 void DMA_doDma(uint8_t location, uint32_t from, uint16_t to, uint16_t len, int16_t step)
 {
+	return;
     volatile uint16_t *pw;
     volatile uint32_t *pl;
     uint32_t newlen;

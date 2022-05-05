@@ -191,8 +191,10 @@ void window_draw_char(uint8_t c) {
             vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0, 1, 0, 0, index-4), msgTextX, msgTextY);
 		} else {
 		    // Low ASCII charset
-            vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0, 1, 0, 0,
-                    TILE_FONTINDEX + c - 0x20), msgTextX, msgTextY);
+            //vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0, 1, 0, 0,
+             //       TILE_FONTINDEX + c - 0x20), msgTextX, msgTextY);
+			vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0, 1, 0, 0,
+                    c), msgTextX, msgTextY);
         }
 		textColumn++;
 		if(spaceCounter % 5 == 1 || spaceCounter == 2) spaceOffset++;

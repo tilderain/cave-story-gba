@@ -23,7 +23,7 @@ static uint16_t skip_atoi(const char **s) {
     return i;
 }
 
-static uint16_t vsprintf(char *buf, const char *fmt, va_list args) {
+/*static uint16_t vsprintf(char *buf, const char *fmt, va_list args) {
     char tmp_buffer[12];
     char *str;
     for (str = buf; *fmt; ++fmt) {
@@ -134,7 +134,7 @@ static uint16_t vsprintf(char *buf, const char *fmt, va_list args) {
                     field_width = 2 * sizeof(void *);
                     zero_pad = 1;
                 } /* fallthrough */
-            case 'x':
+            /*case 'x':
             case 'X': {
                 s = &tmp_buffer[12];
                 *--s = 0;
@@ -226,4 +226,4 @@ uint16_t sprintf(char *buffer, const char *fmt, ...) {
     uint16_t i = vsprintf(buffer, fmt, args);
     va_end(args);
     return i;
-}
+}*/

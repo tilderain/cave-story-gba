@@ -145,6 +145,7 @@ extern const tileset_info_def tileset_info[];
 extern const background_info_def background_info[];
 
 extern const song_info_def song_info[];
+extern const song_info_def song_info_xm[];
 
 extern const sound_info_def sound_info[];
 

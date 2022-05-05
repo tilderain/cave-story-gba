@@ -7,6 +7,12 @@
 #include "xgm.h"
 #include "audio.h"
 
+#include "gba.h"
+
+#include <maxmod.h>
+#include "soundbank.h"
+#include "soundbank_bin.h"
+
 // ID of the currently playing song, and backup of the previous,
 // used for song_resume()
 uint8_t songPlaying, songResume;
@@ -48,7 +54,7 @@ void song_play(uint8_t id) {
 	if(id == songPlaying) return;
 	songResume = songPlaying;
 	// Track 0 in song_info is NULL, but others could be potentially
-	if(song_info[id].song == NULL) {
+	if(song_info_xm[id].song == NULL) {
 		id = 0;
         xgm_music_pause();
 	} else {
@@ -56,6 +62,14 @@ void song_play(uint8_t id) {
         vdp_vsync(); aftervsync();
 		vdp_vsync();
 		xgm_music_play(song_info[id].song);
+	}
+	if(song_info_xm[id].song == NULL)
+	{
+		mmStop();
+	}
+	else
+	{
+		mmStart((mm_word)song_info_xm[id].song, MM_PLAY_LOOP);
 	}
 	songPlaying = id;
 }

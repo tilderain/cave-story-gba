@@ -83,17 +83,21 @@ uint8_t titlescreen_main() {
 	};
 	uint8_t sprFrame = 0, sprTime = ANIM_SPEED;
 	// Menu and version text
+	vdp_puts(VDP_PLAN_A, "Cave Story", 0, 1);
+
+
+
 	vdp_puts(VDP_PLAN_A, "Start Game", 15, 12);
 	vdp_puts(VDP_PLAN_A, "Sound Test", 15, 16);
-	vdp_puts(VDP_PLAN_A, "Config", 15, 18);
+	vdp_puts(VDP_PLAN_A, "Config", 15, 20);
 	// Debug
 	{
 		char vstr[40];
-		sprintf(vstr, "Test Build - %s", __DATE__);
-		vdp_puts(VDP_PLAN_A, vstr, 4, 26);
+		//sprintf(vstr, "Test Build - %s", __DATE__);
+		//vdp_puts(VDP_PLAN_A, vstr, 4, 26);
 	}
 	// Release
-	//vdp_puts(VDP_PLAN_A, "Mega Drive Version 0.6.0 2020.07", 4, 26);
+	vdp_puts(VDP_PLAN_A, "Mega Drive Version 0.6.0 2020.07", 4, 26);
 	vdp_tiles_load_from_rom(cfg_language == LANG_JA ? TS_J_Title.tiles : TS_Title.tiles, TILE_USERINDEX, TS_Title.numTile);
 	vdp_map_fill_rect(VDP_PLAN_B, TILE_ATTR(PAL0,0,0,0,TILE_USERINDEX),        11,  3, 18, 4, 1);
 	vdp_map_fill_rect(VDP_PLAN_B, TILE_ATTR(PAL0,0,0,0,TILE_USERINDEX + 18*4), 11, 23, 18, 2, 1);

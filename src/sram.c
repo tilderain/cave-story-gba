@@ -27,3 +27,9 @@ void SRAM_writeByte(uint32_t offset, uint8_t val)
 {
     *(volatile uint8_t*)(SRAM_BASE + (offset * 2)) = val;
 }
+
+//GBATODO
+uint16_t SRAM_readWord(uint32_t offset){ return 0; }
+uint32_t SRAM_readLong(uint32_t offset) { return 0; }
+void SRAM_writeWord(uint32_t offset, uint16_t val) { return; }
+void SRAM_writeLong(uint32_t offset, uint32_t val) { return; }

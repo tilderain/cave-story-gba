@@ -20,3 +20,4 @@ src/xgm/z80_xgm.h
 .DS_Store
 /build
 *.gba
+*.sav

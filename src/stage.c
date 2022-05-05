@@ -185,6 +185,7 @@ void stage_load_credits(uint8_t id) {
 }
 
 void stage_load_tileset() {
+	return;
     uint32_t *buf = (uint32_t*) 0xFF0100;
     uint16_t numtile = tileset_info[stageTileset].size << 2;
     for(uint16_t i = 0; i < numtile; i += 128) {

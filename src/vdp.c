@@ -91,7 +91,10 @@ void vdp_init() {
 	vdp_tiles_load(TILE_BLANK, 0, 1);
 }
 
+#include "maxmod.h"
+
 void vdp_vsync() {
+	mmFrame();
 	VBlankIntrWait();
 }
 
@@ -165,6 +168,8 @@ void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint
 // Tile maps
 
 void vdp_map_xy(uint16_t plan, uint16_t tile, uint16_t x, uint16_t y) {
+	//iprintf("\x1b[%hu;%huH%s\n", (y>>2)*3, (x>>2)*3, tile);
+	return;
     uint32_t addr = plan + ((x + (y << PLAN_WIDTH_SFT)) << 1);
     *vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);
 	*vdp_data_port = tile;
@@ -192,6 +197,8 @@ void vdp_map_fill_rect(uint16_t plan, uint16_t index, uint16_t x, uint16_t y, ui
 }
 
 void vdp_map_clear(uint16_t plan) {
+	iprintf("\x1b[2J");
+	return;
 	uint16_t addr = plan;
 	while(addr < plan + 0x1000) {
 		vdp_dma_vram((uint32_t) BLANK_DATA, addr, 0x80);
@@ -335,8 +342,9 @@ void vdp_font_pal(uint16_t pal) {
 void vdp_puts(uint16_t plan, const char *str, uint16_t x, uint16_t y) {
 	//GBATODO
 	char text[128];
-	sprintf(text, "%s    \n", str);
-	iprintf(text);
+	iprintf("\x1b[%hu;%huH%s\n", (y>>2)*3, (x>>2)*3, str);
+	//sprintf(text, "\x1b[%hu;%huH%s\n", y, x, str);
+	//iprintf(text);
 	return;
 	uint32_t addr = plan + ((x + (y << PLAN_WIDTH_SFT)) << 1);
 	*vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);
@@ -359,7 +367,13 @@ void vdp_puts(uint16_t plan, const char *str, uint16_t x, uint16_t y) {
 
 void vdp_text_clear(uint16_t plan, uint16_t x, uint16_t y, uint16_t len) {
 	//GBATODO
-	iprintf("\x1b[2J");
+	char space[256];
+	for(int i = 0;i<len;i++)
+	{
+		space[i] = ' ';
+	}
+	space[len] = '\0';
+	iprintf("\x1b[%hu;%huH%s", (y>>2)*3, (x>>2)*3, space);
 	return;
     uint32_t addr = plan + ((x + (y << PLAN_WIDTH_SFT)) << 1);
 	*vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);
