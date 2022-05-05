@@ -135,7 +135,6 @@ Entity *entity_destroy(Entity *e) {
 }
 
 void entities_clear() {
-	//GBATODO
 	LIST_CLEAR(entityList);
 	LIST_CLEAR(inactiveList);
 }

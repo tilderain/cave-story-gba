@@ -81,7 +81,6 @@ uint16_t mem_get_used() {
 /*
 void free(void *ptr) {
     // valid block --> mark block as no more used
-		//GBATODO
     //if(ptr) ((uint16_t*)ptr)[-1] &= ~USED;
 }
 

@@ -153,7 +153,6 @@ void stage_load(uint16_t id) {
     z80_release();
     enable_ints;
 
-	//GBATODO
 	stage_load_entities(); // Create entities defined in the stage's PXE
 	// For rooms where the boss is always loaded
 	if(stageID == STAGE_WATERWAY_BOSS) {
