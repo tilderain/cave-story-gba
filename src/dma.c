@@ -38,6 +38,7 @@ static uint32_t queueTransferSizeLimit;
 
 void DMA_init(uint16_t size, uint16_t capacity)
 {
+	return;
     if (size) queueSize = size;
     else queueSize = DMA_DEFAULT_QUEUE_SIZE;
 
@@ -131,6 +132,7 @@ uint32_t DMA_getQueueTransferSize()
 
 uint16_t DMA_queueDma(uint8_t location, uint32_t from, uint16_t to, uint16_t len, uint16_t step)
 {
+	return;
     uint32_t newlen;
     uint32_t banklimitb;
     uint32_t banklimitw;
@@ -308,6 +310,7 @@ void DMA_doDma(uint8_t location, uint32_t from, uint16_t to, uint16_t len, int16
 
 void DMA_doVRamFill(uint16_t to, uint16_t len, uint8_t value, int16_t step)
 {
+	return;
     volatile uint16_t *pw;
     volatile uint32_t *pl;
     uint16_t l;
@@ -357,6 +360,7 @@ void DMA_doVRamFill(uint16_t to, uint16_t len, uint8_t value, int16_t step)
 
 void DMA_doVRamCopy(uint16_t from, uint16_t to, uint16_t len, int16_t step)
 {
+	return;
     volatile uint16_t *pw;
     volatile uint32_t *pl;
 

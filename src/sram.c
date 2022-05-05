@@ -4,27 +4,32 @@
 
 void SRAM_enable()
 {
+	return;
     *(volatile uint8_t*)SRAM_CONTROL = 1;
 }
 
 void SRAM_enableRO()
 {
+	return;
     *(volatile uint8_t*)SRAM_CONTROL = 3;
 }
 
 void SRAM_disable()
 {
+	return;
     *(volatile uint8_t*)SRAM_CONTROL = 0;
 }
 
 
 uint8_t SRAM_readByte(uint32_t offset)
 {
+	return 1;
     return *(volatile uint8_t*)(SRAM_BASE + (offset * 2));
 }
 
 void SRAM_writeByte(uint32_t offset, uint8_t val)
 {
+	return;
     *(volatile uint8_t*)(SRAM_BASE + (offset * 2)) = val;
 }
 

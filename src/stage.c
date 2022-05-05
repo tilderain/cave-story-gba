@@ -55,6 +55,8 @@ static void stage_draw_moonback();
 
 #include "gba.h"
 
+uint16_t stageID = 0;
+
 void stage_load(uint16_t id) {
 
 	iprintf("Loading stage %d\n", id);

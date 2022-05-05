@@ -125,7 +125,7 @@ enum StageIndex {
 };
 
 // Index of current stage in db/stage.c
-static uint16_t stageID;
+extern uint16_t stageID;
 // Size of the stage - how many blocks wide/high
 static uint16_t stageWidth, stageHeight;
 // A multiplication lookup table for each row of stageBlocks

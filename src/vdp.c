@@ -48,6 +48,7 @@ static uint16_t sprite_ymax;
 static uint16_t font_pal;
 
 void vdp_init() {
+		return;
 	// Store pal_mode and adjust some stuff based on it
     pal_mode = *vdp_ctrl_port & 1;
     SCREEN_HEIGHT = pal_mode ? 240 : 224;
@@ -101,26 +102,32 @@ void vdp_vsync() {
 // Register stuff
 
 void vdp_set_display(uint8_t enabled) {
+		return;
 	*vdp_ctrl_port = 0x8134 | (enabled ? 0x40 : 0) | (pal_mode ? 0x08 : 0);
 }
 
 void vdp_set_autoinc(uint8_t val) {
+		return;
 	*vdp_ctrl_port = 0x8F00 | val;
 }
 
 void vdp_set_scrollmode(uint8_t hoz, uint8_t vert) {
+		return;
 	*vdp_ctrl_port = 0x8B00 | (vert << 2) | hoz;
 }
 
 void vdp_set_highlight(uint8_t enabled) {
+		return;
 	*vdp_ctrl_port = 0x8C81 | (enabled << 3);
 }
 
 void vdp_set_backcolor(uint8_t index) {
+		return;
     *vdp_ctrl_port = 0x8700 | index;
 }
 
 void vdp_set_window(uint8_t x, uint8_t y) {
+		return;
     *vdp_ctrl_port = 0x9100 | x;
     *vdp_ctrl_port = 0x9200 | y;
 }
@@ -128,6 +135,7 @@ void vdp_set_window(uint8_t x, uint8_t y) {
 // DMA stuff
 
 static void dma_do(uint32_t from, uint16_t len, uint32_t cmd) {
+		return;
 	// Setup DMA length (in word here)
     *vdp_ctrl_port = 0x9300 + (len & 0xff);
     *vdp_ctrl_port = 0x9400 + ((len >> 8) & 0xff);
@@ -143,25 +151,30 @@ static void dma_do(uint32_t from, uint16_t len, uint32_t cmd) {
 }
 
 void vdp_dma_vram(uint32_t from, uint16_t to, uint16_t len) {
+		return;
 	dma_do(from, len, ((0x4000 + (((uint32_t)to) & 0x3FFF)) << 16) + ((((uint32_t)to) >> 14) | 0x80));
 }
 
 void vdp_dma_cram(uint32_t from, uint16_t to, uint16_t len) {
+		return;
 	dma_do(from, len, ((0xC000 + (((uint32_t)to) & 0x3FFF)) << 16) + ((((uint32_t)to) >> 14) | 0x80));
 }
 
 void vdp_dma_vsram(uint32_t from, uint16_t to, uint16_t len) {
+		return;
 	dma_do(from, len, ((0x4000 + (((uint32_t)to) & 0x3FFF)) << 16) + ((((uint32_t)to) >> 14) | 0x90));
 }
 
 // Tile patterns
 
 void vdp_tiles_load(volatile const uint32_t *data, uint16_t index, uint16_t num) {
+		return;
 	vdp_dma_vram((uint32_t) data, index << 5, num << 4);
 }
 
 // Temporary solution until I get the tilesets aligned, SGDK takes into account 128K unalignment
 void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint16_t num) {
+		return;
 	DMA_doDma(DMA_VRAM, (uint32_t) data, index << 5, num << 4, 2);
 }
 
@@ -176,16 +189,19 @@ void vdp_map_xy(uint16_t plan, uint16_t tile, uint16_t x, uint16_t y) {
 }
 
 void vdp_map_hline(uint16_t plan, const uint16_t *tiles, uint16_t x, uint16_t y, uint16_t len) {
+	return;
 	vdp_dma_vram((uint32_t) tiles, plan + ((x + (y << PLAN_WIDTH_SFT)) << 1), len);
 }
 
 void vdp_map_vline(uint16_t plan, const uint16_t *tiles, uint16_t x, uint16_t y, uint16_t len) {
+	return;
 	vdp_set_autoinc(128);
 	vdp_dma_vram((uint32_t) tiles, plan + ((x + (y << PLAN_WIDTH_SFT)) << 1), len);
 	vdp_set_autoinc(2);
 }
 
 void vdp_map_fill_rect(uint16_t plan, uint16_t index, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t inc) {
+	return;
 	volatile uint16_t tiles[64]; // Garbled graphics on -Ofast without this volatile here
     for(uint16_t yy = 0; yy < h; yy++) {
         for(uint16_t xx = 0; xx < w; xx++) {
@@ -209,11 +225,13 @@ void vdp_map_clear(uint16_t plan) {
 // Palettes
 
 void vdp_colors(uint16_t index, const uint16_t *values, uint16_t count) {
+	return;
 	vdp_dma_cram((uint32_t) values, index << 1, count);
     for(uint16_t i = count; i--;) pal_current[index+i] = values[i];
 }
 
 void vdp_color(uint16_t index, uint16_t color) {
+	return;
 	uint16_t ind = index << 1;
     *vdp_ctrl_wide = ((0xC000 + (((uint32_t)ind) & 0x3FFF)) << 16) + ((((uint32_t)ind) >> 14) | 0x00);
     *vdp_data_port = color;
@@ -221,14 +239,17 @@ void vdp_color(uint16_t index, uint16_t color) {
 }
 
 void vdp_colors_next(uint16_t index, const uint16_t *values, uint16_t count) {
+	return;
     for(uint16_t i = count; i--;) pal_next[index+i] = values[i];
 }
 
 void vdp_color_next(uint16_t index, uint16_t color) {
+	return;	
     pal_next[index] = color;
 }
 
 uint16_t vdp_fade_step() {
+	return;
 	if(!pal_fading) return 0;
 	if(++pal_fadecnt >= pal_fadespeed) {
 		pal_fadecnt = 0;
@@ -254,6 +275,7 @@ uint16_t vdp_fade_step() {
 }
 
 void vdp_fade(const uint16_t *src, const uint16_t *dst, uint16_t speed, uint8_t async) {
+		return;
     if(src) vdp_colors(0, src, 64);
     if(dst) vdp_colors_next(0, dst, 64);
 	pal_fading = TRUE;
@@ -270,18 +292,21 @@ void vdp_fade(const uint16_t *src, const uint16_t *dst, uint16_t speed, uint8_t 
 // Scroll
 
 void vdp_hscroll(uint16_t plan, int16_t hscroll) {
+		return;
 	uint32_t addr = (plan == VDP_PLAN_A) ? VDP_HSCROLL_TABLE : VDP_HSCROLL_TABLE + 2;
 	*vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);
 	*vdp_data_port = hscroll;
 }
 
 void vdp_hscroll_tile(uint16_t plan, int16_t *hscroll) {
+		return;
     vdp_set_autoinc(32);
     vdp_dma_vram((uint32_t) hscroll, VDP_HSCROLL_TABLE + (plan == VDP_PLAN_A ? 0 : 2), 32);
     vdp_set_autoinc(2);
 }
 
 void vdp_vscroll(uint16_t plan, int16_t vscroll) {
+	return;	
 	uint32_t addr = (plan == VDP_PLAN_A) ? 0 : 2;
 	*vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x10);
 	*vdp_data_port = vscroll;
@@ -290,6 +315,7 @@ void vdp_vscroll(uint16_t plan, int16_t vscroll) {
 // Sprites
 
 void vdp_sprite_add(const VDPSprite *spr) {
+		return;
     // Exceeded max number of sprites
     if(sprite_count >= 80) return;
     // Prevent drawing off screen sprites
@@ -301,16 +327,19 @@ void vdp_sprite_add(const VDPSprite *spr) {
 }
 
 void vdp_sprites_add(const VDPSprite *spr, uint16_t num) {
+		return;
 	for(uint16_t i = num; i--;) vdp_sprite_add(&spr[i]);
 }
 
 void vdp_sprites_clear() {
+		return;
 	static const VDPSprite NULL_SPRITE = { .x = 0x80, .y = 0x80 };
 	sprite_count = 0;
 	vdp_sprites_add(&NULL_SPRITE, 1);
 }
 
 void vdp_sprites_update() {
+		return;
 	if(!sprite_count) return;
 	sprite_table[sprite_count - 1].link = 0; // Mark end of sprite list
 	vdp_dma_vram((uint32_t) sprite_table, VDP_SPRITE_TABLE, sprite_count << 2);
@@ -320,6 +349,7 @@ void vdp_sprites_update() {
 // Font / Text
 
 void vdp_font_load(const uint32_t *tiles) {
+		return;
 	font_pal = 0;
 	// ASCII 32-127
 	vdp_tiles_load_from_rom(tiles, TILE_FONTINDEX, 0x60);
@@ -334,6 +364,7 @@ void vdp_font_load(const uint32_t *tiles) {
 }
 
 void vdp_font_pal(uint16_t pal) {
+		return;
 	font_pal = pal;
 }
 
