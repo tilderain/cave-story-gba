@@ -13,8 +13,8 @@
 
 #define BUTTON_UP       (1<<6)
 #define BUTTON_DOWN     (1<<7)
-#define BUTTON_LEFT     (1<<4)
-#define BUTTON_RIGHT    (1<<5)
+#define BUTTON_LEFT     (1<<5)
+#define BUTTON_RIGHT    (1<<4)
 #define BUTTON_A        0x0040
 #define BUTTON_B        (1<<1) //GBA B
 #define BUTTON_C        (1<<0) //GBA A
