@@ -208,7 +208,12 @@ $(BUILD):
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).gba
+	rm -fr $(BUILD) $(TARGET).elf $(TARGET).gba
+	rm -f $(CPXMS) $(XGCS) $(PCMS) $(PATS) $(MAPS) $(PTSETS) $(CTSETS) $(ZOBJ) $(OBJS)
+	rm -f $(TSBS) $(TL_TSBS)
+	rm -f res/patches/*.patch
+	rm -f src/xgm/z80_xgm.s src/xgm/z80_xgm.o80 src/xgm/z80_xgm.h out.lst
+	rm -f res/resources.h res/resources.s inc/ai_gen.h
 
 
 #---------------------------------------------------------------------------------
