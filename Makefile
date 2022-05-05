@@ -226,7 +226,7 @@ $(OUTPUT).elf	:	prereq $(OFILES)
 
 $(OFILES_SOURCES) : $(HFILES)
 
-prereq: $(RESCOMP) resources.h head-gen $(BINTOS) $(TSCOMP) $(WAVTORAW) 
+prereq: $(RESCOMP) resources.s head-gen $(BINTOS) $(TSCOMP) $(WAVTORAW) 
 prereq: $(CPXMS) $(XGCS) $(PCMS) $(CTSETS) $(ZOBJ) $(TSBS) $(PATS)
 
 head-gen:
@@ -236,8 +236,8 @@ head-gen:
 $(RESCOMP):
 	cc ../tools/rescomp/src/*.c -Itools/rescomp/inc -o $@
 
-resources.h: 
-	$(RESCOMP) ../res/resources.res
+resources.s: 
+	$(RESCOMP) ../res/resources.res 
 
 %.o: %.s 
 	@echo "AS $<"
