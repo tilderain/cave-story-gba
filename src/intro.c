@@ -41,7 +41,7 @@ void intro_main() {
     vdp_puts(VDP_PLAN_A, "Based on the Work of", 10, 6);
     vdp_puts(VDP_PLAN_A, "    Studio Pixel    ", 10, 8);
 	uint16_t timer = 0;
-	oldstate = 0;
+	joystate = oldstate = 0;
 	//GBATODO
 	while(timer++ < 20) {
 		if(timer == TIME_8(150)) {

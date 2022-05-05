@@ -74,7 +74,7 @@ void soundtest_main() {
 	vdp_set_display(TRUE);
 
 	song_stop();
-	oldstate = 0;
+	joystate = oldstate = 0;
     while(TRUE) {
 		// Switch between tracks
 		// Skip the gap between the last song and first sfx
