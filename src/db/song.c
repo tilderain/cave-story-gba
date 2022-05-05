@@ -25,9 +25,9 @@ const song_info_def song_info_xm[SONG_COUNT] = {
 	{ MOD_PLANT, 		"Yamashita Farm" },
 	{ MOD_PULSE, 		"Pulse" },
 	{ MOD_GET_HEART_TANK, 	"Fanfare 2" },
-	{ MOD_VICTORY_, 	"Fanfare 3" }, // 0x10
+	{ MOD_VICTORY, 	"Fanfare 3" }, // 0x10
 	{ MOD_TYRANT, 		"Tyrant" },
-	{ MOD_RUN_, 			"Run!" },
+	{ MOD_RUN, 			"Run!" },
 	{ MOD_JENKA_1, 		"Jenka 1" },
 	{ MOD_LABYRINTH_FIGHT, 	"Labyrinth Fight" },
 	{ MOD_ACCESS, 		"Access" },
@@ -35,12 +35,12 @@ const song_info_def song_info_xm[SONG_COUNT] = {
 	{ MOD_GEOTHERMAL, 	"Geothermal" },
 	{ MOD_CAVE_STORY, 	"Cave Story" },
 	{ MOD_MOONSONG, 	"Moon Song" },
-	{ NULL, 	"Hero's End" },
+	{ MOD_HEROS_END, 	"Hero's End" },
 	{ MOD_SCORCHING_BACK, 	"Scorching Back" },
 	{ MOD_QUIET, 		"Quiet" },
 	{ MOD_LAST_CAVE, 	"Last Cave" },
 	{ MOD_BALCONY, 		"Balcony" },
-	{ NULL, 		"Charge" },
+	{ MOD_CHARGE, 		"Charge" },
 	{ MOD_LAST_BATTLE, 	"Last Battle" }, // 0x20
 	{ MOD_THE_WAY_BACK_HOME, 	"The Way Back Home" },
 	{ MOD_ZOMBIE, 		"Zombie" },
@@ -49,7 +49,7 @@ const song_info_def song_info_xm[SONG_COUNT] = {
 	{ MOD_JENKA_2, 		"Jenka 2" },
 	{ MOD_LIVING_WATERWAY, 	"Living Waterway" },
 	{ MOD_SEAL_CHAMBER, 	"Seal Chamber" },
-	{ NULL, 		"Toroko's Theme" },
+	{ MOD_TOROKOS_THEME, 		"Toroko's Theme" },
 	{ MOD_WHITE, 		"White" },
     { NULL,    "Time Table" },
 };

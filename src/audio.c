@@ -26,8 +26,8 @@ void sound_init() {
     disable_ints;
     z80_request();
     for(uint8_t i = 1; i < SOUND_COUNT; i++) {
-    	uint16_t len = sound_info[i].end-sound_info[i].sound;
-        xgm_pcm_set(0x40 + i, sound_info[i].sound, len > 256 ? len : 256);
+    //	uint16_t len = sound_info[i].end-sound_info[i].sound;
+        //xgm_pcm_set(0x40 + i, sound_info[i].sound, len > 256 ? len : 256);
     }
     z80_release();
     enable_ints;
@@ -35,9 +35,11 @@ void sound_init() {
 }
 
 void sound_play(uint8_t id, uint8_t priority) {
+	mmEffect((mm_word)sound_info[id].sound);
+	return;
 	if(cfg_sfx_mute && gamemode != GM_SOUNDTEST) return;
 	if(id >= 0x90 && id < 0xA0) id -= 0x40;
-	if(id >= SOUND_COUNT || sound_info[id].end == 0) return;
+	//if(id >= SOUND_COUNT || sound_info[id].end == 0) return;
 	xgm_pcm_play(0x40 + id, priority, soundChannel++);
 	if(soundChannel > 3) soundChannel = 1;
 }
