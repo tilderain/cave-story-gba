@@ -21,3 +21,5 @@ src/xgm/z80_xgm.h
 /build
 *.gba
 *.sav
+/bin
+res/resources.s
