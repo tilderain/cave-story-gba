@@ -91,10 +91,10 @@ void outMap(tilemap_* map, FILE* fs, FILE* fh, char* id, int global)
     // map structure
     decl(fs, fh, "Map", id, 2, global);
     // compression
-    fprintf(fs, "    dc.w    %d\n", map->packed);
+    fprintf(fs, "    .dc.w    %d\n", map->packed);
     // size
-    fprintf(fs, "    dc.w    %d, %d\n", map->w, map->h);
+    fprintf(fs, "    .dc.w    %d, %d\n", map->w, map->h);
     // map data pointer
-    fprintf(fs, "    dc.l    %s\n", temp);
+    fprintf(fs, "    .dc.l    %s\n", temp);
     fprintf(fs, "\n");
 }

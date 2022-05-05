@@ -1,3 +1,84 @@
+
+
+
+#---------------------------------------------------
+#---------------CSMD makefile section---------------
+#---------------------------------------------------
+
+MARSDEV ?= ${HOME}/mars
+MARSBIN  = $(MARSDEV)/m68k-elf/bin
+TOOLSBIN = $(MARSDEV)/bin
+
+TARGET = doukutsu
+
+# Z80 Assembler to build XGM driver
+ASMZ80   = $(TOOLSBIN)/sjasm
+# SGDK Tools
+BINTOS   = ../bin/bintos
+RESCOMP  = ../bin/rescomp
+WAVTORAW = ../bin/wavtoraw
+XGMTOOL  = bin/xgmtool
+# Sik's Tools
+MDTILER  = $(TOOLSBIN)/mdtiler
+SLZ      = $(TOOLSBIN)/slz
+UFTC     = $(TOOLSBIN)/uftc
+# Cave Story Tools
+TSCOMP   = ../bin/tscomp
+PATCHROM = bin/patchrom
+
+# Some files needed are in a versioned directory
+GCC_VER := $(shell $(CC) -dumpversion)
+PLUGIN   = $(MARSDEV)/m68k-elf/libexec/gcc/m68k-elf/$(GCC_VER)
+LTO_SO   = liblto_plugin.so
+ifeq ($(OS),Windows_NT)
+    LTO_SO = liblto_plugin-0.dll
+endif
+
+INCS     = -Isrc -Ires -Iinc
+LIBS     = -L$(MARSDEV)/m68k-elf/lib/gcc/m68k-elf/$(GCC_VER)
+CCFLAGS  = -m68000 -Wall -Wextra -std=c99 -ffreestanding -fcommon -mshort
+OPTIONS  =
+ASFLAGS  = -m68000 --register-prefix-optional
+LDFLAGS  = -T mdssf.ld -nostdlib
+Z80FLAGS = -isrc/xgm
+
+# Stage layout files to compress
+PXMS  = $(wildcard ../res/Stage/*.pxm)
+PXMS += $(wildcard ../res/Stage/*/*.pxm)
+CPXMS = $(PXMS:.pxm=.cpxm)
+
+# Tilesets to compress
+TSETS  = $(wildcard ../res/Stage/*_vert.png)
+TSETS += $(wildcard ../res/Stage/**/*_vert.png)
+PTSETS = $(TSETS:.png=.pat)
+CTSETS = $(TSETS:.png=.uftc)
+
+# TSC to convert to TSB
+TSCS  = $(wildcard ../res/tsc/en/*.txt)
+TSCS += $(wildcard ../res/tsc/en/Stage/*.txt)
+TSBS  = $(TSCS:.txt=.tsb)
+
+# TSBs for translations
+TL_TSCS  = $(wildcard ../res/tsc/*/*.txt)
+TL_TSCS += $(wildcard ../res/tsc/*/Stage/*.txt)
+TL_TSBS  = $(TL_TSCS:.txt=.tsb)
+
+# mdtiler scripts to generate tile patterns & mappings
+MDTS  = $(wildcard ../res/*.mdt)
+MDTS += $(wildcard ../res/*/*.mdt)
+PATS  = $(MDTS:.mdt=.pat)
+MAPS  = $(MDTS:.mdt=.map)
+
+# VGM files to convert to XGC
+VGMS  = $(wildcard res/bgm/*.vgm)
+XGCS  = $(VGMS:.vgm=.xgc)
+
+# WAV files to convert to raw PCM
+WAVS  = $(wildcard ../res/sfx/*.wav)
+PCMS  = $(WAVS:.wav=.pcm)
+
+RESS  = res/resources.res
+
 #---------------------------------------------------------------------------------
 .SUFFIXES:
 #---------------------------------------------------------------------------------
@@ -7,63 +88,6 @@ $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>dev
 endif
 
 include $(DEVKITARM)/gba_rules
-
-
-
-# Stage layout files to compress
-PXMS  = $(wildcard res/Stage/*.pxm)
-PXMS += $(wildcard res/Stage/*/*.pxm)
-CPXMS = $(PXMS:.pxm=.cpxm)
-
-# Tilesets to compress
-TSETS  = $(wildcard res/Stage/*_vert.png)
-TSETS += $(wildcard res/Stage/**/*_vert.png)
-PTSETS = $(TSETS:.png=.pat)
-CTSETS = $(TSETS:.png=.uftc)
-
-# TSC to convert to TSB
-TSCS  = $(wildcard res/tsc/en/*.txt)
-TSCS += $(wildcard res/tsc/en/Stage/*.txt)
-TSBS  = $(TSCS:.txt=.tsb)
-
-# TSBs for translations
-TL_TSCS  = $(wildcard res/tsc/*/*.txt)
-TL_TSCS += $(wildcard res/tsc/*/Stage/*.txt)
-TL_TSBS  = $(TL_TSCS:.txt=.tsb)
-
-# mdtiler scripts to generate tile patterns & mappings
-MDTS  = $(wildcard res/*.mdt)
-MDTS += $(wildcard res/*/*.mdt)
-PATS  = $(MDTS:.mdt=.pat)
-MAPS  = $(MDTS:.mdt=.map)
-
-# VGM files to convert to XGC
-VGMS  = $(wildcard res/bgm/*.vgm)
-XGCS  = $(VGMS:.vgm=.xgc)
-
-# WAV files to convert to raw PCM
-WAVS  = $(wildcard res/sfx/*.wav)
-PCMS  = $(WAVS:.wav=.pcm)
-
-
-# Z80 source for XGM driver
-ZSRC  = $(wildcard src/xgm/*.s80)
-ZOBJ  = $(ZSRC:.s80=.o80)
-
-ASMO  = $(RESS:.res=.o)
-ASMO += $(Z80S:.s80=.o)
-ASMO += $(CS:%.c=asmout/%.s)
-
-# SGDK Tools
-BINTOS   = bin/bintos
-RESCOMP  = ../bin/rescomp
-WAVTORAW = bin/wavtoraw
-XGMTOOL  = bin/xgmtool
-# Sik's Tools
-MDTILER  = $(TOOLSBIN)/mdtiler
-SLZ      = $(TOOLSBIN)/slz
-UFTC     = $(TOOLSBIN)/uftc
-
 
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
@@ -162,7 +186,7 @@ endif
 
 export OFILES_BIN := $(addsuffix .o,$(BINFILES)) 
 
-export OFILES_SOURCES := $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o) 
+export OFILES_SOURCES := $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
  
 export OFILES := $(OFILES_BIN) $(OFILES_SOURCES) 
 
@@ -198,12 +222,104 @@ else
 
 $(OUTPUT).gba	:	$(OUTPUT).elf
 
-$(OUTPUT).elf	:	$(OFILES)
+$(OUTPUT).elf	:	prereq $(OFILES)
 
 $(OFILES_SOURCES) : $(HFILES)
 
-res/resources.s: 
+prereq: $(RESCOMP) resources.h head-gen $(BINTOS) $(TSCOMP) $(WAVTORAW) 
+prereq: $(CPXMS) $(XGCS) $(PCMS) $(CTSETS) $(ZOBJ) $(TSBS) $(PATS)
+
+head-gen:
+	rm -f inc/ai_gen.h
+	python ../aigen.py
+
+$(RESCOMP):
+	cc ../tools/rescomp/src/*.c -Itools/rescomp/inc -o $@
+
+resources.h: 
 	$(RESCOMP) ../res/resources.res
+
+%.o: %.s 
+	@echo "AS $<"
+	@$(AS) $(ASFLAGS) $< -o $@
+
+%.s: %.res
+	$(RESCOMP) $< $@
+
+
+$(BINTOS): 
+	cc ../tools/bintos/src/*.c -o $@
+	
+
+
+$(XGMTOOL): bin
+	cc ../tools/xgmtool/src/*.c -Itools/xgmtool/inc -o $@ -lm
+
+$(WAVTORAW): 
+	cc ../tools/wavtoraw/src/*.c -o $@ -lm
+
+# Cave Story tools
+$(TSCOMP): 
+	cc ../tools/tscomp/tscomp.c -o $@
+
+$(PATCHROM): bin
+	cc tools/patchrom/patchrom.c -o $@
+
+
+# Compression of stage layouts
+%.cpxm: %.pxm
+	$(SLZ) -c "$<" "$@"
+
+%.pat: %.mdt
+	$(MDTILER) -b "$(CURDIR)/$<"
+
+# Compression of tilesets
+%.uftc: %.pat
+	$(UFTC) -c "$<" "$@"
+
+%.pat: %.png
+	$(MDTILER) -b "$(CURDIR)/$<"
+
+# Convert VGM
+%.xgc: %.vgm
+	$(XGMTOOL) "$<" "$@" -s
+
+# Convert WAV
+%.pcm: %.wav
+	$(WAVTORAW) "$<" "$@" 14000
+
+# Convert TSC
+../res/tsc/en/%.tsb: ../res/tsc/en/%.txt
+	$(TSCOMP) -l=en "$<"
+../res/tsc/ja/%.tsb: ../res/tsc/ja/%.txt
+	$(TSCOMP) -l=ja "$<"
+../res/tsc/es/%.tsb: ../res/tsc/es/%.txt
+	$(TSCOMP) -l=es "$<"
+../res/tsc/pt/%.tsb: ../res/tsc/pt/%.txt
+	$(TSCOMP) -l=pt "$<"
+../res/tsc/fr/%.tsb: ../res/tsc/fr/%.txt
+	$(TSCOMP) -l=fr "$<"
+../res/tsc/it/%.tsb: ../res/tsc/it/%.txt
+	$(TSCOMP) -l=it "$<"
+../res/tsc/de/%.tsb: ../res/tsc/de/%.txt
+	$(TSCOMP) -l=de "$<"
+../res/tsc/br/%.tsb: ../res/tsc/br/%.txt
+	$(TSCOMP) -l=br "$<"
+../res/tsc/zh/%.tsb: ../res/tsc/zh/%.txt
+	$(TSCOMP) -l=zh "$<"
+../res/tsc/ko/%.tsb: ../res/tsc/ko/%.txt
+	$(TSCOMP) -l=ko "$<"
+
+# Generate patches
+res/patches/$(TARGET)-%.patch: res/patches/$(TARGET)-%.s
+	$(AS) $(ASFLAGS) "$<" -o "temp.o"
+	$(LD) $(LDFLAGS) "temp.o" -o "temp.elf"
+	$(OBJC) -O binary "temp.elf" "$@"
+
+
+%.s: %.res
+	$(RESCOMP) $< $@
+
 #---------------------------------------------------------------------------------
 # The bin2o rule should be copied and modified
 # for each extension used in the data directories

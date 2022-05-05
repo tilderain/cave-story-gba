@@ -299,11 +299,6 @@ BIN		MAP_FogBtm		"../res/back/bkFogBottom.map"
 BIN		PAT_SndTest	    "../res/back/soundtest.pat"
 BIN		MAP_SndTest	    "../res/back/soundtest.map"
 
-/* XGM Driver blob */
-BIN z80_xgm, "../src/xgm/z80_xgm.o80"
-    .globl z80_xgm_end
-z80_xgm_end:
-
 /* Sound Effects */
 PCM SFX_01  "../res/sfx/01.pcm"
 PCM SFX_02  "../res/sfx/02.pcm"

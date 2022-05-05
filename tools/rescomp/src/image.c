@@ -155,10 +155,10 @@ void outImage(FILE* fs, FILE* fh, char* id, int global)
     // output Image structure
     decl(fs, fh, "Image", id, 2, global);
     // Palette pointer
-    fprintf(fs, "    dc.l    %s_palette\n", id);
+    fprintf(fs, "    .dc.l    %s_palette\n", id);
     // TileSet pointer
-    fprintf(fs, "    dc.l    %s_tileset\n", id);
+    fprintf(fs, "    .dc.l    %s_tileset\n", id);
     // Map pointer
-    fprintf(fs, "    dc.l    %s_tilemap\n", id);
+    fprintf(fs, "    .dc.l    %s_tilemap\n", id);
     fprintf(fs, "\n");
 }

@@ -133,12 +133,12 @@ void outBitmap(unsigned char* bitmap, int packed, int w, int h, int size, FILE* 
     // output Bitmap structure
     decl(fs, fh, "Bitmap", id, 2, global);
     // set compression info
-    fprintf(fs, "    dc.w    %d\n", packed);
+    fprintf(fs, "    .dc.w    %d\n", packed);
     // set size in pixel
-    fprintf(fs, "    dc.w    %d, %d\n", w, h);
+    fprintf(fs, "    .dc.w    %d, %d\n", w, h);
     // set palette pointer
-    fprintf(fs, "    dc.l    %s_palette\n", id);
+    fprintf(fs, "    .dc.l    %s_palette\n", id);
     // set image pointer
-    fprintf(fs, "    dc.l    %s\n", temp);
+    fprintf(fs, "    .dc.l    %s\n", temp);
     fprintf(fs, "\n");
 }

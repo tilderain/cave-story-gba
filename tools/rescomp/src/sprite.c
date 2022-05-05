@@ -153,60 +153,60 @@ void outCollision(collision_* collision, FILE* fs, FILE* fh, char* id, int globa
     // Collision structure
     decl(fs, fh, "Collision", id, 2, global);
     // type position
-    fprintf(fs, "    dc.w    %d\n", collision->type);
+    fprintf(fs, "    .dc.w    %d\n", collision->type);
 
     switch(collision->type)
     {
         case COLLISION_BOX:
             // normal version
-            fprintf(fs, "    dc.w    %d\n", collision->norm.box.x);
-            fprintf(fs, "    dc.w    %d\n", collision->norm.box.y);
-            fprintf(fs, "    dc.w    %d\n", collision->norm.box.w);
-            fprintf(fs, "    dc.w    %d\n", collision->norm.box.h);
+            fprintf(fs, "    .dc.w    %d\n", collision->norm.box.x);
+            fprintf(fs, "    .dc.w    %d\n", collision->norm.box.y);
+            fprintf(fs, "    .dc.w    %d\n", collision->norm.box.w);
+            fprintf(fs, "    .dc.w    %d\n", collision->norm.box.h);
             // H flip version
-            fprintf(fs, "    dc.w    %d\n", collision->hflip.box.x);
-            fprintf(fs, "    dc.w    %d\n", collision->hflip.box.y);
-            fprintf(fs, "    dc.w    %d\n", collision->hflip.box.w);
-            fprintf(fs, "    dc.w    %d\n", collision->hflip.box.h);
+            fprintf(fs, "    .dc.w    %d\n", collision->hflip.box.x);
+            fprintf(fs, "    .dc.w    %d\n", collision->hflip.box.y);
+            fprintf(fs, "    .dc.w    %d\n", collision->hflip.box.w);
+            fprintf(fs, "    .dc.w    %d\n", collision->hflip.box.h);
             // V flip version
-            fprintf(fs, "    dc.w    %d\n", collision->vflip.box.x);
-            fprintf(fs, "    dc.w    %d\n", collision->vflip.box.y);
-            fprintf(fs, "    dc.w    %d\n", collision->vflip.box.w);
-            fprintf(fs, "    dc.w    %d\n", collision->vflip.box.h);
+            fprintf(fs, "    .dc.w    %d\n", collision->vflip.box.x);
+            fprintf(fs, "    .dc.w    %d\n", collision->vflip.box.y);
+            fprintf(fs, "    .dc.w    %d\n", collision->vflip.box.w);
+            fprintf(fs, "    .dc.w    %d\n", collision->vflip.box.h);
             // HV flip version
-            fprintf(fs, "    dc.w    %d\n", collision->hvflip.box.x);
-            fprintf(fs, "    dc.w    %d\n", collision->hvflip.box.y);
-            fprintf(fs, "    dc.w    %d\n", collision->hvflip.box.w);
-            fprintf(fs, "    dc.w    %d\n", collision->hvflip.box.h);
+            fprintf(fs, "    .dc.w    %d\n", collision->hvflip.box.x);
+            fprintf(fs, "    .dc.w    %d\n", collision->hvflip.box.y);
+            fprintf(fs, "    .dc.w    %d\n", collision->hvflip.box.w);
+            fprintf(fs, "    .dc.w    %d\n", collision->hvflip.box.h);
             break;
 
         case COLLISION_CIRCLE:
             // normal version
-            fprintf(fs, "    dc.w    %d\n", collision->norm.circle.x);
-            fprintf(fs, "    dc.w    %d\n", collision->norm.circle.y);
-            fprintf(fs, "    dc.w    %d\n", collision->norm.circle.ray);
-            fprintf(fs, "    dc.w    %d\n", 0);
+            fprintf(fs, "    .dc.w    %d\n", collision->norm.circle.x);
+            fprintf(fs, "    .dc.w    %d\n", collision->norm.circle.y);
+            fprintf(fs, "    .dc.w    %d\n", collision->norm.circle.ray);
+            fprintf(fs, "    .dc.w    %d\n", 0);
             // H flip version
-            fprintf(fs, "    dc.w    %d\n", collision->hflip.circle.x);
-            fprintf(fs, "    dc.w    %d\n", collision->hflip.circle.y);
-            fprintf(fs, "    dc.w    %d\n", collision->hflip.circle.ray);
-            fprintf(fs, "    dc.w    %d\n", 0);
+            fprintf(fs, "    .dc.w    %d\n", collision->hflip.circle.x);
+            fprintf(fs, "    .dc.w    %d\n", collision->hflip.circle.y);
+            fprintf(fs, "    .dc.w    %d\n", collision->hflip.circle.ray);
+            fprintf(fs, "    .dc.w    %d\n", 0);
             // V flip version
-            fprintf(fs, "    dc.w    %d\n", collision->vflip.circle.x);
-            fprintf(fs, "    dc.w    %d\n", collision->vflip.circle.y);
-            fprintf(fs, "    dc.w    %d\n", collision->vflip.circle.ray);
-            fprintf(fs, "    dc.w    %d\n", 0);
+            fprintf(fs, "    .dc.w    %d\n", collision->vflip.circle.x);
+            fprintf(fs, "    .dc.w    %d\n", collision->vflip.circle.y);
+            fprintf(fs, "    .dc.w    %d\n", collision->vflip.circle.ray);
+            fprintf(fs, "    .dc.w    %d\n", 0);
             // HV flip version
-            fprintf(fs, "    dc.w    %d\n", collision->hvflip.circle.x);
-            fprintf(fs, "    dc.w    %d\n", collision->hvflip.circle.y);
-            fprintf(fs, "    dc.w    %d\n", collision->hvflip.circle.ray);
-            fprintf(fs, "    dc.w    %d\n", 0);
+            fprintf(fs, "    .dc.w    %d\n", collision->hvflip.circle.x);
+            fprintf(fs, "    .dc.w    %d\n", collision->hvflip.circle.y);
+            fprintf(fs, "    .dc.w    %d\n", collision->hvflip.circle.ray);
+            fprintf(fs, "    .dc.w    %d\n", 0);
             break;
     }
     // inner pointer
-    fprintf(fs, "    dc.l    %d\n", (int) collision->inner);
+    fprintf(fs, "    .dc.l    %d\n", (int) collision->inner);
     // next pointer
-    fprintf(fs, "    dc.l    %d\n", (int) collision->next);
+    fprintf(fs, "    .dc.l    %d\n", (int) collision->next);
 
     fprintf(fs, "\n");
 }
@@ -224,15 +224,15 @@ void outCollision(collision_* collision, FILE* fs, FILE* fh, char* id, int globa
 //    // FrameSprite structure
 //    decl(fs, fh, "FrameSprite", id, 2, global);
 //    // Y position
-//    fprintf(fs, "    dc.w    %d\n", frameSprite->y);
+//    fprintf(fs, "    .dc.w    %d\n", frameSprite->y);
 //    // size infos
-//    fprintf(fs, "    dc.w    %d\n", SPRITE_SIZE(frameSprite->w, frameSprite->h) << 8);
+//    fprintf(fs, "    .dc.w    %d\n", SPRITE_SIZE(frameSprite->w, frameSprite->h) << 8);
 //    // index and attributs
-//    fprintf(fs, "    dc.w    %d\n", frameSprite->ind | (frameSprite->attr << 11));
+//    fprintf(fs, "    .dc.w    %d\n", frameSprite->ind | (frameSprite->attr << 11));
 //    // X position
-//    fprintf(fs, "    dc.w    %d\n", frameSprite->x);
+//    fprintf(fs, "    .dc.w    %d\n", frameSprite->x);
 //    // set tileset pointer
-//    fprintf(fs, "    dc.l    %s\n", temp);
+//    fprintf(fs, "    .dc.l    %s\n", temp);
 //    fprintf(fs, "\n");
 //}
 
@@ -241,13 +241,13 @@ void outFrameSprite(frameSprite_* frameSprite, FILE* fs, FILE* fh, char* id, int
     // FrameSprite = VDPSpriteInf structure in SGDK
     decl(fs, fh, "VDPSpriteInf", id, 2, global);
     // Y position
-    fprintf(fs, "    dc.w    %d\n", frameSprite->y);
+    fprintf(fs, "    .dc.w    %d\n", frameSprite->y);
     // size infos
-    fprintf(fs, "    dc.w    %d\n", SPRITE_SIZE(frameSprite->w, frameSprite->h) << 0);
+    fprintf(fs, "    .dc.w    %d\n", SPRITE_SIZE(frameSprite->w, frameSprite->h) << 0);
     // X position
-    fprintf(fs, "    dc.w    %d\n", frameSprite->x);
+    fprintf(fs, "    .dc.w    %d\n", frameSprite->x);
     // Num tile
-    fprintf(fs, "    dc.w    %d\n", frameSprite->numTile);
+    fprintf(fs, "    .dc.w    %d\n", frameSprite->numTile);
     fprintf(fs, "\n");
 }
 
@@ -285,13 +285,13 @@ void outAnimFrame(animFrame_* animFrame, FILE* fs, FILE* fh, char* id, int globa
     decl(fs, fh, NULL, temp, 2, FALSE);
     // output sprite pointers
     for(i = 0; i < animFrame->numSprite; i++)
-        fprintf(fs, "    dc.l    %s_sprite%d\n", id, i);
+        fprintf(fs, "    .dc.l    %s_sprite%d\n", id, i);
     for(i = 0; i < animFrame->numSprite; i++)
-        fprintf(fs, "    dc.l    %s_sprite%d_h\n", id, i);
+        fprintf(fs, "    .dc.l    %s_sprite%d_h\n", id, i);
     for(i = 0; i < animFrame->numSprite; i++)
-        fprintf(fs, "    dc.l    %s_sprite%d_v\n", id, i);
+        fprintf(fs, "    .dc.l    %s_sprite%d_v\n", id, i);
     for(i = 0; i < animFrame->numSprite; i++)
-        fprintf(fs, "    dc.l    %s_sprite%d_hv\n", id, i);
+        fprintf(fs, "    .dc.l    %s_sprite%d_hv\n", id, i);
 
     fprintf(fs, "\n");
 
@@ -321,7 +321,7 @@ void outAnimFrame(animFrame_* animFrame, FILE* fs, FILE* fh, char* id, int globa
 //        decl(fs, fh, NULL, temp, 2, FALSE);
 //        // output collision pointers
 //        for(i = 0; i < animFrame->numCollision; i++)
-//            fprintf(fs, "    dc.l    %s_collision%d\n", id, i);
+//            fprintf(fs, "    .dc.l    %s_collision%d\n", id, i);
 //
 //        fprintf(fs, "\n");
    // }
@@ -333,26 +333,26 @@ void outAnimFrame(animFrame_* animFrame, FILE* fs, FILE* fh, char* id, int globa
     // AnimationFrame structure
     decl(fs, fh, "AnimationFrame", id, 2, global);
     // set number of sprite
-    fprintf(fs, "    dc.w    %d\n", animFrame->numSprite);
+    fprintf(fs, "    .dc.w    %d\n", animFrame->numSprite);
     // set frames pointer
-    fprintf(fs, "    dc.l    %s_sprites\n", id);
+    fprintf(fs, "    .dc.l    %s_sprites\n", id);
 //    // set number of collision
-//    fprintf(fs, "    dc.w    %d\n", animFrame->numCollision);
+//    fprintf(fs, "    .dc.w    %d\n", animFrame->numCollision);
 //    // set collisions pointer
 //    if (animFrame->numCollision > 0)
-//        fprintf(fs, "    dc.l    %s_collisions\n", id);
+//        fprintf(fs, "    .dc.l    %s_collisions\n", id);
     //if (animFrame->collision)
-   //     fprintf(fs, "    dc.l    %s_collision0\n", id);
+   //     fprintf(fs, "    .dc.l    %s_collision0\n", id);
     //else
-    //    fprintf(fs, "    dc.l    0\n");
+    //    fprintf(fs, "    .dc.l    0\n");
     // set tileset pointer
-    fprintf(fs, "    dc.l    %s_tileset\n", id);
+    fprintf(fs, "    .dc.l    %s_tileset\n", id);
     // frame width
-    fprintf(fs, "    dc.w    %d\n", animFrame->w * 8);
+    fprintf(fs, "    .dc.w    %d\n", animFrame->w * 8);
     // frame height
-    fprintf(fs, "    dc.w    %d\n", animFrame->h * 8);
+    fprintf(fs, "    .dc.w    %d\n", animFrame->h * 8);
     // timer info
-    //fprintf(fs, "    dc.w    %d\n", animFrame->timer);
+    //fprintf(fs, "    .dc.w    %d\n", animFrame->timer);
     fprintf(fs, "\n");
 }
 
@@ -379,7 +379,7 @@ void outAnimation(animation_* animation, FILE* fs, FILE* fh, char* id, int globa
     decl(fs, fh, NULL, temp, 2, FALSE);
     // output frame pointers
     for(i = 0; i < animation->numFrame; i++)
-        fprintf(fs, "    dc.l    %s_frame%d\n", id, i);
+        fprintf(fs, "    .dc.l    %s_frame%d\n", id, i);
 
     fprintf(fs, "\n");
 
@@ -396,15 +396,15 @@ void outAnimation(animation_* animation, FILE* fs, FILE* fh, char* id, int globa
     // Animation structure
     decl(fs, fh, "Animation", id, 2, global);
     // set number of frame
-    fprintf(fs, "    dc.w    %d\n", animation->numFrame);
+    fprintf(fs, "    .dc.w    %d\n", animation->numFrame);
     // set frames pointer
-    fprintf(fs, "    dc.l    %s_frames\n", id);
+    fprintf(fs, "    .dc.l    %s_frames\n", id);
     // set size of sequence
-    fprintf(fs, "    dc.w    %d\n", animation->length);
+    fprintf(fs, "    .dc.w    %d\n", animation->length);
     // set sequence pointer
-    fprintf(fs, "    dc.l    %s_sequence\n", id);
+    fprintf(fs, "    .dc.l    %s_sequence\n", id);
     // loop info
-    //fprintf(fs, "    dc.w    %d\n", animation->loop);
+    //fprintf(fs, "    .dc.w    %d\n", animation->loop);
     fprintf(fs, "\n");
 }
 
@@ -431,22 +431,22 @@ void outSpriteDef(spriteDefinition_* spriteDef, FILE* fs, FILE* fh, char* id, in
     decl(fs, fh, NULL, temp, 2, FALSE);
     // output animation pointers
     for(i = 0; i < spriteDef->numAnimation; i++)
-        fprintf(fs, "    dc.l    %s_animation%d\n", id, i);
+        fprintf(fs, "    .dc.l    %s_animation%d\n", id, i);
 
     fprintf(fs, "\n");
 
     // SpriteDefinition structure
     decl(fs, fh, "SpriteDefinition", id, 2, global);
     // set palette pointer
-    //fprintf(fs, "    dc.l    %s_palette\n", id);
+    //fprintf(fs, "    .dc.l    %s_palette\n", id);
     // set number of animation
-    fprintf(fs, "    dc.w    %d\n", spriteDef->numAnimation);
+    fprintf(fs, "    .dc.w    %d\n", spriteDef->numAnimation);
     // set animations pointer
-    fprintf(fs, "    dc.l    %s_animations\n", id);
+    fprintf(fs, "    .dc.l    %s_animations\n", id);
     // set maximum number of tile used by a single animation frame (used for VRAM tile space allocation)
-    //fprintf(fs, "    dc.w    %d\n", spriteDef->maxNumTile);
+    //fprintf(fs, "    .dc.w    %d\n", spriteDef->maxNumTile);
     // set maximum number of VDP sprite used by a single animation frame (used for VDP sprite allocation)
-    //fprintf(fs, "    dc.w    %d\n", spriteDef->maxNumSprite);
+    //fprintf(fs, "    .dc.w    %d\n", spriteDef->maxNumSprite);
 
     fprintf(fs, "\n");
 }

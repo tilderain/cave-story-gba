@@ -134,7 +134,7 @@ void xgm_init() {
 	z80_set_bank(0);
 	// upload Z80 driver and reset Z80
     z80_clear();
-	z80_upload(0, z80_xgm, (uint16_t)(z80_xgm_end-z80_xgm));
+	//z80_upload(0, z80_xgm, (uint16_t)(z80_xgm_end-z80_xgm));
     z80_reset_start();
     z80_release();
     // wait bus released

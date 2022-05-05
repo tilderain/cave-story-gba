@@ -175,7 +175,7 @@ int main(int argc, char **argv)
 
         if (len)
         {
-            fprintf(FileOutput, "    dc.%s    ", formatasm);
+            fprintf(FileOutput, "    .dc.%s    ", formatasm);
 
             for (ii = 0; ii < (len / formatintasm); ii++)
             {

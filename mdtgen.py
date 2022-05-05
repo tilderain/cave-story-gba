@@ -13,9 +13,9 @@ def gen_mdt(fn, offset):
 		height = bytes_to_int(f.read(4)) >> 3
 	outfn = fn[:-4] + ".mdt"
 	with open(outfn, "w") as f:
-		f.write("input " + fn + "\n")
-		f.write("output " + fn[:-4] + ".pat" + "\n")
-		f.write("output2 " + fn[:-4] + ".map" + "\n")
+		f.write("input ../" + fn + "\n")
+		f.write("output ../" + fn[:-4] + ".pat" + "\n")
+		f.write("output2 ../" + fn[:-4] + ".map" + "\n")
 		f.write("offset " + str(offset) + "\n")
 		f.write("map 0 0 " + str(width) + " " + str(height) + "\n")
 

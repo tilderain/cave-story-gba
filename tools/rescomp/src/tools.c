@@ -490,7 +490,7 @@ void outS(unsigned char* data, int inOffset, int size, FILE* fout, int intSize)
 
     while (remain > 0)
     {
-        fprintf(fout, "    dc.%s    ", formatAsm[adjIntSize]);
+        fprintf(fout, "    .dc.%s    ", formatAsm[adjIntSize]);
 
         for (ii = 0; ii < MIN(16, remain) / adjIntSize; ii++)
         {

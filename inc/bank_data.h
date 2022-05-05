@@ -248,8 +248,6 @@ extern const uint8_t PXE_Weed[];
 extern const uint8_t PXE_WeedB[];
 extern const uint8_t PXE_WeedD[];
 extern const uint8_t PXE_WeedS[];
-
-extern const uint8_t z80_xgm[], z80_xgm_end[];
 extern const uint8_t stop_xgm;
 
 extern const uint8_t NPC_TABLE[];
