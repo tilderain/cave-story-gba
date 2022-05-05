@@ -35,6 +35,7 @@ void sound_init() {
 }
 
 void sound_play(uint8_t id, uint8_t priority) {
+	if(id >= 0x90 && id < 0xA0) id -= 0x40;
 	mmEffect((mm_word)sound_info[id].sound);
 	return;
 	if(cfg_sfx_mute && gamemode != GM_SOUNDTEST) return;
