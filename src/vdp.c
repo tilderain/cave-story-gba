@@ -52,6 +52,7 @@ uint8_t pal_mode = 0;
 uint8_t SCREEN_HEIGHT = 0;
 
 void vdp_init() {
+	SCREEN_HEIGHT = 160;
 		return;
 	// Store pal_mode and adjust some stuff based on it
     pal_mode = *vdp_ctrl_port & 1;

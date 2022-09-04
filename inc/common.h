@@ -43,8 +43,8 @@ typedef uint32_t u32;
 #endif
 
 // Screen size
-#define SCREEN_WIDTH 320
-#define SCREEN_HALF_W 160
+#define SCREEN_WIDTH 240
+#define SCREEN_HALF_W 120
 
 // On PAL the screen height is 16 pixels more, so these can't be constants
 extern uint8_t SCREEN_HEIGHT;

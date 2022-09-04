@@ -166,6 +166,7 @@ uint16_t entities_count() {
 void entities_update(uint8_t draw) {
 	uint16_t new_active_count = 0;
 	Entity *e = entityList;
+	
 	while(e) {
 		if(!e->alwaysActive && !entity_on_screen(e)) {
 			Entity *next = e->next;
@@ -305,6 +306,12 @@ void entities_update(uint8_t draw) {
 						(e->y>>CSF) - camera.y_shifted - e->display_box.top);
 				sprite_index(e->sprite[0], e->vramindex + frameOffset[e->sheet][e->frame]);
 				sprite_hflip(e->sprite[0], e->dir);
+				
+				int x = (e->x>>CSF) - camera.x_shifted - e->display_box.left + e->xoff;
+				int y = (e->y>>CSF) - camera.y_shifted - e->display_box.top;
+				x = (x + 4) / 8; y = (y + 80) / 8;
+				iprintf("\x1b[%hu;%huH%s\n", y, x, "1");
+				//iprintf("ent %d %d ", x, y);
 			} else if(e->tiloc != NOTILOC) {
 				const AnimationFrame *f = npc_info[e->type].sprite->animations[0]->frames[e->frame];
 				if(e->frame != e->oframe) {
@@ -319,6 +326,10 @@ void entities_update(uint8_t draw) {
 					for(uint16_t i = 0; i < e->sprite_count; i++) {
 						sprite_pos(e->sprite[i], bx - x, by);
 						sprite_hflip(e->sprite[i], 1);
+					int xx = bx - x;
+					int y = by;
+					xx = (xx + 4) / 8; y = (y + 80) / 8;
+					iprintf("\x1b[%hu;%huH%s\n", y, xx, "2");
 						if(x >= f->w) {
 							x = min(f->w, 32);
 							by += 32;
@@ -333,6 +344,11 @@ void entities_update(uint8_t draw) {
 					for(uint16_t i = 0; i < e->sprite_count; i++) {
 						sprite_pos(e->sprite[i], bx + x, by);
 						sprite_hflip(e->sprite[i], 0);
+
+						int xx = bx + x;
+						int y = by;
+						xx = (xx + 4) / 8; y = (y + 80) / 8;
+						iprintf("\x1b[%hu;%huH%s\n", y, xx, "3");
 						x += 32;
 						if(x >= f->w) {
 							x = 0;

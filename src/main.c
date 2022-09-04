@@ -45,14 +45,61 @@ void aftervsync() {
     joy_update();
 }
 
+
+// Mixing buffer (globals should go in IWRAM)
+// Mixing buffer SHOULD be in IWRAM, otherwise the CPU load
+// will _drastially_ increase
+u8 myMixingBuffer[ MM_MIXLEN_8KHZ ] __attribute((aligned(4)));
+
+void maxmodInit( void )
+{
+    irqSet( IRQ_VBLANK, mmVBlank );
+
+    u8* myData;
+    mm_gba_system mySystem;
+ 
+    // allocate data for channel buffers & wave buffer (malloc'd data goes to EWRAM)
+    // Use the SIZEOF definitions to calculate how many bytes to reserve
+    myData = (u8*)malloc( 8 * (MM_SIZEOF_MODCH
+                               +MM_SIZEOF_ACTCH
+                               +MM_SIZEOF_MIXCH)
+                               +MM_MIXLEN_8KHZ );
+    
+    // setup system info
+    // 16KHz software mixing rate, select from mm_mixmode
+    mySystem.mixing_mode       = MM_MIX_8KHZ;
+
+    // number of module/mixing channels
+    // higher numbers offer better polyphony at the expense
+    // of more memory and/or CPU usage.
+    mySystem.mod_channel_count = 8;
+    mySystem.mix_channel_count = 8;
+    
+    // Assign memory blocks to pointers
+    mySystem.module_channels   = (mm_addr)(myData+0);
+    mySystem.active_channels   = (mm_addr)(myData+(8*MM_SIZEOF_MODCH));
+    mySystem.mixing_channels   = (mm_addr)(myData+(8*(MM_SIZEOF_MODCH
+	                                             +MM_SIZEOF_ACTCH)));
+    mySystem.mixing_memory     = (mm_addr)myMixingBuffer;
+    mySystem.wave_memory       = (mm_addr)(myData+(8*(MM_SIZEOF_MODCH
+                                                     +MM_SIZEOF_ACTCH
+                                                     +MM_SIZEOF_MIXCH)));
+    // Pass soundbank address
+    mySystem.soundbank         = (mm_addr)soundbank_bin;
+
+    // Initialize Maxmod
+    mmInit( &mySystem );
+}
+
+
 int main() {
 	irqInit();
 
 	irqSet( IRQ_VBLANK, mmVBlank );
 	irqEnable(IRQ_VBLANK);
 
-    mmInitDefault( (mm_addr)soundbank_bin, 8 );
-	
+    //mmInitDefault( (mm_addr)soundbank_bin, 8 );
+	maxmodInit();
 
 	consoleDemoInit();
 	
