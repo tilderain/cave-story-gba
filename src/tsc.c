@@ -27,6 +27,8 @@
 #include "ai.h"
 #include "tsc.h"
 
+#include "gba_video.h"
+
 #define HEAD_EVENT_COUNT 14 // There are exactly 14
 #define MAX_EVENTS 106 // Largest is ArmsItem with 106
 

@@ -101,12 +101,14 @@ int main() {
     //mmInitDefault( (mm_addr)soundbank_bin, 8 );
 	maxmodInit();
 
-	consoleDemoInit();
+		REG_IME = 1;
+
+	//consoleDemoInit();
 	
 	//nocash_puts("BRUH");
     setRandomSeed(0xC427); // initiate random number generator
     //mem_init();
-    //vdp_init();
+    vdp_init();
 	//xgm_init();
 
 	//GBATODO

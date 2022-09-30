@@ -24,6 +24,7 @@
 #include "stage.h"
 
 #include "gba.h"
+#include "gba_video.h"
 
 // Could fit under the Oside map (192 tile gap)
 #define TILE_MOONINDEX (TILE_TSINDEX + 32*8)

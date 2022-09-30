@@ -310,7 +310,7 @@ void entities_update(uint8_t draw) {
 				int x = (e->x>>CSF) - camera.x_shifted - e->display_box.left + e->xoff;
 				int y = (e->y>>CSF) - camera.y_shifted - e->display_box.top;
 				x = (x + 4) / 8; y = (y + 80) / 8;
-				iprintf("\x1b[%hu;%huH%s\n", y, x, "1");
+				//iprintf("\x1b[%hu;%huH%s\n", y, x, "1");
 				//iprintf("ent %d %d ", x, y);
 			} else if(e->tiloc != NOTILOC) {
 				const AnimationFrame *f = npc_info[e->type].sprite->animations[0]->frames[e->frame];
@@ -329,7 +329,7 @@ void entities_update(uint8_t draw) {
 					int xx = bx - x;
 					int y = by;
 					xx = (xx + 4) / 8; y = (y + 80) / 8;
-					iprintf("\x1b[%hu;%huH%s\n", y, xx, "2");
+					//iprintf("\x1b[%hu;%huH%s\n", y, xx, "2");
 						if(x >= f->w) {
 							x = min(f->w, 32);
 							by += 32;
@@ -348,7 +348,7 @@ void entities_update(uint8_t draw) {
 						int xx = bx + x;
 						int y = by;
 						xx = (xx + 4) / 8; y = (y + 80) / 8;
-						iprintf("\x1b[%hu;%huH%s\n", y, xx, "3");
+						//iprintf("\x1b[%hu;%huH%s\n", y, xx, "3");
 						x += 32;
 						if(x >= f->w) {
 							x = 0;

@@ -872,7 +872,7 @@ void player_show_map_name(uint8_t ttl) {
 	if(cfg_language > 0) {
 		str = ((const uint8_t*)STAGE_NAMES) + (stageID << 5);
 	}
-	iprintf(str);
+	//iprintf(str);
 	//iprintf("%s", str);
     //if((uint32_t) str >= 0x400000) {
     //    str = (const uint8_t*)(0x380000 | ((uint32_t)str & 0x7FFFF));
@@ -1037,7 +1037,7 @@ void player_draw() {
 		int y = sub_to_pixel(player.y) - sub_to_pixel(camera.y) + SCREEN_HALF_H - 8;
 		x = (x + 4) / 8; y = (y + 80) / 8;
 		//iprintf("%d, %d", x, y);
-		iprintf("\x1b[%hu;%huH%s\n", y, x, "\"");
+		//iprintf("\x1b[%hu;%huH%s\n", y, x, "\"");
 		
 
 		vdp_sprite_add(&playerSprite);

@@ -10,6 +10,7 @@
 #include "vdp.h"
 
 #include "camera.h"
+#include "gba_video.h"
 
 // Since only one row or column of tiles is drawn at a time
 #define CAMERA_MAX_SPEED 	0xFFF

@@ -6,6 +6,8 @@
 #include "bank_data.h"
 
 #include "gba_systemcalls.h"
+#include "gba_video.h"
+#include "gba_sprites.h"
 
 extern const uint32_t TILE_BLANK[8];
 static const uint16_t BLANK_DATA[0x80];
@@ -49,19 +51,18 @@ static uint16_t font_pal;
 
 uint8_t pal_mode = 0;
 
-uint8_t SCREEN_HEIGHT = 0;
+//uint8_t SCREEN_HEIGHT = 0;
 
 void vdp_init() {
-	SCREEN_HEIGHT = 160;
-		return;
+	//SCREEN_HEIGHT = 160;
 	// Store pal_mode and adjust some stuff based on it
     pal_mode = *vdp_ctrl_port & 1;
-    SCREEN_HEIGHT = pal_mode ? 240 : 224;
+    //SCREEN_HEIGHT = pal_mode ? 240 : 224;
 	SCREEN_HALF_H = SCREEN_HEIGHT >> 1;
 	sprite_ymax = SCREEN_HEIGHT + 32;
 	FPS = pal_mode ? 50 : 60;
 	// Set the registers
-	*vdp_ctrl_port = 0x8004;
+	/**vdp_ctrl_port = 0x8004;
 	*vdp_ctrl_port = 0x8174 | (pal_mode ? 8 : 0); // Enable display
 	*vdp_ctrl_port = 0x8200 | (VDP_PLAN_A >> 10); // Plane A address
 	*vdp_ctrl_port = 0x8300 | (VDP_PLAN_W >> 10); // Window address
@@ -79,7 +80,7 @@ void vdp_init() {
 	*vdp_ctrl_port = 0x8F02; // Auto increment
 	*vdp_ctrl_port = 0x9001; // Map size (64x32)
 	*vdp_ctrl_port = 0x9100; // Window X
-	*vdp_ctrl_port = 0x9200; // Window Y
+	*vdp_ctrl_port = 0x9200; // Window Y*/
 	// Reset the tilemaps
 	vdp_map_clear(VDP_PLAN_A);
 	vdp_hscroll(VDP_PLAN_A, 0);
@@ -95,6 +96,12 @@ void vdp_init() {
 	vdp_colors(0, PAL_FadeOut, 64);
 	// Put blank tile in index 0
 	vdp_tiles_load(TILE_BLANK, 0, 1);
+
+	BGCTRL[0] = SCREEN_BASE(0);
+
+	// screen mode & background to display
+	SetMode( MODE_0 | BG1_ON | OBJ_ON);
+	
 }
 
 #include "maxmod.h"
@@ -140,7 +147,9 @@ void vdp_set_window(uint8_t x, uint8_t y) {
 // DMA stuff
 
 static void dma_do(uint32_t from, uint16_t len, uint32_t cmd) {
-		return;
+	CpuFastSet(from, (u16*)VRAM, len | COPY32);
+	CpuFastSet(from, (u16*)SPRITE_GFX, len | COPY32);
+	return;
 	// Setup DMA length (in word here)
     *vdp_ctrl_port = 0x9300 + (len & 0xff);
     *vdp_ctrl_port = 0x9400 + ((len >> 8) & 0xff);
@@ -156,29 +165,30 @@ static void dma_do(uint32_t from, uint16_t len, uint32_t cmd) {
 }
 
 void vdp_dma_vram(uint32_t from, uint16_t to, uint16_t len) {
-		return;
-	dma_do(from, len, ((0x4000 + (((uint32_t)to) & 0x3FFF)) << 16) + ((((uint32_t)to) >> 14) | 0x80));
+	dma_do(from, len, (uint32_t)to);
 }
 
 void vdp_dma_cram(uint32_t from, uint16_t to, uint16_t len) {
+	CpuFastSet(from, BG_PALETTE, len | COPY32);
 		return;
-	dma_do(from, len, ((0xC000 + (((uint32_t)to) & 0x3FFF)) << 16) + ((((uint32_t)to) >> 14) | 0x80));
+	dma_do(from, len, ((0xC000 + (((uint32_t)to) & 0x3FFF)) << 16) + ((((uint32_t)to) >> 14)));
 }
 
-void vdp_dma_vsram(uint32_t from, uint16_t to, uint16_t len) {
+/*void vdp_dma_vsram(uint32_t from, uint16_t to, uint16_t len) {
 		return;
-	dma_do(from, len, ((0x4000 + (((uint32_t)to) & 0x3FFF)) << 16) + ((((uint32_t)to) >> 14) | 0x90));
-}
+	dma_do(from, len, ((0x4000 + (((uint32_t)to) & 0x3FFF)) << 16) + ((((uint32_t)to) >> 14)));
+}*/
 
 // Tile patterns
 
 void vdp_tiles_load(volatile const uint32_t *data, uint16_t index, uint16_t num) {
-		return;
 	vdp_dma_vram((uint32_t) data, index << 5, num << 4);
 }
 
 // Temporary solution until I get the tilesets aligned, SGDK takes into account 128K unalignment
 void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint16_t num) {
+	CpuFastSet(data, VRAM + (index * 8), num | COPY32);
+	CpuFastSet(data, SPRITE_GFX + (index * 8), num | COPY32);
 		return;
 	DMA_doDma(DMA_VRAM, (uint32_t) data, index << 5, num << 4, 2);
 }
@@ -187,6 +197,7 @@ void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint
 
 void vdp_map_xy(uint16_t plan, uint16_t tile, uint16_t x, uint16_t y) {
 	//iprintf("\x1b[%hu;%huH%s\n", (y>>2)*3, (x>>2)*3, tile);
+	*((u16 *)MAP_BASE_ADR(0) + 1 + x + (y*x/64)) = tile;
 	return;
     uint32_t addr = plan + ((x + (y << PLAN_WIDTH_SFT)) << 1);
     *vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);
@@ -218,7 +229,8 @@ void vdp_map_fill_rect(uint16_t plan, uint16_t index, uint16_t x, uint16_t y, ui
 }
 
 void vdp_map_clear(uint16_t plan) {
-	iprintf("\x1b[2J");
+	//iprintf("\x1b[2J");
+
 	return;
 	uint16_t addr = plan;
 	while(addr < plan + 0x1000) {
@@ -230,26 +242,25 @@ void vdp_map_clear(uint16_t plan) {
 // Palettes
 
 void vdp_colors(uint16_t index, const uint16_t *values, uint16_t count) {
-	return;
 	vdp_dma_cram((uint32_t) values, index << 1, count);
     for(uint16_t i = count; i--;) pal_current[index+i] = values[i];
 }
 
 void vdp_color(uint16_t index, uint16_t color) {
+	BG_PALETTE[index] = color;
+	pal_current[index] = color;
 	return;
 	uint16_t ind = index << 1;
     *vdp_ctrl_wide = ((0xC000 + (((uint32_t)ind) & 0x3FFF)) << 16) + ((((uint32_t)ind) >> 14) | 0x00);
     *vdp_data_port = color;
-    pal_current[index] = color;
+
 }
 
 void vdp_colors_next(uint16_t index, const uint16_t *values, uint16_t count) {
-	return;
     for(uint16_t i = count; i--;) pal_next[index+i] = values[i];
 }
 
 void vdp_color_next(uint16_t index, uint16_t color) {
-	return;	
     pal_next[index] = color;
 }
 
@@ -280,7 +291,7 @@ uint16_t vdp_fade_step() {
 }
 
 void vdp_fade(const uint16_t *src, const uint16_t *dst, uint16_t speed, uint8_t async) {
-		return;
+	return;
     if(src) vdp_colors(0, src, 64);
     if(dst) vdp_colors_next(0, dst, 64);
 	pal_fading = TRUE;
@@ -297,13 +308,15 @@ void vdp_fade(const uint16_t *src, const uint16_t *dst, uint16_t speed, uint8_t 
 // Scroll
 
 void vdp_hscroll(uint16_t plan, int16_t hscroll) {
-		return;
+	BG_OFFSET[plan].x = -hscroll;
+	return;
 	uint32_t addr = (plan == VDP_PLAN_A) ? VDP_HSCROLL_TABLE : VDP_HSCROLL_TABLE + 2;
 	*vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);
 	*vdp_data_port = hscroll;
 }
 
 void vdp_hscroll_tile(uint16_t plan, int16_t *hscroll) {
+	BG_OFFSET[plan].x = hscroll;
 		return;
     vdp_set_autoinc(32);
     vdp_dma_vram((uint32_t) hscroll, VDP_HSCROLL_TABLE + (plan == VDP_PLAN_A ? 0 : 2), 32);
@@ -311,6 +324,7 @@ void vdp_hscroll_tile(uint16_t plan, int16_t *hscroll) {
 }
 
 void vdp_vscroll(uint16_t plan, int16_t vscroll) {
+	BG_OFFSET[plan].y = vscroll;	
 	return;	
 	uint32_t addr = (plan == VDP_PLAN_A) ? 0 : 2;
 	*vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x10);
@@ -320,7 +334,6 @@ void vdp_vscroll(uint16_t plan, int16_t vscroll) {
 // Sprites
 
 void vdp_sprite_add(const VDPSprite *spr) {
-		return;
     // Exceeded max number of sprites
     if(sprite_count >= 80) return;
     // Prevent drawing off screen sprites
@@ -332,22 +345,52 @@ void vdp_sprite_add(const VDPSprite *spr) {
 }
 
 void vdp_sprites_add(const VDPSprite *spr, uint16_t num) {
-		return;
 	for(uint16_t i = num; i--;) vdp_sprite_add(&spr[i]);
 }
 
 void vdp_sprites_clear() {
-		return;
 	static const VDPSprite NULL_SPRITE = { .x = 0x80, .y = 0x80 };
 	sprite_count = 0;
 	vdp_sprites_add(&NULL_SPRITE, 1);
 }
 
+static OBJATTR obj_buffer[128] = { 0 };
+const u16 palette[] = {
+	RGB8(0x40,0x80,0xc0),
+	RGB8(0xFF,0xFF,0xFF),
+	RGB8(0xF5,0xFF,0xFF),
+	RGB8(0xDF,0xFF,0xF2),
+	RGB8(0xCA,0xFF,0xE2),
+	RGB8(0xB7,0xFD,0xD8),
+	RGB8(0x2C,0x4F,0x8B)
+};
+
+u8 sprct = 0;
+
 void vdp_sprites_update() {
-		return;
 	if(!sprite_count) return;
 	sprite_table[sprite_count - 1].link = 0; // Mark end of sprite list
-	vdp_dma_vram((uint32_t) sprite_table, VDP_SPRITE_TABLE, sprite_count << 2);
+
+	for(int i=0;i<sprite_count;i++)
+	{
+		obj_buffer[i].attr0 = OBJ_Y(sprite_table[i].y/2);
+		obj_buffer[i].attr1 = OBJ_X(sprite_table[i].x/2);
+		obj_buffer[i].attr2 = OBJ_CHAR(0);
+	}
+	u16 *temppointer;
+	// load the palette for the background, 7 colors
+	temppointer = BG_COLORS;
+	for(int i=0; i<7; i++) {
+		*temppointer++ = palette[i];
+	}
+
+
+	CpuFastSet(obj_buffer, OAM, ((sizeof(OBJATTR)*128)/4) | COPY32);
+
+	for (u8 i = 0; i < sprite_count; i++)
+		obj_buffer[i].attr0 = OBJ_DISABLE;
+
+	//vdp_dma_vram((uint32_t) sprite_table, VDP_SPRITE_TABLE, sprite_count << 2);
 	sprite_count = 0;
 }
 
@@ -378,7 +421,7 @@ void vdp_font_pal(uint16_t pal) {
 void vdp_puts(uint16_t plan, const char *str, uint16_t x, uint16_t y) {
 	//GBATODO
 	char text[128];
-	iprintf("\x1b[%hu;%huH%s\n", (y>>2)*3, (x>>2)*3, str);
+	//iprintf("\x1b[%hu;%huH%s\n", (y>>2)*3, (x>>2)*3, str);
 	//sprintf(text, "\x1b[%hu;%huH%s\n", y, x, str);
 	//iprintf(text);
 	return;
@@ -409,7 +452,7 @@ void vdp_text_clear(uint16_t plan, uint16_t x, uint16_t y, uint16_t len) {
 		space[i] = ' ';
 	}
 	space[len] = '\0';
-	iprintf("\x1b[%hu;%huH%s", (y>>2)*3, (x>>2)*3, space);
+	//iprintf("\x1b[%hu;%huH%s", (y>>2)*3, (x>>2)*3, space);
 	return;
     uint32_t addr = plan + ((x + (y << PLAN_WIDTH_SFT)) << 1);
 	*vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);

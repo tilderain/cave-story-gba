@@ -19,6 +19,7 @@
 #include "xgm.h"
 
 #include "gamemode.h"
+#include "gba_video.h"
 
 #define TILE_ICONINDEX	(TILE_SHEETINDEX + 24*6 + 228)
 

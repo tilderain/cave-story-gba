@@ -23,3 +23,4 @@ src/xgm/z80_xgm.h
 *.sav
 /bin
 res/resources.s
+mGBA*

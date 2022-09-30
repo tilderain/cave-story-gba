@@ -1,4 +1,5 @@
 #include "ai_common.h"
+#include "gba_video.h"
 
 #define NS_WAIT					1
 #define NS_SEEK_PLAYER			2

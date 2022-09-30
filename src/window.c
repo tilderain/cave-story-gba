@@ -164,7 +164,7 @@ void window_set_face(uint16_t face, uint8_t open) {
 
 void window_draw_char(uint8_t c) {
 	//GBATODO
-	iprintf("%c", c);
+	//iprintf("%c", c);
 
 	if(c == '\n') {
 		textRow++;
