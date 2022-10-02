@@ -53,7 +53,7 @@ typedef struct {
 } background_info_def;
 
 // Information about each music track for song_play()
-#define SONG_COUNT 43
+#define SONG_COUNT 46
 typedef struct {
 	const int *song; // Location of XGM to be loaded
 	char name[24]; // Name of the track (sound test)

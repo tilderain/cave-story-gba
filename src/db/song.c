@@ -51,5 +51,8 @@ const song_info_def song_info_xm[SONG_COUNT] = {
 	{ MOD_SEAL_CHAMBER, 	"Seal Chamber" },
 	{ MOD_TOROKOS_THEME, 		"Toroko's Theme" },
 	{ MOD_WHITE, 		"White" },
-    { NULL,    "Time Table" },
+	{ MOD_PIER_WALK, 		"Pier Walk" },
+	{ MOD_PEOPLE_OF_THE_ROOT, 		"People of the Root" },
+	{ MOD_WIND_FORTRESS, 		"Wind Fortress" },
+    //{ NULL,    "Time Table" },
 };
