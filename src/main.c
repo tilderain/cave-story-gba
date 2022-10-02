@@ -115,7 +115,7 @@ int main() {
     //mmInitDefault( (mm_addr)soundbank_bin, 8 );
 	maxmodInit();
 
-	mmInitDefault (soundbank_bin, 16);
+	//mmInitDefault (soundbank_bin, 16);
 
 		REG_IME = 1;
 
