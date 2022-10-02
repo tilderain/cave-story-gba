@@ -49,39 +49,53 @@ void aftervsync() {
 // Mixing buffer (globals should go in IWRAM)
 // Mixing buffer SHOULD be in IWRAM, otherwise the CPU load
 // will _drastially_ increase
-u8 myMixingBuffer[ MM_MIXLEN_8KHZ ] __attribute((aligned(4)));
+u8 myMixingBuffer[ MM_MIXLEN_31KHZ ] __attribute((aligned(4)));
+
+void myCoolVblankHandler()
+{
+	REG_IME = 0;
+	mmVBlank();
+	REG_IME = 1;
+	
+	vblank = true;
+}
 
 void maxmodInit( void )
 {
-    irqSet( IRQ_VBLANK, mmVBlank );
+    irqSet( IRQ_VBLANK, myCoolVblankHandler );
+
 
     u8* myData;
     mm_gba_system mySystem;
+
+
+	int num_chans = 16;
  
     // allocate data for channel buffers & wave buffer (malloc'd data goes to EWRAM)
     // Use the SIZEOF definitions to calculate how many bytes to reserve
-    myData = (u8*)malloc( 8 * (MM_SIZEOF_MODCH
+    myData = (u8*)malloc( num_chans * (MM_SIZEOF_MODCH
                                +MM_SIZEOF_ACTCH
                                +MM_SIZEOF_MIXCH)
-                               +MM_MIXLEN_8KHZ );
+                               +MM_MIXLEN_31KHZ );
     
     // setup system info
     // 16KHz software mixing rate, select from mm_mixmode
-    mySystem.mixing_mode       = MM_MIX_8KHZ;
+    mySystem.mixing_mode       = MM_MIX_31KHZ;
+
 
     // number of module/mixing channels
     // higher numbers offer better polyphony at the expense
     // of more memory and/or CPU usage.
-    mySystem.mod_channel_count = 8;
-    mySystem.mix_channel_count = 8;
+    mySystem.mod_channel_count = num_chans;
+    mySystem.mix_channel_count = num_chans;
     
     // Assign memory blocks to pointers
     mySystem.module_channels   = (mm_addr)(myData+0);
-    mySystem.active_channels   = (mm_addr)(myData+(8*MM_SIZEOF_MODCH));
-    mySystem.mixing_channels   = (mm_addr)(myData+(8*(MM_SIZEOF_MODCH
+    mySystem.active_channels   = (mm_addr)(myData+(num_chans*MM_SIZEOF_MODCH));
+    mySystem.mixing_channels   = (mm_addr)(myData+(num_chans*(MM_SIZEOF_MODCH
 	                                             +MM_SIZEOF_ACTCH)));
     mySystem.mixing_memory     = (mm_addr)myMixingBuffer;
-    mySystem.wave_memory       = (mm_addr)(myData+(8*(MM_SIZEOF_MODCH
+    mySystem.wave_memory       = (mm_addr)(myData+(num_chans*(MM_SIZEOF_MODCH
                                                      +MM_SIZEOF_ACTCH
                                                      +MM_SIZEOF_MIXCH)));
     // Pass soundbank address
@@ -100,6 +114,8 @@ int main() {
 
     //mmInitDefault( (mm_addr)soundbank_bin, 8 );
 	maxmodInit();
+
+	mmInitDefault (soundbank_bin, 16);
 
 		REG_IME = 1;
 

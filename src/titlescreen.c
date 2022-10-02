@@ -162,7 +162,7 @@ uint8_t titlescreen_main() {
 	}
 		//GBATODO remove this
 		vdp_text_clear(VDP_PLAN_A, 13, 12, 13);
-	if(cheatEnable[0] && (joystate&BUTTON_A) && joy_pressed(btn[cfg_btn_pause])) {
+	if(cheatEnable[0] && joy_pressed(btn[cfg_btn_pause])) {
 		cursor = 0;
 		
 		vdp_map_clear(VDP_PLAN_A);

@@ -100,15 +100,19 @@ void vdp_init() {
 	BGCTRL[0] = SCREEN_BASE(0);
 
 	// screen mode & background to display
-	SetMode( MODE_0 | BG1_ON | OBJ_ON);
+	SetMode( MODE_0 | OBJ_ON);
 	
 }
 
 #include "maxmod.h"
 
 void vdp_vsync() {
-	mmFrame();
 	VBlankIntrWait();
+
+		mmFrame();
+		vblank = false;
+	
+
 }
 
 // Register stuff
@@ -197,7 +201,7 @@ void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint
 
 void vdp_map_xy(uint16_t plan, uint16_t tile, uint16_t x, uint16_t y) {
 	//iprintf("\x1b[%hu;%huH%s\n", (y>>2)*3, (x>>2)*3, tile);
-	*((u16 *)MAP_BASE_ADR(0) + 1 + x + (y*x/64)) = tile;
+	*((u16 *)MAP_BASE_ADR(0) + x + (y*x/64)) = tile;
 	return;
     uint32_t addr = plan + ((x + (y << PLAN_WIDTH_SFT)) << 1);
     *vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);
@@ -373,8 +377,8 @@ void vdp_sprites_update() {
 
 	for(int i=0;i<sprite_count;i++)
 	{
-		obj_buffer[i].attr0 = OBJ_Y(sprite_table[i].y/2);
-		obj_buffer[i].attr1 = OBJ_X(sprite_table[i].x/2);
+		obj_buffer[i].attr0 = OBJ_Y(sprite_table[i].y - 120);
+		obj_buffer[i].attr1 = OBJ_X(sprite_table[i].x - 120) | OBJ_SIZE(1);
 		obj_buffer[i].attr2 = OBJ_CHAR(0);
 	}
 	u16 *temppointer;

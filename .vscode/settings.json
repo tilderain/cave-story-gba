@@ -5,6 +5,7 @@
 		"joy.h": "c",
 		"maxmod.h": "c",
 		"sram.h": "c",
-		"variant": "cpp"
+		"variant": "cpp",
+		"vdp.h": "c"
 	}
 }

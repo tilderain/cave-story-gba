@@ -17,7 +17,7 @@ const song_info_def song_info_xm[SONG_COUNT] = {
 	{ MOD_ON_TO_GRASSTOWN, 	"On To Grasstown" },
 	{ MOD_MELTDOWN_2, 	"Meltdown 2" },
 	{ MOD_EYES_OF_FLAME, 	"Eyes Of Flame" },
-	{ MOD_CEMETERY, 	"Gestation" },
+	{ MOD_GESTATION, 	"Gestation" },
 	{ MOD_MIMIGA_TOWN, 		"Mimiga Village" },
 	{ MOD_GOT_ITEM, 	"Fanfare 1" },
 	{ MOD_BALROG, 		"Balrog's Theme" },
