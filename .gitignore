@@ -24,3 +24,5 @@ src/xgm/z80_xgm.h
 /bin
 res/resources.s
 mGBA*
+*.pal.bin
+*.img.bin

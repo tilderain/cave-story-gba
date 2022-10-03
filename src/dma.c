@@ -134,8 +134,8 @@ uint32_t DMA_getQueueTransferSize()
 
 uint16_t DMA_queueDma(uint8_t location, uint32_t from, uint16_t to, uint16_t len, uint16_t step)
 {
-	if(location == DMA_VRAM)
-		CpuFastSet(from, VRAM + (to * 8), len | COPY32);
+	//if(location == DMA_VRAM)
+	//	CpuFastSet(from, VRAM + (to), len | COPY32);
 	return;
     uint32_t newlen;
     uint32_t banklimitb;
@@ -257,8 +257,8 @@ void DMA_waitCompletion()
 
 void DMA_doDma(uint8_t location, uint32_t from, uint16_t to, uint16_t len, int16_t step)
 {
-	if(location == DMA_VRAM)
-		CpuFastSet(from, VRAM + (to * 8), len | COPY32);
+	//if(location == DMA_VRAM)
+	//	CpuFastSet(from, VRAM + (to), len | COPY32);
 	return;
     volatile uint16_t *pw;
     volatile uint32_t *pl;

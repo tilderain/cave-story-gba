@@ -231,12 +231,16 @@ $(OUTPUT).elf	:	prereq $(OFILES)
 
 $(OFILES_SOURCES) : $(HFILES)
 
-prereq: $(RESCOMP) resources.s head-gen $(BINTOS) $(TSCOMP) $(WAVTORAW) 
+prereq: $(RESCOMP) resources.s head-gen grit-gen $(BINTOS) $(TSCOMP) $(WAVTORAW) 
 prereq: $(CPXMS) $(XGCS) $(PCMS) $(CTSETS) $(ZOBJ) $(TSBS) $(PATS)
 
 head-gen:
 	rm -f inc/ai_gen.h
 	python ../aigen.py
+
+grit-gen:
+	python3 ../gritgen.py
+
 
 $(RESCOMP):
 	cc ../tools/rescomp/src/*.c -Itools/rescomp/inc -o $@

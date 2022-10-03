@@ -6,6 +6,11 @@
 		"maxmod.h": "c",
 		"sram.h": "c",
 		"variant": "cpp",
-		"vdp.h": "c"
+		"vdp.h": "c",
+		"cstdlib": "c",
+		"*.tcc": "c",
+		"memory": "c",
+		"new": "c",
+		"cstring": "c"
 	}
 }

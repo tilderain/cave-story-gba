@@ -153,7 +153,7 @@ uint8_t titlescreen_main() {
 		}
 		// Draw quote sprite at cursor position
 		sprite_pos(sprCursor, 13*8-4, (12*8+cursor*16)-4);
-	vdp_sprite_add(&sprCursor);
+		vdp_sprite_add(&sprCursor);
 
 		if(besttime > 0 && besttime < 300000) system_draw_counter();
 		
@@ -161,7 +161,7 @@ uint8_t titlescreen_main() {
 		vdp_vsync(); aftervsync();
 	}
 		//GBATODO remove this
-		vdp_text_clear(VDP_PLAN_A, 13, 12, 13);
+		//vdp_text_clear(VDP_PLAN_A, 13, 12, 13);
 	if(cheatEnable[0] && joy_pressed(btn[cfg_btn_pause])) {
 		cursor = 0;
 		

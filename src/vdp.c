@@ -100,7 +100,7 @@ void vdp_init() {
 	BGCTRL[0] = SCREEN_BASE(0);
 
 	// screen mode & background to display
-	SetMode( MODE_0 | OBJ_ON);
+	SetMode( MODE_0 | BG1_ON | OBJ_ON);
 	
 }
 
@@ -151,8 +151,8 @@ void vdp_set_window(uint8_t x, uint8_t y) {
 // DMA stuff
 
 static void dma_do(uint32_t from, uint16_t len, uint32_t cmd) {
-	CpuFastSet(from, (u16*)VRAM, len | COPY32);
-	CpuFastSet(from, (u16*)SPRITE_GFX, len | COPY32);
+	//CpuFastSet(from, (u16*)VRAM + cmd, len | COPY32);
+	//CpuFastSet(from, (u16*)SPRITE_GFX + cmd, len | COPY32);
 	return;
 	// Setup DMA length (in word here)
     *vdp_ctrl_port = 0x9300 + (len & 0xff);
@@ -173,7 +173,7 @@ void vdp_dma_vram(uint32_t from, uint16_t to, uint16_t len) {
 }
 
 void vdp_dma_cram(uint32_t from, uint16_t to, uint16_t len) {
-	CpuFastSet(from, BG_PALETTE, len | COPY32);
+	//CpuFastSet(from, BG_PALETTE + to, len | COPY32);
 		return;
 	dma_do(from, len, ((0xC000 + (((uint32_t)to) & 0x3FFF)) << 16) + ((((uint32_t)to) >> 14)));
 }
@@ -186,13 +186,14 @@ void vdp_dma_cram(uint32_t from, uint16_t to, uint16_t len) {
 // Tile patterns
 
 void vdp_tiles_load(volatile const uint32_t *data, uint16_t index, uint16_t num) {
-	vdp_dma_vram((uint32_t) data, index << 5, num << 4);
+	CpuFastSet(data + 4, VRAM + 256 + (index), num | COPY32);
+	//vdp_dma_vram((uint32_t) data, index, num);
 }
 
 // Temporary solution until I get the tilesets aligned, SGDK takes into account 128K unalignment
 void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint16_t num) {
-	CpuFastSet(data, VRAM + (index * 8), num | COPY32);
-	CpuFastSet(data, SPRITE_GFX + (index * 8), num | COPY32);
+	//CpuFastSet(data, VRAM + (index), num | COPY32);
+	//CpuFastSet(data, SPRITE_GFX + (index), num | COPY32);
 		return;
 	DMA_doDma(DMA_VRAM, (uint32_t) data, index << 5, num << 4, 2);
 }
@@ -201,7 +202,7 @@ void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint
 
 void vdp_map_xy(uint16_t plan, uint16_t tile, uint16_t x, uint16_t y) {
 	//iprintf("\x1b[%hu;%huH%s\n", (y>>2)*3, (x>>2)*3, tile);
-	*((u16 *)MAP_BASE_ADR(0) + x + (y*x/64)) = tile;
+	//*((u16 *)MAP_BASE_ADR(0) + x + (y*x/64)) = tile;
 	return;
     uint32_t addr = plan + ((x + (y << PLAN_WIDTH_SFT)) << 1);
     *vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);
@@ -251,7 +252,7 @@ void vdp_colors(uint16_t index, const uint16_t *values, uint16_t count) {
 }
 
 void vdp_color(uint16_t index, uint16_t color) {
-	BG_PALETTE[index] = color;
+	//BG_PALETTE[index] = color;
 	pal_current[index] = color;
 	return;
 	uint16_t ind = index << 1;
@@ -366,6 +367,11 @@ const u16 palette[] = {
 	RGB8(0xDF,0xFF,0xF2),
 	RGB8(0xCA,0xFF,0xE2),
 	RGB8(0xB7,0xFD,0xD8),
+	RGB8(0x2C,0x4F,0x8B),
+	RGB8(0xF5,0xFF,0xFF),
+	RGB8(0xDF,0xFF,0xF2),
+	RGB8(0xCA,0xFF,0xE2),
+	RGB8(0xB7,0xFD,0xD8),
 	RGB8(0x2C,0x4F,0x8B)
 };
 
@@ -383,9 +389,9 @@ void vdp_sprites_update() {
 	}
 	u16 *temppointer;
 	// load the palette for the background, 7 colors
-	temppointer = BG_COLORS;
-	for(int i=0; i<7; i++) {
-		*temppointer++ = palette[i];
+	temppointer = BG_COLORS + 1;
+	for(int i=1; i<16; i++) {
+		*temppointer++ = PAL_Cave[i];
 	}
 
 

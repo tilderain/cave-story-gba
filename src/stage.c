@@ -26,6 +26,8 @@
 #include "gba.h"
 #include "gba_video.h"
 
+#include "bank_data.h"
+
 // Could fit under the Oside map (192 tile gap)
 #define TILE_MOONINDEX (TILE_TSINDEX + 32*8)
 // Another tile gap, fits under both Almond and Cave
@@ -208,12 +210,12 @@ void stage_load_credits(uint8_t id) {
 void stage_load_tileset() {
     uint32_t *buf = (uint32_t*) 0xFF0100;
     uint16_t numtile = tileset_info[stageTileset].size << 2;
-    for(uint16_t i = 0; i < numtile; i += 128) {
-        uint16_t num = min(numtile - i, 128);
+    //for(uint16_t i = 0; i < numtile; i += 128) {
+     //   uint16_t num = min(numtile - i, 128);
 		//GBATODO
-        //uftc_unpack(tileset_info[stageTileset].pat, buf, i, num);
-        //vdp_tiles_load(buf, TILE_TSINDEX + i, num);
-    }
+        //decompress_uftc(buf, tileset_info[stageTileset].pat, i, num);
+        vdp_tiles_load(tileset_info[stageTileset].pat, TILE_TSINDEX, tileset_info[stageTileset].size*32);
+    //}
 	// Inject the breakable block sprite into the tileset
 	stagePXA = tileset_info[stageTileset].PXA;
 	for(uint16_t i = 0; i < numtile >> 2; i++) {
@@ -511,7 +513,7 @@ void stage_setup_palettes() {
 		vdp_colors_next(16, PAL_Sym.data, 16);
 	}
 	if(stageID == STAGE_WATERWAY) {
-		vdp_colors_next(32, PAL_RiverAlt.data, 16); // For Waterway green background
+		vdp_colors_next(32, PAL_RiverAlt, 16); // For Waterway green background
 	} else {
 		vdp_colors_next(32, tileset_info[stage_info[stageID].tileset].palette->data, 16);
 	}
@@ -535,15 +537,26 @@ void stage_draw_screen() {
 					uint16_t t = b << 2; //((b&15) << 1) + ((b>>4) << 6);
 					uint16_t ta = pxa[b];
 					uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
-					maprow[x&63] = TILE_ATTR(pal, (ta&0x40) > 0, 
-							0, 0, TILE_TSINDEX + t + (x&1) + ((y&1)<<1));
+					//maprow[x&63] = TILE_ATTR(pal, (ta&0x40) > 0, 
+					//		0, 0, TILE_TSINDEX + t + (x&1) + ((y&1)<<1));
+					maprow[x&63] = TILE_TSINDEX + t + (x&1) + ((y&1)<<1);
 				//}
 				x++;
 			}
-			DMA_doDma(DMA_VRAM, (uint32_t)maprow, VDP_PLAN_A + ((y&31)<<7), 64, 2);
+			CpuFastSet(maprow, MAP_BASE_ADR(0), 64 | COPY32);
+			//*((u16 *)MAP_BASE_ADR(0) + 1) = 20;
+			//*((u16 *)MAP_BASE_ADR(0) + 2) = 21;
+			//DMA_doDma(DMA_VRAM, (uint32_t)maprow, VDP_PLAN_A + ((y&31)<<7), 64, 2);
 		}
 		y++;
 	}
+
+		/*for(uint16_t i = 32; i--; ) {
+			for(uint16_t j = 64; j--; ) {
+				*((u16 *)MAP_BASE_ADR(0) + j + (i*64)) = j;
+			}
+
+		}*/
 }
 
 void stage_draw_screen_credits() {
