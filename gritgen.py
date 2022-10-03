@@ -26,10 +26,10 @@ if __name__ == '__main__':
 	os.chdir(folder)
 	for fn in os.listdir("."):
 		if fn.startswith("Prt") and fn.endswith(".png"):
-			print(subprocess.run(['grit', fn, '-gt', 'gB4', '-ftb', '-m!', '-fh!']))
+			print(subprocess.run(['grit', fn, '-gt', '-gB4', '-ftb', '-m!', '-fh!']))
 	for f in folders:
 		os.chdir(wd)
 		os.chdir(folder + f)
 		for fn in os.listdir("."):
 			if fn.startswith("Prt") and fn.endswith(".png"):
-				print(subprocess.run(['grit', fn, '-gt', 'gB4', '-ftb', '-m!', '-fh!']))
+				print(subprocess.run(['grit', fn, '-gt', '-gB4', '-ftb', '-m!', '-fh!']))

@@ -165,12 +165,14 @@ void camera_update() {
 							uint16_t t = b << 2; //((b&15) << 1) + ((b>>4) << 6);
 							uint16_t ta = pxa[b]; //stage_get_block_type(x>>1, y>>1);
 							uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
-							mapbuf[y&31] = TILE_ATTR(pal, (ta&0x40) > 0, 
-									0, 0, TILE_TSINDEX + t + (x&1) + ((y&1)<<1));
+							//mapbuf[y&31] = TILE_ATTR(pal, (ta&0x40) > 0, 
+									//0, 0, TILE_TSINDEX + t + (x&1) + ((y&1)<<1));
+							mapbuf[y&31] = 8 + t + (x&1) + ((y&1)<<1);
 						//}
 						y++;
 					}
-					DMA_queueDma(DMA_VRAM, (uint32_t) mapbuf, VDP_PLAN_A + ((x & 63) << 1), 32, 128);
+					CpuFastSet(mapbuf, MAP_BASE_ADR(31) + ((x & 63) << 1), 32 | COPY32);
+					//DMA_queueDma(DMA_VRAM, (uint32_t) mapbuf, VDP_PLAN_A + ((x & 63) << 1), 32, 128);
 				}
 			}
 		}
@@ -189,12 +191,14 @@ void camera_update() {
 							uint16_t t = b << 2; //((b&15) << 1) + ((b>>4) << 6);
 							uint16_t ta = pxa[b]; //stage_get_block_type(x>>1, y>>1);
 							uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
-							mapbuf[x&63] = TILE_ATTR(pal, (ta&0x40) > 0, 
-									0, 0, TILE_TSINDEX + t + (x&1) + ((y&1)<<1));
+							//mapbuf[x&63] = TILE_ATTR(pal, (ta&0x40) > 0, 
+							//		0, 0, TILE_TSINDEX + t + (x&1) + ((y&1)<<1));
+							mapbuf[x&63] = 8 + t + (x&1) + ((y&1)<<1);
 						//}
 						x++;
 					}
-					DMA_queueDma(DMA_VRAM, (uint32_t) mapbuf, VDP_PLAN_A + ((y & 31) << 7), 64, 2);
+					CpuFastSet(mapbuf, MAP_BASE_ADR(31) + ((y&31)<<6), 32 | COPY32);
+					//DMA_queueDma(DMA_VRAM, (uint32_t) mapbuf, VDP_PLAN_A + ((y & 31) << 7), 64, 2);
 				}
 			}
 		}

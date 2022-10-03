@@ -31,7 +31,7 @@ typedef struct {
 	//const TileSet *tileset; // The graphical tile data to load
     const uint16_t size; // Number of 16x16 blocks in the tileset
     const uint16_t *pat; // The graphical tile data to load
-	const Palette *palette; // The palette, which will be loaded to PAL2
+	const uint16_t *palette; // The palette, which will be loaded to PAL2
 	const uint8_t *PXA; // Tile options, how objects interact with different tiles
 } tileset_info_def;
 

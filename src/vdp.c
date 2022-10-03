@@ -5,6 +5,9 @@
 #include "resources.h"
 #include "bank_data.h"
 
+#include "stage.h"
+#include "tables.h"
+
 #include "gba_systemcalls.h"
 #include "gba_video.h"
 #include "gba_sprites.h"
@@ -362,7 +365,7 @@ void vdp_sprites_clear() {
 
 static OBJATTR obj_buffer[128] = { 0 };
 const u16 palette[] = {
-	RGB8(0x40,0x80,0xc0),
+	RGB8(0x00,0x00,0x00),
 	RGB8(0xFF,0xFF,0xFF),
 	RGB8(0xF5,0xFF,0xFF),
 	RGB8(0xDF,0xFF,0xF2),
@@ -384,17 +387,25 @@ void vdp_sprites_update() {
 
 	for(int i=0;i<sprite_count;i++)
 	{
-		obj_buffer[i].attr0 = OBJ_Y(sprite_table[i].y - 120);
+		obj_buffer[i].attr0 = OBJ_Y(sprite_table[i].y - 128);
 		obj_buffer[i].attr1 = OBJ_X(sprite_table[i].x - 120) | OBJ_SIZE(1);
-		obj_buffer[i].attr2 = OBJ_CHAR(0);
+		obj_buffer[i].attr2 = OBJ_CHAR(0) | OBJ_PALETTE(0);
 	}
 	u16 *temppointer;
+	u16 *temppointer2;
 	// load the palette for the background, 7 colors
+	temppointer = BG_COLORS;
+	*temppointer = palette[0];
+	temppointer2 = OBJ_COLORS;
+	*temppointer2 = palette[1];
 	temppointer = BG_COLORS + 1;
 	for(int i=1; i<16; i++) {
-		*temppointer++ = PAL_Cave[i];
+		
+		*temppointer++ = tileset_info[stage_info[stageID].tileset].palette[i];
 	}
-
+	for(int i=1; i<256; i++) {
+		*temppointer2++ = palette[1];
+	}
 
 	CpuFastSet(obj_buffer, OAM, ((sizeof(OBJATTR)*128)/4) | COPY32);
 

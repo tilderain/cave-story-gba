@@ -515,7 +515,7 @@ void stage_setup_palettes() {
 	if(stageID == STAGE_WATERWAY) {
 		vdp_colors_next(32, PAL_RiverAlt, 16); // For Waterway green background
 	} else {
-		vdp_colors_next(32, tileset_info[stage_info[stageID].tileset].palette->data, 16);
+		vdp_colors_next(32, tileset_info[stage_info[stageID].tileset].palette, 16);
 	}
 	vdp_colors_next(48, stage_info[stageID].npcPalette->data, 16);
 }
