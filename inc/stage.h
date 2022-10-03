@@ -172,3 +172,4 @@ void stage_replace_block(int16_t bx, int16_t by, uint8_t index);
 void stage_update();
 // Put the palettes expected by the current stage into "next" cache
 void stage_setup_palettes();
+void stage_draw_screen();

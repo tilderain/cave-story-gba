@@ -70,7 +70,7 @@ static void stage_load_tileset();
 static void stage_load_blocks();
 
 static void stage_draw_block(uint16_t x, uint16_t y);
-static void stage_draw_screen();
+//static void stage_draw_screen();
 static void stage_draw_screen_credits();
 static void stage_draw_background();
 static void stage_draw_moonback();
@@ -524,6 +524,7 @@ void stage_draw_screen() {
     const uint8_t *pxa = tileset_info[stageTileset].PXA;
 	uint16_t maprow[64];
 	uint16_t y = sub_to_tile(camera.y) - 16;
+
 	for(uint16_t i = 32; i--; ) {
 		if(vblank) aftervsync(); // So we don't lag the music
 		vblank = 0;
@@ -539,13 +540,13 @@ void stage_draw_screen() {
 					uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
 					//maprow[x&63] = TILE_ATTR(pal, (ta&0x40) > 0, 
 					//		0, 0, TILE_TSINDEX + t + (x&1) + ((y&1)<<1));
-					maprow[x&63] = TILE_TSINDEX + t + (x&1) + ((y&1)<<1);
+					maprow[x&63] = 8 + t + (x&1) + ((y&1)<<1);
 				//}
 				x++;
 			}
-			CpuFastSet(maprow, MAP_BASE_ADR(0), 64 | COPY32);
-			//*((u16 *)MAP_BASE_ADR(0) + 1) = 20;
-			//*((u16 *)MAP_BASE_ADR(0) + 2) = 21;
+			CpuFastSet(maprow, MAP_BASE_ADR(31) + ((y&31)<<6), 16 | COPY32);
+			//*((u16 *)MAP_BASE_ADR(31) + 1) = 20;
+			//*((u16 *)MAP_BASE_ADR(31) + 2) = 21;
 			//DMA_doDma(DMA_VRAM, (uint32_t)maprow, VDP_PLAN_A + ((y&31)<<7), 64, 2);
 		}
 		y++;
@@ -553,7 +554,7 @@ void stage_draw_screen() {
 
 		/*for(uint16_t i = 32; i--; ) {
 			for(uint16_t j = 64; j--; ) {
-				*((u16 *)MAP_BASE_ADR(0) + j + (i*64)) = j;
+				*((u16 *)MAP_BASE_ADR(31) + j + (i*64)) = j;
 			}
 
 		}*/

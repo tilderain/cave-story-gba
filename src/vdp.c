@@ -97,7 +97,8 @@ void vdp_init() {
 	// Put blank tile in index 0
 	vdp_tiles_load(TILE_BLANK, 0, 1);
 
-	BGCTRL[0] = SCREEN_BASE(0);
+	BGCTRL[0] = BG_SIZE(1) | SCREEN_BASE(31);
+	BGCTRL[1] = BG_SIZE(1) | SCREEN_BASE(31);
 
 	// screen mode & background to display
 	SetMode( MODE_0 | BG1_ON | OBJ_ON);
@@ -202,7 +203,7 @@ void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint
 
 void vdp_map_xy(uint16_t plan, uint16_t tile, uint16_t x, uint16_t y) {
 	//iprintf("\x1b[%hu;%huH%s\n", (y>>2)*3, (x>>2)*3, tile);
-	//*((u16 *)MAP_BASE_ADR(0) + x + (y*x/64)) = tile;
+	//*((u16 *)MAP_BASE_ADR(31) + x + (y*x/64)) = tile;
 	return;
     uint32_t addr = plan + ((x + (y << PLAN_WIDTH_SFT)) << 1);
     *vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);
