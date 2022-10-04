@@ -153,7 +153,7 @@ void camera_update() {
 				morphingColumn = 0;
 				x_next = camera.x;
 			} else {
-				int16_t x = sub_to_tile(x_next) + (morphingColumn == 1 ? 30 : -30);
+				int16_t x = sub_to_tile(x_next) + (morphingColumn == 1 ? 32 : -32);
 				int16_t y = sub_to_tile(y_next) - 16 /*+ morphingRow*/;
 				if(x >= 0 && x < (int16_t)(stageWidth) << 1) {
 					for(uint16_t i = 32; i--; ) {
@@ -161,17 +161,22 @@ void camera_update() {
 						//if(y >= stageHeight << 1) break;
 						//if(y >= 0) {
 							// Fuck math tbh
-							uint16_t b = stage_get_block(x>>1, y>>1);
+							int16_t add = (morphingColumn == 1 ? -16 : 16);
+							uint16_t b = stage_get_block(((x+add)>>1), y>>1);
 							uint16_t t = b << 2; //((b&15) << 1) + ((b>>4) << 6);
 							uint16_t ta = pxa[b]; //stage_get_block_type(x>>1, y>>1);
 							uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
 							//mapbuf[y&31] = TILE_ATTR(pal, (ta&0x40) > 0, 
 									//0, 0, TILE_TSINDEX + t + (x&1) + ((y&1)<<1));
-							mapbuf[y&31] = 8 + t + (x&1) + ((y&1)<<1);
+								
+							//mapbuf[y&31] = 8 + t + (x&1) + ((y&1)<<1);
+							u16* adr = MAP_BASE_ADR(BASE_STAGE) + ((y&31)<<6) + (((x&31)<<1)) + 32;
+							*adr = 8 + t + (x&1) + ((y&1)<<1);
 						//}
 						y++;
 					}
-					CpuFastSet(mapbuf, MAP_BASE_ADR(BASE_STAGE) + ((x & 63) << 1), 32 | COPY32);
+
+					//CpuFastSet(mapbuf, MAP_BASE_ADR(BASE_STAGE) + ((x & 63) << 1), 32 | COPY32);
 					//DMA_queueDma(DMA_VRAM, (uint32_t) mapbuf, VDP_PLAN_A + ((x & 63) << 1), 32, 128);
 				}
 			}
@@ -197,7 +202,7 @@ void camera_update() {
 						//}
 						x++;
 					}
-					CpuFastSet(mapbuf, MAP_BASE_ADR(BASE_STAGE) + ((y&31)<<6), 32 | COPY32);
+					CpuFastSet(mapbuf, MAP_BASE_ADR(BASE_STAGE) + ((y&31)<<6), 16 | COPY32);
 					//DMA_queueDma(DMA_VRAM, (uint32_t) mapbuf, VDP_PLAN_A + ((y & 31) << 7), 64, 2);
 				}
 			}

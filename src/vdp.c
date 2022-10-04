@@ -100,8 +100,8 @@ void vdp_init() {
 	// Put blank tile in index 0
 	vdp_tiles_load(TILE_BLANK, 0, 1);
 
-	BGCTRL[0] = BG_PRIORITY(1) | BG_SIZE(1) | CHAR_BASE(1) | SCREEN_BASE(BASE_BACK);
-	BGCTRL[1] = BG_PRIORITY(0) | BG_SIZE(1) | CHAR_BASE(0) | SCREEN_BASE(BASE_STAGE);
+	BGCTRL[0] = BG_PRIORITY(1) | BG_SIZE(0) | CHAR_BASE(1) | SCREEN_BASE(BASE_BACK);
+	BGCTRL[1] = BG_PRIORITY(0) | BG_SIZE(0) | CHAR_BASE(0) | SCREEN_BASE(BASE_STAGE);
 
 	// screen mode & background to display
 	SetMode( MODE_0 | BG0_ON | BG1_ON | OBJ_ON);
