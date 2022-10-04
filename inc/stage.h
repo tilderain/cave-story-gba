@@ -173,3 +173,4 @@ void stage_update();
 // Put the palettes expected by the current stage into "next" cache
 void stage_setup_palettes();
 void stage_draw_screen();
+void stage_draw_background();

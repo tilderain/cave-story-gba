@@ -39,7 +39,7 @@ typedef struct {
 // The IDs deviate from the original game. I do not know the "correct" order
 #define BACKGROUND_COUNT 17
 typedef struct {
-	const TileSet *tileset; // Graphical tile data to load
+	const uint16_t *tileset; // Graphical tile data to load
 	// Backgrounds do not use their own palette and instead "share" with any other of the
 	// 4 already loaded. This value specifies which, like PAL0, PAL1, etc
 	uint16_t palette;

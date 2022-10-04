@@ -72,7 +72,7 @@ static void stage_load_blocks();
 static void stage_draw_block(uint16_t x, uint16_t y);
 //static void stage_draw_screen();
 static void stage_draw_screen_credits();
-static void stage_draw_background();
+void stage_draw_background();
 static void stage_draw_moonback();
 
 #include "gba.h"
@@ -118,8 +118,9 @@ void stage_load(uint16_t id) {
 		vdp_set_backcolor(0); // Color index 0 for everything except fog
 		if(stageBackgroundType == 0 || stageBackgroundType == 3) { // Tiled image
 			vdp_set_scrollmode(HSCROLL_PLANE, VSCROLL_PLANE);
-			vdp_tiles_load_from_rom(background_info[stageBackground].tileset->tiles, TILE_BACKINDEX, 
-						background_info[stageBackground].tileset->numTile);
+			if(background_info[stageBackground].tileset != NULL)
+				vdp_tiles_load_from_rom(background_info[stageBackground].tileset, TILE_BACKINDEX, 
+						1024);
 			stage_draw_background();
 		} else if(stageBackgroundType == 1) { // Moon
 			vdp_set_scrollmode(HSCROLL_TILE, VSCROLL_PLANE);
@@ -131,7 +132,8 @@ void stage_load(uint16_t id) {
 			vdp_set_scrollmode(HSCROLL_PLANE, VSCROLL_PLANE);
 			vdp_map_clear(VDP_PLAN_B);
             backScrollTable[0] = (SCREEN_HEIGHT >> 3) + 1;
-			vdp_tiles_load_from_rom(BG_Water.tiles, TILE_WATERINDEX, BG_Water.numTile);
+			//	gbatodo
+			vdp_tiles_load_from_rom(BG_Water, TILE_WATERINDEX, 64);
 		} else if(stageBackgroundType == 5) { // Fog
 			vdp_set_scrollmode(HSCROLL_TILE, VSCROLL_PLANE);
 			// Use background color from tileset
@@ -544,9 +546,9 @@ void stage_draw_screen() {
 				//}
 				x++;
 			}
-			CpuFastSet(maprow, MAP_BASE_ADR(31) + ((y&31)<<6), 16 | COPY32);
-			//*((u16 *)MAP_BASE_ADR(31) + 1) = 20;
-			//*((u16 *)MAP_BASE_ADR(31) + 2) = 21;
+			CpuFastSet(maprow, MAP_BASE_ADR(BASE_STAGE) + ((y&31)<<6), 16 | COPY32);
+			//*((u16 *)MAP_BASE_ADR(BASE_STAGE) + 1) = 20;
+			//*((u16 *)MAP_BASE_ADR(BASE_STAGE) + 2) = 21;
 			//DMA_doDma(DMA_VRAM, (uint32_t)maprow, VDP_PLAN_A + ((y&31)<<7), 64, 2);
 		}
 		y++;
@@ -554,7 +556,7 @@ void stage_draw_screen() {
 
 		/*for(uint16_t i = 32; i--; ) {
 			for(uint16_t j = 64; j--; ) {
-				*((u16 *)MAP_BASE_ADR(31) + j + (i*64)) = j;
+				*((u16 *)MAP_BASE_ADR(BASE_STAGE) + j + (i*64)) = j;
 			}
 
 		}*/
@@ -589,13 +591,16 @@ void stage_draw_block(uint16_t x, uint16_t y) {
 }
 
 // Fills VDP_PLAN_B with a tiled background
+int ind = 0;
+u8 ind2 = 0;
 void stage_draw_background() {
 	uint16_t w = background_info[stageBackground].width;
 	uint16_t h = background_info[stageBackground].height;
 	uint16_t pal = background_info[stageBackground].palette;
 	for(uint16_t y = 0; y < 32; y += h) {
 		for(uint16_t x = 0; x < 64; x += w) {
-			vdp_map_fill_rect(VDP_PLAN_B, TILE_ATTR(pal,0,0,0,TILE_BACKINDEX), x, y, w, h, 1);
+			//vdp_map_fill_rect(BASE_BACK, TILE_ATTR(pal,0,0,0,TILE_BACKINDEX), x, y, w, h, 1);
+			vdp_map_fill_rect(BASE_BACK, TILE_BACKINDEX + ind2, x, y, w, h, 1);
 			//uint16_t tile = TILE_ATTR(pal,0,0,0,TILE_BACKINDEX);
 			//for(uint16_t yy = 0; yy < h; yy++) {
 			//	for(uint16_t xx = 0; xx < w; xx++) {

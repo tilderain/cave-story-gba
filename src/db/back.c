@@ -5,6 +5,8 @@
 
 #include "tables.h"
 
+#include "bank_data.h"
+
 const background_info_def background_info[BACKGROUND_COUNT] = {
 	{ NULL, 	PAL2, 2, 0, 0 },
 	{ NULL,     PAL0, 0, 8, 8 },

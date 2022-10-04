@@ -100,11 +100,11 @@ void vdp_init() {
 	// Put blank tile in index 0
 	vdp_tiles_load(TILE_BLANK, 0, 1);
 
-	BGCTRL[0] = BG_SIZE(1) | SCREEN_BASE(31);
-	BGCTRL[1] = BG_SIZE(1) | SCREEN_BASE(31);
+	BGCTRL[0] = BG_PRIORITY(1) | BG_SIZE(1) | CHAR_BASE(1) | SCREEN_BASE(BASE_BACK);
+	BGCTRL[1] = BG_PRIORITY(0) | BG_SIZE(1) | CHAR_BASE(0) | SCREEN_BASE(BASE_STAGE);
 
 	// screen mode & background to display
-	SetMode( MODE_0 | BG1_ON | OBJ_ON);
+	SetMode( MODE_0 | BG0_ON | BG1_ON | OBJ_ON);
 	
 }
 
@@ -196,8 +196,9 @@ void vdp_tiles_load(volatile const uint32_t *data, uint16_t index, uint16_t num)
 
 // Temporary solution until I get the tilesets aligned, SGDK takes into account 128K unalignment
 void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint16_t num) {
+	CpuFastSet(data + 4, VRAM + 256 + (index), num | COPY32);
 	//CpuFastSet(data, VRAM + (index), num | COPY32);
-	//CpuFastSet(data, SPRITE_GFX + (index), num | COPY32);
+	CpuFastSet(data + 4, SPRITE_GFX + 256 + (index), num | COPY32);
 		return;
 	DMA_doDma(DMA_VRAM, (uint32_t) data, index << 5, num << 4, 2);
 }
@@ -206,7 +207,7 @@ void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint
 
 void vdp_map_xy(uint16_t plan, uint16_t tile, uint16_t x, uint16_t y) {
 	//iprintf("\x1b[%hu;%huH%s\n", (y>>2)*3, (x>>2)*3, tile);
-	//*((u16 *)MAP_BASE_ADR(31) + x + (y*x/64)) = tile;
+	//*((u16 *)MAP_BASE_ADR(BASE_STAGE) + x + (y*x/64)) = tile;
 	return;
     uint32_t addr = plan + ((x + (y << PLAN_WIDTH_SFT)) << 1);
     *vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);
@@ -226,14 +227,15 @@ void vdp_map_vline(uint16_t plan, const uint16_t *tiles, uint16_t x, uint16_t y,
 }
 
 void vdp_map_fill_rect(uint16_t plan, uint16_t index, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t inc) {
-	return;
+
 	volatile uint16_t tiles[64]; // Garbled graphics on -Ofast without this volatile here
     for(uint16_t yy = 0; yy < h; yy++) {
         for(uint16_t xx = 0; xx < w; xx++) {
             tiles[xx] = index;
             index += inc;
         }
-		vdp_dma_vram((uint32_t) tiles, plan + ((x + ((y+yy) << PLAN_WIDTH_SFT)) << 1), w);
+		CpuFastSet(tiles, MAP_BASE_ADR(plan) + (x + ((y+yy) << PLAN_WIDTH_SFT)), w | COPY32);
+		//vdp_dma_vram((uint32_t) tiles, plan + ((x + ((y+yy) << PLAN_WIDTH_SFT)) << 1), w);
     }
 }
 
@@ -399,7 +401,7 @@ void vdp_sprites_update() {
 	temppointer2 = OBJ_COLORS;
 	*temppointer2 = palette[1];
 	temppointer = BG_COLORS + 1;
-	for(int i=1; i<16; i++) {
+	for(int i=1; i<256; i++) {
 		
 		*temppointer++ = tileset_info[stage_info[stageID].tileset].palette[i];
 	}

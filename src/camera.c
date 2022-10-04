@@ -171,7 +171,7 @@ void camera_update() {
 						//}
 						y++;
 					}
-					CpuFastSet(mapbuf, MAP_BASE_ADR(31) + ((x & 63) << 1), 32 | COPY32);
+					CpuFastSet(mapbuf, MAP_BASE_ADR(BASE_STAGE) + ((x & 63) << 1), 32 | COPY32);
 					//DMA_queueDma(DMA_VRAM, (uint32_t) mapbuf, VDP_PLAN_A + ((x & 63) << 1), 32, 128);
 				}
 			}
@@ -197,7 +197,7 @@ void camera_update() {
 						//}
 						x++;
 					}
-					CpuFastSet(mapbuf, MAP_BASE_ADR(31) + ((y&31)<<6), 32 | COPY32);
+					CpuFastSet(mapbuf, MAP_BASE_ADR(BASE_STAGE) + ((y&31)<<6), 32 | COPY32);
 					//DMA_queueDma(DMA_VRAM, (uint32_t) mapbuf, VDP_PLAN_A + ((y & 31) << 7), 64, 2);
 				}
 			}

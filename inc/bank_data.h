@@ -29,6 +29,21 @@ extern const uint16_t UFTC_Statue[];
 extern const uint16_t UFTC_Ring2[];
 extern const uint16_t UFTC_Ring3[];
 
+extern const uint16_t BG_Blue[];
+extern const uint16_t BG_Eggs[];
+extern const uint16_t BG_Gard[];
+extern const uint16_t BG_Gray[];
+extern const uint16_t BG_Cent[];
+extern const uint16_t BG_Maze[];
+extern const uint16_t BG_Maze2[];
+extern const uint16_t BG_Red[];
+extern const uint16_t BG_Water[];
+extern const uint16_t BG_LabB[];
+extern const uint16_t BG_Stream[];
+extern const uint16_t BG_Sand[];
+extern const uint16_t BG_Hell[];
+extern const uint16_t BG_Fall[];
+
 extern const uint16_t PAL_Mimi[];
 extern const uint16_t PAL_Eggs[];
 extern const uint16_t PAL_Maze[];

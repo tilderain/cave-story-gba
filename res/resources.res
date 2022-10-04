@@ -601,18 +601,18 @@ PALETTE PAL_Ill18	"credits/ill18.png"
 # Background Tilesets
 # ----------------------------------------------------------------------------------------------
 
-TILESET BG_Blue		"back/bkMimi.png" 0
-TILESET BG_Eggs		"back/bkEggs.png" 0
-TILESET BG_Gard		"back/bkGard.bmp" 0
-TILESET BG_Gray		"back/bkGrayRegu.png" 0
-TILESET BG_Cent		"back/bkCent.png" 0
-TILESET BG_Maze		"back/bkMaze.png" 0
-TILESET BG_Maze2	"back/bkMaze.bmp" 0
-TILESET BG_Red		"back/bkRed.bmp" 0
-TILESET BG_Water	"back/bkWater.bmp" 0
-TILESET BG_LabB		"back/bkMimiRegu.png" 0
-TILESET BG_Stream	"back/bkStream.png" 0
-TILESET BG_Sand		"back/bkSand.png" 0
-TILESET BG_Hell		"back/bkHell.png" 0
-TILESET BG_Fall		"back/bkFall.png" 0
+#TILESET BG_Blue		"back/bkMimi.png" 0
+#TILESET BG_Eggs		"back/bkEggs.png" 0
+#TILESET BG_Gard		"back/bkGard.bmp" 0
+#TILESET BG_Gray		"back/bkGrayRegu.png" 0
+#TILESET BG_Cent		"back/bkCent.png" 0
+#TILESET BG_Maze		"back/bkMaze.png" 0
+#TILESET BG_Maze2	"back/bkMaze.bmp" 0
+#TILESET BG_Red		"back/bkRed.bmp" 0
+#TILESET BG_Water	"back/bkWater.bmp" 0
+#TILESET BG_LabB		"back/bkMimiRegu.png" 0
+#TILESET BG_Stream	"back/bkStream.png" 0
+#TILESET BG_Sand		"back/bkSand.png" 0
+#TILESET BG_Hell		"back/bkHell.png" 0
+#TILESET BG_Fall		"back/bkFall.png" 0
 

@@ -1,8 +1,11 @@
-#define VDP_PLAN_W				((uint16_t)0)
+#define VDP_PLAN_W				((uint16_t)2)
 #define VDP_PLAN_A              ((uint16_t)1)
-#define VDP_PLAN_B              ((uint16_t)2)
+#define VDP_PLAN_B              ((uint16_t)0)
 #define VDP_SPRITE_TABLE        ((uint16_t)0xF800)
 #define VDP_HSCROLL_TABLE       ((uint16_t)0xFC00)
+
+#define BASE_STAGE 31
+#define BASE_BACK 25
 
 #define PLAN_WIDTH				64
 #define PLAN_HEIGHT				32
@@ -26,8 +29,8 @@
 #define TILE_SYSTEMINDEX        0x0000
 #define TILE_USERINDEX			0x0010
 #define TILE_FONTINDEX			((VDP_PLAN_W >> 5) - 96)
-#define TILE_EXTRA1INDEX		(((uint16_t)0xD000) >> 5) // 128 tiles after PLAN_A
-#define TILE_EXTRA2INDEX		(((uint16_t)0xF000) >> 5) // 64 tiles after PLAN_B
+#define TILE_EXTRA1INDEX		128*128 // 128 tiles after PLAN_A
+#define TILE_EXTRA2INDEX		64*128 // 64 tiles after PLAN_B
 
 // Tileset width/height
 #define TS_WIDTH 32

@@ -71,6 +71,22 @@ BIN PAL_Sand	"../res/Stage/PrtSand_vert.pal.bin"
 BIN PAL_Store	"../res/Stage/PrtStore_vert.pal.bin"
 BIN PAL_Weed	"../res/Stage/PrtWeed_vert.pal.bin"
 
+BIN BG_Blue		"../res/back/bkBlue.img.bin" 
+BIN BG_Eggs		"../res/back/bkEggs.img.bin" 
+BIN BG_Gard		"../res/back/bkGard.img.bin" 
+BIN BG_Gray		"../res/back/bkGrayRegu.img.bin" 
+BIN BG_Cent		"../res/back/bkCent.img.bin" 
+BIN BG_Maze		"../res/back/bkMaze.img.bin" 
+BIN BG_Maze2	"../res/back/bkMaze.img.bin" 
+BIN BG_Red		"../res/back/bkRed.img.bin" 
+BIN BG_Water	"../res/back/bkWater.img.bin"
+BIN BG_LabB		"../res/back/bkMimiRegu.img.bin" 
+BIN BG_Stream	"../res/back/bkStream.img.bin" 
+BIN BG_Sand		"../res/back/bkSand.img.bin" 
+BIN BG_Hell		"../res/back/bkHell.img.bin" 
+BIN BG_Fall		"../res/back/bkFall.img.bin" 
+
+
 
 
 # Alternate for waterway (Green background)

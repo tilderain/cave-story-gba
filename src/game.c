@@ -171,6 +171,8 @@ void game_main(uint8_t load) {
 				// Restore controller locking if it was locked
 				joystate = lockstate;
 				oldstate = oldlockstate;
+
+				//stage_draw_background();
 			}
 		}
 		PF_BGCOLOR(0xEEE);
