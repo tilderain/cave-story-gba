@@ -12,6 +12,7 @@
 		"memory": "c",
 		"new": "c",
 		"cstring": "c",
-		"stage.h": "c"
+		"stage.h": "c",
+		"*.ipp": "c"
 	}
 }
