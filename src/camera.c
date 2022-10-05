@@ -171,7 +171,7 @@ void camera_update() {
 								
 							//mapbuf[y&31] = 8 + t + (x&1) + ((y&1)<<1);
 							u16* adr = MAP_BASE_ADR(BASE_STAGE) + ((y&31)<<6) + (((x&31)<<1)) + 32;
-							*adr = 8 + t + (x&1) + ((y&1)<<1);
+							*adr = TILE_TSINDEX + t + (x&1) + ((y&1)<<1);
 						//}
 						y++;
 					}
@@ -198,7 +198,7 @@ void camera_update() {
 							uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
 							//mapbuf[x&63] = TILE_ATTR(pal, (ta&0x40) > 0, 
 							//		0, 0, TILE_TSINDEX + t + (x&1) + ((y&1)<<1));
-							mapbuf[x&63] = 8 + t + (x&1) + ((y&1)<<1);
+							mapbuf[x&63] = TILE_TSINDEX + t + (x&1) + ((y&1)<<1);
 						//}
 						x++;
 					}

@@ -100,11 +100,13 @@ void vdp_init() {
 	// Put blank tile in index 0
 	vdp_tiles_load(TILE_BLANK, 0, 1);
 
-	BGCTRL[0] = BG_PRIORITY(1) | BG_SIZE(0) | CHAR_BASE(1) | SCREEN_BASE(BASE_BACK);
-	BGCTRL[1] = BG_PRIORITY(0) | BG_SIZE(0) | CHAR_BASE(0) | SCREEN_BASE(BASE_STAGE);
+	BGCTRL[0] = BG_PRIORITY(2) | BG_SIZE(0) | CHAR_BASE(1) | SCREEN_BASE(BASE_BACK);
+	BGCTRL[1] = BG_PRIORITY(1) | BG_SIZE(0) | CHAR_BASE(0) | SCREEN_BASE(BASE_STAGE);
+
+	BGCTRL[1] |= BG_PRIORITY(0);
 
 	// screen mode & background to display
-	SetMode( MODE_0 | BG0_ON | BG1_ON | OBJ_ON);
+	SetMode( MODE_0 | BG0_ON | BG1_ON | BG3_ON | OBJ_ON);
 	
 }
 
@@ -190,15 +192,15 @@ void vdp_dma_cram(uint32_t from, uint16_t to, uint16_t len) {
 // Tile patterns
 
 void vdp_tiles_load(volatile const uint32_t *data, uint16_t index, uint16_t num) {
-	CpuFastSet(data + 4, VRAM + 256 + (index), num | COPY32);
+	CpuFastSet(data, VRAM + 0 + (index), num | COPY32);
 	//vdp_dma_vram((uint32_t) data, index, num);
 }
 
 // Temporary solution until I get the tilesets aligned, SGDK takes into account 128K unalignment
 void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint16_t num) {
-	CpuFastSet(data + 4, VRAM + 256 + (index), num | COPY32);
+	CpuFastSet(data, VRAM + 0 + (index), num | COPY32);
 	//CpuFastSet(data, VRAM + (index), num | COPY32);
-	CpuFastSet(data + 4, SPRITE_GFX + 256 + (index), num | COPY32);
+	CpuFastSet(data, SPRITE_GFX + 0 + (index), num | COPY32);
 		return;
 	DMA_doDma(DMA_VRAM, (uint32_t) data, index << 5, num << 4, 2);
 }
@@ -240,7 +242,7 @@ void vdp_map_fill_rect(uint16_t plan, uint16_t index, uint16_t x, uint16_t y, ui
 }
 
 void vdp_map_clear(uint16_t plan) {
-	//iprintf("\x1b[2J");
+	iprintf("\x1b[2J");
 
 	return;
 	uint16_t addr = plan;
@@ -409,6 +411,8 @@ void vdp_sprites_update() {
 		*temppointer2++ = palette[1];
 	}
 
+	BG_COLORS[241]=RGB5(17,31,31);
+
 	CpuFastSet(obj_buffer, OAM, ((sizeof(OBJATTR)*128)/4) | COPY32);
 
 	for (u8 i = 0; i < sprite_count; i++)
@@ -445,7 +449,7 @@ void vdp_font_pal(uint16_t pal) {
 void vdp_puts(uint16_t plan, const char *str, uint16_t x, uint16_t y) {
 	//GBATODO
 	char text[128];
-	//iprintf("\x1b[%hu;%huH%s\n", (y>>2)*3, (x>>2)*3, str);
+	iprintf("\x1b[%hu;%huH%s\n", (y>>2)*3, (x>>2)*3, str);
 	//sprintf(text, "\x1b[%hu;%huH%s\n", y, x, str);
 	//iprintf(text);
 	return;

@@ -531,7 +531,7 @@ void stage_draw_screen() {
 		if(vblank) aftervsync(); // So we don't lag the music
 		vblank = 0;
 		
-		if(y < stageHeight << 1) {
+		if(y < stageHeight + 32 << 1) {
 			uint16_t x = sub_to_tile(camera.x) - 32;
 			for(uint16_t j = 64; j--; ) {
 				//if(x >= stageWidth << 1) break;
@@ -542,7 +542,7 @@ void stage_draw_screen() {
 					uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
 					//maprow[x&63] = TILE_ATTR(pal, (ta&0x40) > 0, 
 					//		0, 0, TILE_TSINDEX + t + (x&1) + ((y&1)<<1));
-					maprow[x&63] = 8 + t + (x&1) + ((y&1)<<1);
+					maprow[x&63] = TILE_TSINDEX + t + (x&1) + ((y&1)<<1);
 				//}
 				x++;
 			}

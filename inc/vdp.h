@@ -27,7 +27,7 @@
 #define TILE_INDEX_MASK         0x7FF
 
 #define TILE_SYSTEMINDEX        0x0000
-#define TILE_USERINDEX			0x0010
+#define TILE_USERINDEX			0
 #define TILE_FONTINDEX			((VDP_PLAN_W >> 5) - 96)
 #define TILE_EXTRA1INDEX		128*128 // 128 tiles after PLAN_A
 #define TILE_EXTRA2INDEX		64*128 // 64 tiles after PLAN_B

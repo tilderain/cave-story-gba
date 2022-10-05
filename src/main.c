@@ -120,6 +120,7 @@ int main() {
 		REG_IME = 1;
 
 	//consoleDemoInit();
+	consoleInit(2, 23, 3, NULL, 0, 15);
 	
 	//nocash_puts("BRUH");
     setRandomSeed(0xC427); // initiate random number generator
