@@ -186,7 +186,7 @@ void camera_update() {
 				morphingRow = 0;
 				y_next = camera.y;
 			} else {
-				int16_t y = sub_to_tile(y_next) + (morphingRow == 1 ? 30 : -30);
+				int16_t y = sub_to_tile(y_next) + (morphingRow == 1 ? 15 : -15);
 				int16_t x = sub_to_tile(x_next) - 32 /*+ morphingColumn*/;
 				if(y >= -32 && y < (int16_t)(stageHeight+32) << 1) {
 					for(uint16_t i = 64; i--; ) {
