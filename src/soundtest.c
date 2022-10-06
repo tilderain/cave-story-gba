@@ -12,6 +12,9 @@
 
 #include "gamemode.h"
 
+
+#include "bank_data.h"
+
 #define DRAW_BYTE(b, x, y) { \
 	char byte[4]; \
 	sprintf(byte, "%02hX", b); \
@@ -68,7 +71,7 @@ void soundtest_main() {
 	
 	DRAW_BYTE(track, 10, 8);
 	
-	vdp_colors(0, PAL_Main.data, 16);
+	vdp_colors(0, PAL_Main, 16);
 	vdp_colors(16, PAL_SndTest.data, 16);
 	
 	vdp_set_display(TRUE);

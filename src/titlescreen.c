@@ -25,6 +25,8 @@
 
 #include "gba.h"
 
+#include "bank_data.h"
+
 #define OPTIONS		4
 #define SAVES		22
 #define ANIM_SPEED	7
@@ -103,12 +105,12 @@ uint8_t titlescreen_main() {
 	vdp_map_fill_rect(VDP_PLAN_B, TILE_ATTR(PAL0,0,0,0,TILE_USERINDEX + 18*4), 11, 23, 18, 2, 1);
 	
 	// Set palettes last
-	vdp_colors(0, PAL_Main.data, 16);
-	vdp_colors(16, PAL_Main.data, 16);
+	vdp_colors(0, PAL_Main, 16);
+	vdp_colors(16, PAL_Main, 16);
 	vdp_color(PAL0, 0x444); // Gray background
 	vdp_color(PAL0 + 8, 0x8CE); // Yellow text
 	// PAL_Regu, for King and Toroko
-	vdp_colors(48, PAL_Regu.data, 16);
+	vdp_colors(48, PAL_Regu, 16);
 	
 	vdp_set_display(TRUE);
 

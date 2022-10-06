@@ -508,11 +508,11 @@ void stage_update() {
 
 void stage_setup_palettes() {
 	// Stage palette and shared NPC palette
-	vdp_colors_next(0, PAL_Main.data, 16);
+	vdp_colors_next(0, PAL_Main, 16);
 	if(stageID == STAGE_INTRO) {
-		vdp_colors_next(16, PAL_Intro.data, 16);
+		vdp_colors_next(16, PAL_Intro, 16);
 	} else {
-		vdp_colors_next(16, PAL_Sym.data, 16);
+		vdp_colors_next(16, PAL_Sym, 16);
 	}
 	if(stageID == STAGE_WATERWAY) {
 		vdp_colors_next(32, PAL_RiverAlt, 16); // For Waterway green background

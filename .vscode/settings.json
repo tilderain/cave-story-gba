@@ -13,6 +13,7 @@
 		"new": "c",
 		"cstring": "c",
 		"stage.h": "c",
-		"*.ipp": "c"
+		"*.ipp": "c",
+		"resources.h": "c"
 	}
 }

@@ -68,6 +68,28 @@ extern const uint16_t PAL_Store[];
 extern const uint16_t PAL_Weed[];
 extern const uint16_t PAL_RiverAlt[];
 
+extern const uint16_t  PAL_Sega		[];
+extern const uint16_t  PAL_Main		[];
+extern const uint16_t  PAL_Sym			[];
+extern const uint16_t  PAL_Regu		[];
+extern const uint16_t  PAL_Gunsmith	[];
+extern const uint16_t  PAL_Plant		[];
+extern const uint16_t  PAL_Frog		[];
+extern const uint16_t  PAL_Chaco		[];
+extern const uint16_t  PAL_Jenka		[];
+extern const uint16_t  PAL_Dark		[];
+extern const uint16_t  PAL_X			[];
+extern const uint16_t  PAL_XB			[];
+extern const uint16_t  PAL_LabB		[];
+extern const uint16_t  PAL_Boulder		[];
+extern const uint16_t  PAL_MazeM		[];
+extern const uint16_t  PAL_Eggs2		[];
+extern const uint16_t  PAL_Sisters		[];
+extern const uint16_t  PAL_Red			[];
+extern const uint16_t  PAL_Mapi		[];
+extern const uint16_t  PAL_Miza		[];
+extern const uint16_t  PAL_Intro		[];
+
 extern const uint8_t PXA_Almond[];
 extern const uint8_t PXA_Barr[];
 extern const uint8_t PXA_Cave[];

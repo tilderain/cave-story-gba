@@ -198,7 +198,7 @@ void vdp_tiles_load(volatile const uint32_t *data, uint16_t index, uint16_t num)
 
 // Temporary solution until I get the tilesets aligned, SGDK takes into account 128K unalignment
 void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint16_t num) {
-	CpuFastSet(data, VRAM + 0 + (index), num | COPY32);
+	//CpuFastSet(data, VRAM + 0 + (index), num | COPY32);
 	//CpuFastSet(data, VRAM + (index), num | COPY32);
 	CpuFastSet(data, SPRITE_GFX + 0 + (index), num | COPY32);
 		return;
@@ -408,7 +408,7 @@ void vdp_sprites_update() {
 		*temppointer++ = tileset_info[stage_info[stageID].tileset].palette[i];
 	}
 	for(int i=1; i<256; i++) {
-		*temppointer2++ = palette[1];
+		*temppointer2++ = PAL_Main[i];
 	}
 
 	BG_COLORS[241]=RGB5(17,31,31);
@@ -480,7 +480,7 @@ void vdp_text_clear(uint16_t plan, uint16_t x, uint16_t y, uint16_t len) {
 		space[i] = ' ';
 	}
 	space[len] = '\0';
-	//iprintf("\x1b[%hu;%huH%s", (y>>2)*3, (x>>2)*3, space);
+	iprintf("\x1b[%hu;%huH%s", (y>>2)*3, (x>>2)*3, space);
 	return;
     uint32_t addr = plan + ((x + (y << PLAN_WIDTH_SFT)) << 1);
 	*vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);

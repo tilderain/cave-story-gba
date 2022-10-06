@@ -26,15 +26,20 @@ if __name__ == '__main__':
 	os.chdir(folder)
 	for fn in os.listdir("."):
 		if fn.startswith("Prt") and fn.endswith(".png"):
-			print(subprocess.run(['grit', fn, '-gt', '-gB4', '-ftb', '-m!', '-fh!']))
+			subprocess.run(['grit', fn, '-gt', '-gB4', '-ftb', '-m!', '-fh!'])
 	for f in folders:
 		os.chdir(wd)
 		os.chdir(folder + f)
 		for fn in os.listdir("."):
 			if fn.startswith("Prt") and fn.endswith(".png"):
-				print(subprocess.run(['grit', fn, '-gt', '-gB4', '-ftb', '-m!', '-fh!']))
+				subprocess.run(['grit', fn, '-gt', '-gB4', '-ftb', '-m!', '-fh!'])
 	os.chdir(wd)
 	os.chdir("../res/back/")
 	for fn in os.listdir("."):
 		if fn.startswith("bk") and (fn.endswith(".png") or fn.endswith(".bmp")):
-			print(subprocess.run(['grit', fn, '-gt', '-gB4', '-ftb', '-m!', '-fh!']))
+			subprocess.run(['grit', fn, '-gt', '-gB4', '-ftb', '-m!', '-fh!'])
+	os.chdir(wd)
+	os.chdir("../res/sprite/")
+	for fn in os.listdir("."):
+		if fn.endswith(".png"):
+			subprocess.run(['grit', fn, '-gt', '-gB4', '-ftb', '-m!', '-fh!', '-Mh2', '-Mw2'])
