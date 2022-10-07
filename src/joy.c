@@ -50,8 +50,8 @@ void joy_update() {
 	
 	scanKeys();
 	//iprintf("joy_update %d %d\n", joystate, oldstate);
-	oldstate = keysHeld();
-	joystate = keysDown();
+	oldstate = joystate;
+	joystate = keysHeld();
 	return;
 	volatile uint8_t *pb = (volatile uint8_t*) 0xa10003;
     // On hardware, the C button did not work, but it did in emulators

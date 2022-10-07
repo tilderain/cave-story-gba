@@ -33,9 +33,9 @@
 extern const uint16_t btn[12];
 extern const char btnName[12][4];
 
-#define joy_pressed(b) ((joystate&(b)))
+#define joy_pressed(b) (((joystate&(b))&&((~oldstate)&(b))))
 #define joy_released(b) ((((~joystate)&(b))&&(oldstate&(b))))
-#define joy_down(b) ((oldstate&(b)))
+#define joy_down(b) ((joystate&(b)))
 
 extern uint8_t joytype;
 extern uint16_t joystate, oldstate;
