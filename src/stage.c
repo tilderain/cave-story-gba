@@ -83,7 +83,7 @@ void stage_load(uint16_t id) {
 
 	iprintf("Loading stage %d\n", id);
 	vdp_set_display(FALSE);
-	joystate = oldstate = 0;
+	oldstate = 65535;
 	// Prevents an issue where a column of the previous map would get drawn over the new one
 	DMA_clearQueue();
 	stageID = id;

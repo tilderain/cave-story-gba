@@ -284,7 +284,7 @@ void config_main() {
 	};
 	
 	//set_page(page);
-	joystate = oldstate = 0;
+	oldstate = 65535;
 	while(TRUE) {
 		if(joy_pressed(BUTTON_UP)) {
 			do {

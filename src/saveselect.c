@@ -193,7 +193,7 @@ uint8_t saveselect_main() {
 	
 	vdp_set_display(TRUE);
 
-	joystate = 0; oldstate = 0;
+	oldstate = 65535;
 	while(TRUE) {
 		if(joy_pressed(btn[cfg_btn_jump]) || joy_pressed(btn[cfg_btn_pause])) { // Confirm action
 			if(cursor < SRAM_FILE_MAX) {
