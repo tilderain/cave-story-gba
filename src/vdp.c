@@ -106,7 +106,7 @@ void vdp_init() {
 	BGCTRL[1] |= BG_PRIORITY(0);
 
 	// screen mode & background to display
-	SetMode( MODE_0 | BG0_ON | BG1_ON | BG3_ON | OBJ_ON);
+	SetMode( MODE_0 | BG0_ON | BG1_ON | BG3_ON | OBJ_ON | OBJ_1D_MAP);
 	
 }
 
@@ -200,7 +200,7 @@ void vdp_tiles_load(volatile const uint32_t *data, uint16_t index, uint16_t num)
 void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint16_t num) {
 	//CpuFastSet(data, VRAM + 0 + (index), num | COPY32);
 	//CpuFastSet(data, VRAM + (index), num | COPY32);
-	CpuFastSet(data, SPRITE_GFX + 0 + (index), num | COPY32);
+	CpuFastSet(SPR_Quote_data, SPRITE_GFX + 0, num*4 | COPY32);
 		return;
 	DMA_doDma(DMA_VRAM, (uint32_t) data, index << 5, num << 4, 2);
 }
@@ -385,6 +385,11 @@ const u16 palette[] = {
 
 u8 sprct = 0;
 
+bool IsBitSet(uint16_t b, int pos)
+{
+   return (b & (1 << pos)) != 0;
+}
+
 void vdp_sprites_update() {
 	if(!sprite_count) return;
 	sprite_table[sprite_count - 1].link = 0; // Mark end of sprite list
@@ -392,7 +397,11 @@ void vdp_sprites_update() {
 	for(int i=0;i<sprite_count;i++)
 	{
 		obj_buffer[i].attr0 = OBJ_Y(sprite_table[i].y - 128);
-		obj_buffer[i].attr1 = OBJ_X(sprite_table[i].x - 120) | OBJ_SIZE(1);
+		obj_buffer[i].attr1 = OBJ_X(sprite_table[i].x - 120) | OBJ_SIZE(Sprite_16x16);
+		if(IsBitSet(sprite_table[i].attr, 11))
+			obj_buffer[i].attr1 |= OBJ_HFLIP;
+		if(IsBitSet(sprite_table[i].attr, 12))
+			obj_buffer[i].attr1 |= OBJ_VFLIP;
 		obj_buffer[i].attr2 = OBJ_CHAR(0) | OBJ_PALETTE(0);
 	}
 	u16 *temppointer;

@@ -93,6 +93,8 @@ BIN PAL_Mapi		"../res/sprite/mapignon.pal.bin"
 BIN PAL_Miza		"../res/sprite/misery2.pal.bin"
 BIN PAL_Intro		"../res/sprite/bubbleintro.pal.bin"
 
+BIN SPR_Quote_data "../res/sprite/quote.img.bin"
+
 BIN BG_Blue		"../res/back/bkBlue.img.bin" 
 BIN BG_Eggs		"../res/back/bkEggs.img.bin" 
 BIN BG_Gard		"../res/back/bkGard.img.bin" 

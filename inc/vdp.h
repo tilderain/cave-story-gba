@@ -97,6 +97,7 @@
 #define sprite_hflip(s, flp) { (s).attr &= ~(1<<11); (s).attr |= ((flp)&1) << 11; }
 #define sprite_index(s, ind) { (s).attr &= ~0x7FF;   (s).attr |= (ind)&0x7FF; }
 
+
 // 32 bytes of zero, can be sent to VDP to clear any tile
 extern const uint32_t TILE_BLANK[8];
 // FadeOut is almost completely black, except index 15 which is white

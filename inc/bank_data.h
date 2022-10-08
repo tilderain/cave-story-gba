@@ -90,6 +90,8 @@ extern const uint16_t  PAL_Mapi		[];
 extern const uint16_t  PAL_Miza		[];
 extern const uint16_t  PAL_Intro		[];
 
+extern const uint16_t SPR_Quote_data[];
+
 extern const uint8_t PXA_Almond[];
 extern const uint8_t PXA_Barr[];
 extern const uint8_t PXA_Cave[];
