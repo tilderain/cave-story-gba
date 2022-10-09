@@ -310,7 +310,6 @@ sprTable = [
 ["littles.png",1,1],
 ["bute.png",3,2],
 ["mesa.png",4,4],
-#["casts.png",3,3],
 ["grndevil.png",2,2],
 ["turning_human.png",2,3],
 ["ahchoo_en.png",2,2],
@@ -367,6 +366,15 @@ sprTable = [
 ["itemimage.png",3,2],
 ["itemimage_g.png" ,3,2],
 	]
+
+sprTableExtra = [
+["itemwindow.png" 		,6,3],
+["prompt.png" 			,8,3],
+["prompt_ja.png" 		,8,3],
+["xxIsland.png" 		,5,3],
+]
+
+casts = ["casts.png",3,3]
 if __name__ == '__main__':
 	folder = "../res/Stage/"
 	folders = ['White/', 'Mimi/', 'Maze/', 'Hell/', 'Eggs/']
@@ -393,4 +401,9 @@ if __name__ == '__main__':
 #			subprocess.run(['grit', fn, '-gt', '-gB4', '-ftb', '-m!', '-fh!', '-Mh2', '-Mw2'])
 	for entry in sprTable:
 		subprocess.run(['grit', entry[0], '-gt', '-gB4', '-ftb', '-m!', '-fh!', '-Mw' + str(entry[1]), '-Mh' + str(entry[2])])
-	
+	os.chdir(wd)
+	os.chdir("../res/")
+	for entry in sprTableExtra:
+		subprocess.run(['grit', entry[0], '-gt', '-gB4', '-ftb', '-m!', '-fh!', '-Mw' + str(entry[1]), '-Mh' + str(entry[2])])
+	os.chdir("credits")
+	subprocess.run(['grit', casts[0], '-gt', '-gB4', '-ftb', '-m!', '-fh!', '-Mw' + str(casts[1]), '-Mh' + str(casts[2])])
