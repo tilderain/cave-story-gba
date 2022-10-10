@@ -141,6 +141,34 @@ static int execute(char *info, FILE *fs, FILE *fh)
     //strcat(temp, "_palette");
     //outPalette(palette, 0, psize, fs, fh, temp, FALSE);
 
+	/*size_t len = strlen(fileIn);
+
+	fileIn[len-4] = 0;
+	strcat(fileIn, ".img.bin");
+
+	FILE* fp = fopen(fileIn, "rb");
+
+	if(fp==NULL)
+	{
+		printf("Error: failed to open %s\n", fileIn);
+		return FALSE;
+	}
+
+    animation_ **animations = NULL;
+    animations = sprDef->animations;
+    for(int i = 0; i < sprDef->numAnimation; i++)
+    {
+    	animFrame_ **frames = NULL;
+    	char temp[MAX_PATH_LEN];
+
+    	// EXPORT FRAME
+    	frames = animations[i]->frames;
+    	for(int j = 0; j < animations[i]->numFrame; j++)
+    	{
+			fread(animations[i]->frames[j]->tileset->tiles, animations[i]->frames[j]->tileset->num*32, 1, fp);
+    	}
+    }
+	fclose(fp);*/
     // EXPORT SPRITE
     outSpriteDef(sprDef, fs, fh, id, TRUE);
 
@@ -443,6 +471,11 @@ void outSpriteDef(spriteDefinition_* spriteDef, FILE* fs, FILE* fh, char* id, in
     fprintf(fs, "    .dc.w    %d\n", spriteDef->numAnimation);
     // set animations pointer
     fprintf(fs, "    .dc.l    %s_animations\n", id);
+
+	//2 things worth of padding...
+    fprintf(fs, "    .dc.w    %d\n", spriteDef->numAnimation);
+	// set data pointer
+    fprintf(fs, "    .dc.l    %s_data\n", id);
     // set maximum number of tile used by a single animation frame (used for VRAM tile space allocation)
     //fprintf(fs, "    .dc.w    %d\n", spriteDef->maxNumTile);
     // set maximum number of VDP sprite used by a single animation frame (used for VDP sprite allocation)

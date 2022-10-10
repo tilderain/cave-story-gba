@@ -200,7 +200,7 @@ void vdp_tiles_load(volatile const uint32_t *data, uint16_t index, uint16_t num)
 void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint16_t num) {
 	//CpuFastSet(data, VRAM + 0 + (index), num | COPY32);
 	//CpuFastSet(data, VRAM + (index), num | COPY32);
-	CpuFastSet(SPR_Quote_data, SPRITE_GFX + 0, num*4 | COPY32);
+	CpuFastSet(SPR_Sue.sprite_data, SPRITE_GFX + 0, num*4 | COPY32);
 		return;
 	DMA_doDma(DMA_VRAM, (uint32_t) data, index << 5, num << 4, 2);
 }
@@ -417,7 +417,7 @@ void vdp_sprites_update() {
 		*temppointer++ = tileset_info[stage_info[stageID].tileset].palette[i];
 	}
 	for(int i=1; i<256; i++) {
-		*temppointer2++ = PAL_Main[i];
+		*temppointer2++ = PAL_Regu[i];
 	}
 
 	BG_COLORS[241]=RGB5(17,31,31);

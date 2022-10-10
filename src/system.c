@@ -546,13 +546,13 @@ void system_load_config() {
 		//if(cfg_language == 1) cfg_language = LANG_JA;
 	}
 
-    if(pal_mode || cfg_60fps) {
+    /*if(pal_mode || cfg_60fps) {
         time_tab = time_tab_pal;
         speed_tab = speed_tab_pal;
     } else {
         time_tab = time_tab_ntsc;
         speed_tab = speed_tab_ntsc;
-    }
+    }*/
 
 	SRAM_disable();
 	z80_release();

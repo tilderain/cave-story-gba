@@ -243,6 +243,7 @@ typedef struct {
     //Palette *palette;
     uint16_t numAnimation;
     Animation **animations;
+	const uint16_t* sprite_data;
     //uint16_t maxNumTile;
     //uint16_t maxNumSprite;
 } SpriteDefinition;

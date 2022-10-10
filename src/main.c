@@ -136,13 +136,13 @@ int main() {
 	joy_init();
 	enable_ints;
     // Initialize time and speed tables (framerate adjusted)
-    if(pal_mode) {
+    /*if(pal_mode) {
 		time_tab = time_tab_pal;
         speed_tab = speed_tab_pal;
 	} else {
         time_tab = time_tab_ntsc;
         speed_tab = speed_tab_ntsc;
-	}
+	}*/
     // let's the fun go on !
     
     //sound_init();
