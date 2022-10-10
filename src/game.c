@@ -66,7 +66,7 @@ IWRAM_CODE void game_main(uint8_t load) {
 		PF_BGCOLOR(0x000);
 
 		if(paused) {
-            PF_BGCOLOR(0x0E0);
+            PF_BGCOLOR(0x080);
 			paused = update_pause();
 		} else {
 			// Pressing start opens the item menu (unless a script is running)
@@ -117,10 +117,10 @@ IWRAM_CODE void game_main(uint8_t load) {
 				vdp_set_display(TRUE);
 			} else {
 				// HUD on top
-                PF_BGCOLOR(0x00E);
+                PF_BGCOLOR(0x008);
 				hud_update();
 				// Run the next set of commands in a script if it is running
-                PF_BGCOLOR(0x0E0);
+                PF_BGCOLOR(0x080);
 				uint8_t rtn = tsc_update();
 				// Nonzero return values exit the game, or switch to the ending sequence
 				if(rtn > 0) {
@@ -158,14 +158,16 @@ IWRAM_CODE void game_main(uint8_t load) {
 				uint16_t lockstate = joystate, oldlockstate = oldstate;
 				if(controlsLocked) joystate = oldstate = 0;
 				// Don't update this stuff if a script is using <PRI
-                PF_BGCOLOR(0xE00);
+                PF_BGCOLOR(0x800);
 				effects_update();
-                PF_BGCOLOR(0xE0E);
+                PF_BGCOLOR(0x804);
 				if(!gameFrozen) {
 					player_update();
+                    PF_BGCOLOR(0x808);
 					entities_update(TRUE);
 				} else {
 					player_draw();
+                    PF_BGCOLOR(0x808);
 					entities_draw();
 				}
 				// Restore controller locking if it was locked
@@ -175,7 +177,7 @@ IWRAM_CODE void game_main(uint8_t load) {
 				//stage_draw_background();
 			}
 		}
-		PF_BGCOLOR(0xEEE);
+		PF_BGCOLOR(0x888);
 		system_update();
 		ready = TRUE;
 		PF_BGCOLOR(0x000);
