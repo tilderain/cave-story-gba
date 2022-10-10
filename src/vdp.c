@@ -200,7 +200,7 @@ void vdp_tiles_load(volatile const uint32_t *data, uint16_t index, uint16_t num)
 void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint16_t num) {
 	//CpuFastSet(data, VRAM + 0 + (index), num | COPY32);
 	//CpuFastSet(data, VRAM + (index), num | COPY32);
-	CpuFastSet(SPR_Sue.sprite_data, SPRITE_GFX + 0, num*4 | COPY32);
+	CpuFastSet(data, SPRITE_GFX + index, num*4 | COPY32);
 		return;
 	DMA_doDma(DMA_VRAM, (uint32_t) data, index << 5, num << 4, 2);
 }
@@ -392,6 +392,7 @@ bool IsBitSet(uint16_t b, int pos)
 
 void vdp_sprites_update() {
 	if(!sprite_count) return;
+	//iprintf("%d %d\n", (&SPR_Quote)->animations[0]->frames[0]->w, (&SPR_Quote)->animations[0]->frames[0]->h);
 	sprite_table[sprite_count - 1].link = 0; // Mark end of sprite list
 
 	for(int i=0;i<sprite_count;i++)
@@ -402,7 +403,7 @@ void vdp_sprites_update() {
 			obj_buffer[i].attr1 |= OBJ_HFLIP;
 		if(IsBitSet(sprite_table[i].attr, 12))
 			obj_buffer[i].attr1 |= OBJ_VFLIP;
-		obj_buffer[i].attr2 = OBJ_CHAR(0) | OBJ_PALETTE(0);
+		obj_buffer[i].attr2 = OBJ_CHAR(4) | OBJ_PALETTE(0);
 	}
 	u16 *temppointer;
 	u16 *temppointer2;
@@ -410,14 +411,14 @@ void vdp_sprites_update() {
 	temppointer = BG_COLORS;
 	*temppointer = palette[0];
 	temppointer2 = OBJ_COLORS;
-	*temppointer2 = palette[1];
+	*temppointer2 = palette[0];
 	temppointer = BG_COLORS + 1;
 	for(int i=1; i<256; i++) {
 		
 		*temppointer++ = tileset_info[stage_info[stageID].tileset].palette[i];
 	}
 	for(int i=1; i<256; i++) {
-		*temppointer2++ = PAL_Regu[i];
+		*temppointer2++ = PAL_Main[i];
 	}
 
 	BG_COLORS[241]=RGB5(17,31,31);

@@ -157,9 +157,6 @@ extern const int16_t cos2[0x100];
 #define max(X, Y)   (((X) > (Y))?(X):(Y))
 #define abs(X)      (((X) < 0)?-(X):(X))
 
-// Get tiles from SpriteDefinition
-#define SPR_TILES(spr, a, f) ((spr)->animations[a]->frames[f]->tileset->tiles)
-
 // Bounding box used for collision and relative area to display sprites
 typedef struct {
 	uint8_t left;
@@ -221,6 +218,7 @@ typedef struct {
     uint16_t numTile;
 } VDPSpriteInf;
 
+#pragma pack(push, 2)
 typedef struct {
     uint16_t numSprite;
 	VDPSpriteInf **vdpSpritesInf;
@@ -239,6 +237,11 @@ typedef struct {
     //int16_t loop;
 } Animation;
 
+// Get tiles from SpriteDefinition
+//#define SPR_TILES(spr, a, f) ((spr)->sprite_data + \
+ //32 * ((((spr)->animations[0]->frames[0]->w * (spr)->animations[0]->frames[0]->h)/128) * f + (a * )))
+
+
 typedef struct {
     //Palette *palette;
     uint16_t numAnimation;
@@ -247,6 +250,13 @@ typedef struct {
     //uint16_t maxNumTile;
     //uint16_t maxNumSprite;
 } SpriteDefinition;
+#pragma pack(pop)
+static inline int16_t* SPR_TILES(const SpriteDefinition* spr, int a, int f)
+{
+	int base = ((((spr)->animations[0]->frames[0]->w * (spr)->animations[0]->frames[0]->h)/128)); // how many tiles to get to the next frame
+	int base2 = 32 * (base * a * spr->animations[0]->numFrame); // how many bytes to get to the next animation
+	return (spr)->sprite_data + (32 * base * f) + base2;
+}
 
 // VBlank stuff
 extern volatile uint8_t vblank;

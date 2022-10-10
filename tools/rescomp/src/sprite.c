@@ -469,11 +469,10 @@ void outSpriteDef(spriteDefinition_* spriteDef, FILE* fs, FILE* fh, char* id, in
     //fprintf(fs, "    .dc.l    %s_palette\n", id);
     // set number of animation
     fprintf(fs, "    .dc.w    %d\n", spriteDef->numAnimation);
+
     // set animations pointer
     fprintf(fs, "    .dc.l    %s_animations\n", id);
 
-	//2 things worth of padding...
-    fprintf(fs, "    .dc.w    %d\n", spriteDef->numAnimation);
 	// set data pointer
     fprintf(fs, "    .dc.l    %s_data\n", id);
     // set maximum number of tile used by a single animation frame (used for VRAM tile space allocation)
