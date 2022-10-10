@@ -754,8 +754,8 @@ static void player_update_booster() {
 
 	// Don't bump in the opposite direction when hitting the ceiling
 	if(player.y_speed <= 0 && collide_stage_ceiling(&player)) player.y_speed = 0;
-	uint8_t blockl = collide_stage_leftwall(&player),
-			blockr = collide_stage_rightwall(&player);
+	uint8_t nblockl = collide_stage_leftwall(&player),
+			nblockr = collide_stage_rightwall(&player);
 	collide_stage_floor(&player);
 	player.grounded = FALSE;
 	playerPlatform = NULL;
@@ -764,17 +764,9 @@ static void player_update_booster() {
 	switch(playerBoostState) {
 		case BOOST_HOZ:
 		{
-            if(!player.dir) { // Left
-                if(blockl) {
-                    player.y_speed = -SPEED_8(0xFF);
-                    player.x += 0x100;
-                }
-            } else { // Right
-                if(blockr) {
-                    player.y_speed = -SPEED_8(0xFF);
-                    player.x -= 0x100;
-                }
-            }
+			if ((!player.dir && nblockl) || (player.dir && nblockr)) {
+				player.y_speed = -SPEED_8(0xFF);
+			}
 			// I believe the player should not constantly fly upward after
 			// getting hit but need to verify what the original CS does
 			//if(playerIFrames) {

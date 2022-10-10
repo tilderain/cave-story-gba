@@ -403,26 +403,32 @@ uint16_t vdp_fade_step() {
 			if(cB != nB) { pal_current[i] += cB < nB ? 0x200 : -0x200; colors_changed++; }
 		}
 		if(!colors_changed) {
-			pal_fading = FALSE;
-			return 0;
+			pal_fading = FADE_LAST;
+			return 2;
 		}
-		vdp_dma_cram((uint32_t) pal_current, 0, 64);
 	}
     return 1;
+}
+
+void vdp_fade_step_dma() {
+    if(pal_fading != FADE_NONE) {
+        vdp_dma_cram((uint32_t) pal_current, 0, 64);
+        if(pal_fading == FADE_LAST) pal_fading = FADE_NONE;
+    }
 }
 
 void vdp_fade(const uint16_t *src, const uint16_t *dst, uint16_t speed, uint8_t async) {
 	return;
     if(src) vdp_colors(0, src, 64);
     if(dst) vdp_colors_next(0, dst, 64);
-	pal_fading = TRUE;
+	pal_fading = FADE_INPROGRESS;
 	pal_fadespeed = speed;
 	pal_fadecnt = 0;
     if(!async) {
-        while(vdp_fade_step()) {
+        //while(vdp_fade_step_calc()) {
 			vdp_vsync();
-			//xgm_vblank();
-		}
+			vdp_fade_step_dma();
+		//}
     }
 }
 
