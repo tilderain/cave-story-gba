@@ -391,6 +391,38 @@ bool IsBitSet(uint16_t b, int pos)
    return (b & (1 << pos)) != 0;
 }
 
+int get_sprite_size(uint8_t size)
+{
+	int h = size&3;
+	int w = size&12;
+
+	if (w == 0 && h == 0)
+		return Sprite_8x8;
+	if (w == 1 && h == 1)
+		return Sprite_16x16;
+	if (w == 2 && h == 2)
+		return Sprite_32x32;
+	if (w == 3 && h == 3)
+		return Sprite_64x64;
+	if (w == 1 && h == 0)
+		return Sprite_32x8;
+	if (w == 2 && h == 0)
+		return Sprite_32x16;
+	if (w == 3 && h == 0)
+		return Sprite_64x32;
+	if (w == 3 && h == 2)
+		return Sprite_64x32;		
+	if (w == 0 && h == 1)
+		return Sprite_8x16;
+	if (w == 0 && h == 2)
+		return Sprite_8x32;
+	if (w == 1 && h == 2)
+		return Sprite_16x32;
+	if (w == 2 && h == 3)
+		return Sprite_32x64;
+	return Sprite_16x16;
+}
+
 void vdp_sprites_update() {
 	if(!sprite_count) return;
 	//iprintf("%d %d\n", (&SPR_Quote)->animations[0]->frames[0]->w, (&SPR_Quote)->animations[0]->frames[0]->h);
@@ -398,8 +430,9 @@ void vdp_sprites_update() {
 
 	for(int i=0;i<sprite_count;i++)
 	{
+		int size = get_sprite_size(sprite_table[i].size);
 		obj_buffer[i].attr0 = OBJ_Y(sprite_table[i].y - 128);
-		obj_buffer[i].attr1 = OBJ_X(sprite_table[i].x - 120) | OBJ_SIZE(Sprite_16x16);
+		obj_buffer[i].attr1 = OBJ_X(sprite_table[i].x - 120) | OBJ_SIZE(size);
 		if(IsBitSet(sprite_table[i].attr, 11))
 			obj_buffer[i].attr1 |= OBJ_HFLIP;
 		if(IsBitSet(sprite_table[i].attr, 12))
