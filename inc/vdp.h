@@ -45,7 +45,7 @@
 #define TILE_NAMEINDEX (TILE_FACEINDEX + TILE_FACESIZE)
 #define TILE_NAMESIZE 16
 // Space for shared sprite sheets
-#define TILE_SHEETINDEX 2
+#define TILE_SHEETINDEX 4
 #define TILE_SHEETSIZE 1024
 // Space for prompt/item display at the end of the sprite tiles
 #define TILE_PROMPTINDEX (TILE_SHEETINDEX + TILE_SHEETSIZE - 28)
@@ -73,7 +73,7 @@
 // 8 tiles after window plane for blade L3
 #define TILE_SLASHINDEX ((0xC000 >> 5) - 8)
 // Unused palette color tiles area
-#define TILE_PLAYERINDEX (TILE_SYSTEMINDEX + 2)
+#define TILE_PLAYERINDEX (TILE_SYSTEMINDEX + 0)
 #define TILE_PLAYERSIZE 4
 #define TILE_WEAPONINDEX (TILE_PLAYERINDEX + TILE_PLAYERSIZE)
 #define TILE_WEAPONSIZE 6
