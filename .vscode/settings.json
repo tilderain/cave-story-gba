@@ -14,6 +14,7 @@
 		"cstring": "c",
 		"stage.h": "c",
 		"*.ipp": "c",
-		"resources.h": "c"
+		"resources.h": "c",
+		"ratio": "c"
 	}
 }

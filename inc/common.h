@@ -185,7 +185,7 @@ typedef void (*ActionFunc)(uint8_t page);
 typedef struct {
     uint16_t value;
 } VDPPlan;
-
+#pragma pack(push, 2)
 typedef struct {
     //uint16_t compression;
     uint16_t numTile;
@@ -197,7 +197,7 @@ typedef struct {
     //uint16_t length;
     uint16_t *data;
 } Palette;
-
+#pragma pack(pop)
 typedef struct {
     int16_t y;
     union {
@@ -251,6 +251,9 @@ typedef struct {
     //uint16_t maxNumSprite;
 } SpriteDefinition;
 #pragma pack(pop)
+
+//#define SPR_TILES(spr, a, f) ((spr)->animations[a]->frames[f]->tileset->tiles)
+
 static inline int16_t* SPR_TILES(const SpriteDefinition* spr, int a, int f)
 {
 	int base = ((((spr)->animations[0]->frames[0]->w * (spr)->animations[0]->frames[0]->h)/128)); // how many tiles to get to the next frame

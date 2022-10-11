@@ -1,3 +1,36 @@
 use Terminusmodx as font
 
 fix eggcorridor/tyrant xm
+
+fix sprite palettes
+fix map scrolling
+fix bk scrolling
+bkmoon
+fix tile mapx_y
+
+fix particle effects
+disable xp merging
+fix missing sounds
+increase npc activation range
+
+add textbox window plane
+add fade effect
+
+add item get sound
+esc menu
+camp menu
+
+boss bar
+
+fast forward
+
+down scrolling
+fix spur damage
+
+sram
+
+ironhead
+
+FON many
+
+map system

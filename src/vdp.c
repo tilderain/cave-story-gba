@@ -200,7 +200,8 @@ void vdp_tiles_load(volatile const uint32_t *data, uint16_t index, uint16_t num)
 void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint16_t num) {
 	//CpuFastSet(data, VRAM + 0 + (index), num | COPY32);
 	//CpuFastSet(data, VRAM + (index), num | COPY32);
-	CpuFastSet(data, SPRITE_GFX + index, num*4 | COPY32);
+	//iprintf("index %d num %d\n", index, num);
+	CpuFastSet(data, SPRITE_GFX + (index*32), (num*16) | COPY32);
 		return;
 	DMA_doDma(DMA_VRAM, (uint32_t) data, index << 5, num << 4, 2);
 }
@@ -403,7 +404,8 @@ void vdp_sprites_update() {
 			obj_buffer[i].attr1 |= OBJ_HFLIP;
 		if(IsBitSet(sprite_table[i].attr, 12))
 			obj_buffer[i].attr1 |= OBJ_VFLIP;
-		obj_buffer[i].attr2 = OBJ_CHAR(4) | OBJ_PALETTE(0);
+			
+		obj_buffer[i].attr2 = OBJ_CHAR((sprite_table[i].attr&0x7FF)+2) | OBJ_PALETTE(0);
 	}
 	u16 *temppointer;
 	u16 *temppointer2;
