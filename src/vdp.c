@@ -448,16 +448,16 @@ void vdp_sprites_update() {
 	// load the palette for the background, 7 colors
 	temppointer = BG_COLORS;
 	*temppointer = palette[0];
-	//temppointer2 = OBJ_COLORS;
+	temppointer2 = OBJ_COLORS + 33;
 	//*temppointer2 = palette[0];
 	temppointer = BG_COLORS + 1;
 	for(int i=1; i<256; i++) {
 		
 		*temppointer++ = tileset_info[stage_info[stageID].tileset].palette[i];
 	}
-	/*for(int i=1; i<256; i++) {
-		*temppointer2++ = PAL_Main[i];
-	}*/
+	for(int i=1; i<16; i++) {
+		*temppointer2++ = tileset_info[stage_info[stageID].tileset].palette[i];
+	}
 
 	BG_COLORS[241]=RGB5(17,31,31);
 

@@ -316,7 +316,7 @@ void entities_update(uint8_t draw) {
 				const AnimationFrame *f = npc_info[e->type].sprite->animations[0]->frames[e->frame];
 				if(e->frame != e->oframe) {
 					e->oframe = e->frame;
-					TILES_QUEUE(npc_info[e->type].sprite->sprite_data, e->vramindex, e->framesize);
+					TILES_QUEUE(SPR_TILES(npc_info[e->type].sprite, 0, e->frame), e->vramindex, e->framesize);
 				}
 				// We can't just flip the vdpsprites, gotta draw them in backwards order too
 				if(e->dir) {
@@ -345,9 +345,9 @@ void entities_update(uint8_t draw) {
 						sprite_pos(e->sprite[i], bx + x, by);
 						sprite_hflip(e->sprite[i], 0);
 
-						int xx = bx + x;
-						int y = by;
-						xx = (xx + 4) / 8; y = (y + 80) / 8;
+						//int xx = bx + x;
+						//int y = by;
+						//xx = (xx + 4) / 8; y = (y + 80) / 8;
 						//iprintf("\x1b[%hu;%huH%s\n", y, xx, "3");
 						x += 32;
 						if(x >= f->w) {
