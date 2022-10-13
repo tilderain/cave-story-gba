@@ -7,7 +7,7 @@
 #define BASE_STAGE 31
 #define BASE_BACK 25
 
-#define PLAN_WIDTH				64
+#define PLAN_WIDTH				32
 #define PLAN_HEIGHT				32
 #define PLAN_WIDTH_SFT			6
 #define PLAN_HEIGHT_SFT			5
@@ -28,9 +28,9 @@
 
 #define TILE_SYSTEMINDEX        0x0000
 #define TILE_USERINDEX			0
-#define TILE_FONTINDEX			((VDP_PLAN_W >> 5) - 96)
-#define TILE_EXTRA1INDEX		4 // 128 tiles after PLAN_A
-#define TILE_EXTRA2INDEX		8 // 64 tiles after PLAN_B
+#define TILE_FONTINDEX			96
+#define TILE_EXTRA1INDEX		128 // 128 tiles after PLAN_A
+#define TILE_EXTRA2INDEX		64 // 64 tiles after PLAN_B
 
 // Tileset width/height
 #define TS_WIDTH 32
@@ -45,8 +45,8 @@
 #define TILE_NAMEINDEX (TILE_FACEINDEX + TILE_FACESIZE)
 #define TILE_NAMESIZE 16
 // Space for shared sprite sheets
-#define TILE_SHEETINDEX 4
-#define TILE_SHEETSIZE 1024
+#define TILE_SHEETINDEX (TILE_NAMEINDEX + TILE_NAMESIZE)
+#define TILE_SHEETSIZE (TILE_FONTINDEX - TILE_SHEETINDEX)
 // Space for prompt/item display at the end of the sprite tiles
 #define TILE_PROMPTINDEX (TILE_SHEETINDEX + TILE_SHEETSIZE - 28)
 #define TILE_AIRTANKINDEX (TILE_PROMPTINDEX - 9)
@@ -73,7 +73,7 @@
 // 8 tiles after window plane for blade L3
 #define TILE_SLASHINDEX ((0xC000 >> 5) - 8)
 // Unused palette color tiles area
-#define TILE_PLAYERINDEX (TILE_SYSTEMINDEX + 0)
+#define TILE_PLAYERINDEX (TILE_SYSTEMINDEX + 2)
 #define TILE_PLAYERSIZE 4
 #define TILE_WEAPONINDEX (TILE_PLAYERINDEX + TILE_PLAYERSIZE)
 #define TILE_WEAPONSIZE 6

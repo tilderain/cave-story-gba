@@ -136,7 +136,7 @@ uint16_t DMA_queueDma(uint8_t location, uint32_t from, uint16_t to, uint16_t len
 {
 
 	if(location == DMA_VRAM)
-		CpuFastSet(from, SPRITE_GFX + (to), len/2 | COPY32);
+		CpuFastSet(from, SPRITE_GFX + (to*16), (len*8) | COPY16);
 	return TRUE;
     uint32_t newlen;
     uint32_t banklimitb;

@@ -29,7 +29,7 @@
 
 #define PLAYER_SPRITE_TILES_QUEUE() ({ \
 	uint8_t f = player.frame + ((playerEquipment & EQUIP_MIMIMASK) ? 10 : 0); \
-	TILES_QUEUE(SPR_TILES(&SPR_Sue,0,f),TILE_PLAYERINDEX,4); \
+	TILES_QUEUE(SPR_TILES(&SPR_Quote,0,f),TILE_PLAYERINDEX,4); \
 })
 
 const uint8_t spur_time[2][4] = {

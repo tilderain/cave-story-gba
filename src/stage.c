@@ -118,9 +118,9 @@ void stage_load(uint16_t id) {
 		vdp_set_backcolor(0); // Color index 0 for everything except fog
 		if(stageBackgroundType == 0 || stageBackgroundType == 3) { // Tiled image
 			vdp_set_scrollmode(HSCROLL_PLANE, VSCROLL_PLANE);
-			if(background_info[stageBackground].tileset != NULL)
-				vdp_tiles_load_from_rom(background_info[stageBackground].tileset, TILE_BACKINDEX, 
-						1024);
+			//if(background_info[stageBackground].tileset != NULL)
+		//		vdp_tiles_load_from_rom(background_info[stageBackground].tileset, TILE_BACKINDEX, 
+		//				1024);
 			stage_draw_background();
 		} else if(stageBackgroundType == 1) { // Moon
 			vdp_set_scrollmode(HSCROLL_TILE, VSCROLL_PLANE);
@@ -514,11 +514,11 @@ void stage_setup_palettes() {
 	} else {
 		vdp_colors_next(16, PAL_Sym, 16);
 	}
-	if(stageID == STAGE_WATERWAY) {
+	/*if(stageID == STAGE_WATERWAY) {
 		vdp_colors_next(32, PAL_RiverAlt, 16); // For Waterway green background
 	} else {
 		vdp_colors_next(32, tileset_info[stage_info[stageID].tileset].palette, 16);
-	}
+	}*/
 	vdp_colors_next(48, stage_info[stageID].npcPalette->data, 16);
 }
 

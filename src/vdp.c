@@ -179,7 +179,7 @@ void vdp_dma_vram(uint32_t from, uint16_t to, uint16_t len) {
 }
 
 void vdp_dma_cram(uint32_t from, uint16_t to, uint16_t len) {
-	//CpuFastSet(from, BG_PALETTE + to, len | COPY32);
+	CpuFastSet(from, OBJ_COLORS + to, len | COPY32);
 		return;
 	dma_do(from, len, ((0xC000 + (((uint32_t)to) & 0x3FFF)) << 16) + ((((uint32_t)to) >> 14)));
 }
@@ -272,6 +272,7 @@ void vdp_color(uint16_t index, uint16_t color) {
 
 void vdp_colors_next(uint16_t index, const uint16_t *values, uint16_t count) {
     for(uint16_t i = count; i--;) pal_next[index+i] = values[i];
+	vdp_dma_cram((uint32_t) values, index << 1, count);
 }
 
 void vdp_color_next(uint16_t index, uint16_t color) {
@@ -418,6 +419,8 @@ int get_sprite_size(uint8_t size)
 		return Sprite_8x32;
 	if (w == 1 && h == 2)
 		return Sprite_16x32;
+	if (w == 1 && h == 3)
+	return Sprite_16x32;
 	if (w == 2 && h == 3)
 		return Sprite_32x64;
 	return Sprite_16x16;
@@ -432,29 +435,29 @@ void vdp_sprites_update() {
 	{
 		int size = get_sprite_size(sprite_table[i].size);
 		obj_buffer[i].attr0 = OBJ_Y(sprite_table[i].y - 128);
-		obj_buffer[i].attr1 = OBJ_X(sprite_table[i].x - 120) | OBJ_SIZE(size);
+		obj_buffer[i].attr1 = OBJ_X(sprite_table[i].x - 128) | OBJ_SIZE(size);
 		if(IsBitSet(sprite_table[i].attr, 11))
 			obj_buffer[i].attr1 |= OBJ_HFLIP;
 		if(IsBitSet(sprite_table[i].attr, 12))
 			obj_buffer[i].attr1 |= OBJ_VFLIP;
 			
-		obj_buffer[i].attr2 = OBJ_CHAR((sprite_table[i].attr&0x7FF)+0) | OBJ_PALETTE(0);
+		obj_buffer[i].attr2 = OBJ_CHAR((sprite_table[i].attr&0x7FF)+0) | OBJ_PALETTE((sprite_table[i].attr>>13)&3);
 	}
 	u16 *temppointer;
 	u16 *temppointer2;
 	// load the palette for the background, 7 colors
 	temppointer = BG_COLORS;
 	*temppointer = palette[0];
-	temppointer2 = OBJ_COLORS;
-	*temppointer2 = palette[0];
+	//temppointer2 = OBJ_COLORS;
+	//*temppointer2 = palette[0];
 	temppointer = BG_COLORS + 1;
 	for(int i=1; i<256; i++) {
 		
 		*temppointer++ = tileset_info[stage_info[stageID].tileset].palette[i];
 	}
-	for(int i=1; i<256; i++) {
+	/*for(int i=1; i<256; i++) {
 		*temppointer2++ = PAL_Main[i];
-	}
+	}*/
 
 	BG_COLORS[241]=RGB5(17,31,31);
 
