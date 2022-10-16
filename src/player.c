@@ -764,9 +764,17 @@ static void player_update_booster() {
 	switch(playerBoostState) {
 		case BOOST_HOZ:
 		{
-			if ((!player.dir && nblockl) || (player.dir && nblockr)) {
-				player.y_speed = -SPEED_8(0xFF);
-			}
+            if(!player.dir) { // Left
+                if(nblockl) {
+                    player.y_speed = -SPEED_8(0xFF);
+                    player.x += 0x100;
+                }
+            } else { // Right
+                if(nblockr) {
+                    player.y_speed = -SPEED_8(0xFF);
+                    player.x -= 0x100;
+                }
+            }
 			// I believe the player should not constantly fly upward after
 			// getting hit but need to verify what the original CS does
 			//if(playerIFrames) {
