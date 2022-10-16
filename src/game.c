@@ -119,12 +119,6 @@ IWRAM_CODE void game_main(uint8_t load) {
 				// HUD on top
                 PF_BGCOLOR(0x00E);
 				hud_update();
-				// Boss health, camera
-                PF_BGCOLOR(0x0EE);
-				if(!gameFrozen) {
-					if(showingBossHealth) tsc_update_boss_health();
-					camera_update();
-				}
 				// Run the next set of commands in a script if it is running
                 PF_BGCOLOR(0x0E0);
 				uint8_t rtn = tsc_update();
@@ -151,7 +145,14 @@ IWRAM_CODE void game_main(uint8_t load) {
 						break;
 					}
 				}
-                PF_BGCOLOR(0xEE0);
+                // Boss health, camera
+                if(!gameFrozen) {
+                    PF_BGCOLOR(0x088);
+                    if(showingBossHealth) tsc_update_boss_health();
+                    PF_BGCOLOR(0x08E);
+                    camera_update();
+                }
+                PF_BGCOLOR(0x880);
 				window_update();
 				// Handle controller locking
 				uint16_t lockstate = joystate, oldlockstate = oldstate;

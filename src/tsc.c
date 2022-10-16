@@ -235,6 +235,7 @@ uint8_t tsc_load(Event *eventList, const uint8_t *TSC, uint8_t max) {
 }
 
 void tsc_call_event(uint16_t number) {
+    window_set_textmode(TM_NORMAL);
 	// Events under 50 will be in Head.tsc
 	if(number < 50) {
 		for(uint8_t i = 0; i < HEAD_EVENT_COUNT; i++) {
@@ -586,7 +587,7 @@ uint8_t execute_command() {
 		break;
 		case CMD_TUR:
 		{
-			window_set_textmode(TM_ALL);
+			window_set_textmode(TM_MSG);
 		}
 		break;
 		case CMD_YNJ: // Prompt Yes/No and jump to event (1) if No
@@ -605,6 +606,7 @@ uint8_t execute_command() {
 				gameFrozen = FALSE;
 				window_set_face(0, FALSE);
 				window_close();
+                window_set_textmode(TM_NORMAL);
 				controlsLocked = FALSE;
 				hud_show();
 			}
