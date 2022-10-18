@@ -169,7 +169,7 @@ void hud_refresh_energy(uint8_t hard) {
 		hard = TRUE;
 	}
 	if(playerWeapon[currentWeapon].type == WEAPON_SPUR) {
-		hudMaxEnergy = spur_time[pal_mode][playerWeapon[currentWeapon].level];
+		hudMaxEnergy = spur_time[pal_mode||cfg_60fps][playerWeapon[currentWeapon].level];
 		if(playerWeapon[currentWeapon].level == 3){
 			tempMaxEnergy = hudMaxEnergy >> 2;
         	tempEnergy = hudEnergy >> 2;
