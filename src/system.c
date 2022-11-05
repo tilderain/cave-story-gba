@@ -54,7 +54,7 @@ uint8_t cfg_ffwd = TRUE;
 uint8_t cfg_updoor = FALSE;
 uint8_t cfg_hellquake = TRUE;
 uint8_t cfg_iframebug = TRUE;
-uint8_t cfg_60fps = FALSE;
+uint8_t cfg_60fps = TRUE;
 
 uint8_t cfg_force_btn = 0;
 uint8_t cfg_msg_blip = TRUE;
@@ -553,6 +553,8 @@ void system_load_config() {
         time_tab = time_tab_ntsc;
         speed_tab = speed_tab_ntsc;
     }*/
+
+	cfg_60fps = 1;
 
 	SRAM_disable();
 	z80_release();

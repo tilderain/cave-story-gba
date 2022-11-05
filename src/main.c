@@ -53,9 +53,9 @@ u8 myMixingBuffer[ MM_MIXLEN_31KHZ ] __attribute((aligned(4)));
 
 void myCoolVblankHandler()
 {
-	REG_IME = 0;
+	//REG_IME = 0;
 	mmVBlank();
-	REG_IME = 1;
+	//REG_IME = 1;
 	
 	vblank = true;
 }

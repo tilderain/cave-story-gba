@@ -8,6 +8,8 @@
 #include "stage.h"
 #include "tables.h"
 
+#include "gba.h"
+
 #include "gba_systemcalls.h"
 #include "gba_video.h"
 #include "gba_sprites.h"
@@ -179,7 +181,7 @@ void vdp_dma_vram(uint32_t from, uint16_t to, uint16_t len) {
 }
 
 void vdp_dma_cram(uint32_t from, uint16_t to, uint16_t len) {
-	CpuFastSet(from, OBJ_COLORS + to, len | COPY32);
+	DMA3COPY(from, OBJ_COLORS + to, len | COPY32);
 		return;
 	dma_do(from, len, ((0xC000 + (((uint32_t)to) & 0x3FFF)) << 16) + ((((uint32_t)to) >> 14)));
 }
@@ -192,7 +194,7 @@ void vdp_dma_cram(uint32_t from, uint16_t to, uint16_t len) {
 // Tile patterns
 
 void vdp_tiles_load(volatile const uint32_t *data, uint16_t index, uint16_t num) {
-	CpuFastSet(data, VRAM + 0 + (index), num | COPY32);
+	DMA3COPY(data, VRAM + 0 + (index), num | COPY32);
 	//vdp_dma_vram((uint32_t) data, index, num);
 }
 
@@ -201,7 +203,7 @@ void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint
 	//CpuFastSet(data, VRAM + 0 + (index), num | COPY32);
 	//CpuFastSet(data, VRAM + (index), num | COPY32);
 	//iprintf("index %d num %d\n", index, num);
-	CpuFastSet(data, SPRITE_GFX + (index*16), (num*8) | COPY32);
+	DMA3COPY(data, SPRITE_GFX + (index*16), (num*8) | COPY32);
 		return;
 	DMA_doDma(DMA_VRAM, (uint32_t) data, index << 5, num << 4, 2);
 }
@@ -230,14 +232,14 @@ void vdp_map_vline(uint16_t plan, const uint16_t *tiles, uint16_t x, uint16_t y,
 }
 
 void vdp_map_fill_rect(uint16_t plan, uint16_t index, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t inc) {
-
+return;
 	volatile uint16_t tiles[64]; // Garbled graphics on -Ofast without this volatile here
     for(uint16_t yy = 0; yy < h; yy++) {
         for(uint16_t xx = 0; xx < w; xx++) {
             tiles[xx] = index;
             index += inc;
         }
-		CpuFastSet(tiles, MAP_BASE_ADR(plan) + (x + ((y+yy) << PLAN_WIDTH_SFT)), w | COPY32);
+		DMA3COPY(tiles, MAP_BASE_ADR(plan) + (x + ((y+yy) << PLAN_WIDTH_SFT)), w | COPY32);
 		//vdp_dma_vram((uint32_t) tiles, plan + ((x + ((y+yy) << PLAN_WIDTH_SFT)) << 1), w);
     }
 }
@@ -451,7 +453,7 @@ void vdp_sprites_update() {
 	temppointer2 = OBJ_COLORS + 33;
 	//*temppointer2 = palette[0];
 	temppointer = BG_COLORS + 1;
-	for(int i=1; i<256; i++) {
+	for(int i=1; i<32; i++) {
 		
 		*temppointer++ = tileset_info[stage_info[stageID].tileset].palette[i];
 	}
@@ -461,7 +463,7 @@ void vdp_sprites_update() {
 
 	BG_COLORS[241]=RGB5(17,31,31);
 
-	CpuFastSet(obj_buffer, OAM, ((sizeof(OBJATTR)*128)/4) | COPY32);
+	DMA3COPY(obj_buffer, OAM, ((sizeof(OBJATTR)*128)/4));
 
 	for (u8 i = 0; i < sprite_count; i++)
 		obj_buffer[i].attr0 = OBJ_DISABLE;

@@ -546,7 +546,7 @@ void stage_draw_screen() {
 				//}
 				x++;
 			}
-			CpuFastSet(maprow, MAP_BASE_ADR(BASE_STAGE) + ((y&31)<<6), 16 | COPY32);
+			DMA3COPY(maprow, MAP_BASE_ADR(BASE_STAGE) + ((y&31)<<6), 16 | COPY32);
 			//*((u16 *)MAP_BASE_ADR(BASE_STAGE) + 1) = 20;
 			//*((u16 *)MAP_BASE_ADR(BASE_STAGE) + 2) = 21;
 			//DMA_doDma(DMA_VRAM, (uint32_t)maprow, VDP_PLAN_A + ((y&31)<<7), 64, 2);

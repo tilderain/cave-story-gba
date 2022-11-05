@@ -78,7 +78,6 @@ void hud_create() {
 }
 
 void hud_force_redraw() {
-	return;
 	hud_refresh_health();
     hud_refresh_weapon();
     hud_refresh_energy(TRUE);
@@ -110,7 +109,6 @@ void hud_hide() {
 }
 
 void hud_update() {
-	return;
 	//if(paused) return;
 	if(!showing) return;
 	vdp_sprites_add(sprHUD, 2);

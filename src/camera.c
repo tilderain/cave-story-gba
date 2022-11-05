@@ -12,6 +12,8 @@
 #include "camera.h"
 #include "gba_video.h"
 
+#include "gba.h"
+
 // Since only one row or column of tiles is drawn at a time
 #define CAMERA_MAX_SPEED 	0xFFF
 #define FOCUS_SPEED 		5
@@ -202,7 +204,7 @@ void camera_update() {
 						//}
 						x++;
 					}
-					CpuFastSet(mapbuf, MAP_BASE_ADR(BASE_STAGE) + ((y&31)<<6), 16 | COPY32);
+					DMA3COPY(mapbuf, MAP_BASE_ADR(BASE_STAGE) + ((y&31)<<6), 16 | COPY32);
 					//DMA_queueDma(DMA_VRAM, (uint32_t) mapbuf, VDP_PLAN_A + ((y & 31) << 7), 64, 2);
 				}
 			}
@@ -216,6 +218,9 @@ void camera_update() {
 	// Apply camera position
 	camera.x = x_next;
 	camera.y = y_next;
+
+	camera.x_shifted = (x_next >> CSF) - SCREEN_HALF_W;
+	camera.y_shifted = (y_next >> CSF) - SCREEN_HALF_H;
 
 	PF_BGCOLOR(0x000);
 }
