@@ -215,13 +215,13 @@ void camera_update() {
 			//	morphingColumn = 0;
 			//	x_next = camera.x;
 			//} else {
-				stage_x = sub_to_tile(x_next) + (morphingColumn == 1 ? 32 : -32);
+				stage_x = sub_to_tile(x_next) + (morphingColumn == 1 ? 31 : -31);
 				stage_y = sub_to_tile(y_next) - 10 /*+ morphingRow*/;
 
 				if(morphingColumn != 1) 
-					x_start = ((scroll_x / 8)-2) % 32;
+					x_start = ((scroll_x / 8)-1) % 32;
 				else 
-					x_start = ((scroll_x / 8) + 32) % 32;
+					x_start = ((scroll_x / 8) + 31) % 32;
 				if(stage_x >= -32 && stage_x < (int16_t)(stageWidth+32) << 1) {
 					y_start = scroll_y / 8;
 					setStageColumn(32 - y_start);
