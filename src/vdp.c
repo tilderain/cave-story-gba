@@ -56,6 +56,9 @@ static uint16_t font_pal;
 
 uint8_t pal_mode = 0;
 
+uint16_t tileScrollX = 0;
+uint16_t tileScrollY = 0;
+
 //uint8_t SCREEN_HEIGHT = 0;
 
 void vdp_init() {
@@ -326,6 +329,8 @@ void vdp_fade(const uint16_t *src, const uint16_t *dst, uint16_t speed, uint8_t 
 
 void vdp_hscroll(uint16_t plan, int16_t hscroll) {
 	BG_OFFSET[plan].x = -hscroll;
+	if(plan == VDP_PLAN_A)
+		tileScrollX = -hscroll;
 	return;
 	uint32_t addr = (plan == VDP_PLAN_A) ? VDP_HSCROLL_TABLE : VDP_HSCROLL_TABLE + 2;
 	*vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);
@@ -341,7 +346,9 @@ void vdp_hscroll_tile(uint16_t plan, int16_t *hscroll) {
 }
 
 void vdp_vscroll(uint16_t plan, int16_t vscroll) {
-	BG_OFFSET[plan].y = vscroll;	
+	BG_OFFSET[plan].y = vscroll;
+	if(plan == VDP_PLAN_A)
+		tileScrollY = vscroll;
 	return;	
 	uint32_t addr = (plan == VDP_PLAN_A) ? 0 : 2;
 	*vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x10);

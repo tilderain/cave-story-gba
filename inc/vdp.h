@@ -109,6 +109,9 @@ extern const uint16_t PAL_FullWhite[64];
 // Remember the pal mode flag so we don't have to read the control port every time
 extern uint8_t pal_mode;
 
+extern uint16_t tileScrollX;
+extern uint16_t tileScrollY;
+
 // Set defaults, clear everything
 void vdp_init();
 // Wait until next vblank
