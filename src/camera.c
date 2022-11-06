@@ -211,10 +211,10 @@ void camera_update() {
 		// Queue row and/or column mapping
 		if(morphingColumn) {
 			// Draw row OR column, and when going diagonally, alternate
-			//if(morphingRow && (++diag_tick & 1)) {
-			//	morphingColumn = 0;
-			//	x_next = camera.x;
-			//} else {
+			if(morphingRow && (++diag_tick & 1)) {
+				morphingColumn = 0;
+				x_next = camera.x;
+			} else {
 				stage_x = sub_to_tile(x_next) + (morphingColumn == 1 ? 31 : -31);
 				stage_y = sub_to_tile(y_next) - 10 /*+ morphingRow*/;
 
@@ -223,7 +223,7 @@ void camera_update() {
 				else 
 					x_start = ((scroll_x / 8) + 31) % 32;
 				if(stage_x >= -32 && stage_x < (int16_t)(stageWidth+32) << 1) {
-					y_start = scroll_y / 8;
+					y_start = (stage_y%32);
 					setStageColumn(32 - y_start);
 					y_start = 0;
 					setStageColumn(scroll_y / 8);
@@ -232,13 +232,13 @@ void camera_update() {
 					//CpuFastSet(mapbuf, MAP_BASE_ADR(BASE_STAGE) + ((x & 63) << 1), 32 | COPY32);
 					//DMA_queueDma(DMA_VRAM, (uint32_t) mapbuf, VDP_PLAN_A + ((x & 63) << 1), 32, 128);
 				}
-			//}
+			}
 		}
 		if(morphingRow) {
-			//if(morphingColumn && !(diag_tick & 1)) {
-			//	morphingRow = 0;
-			//	y_next = camera.y;
-			//} else {
+			if(morphingColumn && !(diag_tick & 1)) {
+				morphingRow = 0;
+				y_next = camera.y;
+			} else {
 				stage_y = sub_to_tile(y_next) + (morphingRow == 1 ? 10 : -10);;
 				stage_x = sub_to_tile(x_next) - 15 /*+ morphingColumn*/;
 
@@ -247,14 +247,14 @@ void camera_update() {
 				else 
 					y_start = ((scroll_y / 8) + 21) % 32;
 				if(stage_y >= -32 && stage_y < (int16_t)(stageHeight+32) << 1) {
-					x_start = scroll_x / 8;
+					x_start = (stage_x%32);
 					setStageRow(32 - x_start);
 					x_start = 0;
 					setStageRow(scroll_x / 8);
 					//DMA3COPY(mapbuf, MAP_BASE_ADR(BASE_STAGE) + ((y&31)<<6), 16 | COPY32);
 					//DMA_queueDma(DMA_VRAM, (uint32_t) mapbuf, VDP_PLAN_A + ((y & 31) << 7), 64, 2);
 				}
-			//}
+			}
 		}
 	}
 	if(!morphingColumn && (abs(camera.x_mark - x_next) > 0x1FFF || abs(camera.y_mark - y_next) > 0x1FFF)) {
