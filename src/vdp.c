@@ -235,11 +235,11 @@ void vdp_map_vline(uint16_t plan, const uint16_t *tiles, uint16_t x, uint16_t y,
 }
 
 void vdp_map_fill_rect(uint16_t plan, uint16_t index, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t inc) {
-return;
+	return;
 	volatile uint16_t tiles[64]; // Garbled graphics on -Ofast without this volatile here
     for(uint16_t yy = 0; yy < h; yy++) {
         for(uint16_t xx = 0; xx < w; xx++) {
-            tiles[xx] = index;
+            tiles[xx] = index | CHAR_PALETTE(1);
             index += inc;
         }
 		DMA3COPY(tiles, MAP_BASE_ADR(plan) + (x + ((y+yy) << PLAN_WIDTH_SFT)), w | COPY32);

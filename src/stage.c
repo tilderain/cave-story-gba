@@ -118,9 +118,9 @@ void stage_load(uint16_t id) {
 		vdp_set_backcolor(0); // Color index 0 for everything except fog
 		if(stageBackgroundType == 0 || stageBackgroundType == 3) { // Tiled image
 			vdp_set_scrollmode(HSCROLL_PLANE, VSCROLL_PLANE);
-			//if(background_info[stageBackground].tileset != NULL)
-		//		vdp_tiles_load_from_rom(background_info[stageBackground].tileset, TILE_BACKINDEX, 
-		//				1024);
+			if(background_info[stageBackground].tileset != NULL)
+				vdp_tiles_load(background_info[stageBackground].tileset, TILE_BACKINDEX, 
+						background_info[stageBackground].width*background_info[stageBackground].height*8);
 			stage_draw_background();
 		} else if(stageBackgroundType == 1) { // Moon
 			vdp_set_scrollmode(HSCROLL_TILE, VSCROLL_PLANE);
@@ -597,10 +597,14 @@ void stage_draw_background() {
 	uint16_t w = background_info[stageBackground].width;
 	uint16_t h = background_info[stageBackground].height;
 	uint16_t pal = background_info[stageBackground].palette;
-	for(uint16_t y = 0; y < 32; y += h) {
-		for(uint16_t x = 0; x < 64; x += w) {
+	
+	for(uint16_t y = 0; y < 32; y++) {
+		for(uint16_t x = 0; x < 32; x++) {
 			//vdp_map_fill_rect(BASE_BACK, TILE_ATTR(pal,0,0,0,TILE_BACKINDEX), x, y, w, h, 1);
-			vdp_map_fill_rect(BASE_BACK, TILE_BACKINDEX + ind2, x, y, w, h, 1);
+			u16* adr = MAP_BASE_ADR(BASE_BACK) + ((y&31)<<6) + (((x&31)<<1));
+			*adr = (TILE_TSINDEX + (x%w) + ((y*w)%(w*h))) | CHAR_PALETTE(0);
+
+			//vdp_map_fill_rect(BASE_BACK, TILE_BACKINDEX + ind2, x, y, w, h, 1);
 			//uint16_t tile = TILE_ATTR(pal,0,0,0,TILE_BACKINDEX);
 			//for(uint16_t yy = 0; yy < h; yy++) {
 			//	for(uint16_t xx = 0; xx < w; xx++) {
