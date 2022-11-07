@@ -444,7 +444,7 @@ BIN SPR_J_Prompt_data "../res/prompt_ja.img.bin"
 BIN SPR_XXIsland_data "../res/xxIsland.img.bin"
 
 
-BIN BG_Blue		"../res/back/bkBlue.img.bin" 
+BIN BG_Blue		"../res/back/bkMimi.img.bin" 
 BIN BG_Eggs		"../res/back/bkEggs.img.bin" 
 BIN BG_Gard		"../res/back/bkGard.img.bin" 
 BIN BG_Gray		"../res/back/bkGrayRegu.img.bin" 

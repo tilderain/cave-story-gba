@@ -66,57 +66,6 @@ void camera_shake(uint16_t time) {
 	cameraShake = time;
 }
 
-int x_start = 0;
-int y_start = 0;
-int stage_x = 0;
-int stage_y = 0;
-
-void setStageColumn(int iterations)
-{
-	const uint8_t *pxa = tileset_info[stageTileset].PXA;
-	for(uint16_t i = iterations; i--; ) {
-		// It's actually faster to just draw garbage than have these checks
-		//if(y >= stageHeight << 1) break;
-		//if(y >= 0) {
-			// Fuck math tbh
-			int16_t add = (morphingColumn == 1 ? -16 : 16);
-			uint16_t b = stage_get_block(((stage_x+add)>>1), stage_y>>1);
-			uint16_t t = b << 2; //((b&15) << 1) + ((b>>4) << 6);
-			uint16_t ta = pxa[b]; //stage_get_block_type(x>>1, y>>1);
-			uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
-			//mapbuf[y&31] = TILE_ATTR(pal, (ta&0x40) > 0, 
-					//0, 0, TILE_TSINDEX + t + (x&1) + ((y&1)<<1));
-				
-			//mapbuf[y&31] = 8 + t + (x&1) + ((y&1)<<1);
-			u16* adr = MAP_BASE_ADR(BASE_STAGE) + ((y_start&31)<<6) + (((x_start&31)<<1));
-			*adr = TILE_TSINDEX + t + (stage_x&1) + ((stage_y&1)<<1);
-		//}
-		stage_y++;
-		y_start++;
-	}
-}
-
-void setStageRow(int iterations)
-{
-	const uint8_t *pxa = tileset_info[stageTileset].PXA;
-	for(uint16_t i = iterations; i--; ) {
-		//if(x >= stageWidth << 1) break;
-		//if(x >= 0) {
-			uint16_t b = stage_get_block(stage_x>>1, stage_y>>1);
-			uint16_t t = b << 2; //((b&15) << 1) + ((b>>4) << 6);
-			uint16_t ta = pxa[b]; //stage_get_block_type(x>>1, y>>1);
-			uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
-			//mapbuf[x&63] = TILE_ATTR(pal, (ta&0x40) > 0, 
-			//		0, 0, TILE_TSINDEX + t + (x&1) + ((y&1)<<1));
-			//mapbuf[x&63] = TILE_TSINDEX + t + (x&1) + ((y&1)<<1);
-			u16* adr = MAP_BASE_ADR(BASE_STAGE) + ((y_start&31)<<6) + (((x_start&31)<<1));
-			*adr = TILE_TSINDEX + t + (stage_x&1) + ((stage_y&1)<<1);
-		//}
-		stage_x++;
-		x_start++;
-	}
-}
-
 void camera_update() {
 	PF_BGCOLOR(0x08E);
 	int32_t x_next, y_next;
@@ -203,9 +152,6 @@ void camera_update() {
 	morphingColumn = sub_to_tile(x_next) - sub_to_tile(camera.x);
 	morphingRow = sub_to_tile(y_next) - sub_to_tile(camera.y);
 
-	int scroll_x = tileScrollX%256;
-	int scroll_y = tileScrollY%256;
-
 	if(morphingColumn | morphingRow) {
 		const uint8_t *pxa = tileset_info[stageTileset].PXA;
 		// Queue row and/or column mapping
@@ -215,22 +161,27 @@ void camera_update() {
 				morphingColumn = 0;
 				x_next = camera.x;
 			} else {
-				stage_x = sub_to_tile(x_next) + (morphingColumn == 1 ? 31 : -31);
-				stage_y = sub_to_tile(y_next) - 10 /*+ morphingRow*/;
+				int16_t x = sub_to_tile(x_next) + (morphingColumn == 1 ? 15 : -15);
+				int16_t y = sub_to_tile(y_next) - 10 /*+ morphingRow*/;
+				if(x >= -32 && x < (int16_t)(stageWidth+32) << 1) {
+					for(uint16_t i = 32; i--; ) {
+						// It's actually faster to just draw garbage than have these checks
+						//if(y >= stageHeight << 1) break;
+						//if(y >= 0) {
+							// Fuck math tbh
+							uint16_t b = stage_get_block(x>>1, y>>1);
+							uint16_t t = b << 2; //((b&15) << 1) + ((b>>4) << 6);
+							uint16_t ta = pxa[b]; //stage_get_block_type(x>>1, y>>1);
+							uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
+							int xloc = ((x*2)%64);
+							int yloc = ((y*2*32));
+							u16* adr = MAP_BASE_ADR(BASE_STAGE) + ((xloc + yloc)%2048);
+							*adr = TILE_TSINDEX + t + (x&1) + ((y&1)<<1);
 
-				if(morphingColumn != 1) 
-					x_start = ((scroll_x / 8)-1) % 32;
-				else 
-					x_start = ((scroll_x / 8) + 31) % 32;
-				if(stage_x >= -32 && stage_x < (int16_t)(stageWidth+32) << 1) {
-					y_start = (stage_y%32);
-					setStageColumn(32 - y_start);
-					y_start = 0;
-					setStageColumn(scroll_y / 8);
-
-
-					//CpuFastSet(mapbuf, MAP_BASE_ADR(BASE_STAGE) + ((x & 63) << 1), 32 | COPY32);
-					//DMA_queueDma(DMA_VRAM, (uint32_t) mapbuf, VDP_PLAN_A + ((x & 63) << 1), 32, 128);
+						//}
+						y++;
+					}
+					//dma_queue(DmaVRAM, (uint32_t) mapbuf, VDP_PLANE_A + ((x & 63) << 1), 32, 128);
 				}
 			}
 		}
@@ -239,20 +190,25 @@ void camera_update() {
 				morphingRow = 0;
 				y_next = camera.y;
 			} else {
-				stage_y = sub_to_tile(y_next) + (morphingRow == 1 ? 10 : -10);;
-				stage_x = sub_to_tile(x_next) - 15 /*+ morphingColumn*/;
-
-				if(morphingRow != 1) 
-					y_start = ((scroll_y / 8) - 1) % 32;
-				else 
-					y_start = ((scroll_y / 8) + 21) % 32;
-				if(stage_y >= -32 && stage_y < (int16_t)(stageHeight+32) << 1) {
-					x_start = (stage_x%32);
-					setStageRow(32 - x_start);
-					x_start = 0;
-					setStageRow(scroll_x / 8);
-					//DMA3COPY(mapbuf, MAP_BASE_ADR(BASE_STAGE) + ((y&31)<<6), 16 | COPY32);
-					//DMA_queueDma(DMA_VRAM, (uint32_t) mapbuf, VDP_PLAN_A + ((y & 31) << 7), 64, 2);
+				int16_t y = sub_to_tile(y_next) + (morphingRow == 1 ? 10 : -10);
+				int16_t x = sub_to_tile(x_next) - 15 /*+ morphingColumn*/;
+				if(y >= -32 && y < (int16_t)(stageHeight+32) << 1) {
+					for(uint16_t i = 32; i--; ) {
+						//if(x >= stageWidth << 1) break;
+						//if(x >= 0) {
+							uint16_t b = stage_get_block(x>>1, y>>1);
+							uint16_t t = b << 2; //((b&15) << 1) + ((b>>4) << 6);
+							uint16_t ta = pxa[b]; //stage_get_block_type(x>>1, y>>1);
+							uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
+							int xloc = ((x*2)%64);
+							int yloc = ((y*2*32));
+							u16* adr = MAP_BASE_ADR(BASE_STAGE) + ((xloc + yloc)%2048);
+							*adr = TILE_TSINDEX + t + (x&1) + ((y&1)<<1);
+							//u16* adr = MAP_BASE_ADR(BASE_STAGE) + ((xloc + yloc)%2048);
+						//}
+						x++;
+					}
+					//dma_queue(DmaVRAM, (uint32_t) mapbuf, VDP_PLANE_A + ((y & 31) << 7), 64, 2);
 				}
 			}
 		}
