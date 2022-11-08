@@ -4,7 +4,8 @@
 #define VDP_SPRITE_TABLE        ((uint16_t)0xF800)
 #define VDP_HSCROLL_TABLE       ((uint16_t)0xFC00)
 
-#define BASE_STAGE 31
+#define BASE_STAGE 30
+#define BASE_STAGE_BACK 31
 #define BASE_BACK 25
 
 #define PLAN_WIDTH				32

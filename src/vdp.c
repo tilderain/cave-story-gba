@@ -105,13 +105,19 @@ void vdp_init() {
 	// Put blank tile in index 0
 	vdp_tiles_load(TILE_BLANK, 0, 1);
 
-	BGCTRL[0] = BG_PRIORITY(2) | BG_SIZE(0) | CHAR_BASE(1) | SCREEN_BASE(BASE_BACK);
+	//Background
+	BGCTRL[0] = BG_PRIORITY(3) | BG_SIZE(0) | CHAR_BASE(1) | SCREEN_BASE(BASE_BACK);
+	//Foreground
 	BGCTRL[1] = BG_PRIORITY(1) | BG_SIZE(0) | CHAR_BASE(0) | SCREEN_BASE(BASE_STAGE);
 
-	BGCTRL[1] |= BG_PRIORITY(0);
+	//Stage Back
+	BGCTRL[2] = BG_PRIORITY(2) | BG_SIZE(0) | CHAR_BASE(0) | SCREEN_BASE(BASE_STAGE_BACK);
+
+	//Text/ Window
+	BGCTRL[3] |= BG_PRIORITY(0);
 
 	// screen mode & background to display
-	SetMode( MODE_0 | BG0_ON | BG1_ON | BG3_ON | OBJ_ON | OBJ_1D_MAP);
+	SetMode( MODE_0 | BG0_ON | BG1_ON | BG2_ON | BG3_ON | OBJ_ON | OBJ_1D_MAP);
 	
 }
 
@@ -330,7 +336,12 @@ void vdp_fade(const uint16_t *src, const uint16_t *dst, uint16_t speed, uint8_t 
 void vdp_hscroll(uint16_t plan, int16_t hscroll) {
 	BG_OFFSET[plan].x = -hscroll;
 	if(plan == VDP_PLAN_A)
+	{
 		tileScrollX = -hscroll;
+		//scroll stage back too
+		BG_OFFSET[2].x = -hscroll;
+	}
+
 	return;
 	uint32_t addr = (plan == VDP_PLAN_A) ? VDP_HSCROLL_TABLE : VDP_HSCROLL_TABLE + 2;
 	*vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);
@@ -348,7 +359,12 @@ void vdp_hscroll_tile(uint16_t plan, int16_t *hscroll) {
 void vdp_vscroll(uint16_t plan, int16_t vscroll) {
 	BG_OFFSET[plan].y = vscroll;
 	if(plan == VDP_PLAN_A)
-		tileScrollY = vscroll;
+	{
+		tileScrollX = vscroll;
+		//scroll stage back too
+		BG_OFFSET[2].y = vscroll;
+	}
+
 	return;	
 	uint32_t addr = (plan == VDP_PLAN_A) ? 0 : 2;
 	*vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x10);
@@ -450,7 +466,13 @@ void vdp_sprites_update() {
 		if(IsBitSet(sprite_table[i].attr, 12))
 			obj_buffer[i].attr1 |= OBJ_VFLIP;
 			
-		obj_buffer[i].attr2 = OBJ_CHAR((sprite_table[i].attr&0x7FF)+0) | OBJ_PALETTE((sprite_table[i].attr>>13)&3);
+		int prio = sprite_table[i].attr>>15;
+		if(prio == 0)
+			prio = 2;
+		else
+			prio = 1;
+		obj_buffer[i].attr2 = OBJ_PRIORITY(prio) 
+			| OBJ_CHAR((sprite_table[i].attr&0x7FF)+0) | OBJ_PALETTE((sprite_table[i].attr>>13)&3);
 	}
 	u16 *temppointer;
 	u16 *temppointer2;
@@ -470,9 +492,9 @@ void vdp_sprites_update() {
 
 	BG_COLORS[241]=RGB5(17,31,31);
 
-	DMA3COPY(obj_buffer, OAM, ((sizeof(OBJATTR)*128)/4));
+	DMA3COPY(obj_buffer, OAM, ((sizeof(OBJATTR)*128)/2));
 
-	for (u8 i = 0; i < sprite_count; i++)
+	for (u8 i = 0; i < 128; i++)
 		obj_buffer[i].attr0 = OBJ_DISABLE;
 
 	//vdp_dma_vram((uint32_t) sprite_table, VDP_SPRITE_TABLE, sprite_count << 2);

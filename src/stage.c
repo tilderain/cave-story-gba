@@ -522,6 +522,32 @@ void stage_setup_palettes() {
 	vdp_colors_next(48, stage_info[stageID].npcPalette->data, 16);
 }
 
+void stage_draw_tile(uint16_t x, uint16_t y, uint8_t* pxa){
+	uint16_t b = stage_get_block(x>>1, y>>1);
+	uint16_t t = b << 2; //((b&15) << 1) + ((b>>4) << 6);
+	uint16_t ta = pxa[b];
+	uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
+	int xloc = ((x*2)%64);
+	int yloc = ((y*2*32));
+
+	u16* adr = MAP_BASE_ADR(BASE_STAGE) + ((xloc + yloc)%2048);
+	u16* adr2 = MAP_BASE_ADR(BASE_STAGE_BACK) + ((xloc + yloc)%2048);
+
+	if((ta&0x40) > 0)
+	{
+		//Foreground
+		*adr = TILE_TSINDEX + t + (x&1) + ((y&1)<<1);
+		*adr2 = TILE_TSINDEX;
+	}
+	else
+	{	
+		//Background
+		*adr = TILE_TSINDEX;
+		*adr2 = TILE_TSINDEX + t + (x&1) + ((y&1)<<1);
+	}
+
+}
+
 void stage_draw_screen() {
     const uint8_t *pxa = tileset_info[stageTileset].PXA;
 	uint16_t maprow[64];
@@ -535,14 +561,7 @@ void stage_draw_screen() {
 			for(uint16_t j = 32; j--; ) {
 				//if(x >= stageWidth << 1) break;
 				//if(x >= 0) {
-					uint16_t b = stage_get_block(x>>1, y>>1);
-					uint16_t t = b << 2; //((b&15) << 1) + ((b>>4) << 6);
-					uint16_t ta = pxa[b];
-					uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
-					int xloc = ((x*2)%64);
-					int yloc = ((y*2*32));
-					u16* adr = MAP_BASE_ADR(BASE_STAGE) + ((xloc + yloc)%2048);
-					*adr = TILE_TSINDEX + t + (x&1) + ((y&1)<<1);
+					stage_draw_tile(x, y, pxa);
 				//}
 				x++;
 			}

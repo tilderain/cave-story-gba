@@ -169,15 +169,7 @@ void camera_update() {
 						//if(y >= stageHeight << 1) break;
 						//if(y >= 0) {
 							// Fuck math tbh
-							uint16_t b = stage_get_block(x>>1, y>>1);
-							uint16_t t = b << 2; //((b&15) << 1) + ((b>>4) << 6);
-							uint16_t ta = pxa[b]; //stage_get_block_type(x>>1, y>>1);
-							uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
-							int xloc = ((x*2)%64);
-							int yloc = ((y*2*32));
-							u16* adr = MAP_BASE_ADR(BASE_STAGE) + ((xloc + yloc)%2048);
-							*adr = TILE_TSINDEX + t + (x&1) + ((y&1)<<1);
-
+							stage_draw_tile(x, y, pxa);
 						//}
 						y++;
 					}
@@ -196,15 +188,7 @@ void camera_update() {
 					for(uint16_t i = 32; i--; ) {
 						//if(x >= stageWidth << 1) break;
 						//if(x >= 0) {
-							uint16_t b = stage_get_block(x>>1, y>>1);
-							uint16_t t = b << 2; //((b&15) << 1) + ((b>>4) << 6);
-							uint16_t ta = pxa[b]; //stage_get_block_type(x>>1, y>>1);
-							uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
-							int xloc = ((x*2)%64);
-							int yloc = ((y*2*32));
-							u16* adr = MAP_BASE_ADR(BASE_STAGE) + ((xloc + yloc)%2048);
-							*adr = TILE_TSINDEX + t + (x&1) + ((y&1)<<1);
-							//u16* adr = MAP_BASE_ADR(BASE_STAGE) + ((xloc + yloc)%2048);
+							stage_draw_tile(x, y, pxa);
 						//}
 						x++;
 					}
