@@ -1,9 +1,9 @@
 use Terminusmodx as font
 
-fix eggcorridor/tyrant xm
+fix eggcorridor/tyrant/mimiga xm
 
 fix sprite palettes
-fix map scrolling
+fix map layer priority
 fix bk scrolling
 bkmoon
 fix tile mapx_y

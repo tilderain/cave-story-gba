@@ -526,42 +526,31 @@ void stage_draw_screen() {
     const uint8_t *pxa = tileset_info[stageTileset].PXA;
 	uint16_t maprow[64];
 	uint16_t y = sub_to_tile(camera.y) - 16;
-
 	for(uint16_t i = 32; i--; ) {
 		if(vblank) aftervsync(); // So we don't lag the music
 		vblank = 0;
 		
 		if(y < stageHeight + 32 << 1) {
-			uint16_t x = sub_to_tile(camera.x) - 32;
-			for(uint16_t j = 64; j--; ) {
+			uint16_t x = sub_to_tile(camera.x) - 16;
+			for(uint16_t j = 32; j--; ) {
 				//if(x >= stageWidth << 1) break;
 				//if(x >= 0) {
 					uint16_t b = stage_get_block(x>>1, y>>1);
 					uint16_t t = b << 2; //((b&15) << 1) + ((b>>4) << 6);
 					uint16_t ta = pxa[b];
 					uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
-					//maprow[x&63] = TILE_ATTR(pal, (ta&0x40) > 0, 
-					//		0, 0, TILE_TSINDEX + t + (x&1) + ((y&1)<<1));
-					maprow[x&63] = TILE_TSINDEX + t + (x&1) + ((y&1)<<1);
+					int xloc = ((x*2)%64);
+					int yloc = ((y*2*32));
+					u16* adr = MAP_BASE_ADR(BASE_STAGE) + ((xloc + yloc)%2048);
+					*adr = TILE_TSINDEX + t + (x&1) + ((y&1)<<1);
 				//}
 				x++;
 			}
-			DMA3COPY(maprow, MAP_BASE_ADR(BASE_STAGE) + ((y&31)<<6), 16 | COPY32);
-			//*((u16 *)MAP_BASE_ADR(BASE_STAGE) + 1) = 20;
-			//*((u16 *)MAP_BASE_ADR(BASE_STAGE) + 2) = 21;
-			//DMA_doDma(DMA_VRAM, (uint32_t)maprow, VDP_PLAN_A + ((y&31)<<7), 64, 2);
+            //dma_now(DmaVRAM, (uint32_t)maprow, VDP_PLANE_A + ((y & 31) << 7), 64, 2);
 		}
 		y++;
 	}
-
-		/*for(uint16_t i = 32; i--; ) {
-			for(uint16_t j = 64; j--; ) {
-				*((u16 *)MAP_BASE_ADR(BASE_STAGE) + j + (i*64)) = j;
-			}
-
-		}*/
 }
-
 void stage_draw_screen_credits() {
 	uint16_t maprow[20];
 	for(uint16_t y = 0; y < 30; y++) {
