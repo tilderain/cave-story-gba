@@ -279,8 +279,8 @@ $(PATCHROM): bin
 %.cpxm: %.pxm
 	$(SLZ) -c "$<" "$@"
 
-#%.pat: %.mdt
-#	$(MDTILER) -b "$(CURDIR)/$<"
+%.pat: %.mdt
+	$(MDTILER) -b "$(CURDIR)/$<"
 
 # Compression of tilesets
 %.uftc: %.pat
