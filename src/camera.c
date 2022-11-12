@@ -14,6 +14,8 @@
 
 #include "gba.h"
 
+#include "gamemode.h"
+
 // Since only one row or column of tiles is drawn at a time
 #define CAMERA_MAX_SPEED 	0xFFF
 #define FOCUS_SPEED 		5
@@ -67,6 +69,9 @@ void camera_shake(uint16_t time) {
 }
 
 void camera_update() {
+
+	if(gamemode == GM_GAME) stage_update(); // Scrolling
+
 	PF_BGCOLOR(0x08E);
 	int32_t x_next, y_next;
 	if(camera.target) {
