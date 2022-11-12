@@ -256,9 +256,9 @@ typedef struct {
 
 static inline int16_t* SPR_TILES(const SpriteDefinition* spr, int a, int f)
 {
-	int base = ((((spr)->animations[0]->frames[0]->w * (spr)->animations[0]->frames[0]->h)/128)); // how many tiles to get to the next frame
-	int base2 = 32 * (base * a * spr->animations[0]->numFrame); // how many bytes to get to the next animation
-	return (spr)->sprite_data + (32 * base * f) + base2;
+	int base = ((((spr)->animations[0]->frames[f]->w * (spr)->animations[0]->frames[f]->h))); // how many tiles to get to the next frame
+	int base2 =  ((base>>2) * a * spr->animations[0]->numFrame); // how many bytes to get to the next animation
+	return (spr)->sprite_data + ((base * f)>>2) + base2;
 }
 
 // VBlank stuff
