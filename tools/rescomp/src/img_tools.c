@@ -508,7 +508,7 @@ unsigned char *to4bpp(unsigned char* buf8bpp, int size)
 
     for(i = 0; i < size / 2; i++)
     {
-        *dst++ = ((src[0] & 0x0F) << 4) | ((src[1] & 0x0F) << 0);
+        *dst++ = ((src[1] & 0x0F) << 4) | ((src[0] & 0x0F) << 0);
         src += 2;
     }
 
