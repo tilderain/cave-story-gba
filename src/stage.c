@@ -119,8 +119,12 @@ void stage_load(uint16_t id) {
 		if(stageBackgroundType == 0 || stageBackgroundType == 3) { // Tiled image
 			vdp_set_scrollmode(HSCROLL_PLANE, VSCROLL_PLANE);
 			if(background_info[stageBackground].tileset != NULL)
+			{
 				vdp_tiles_load(background_info[stageBackground].tileset, TILE_BACKINDEX, 
 						background_info[stageBackground].width*background_info[stageBackground].height*8);
+						
+			}
+
 			stage_draw_background();
 		} else if(stageBackgroundType == 1) { // Moon
 			vdp_set_scrollmode(HSCROLL_TILE, VSCROLL_PLANE);
@@ -519,7 +523,7 @@ void stage_setup_palettes() {
 	} else {
 		vdp_colors_next(32, tileset_info[stage_info[stageID].tileset].palette, 16);
 	}*/
-	vdp_colors_next(48, stage_info[stageID].npcPalette->data, 16);
+	vdp_colors_next(48, stage_info[stageID].npcPalette, 16);
 }
 
 void stage_draw_tile(uint16_t x, uint16_t y, uint8_t* pxa){
@@ -610,7 +614,7 @@ void stage_draw_background() {
 		for(uint16_t x = 0; x < 32; x++) {
 			//vdp_map_fill_rect(BASE_BACK, TILE_ATTR(pal,0,0,0,TILE_BACKINDEX), x, y, w, h, 1);
 			u16* adr = MAP_BASE_ADR(BASE_BACK) + ((y&31)<<6) + (((x&31)<<1));
-			*adr = (TILE_TSINDEX + (x%w) + ((y*w)%(w*h))) | CHAR_PALETTE(0);
+			*adr = (TILE_TSINDEX + (x%w) + ((y*w)%(w*h))) | CHAR_PALETTE(1);
 
 			//vdp_map_fill_rect(BASE_BACK, TILE_BACKINDEX + ind2, x, y, w, h, 1);
 			//uint16_t tile = TILE_ATTR(pal,0,0,0,TILE_BACKINDEX);

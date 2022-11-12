@@ -190,7 +190,7 @@ void vdp_dma_vram(uint32_t from, uint16_t to, uint16_t len) {
 }
 
 void vdp_dma_cram(uint32_t from, uint16_t to, uint16_t len) {
-	DMA3COPY(from, OBJ_COLORS + to, len | COPY32);
+	DMA3COPY(from, OBJ_COLORS + (to/2), len | COPY32);
 		return;
 	dma_do(from, len, ((0xC000 + (((uint32_t)to) & 0x3FFF)) << 16) + ((((uint32_t)to) >> 14)));
 }
@@ -480,14 +480,21 @@ void vdp_sprites_update() {
 	temppointer = BG_COLORS;
 	*temppointer = palette[0];
 	temppointer2 = OBJ_COLORS + 33;
-	//*temppointer2 = palette[0];
+	*temppointer2 = palette[0];
 	temppointer = BG_COLORS + 1;
-	for(int i=1; i<32; i++) {
+	for(int i=1; i<16; i++) {
 		
 		*temppointer++ = tileset_info[stage_info[stageID].tileset].palette[i];
 	}
+	for(int i=0; i<16; i++) {
+		
+		*temppointer++ = background_info[stageBackground].palette[i];
+	}
 	for(int i=1; i<16; i++) {
 		*temppointer2++ = tileset_info[stage_info[stageID].tileset].palette[i];
+	}
+	for(int i=0; i<16; i++) {
+		*temppointer2++ = stage_info[stageID].npcPalette[i];
 	}
 
 	BG_COLORS[241]=RGB5(17,31,31);

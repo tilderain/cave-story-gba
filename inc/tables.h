@@ -18,7 +18,7 @@ typedef struct {
     //const uint8_t *GTSC; // German version of the Stage TSC
     //const uint8_t *BTSC; // BR Portugese version of the Stage TSC
 	// Which palette to load for PAL3. Most use PAL_Regu but some differ
-	const Palette *npcPalette;
+	const uint16_t *npcPalette;
 	uint8_t tileset; // Which tileset in tileset_info to use
 	uint8_t background; // Which background in background_info to use
 	char name[24]; // The name of the map, as displayed to the player
@@ -42,7 +42,7 @@ typedef struct {
 	const uint16_t *tileset; // Graphical tile data to load
 	// Backgrounds do not use their own palette and instead "share" with any other of the
 	// 4 already loaded. This value specifies which, like PAL0, PAL1, etc
-	uint16_t palette;
+	const uint16_t *palette;
 	// The "type" is which behavior/algorithm to use when loading/scrolling the background
 	// 0 - Draw a plain tiled image into VDP_PLAN_B
 	// 1 - Moon/Fog - Draw from a specified pattern into VDP_PLAN_B and scroll the clouds

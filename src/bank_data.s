@@ -444,10 +444,10 @@ BIN SPR_J_Prompt_data "../res/prompt_ja.img.bin"
 BIN SPR_XXIsland_data "../res/xxIsland.img.bin"
 
 
-BIN BG_Blue		"../res/back/bkMimi.img.bin" 
+BIN BG_Blue		"../res/back/bkBlue.img.bin" 
 BIN BG_Eggs		"../res/back/bkEggs.img.bin" 
 BIN BG_Gard		"../res/back/bkGard.img.bin" 
-BIN BG_Gray		"../res/back/bkGrayRegu.img.bin" 
+BIN BG_Gray		"../res/back/bkGray.img.bin" 
 BIN BG_Cent		"../res/back/bkCent.img.bin" 
 BIN BG_Maze		"../res/back/bkMaze.img.bin" 
 BIN BG_Maze2	"../res/back/bkMaze.img.bin" 
@@ -459,7 +459,27 @@ BIN BG_Sand		"../res/back/bkSand.img.bin"
 BIN BG_Hell		"../res/back/bkHell.img.bin" 
 BIN BG_Fall		"../res/back/bkFall.img.bin" 
 
+BIN BG_bk0		"../res/back/bk0.img.bin" 
+BIN BG_Black		"../res/back/bkBlack.img.bin" 
 
+BIN BG_Green		"../res/back/bkGreen.img.bin" 
+
+BIN BG_Moon		"../res/back/bkMoon.img.bin" 
+BIN BG_Fog		"../res/back/bkFog.img.bin" 
+
+BIN PAL_bkBlue		"../res/back/bkBlue.pal.bin"
+BIN PAL_bkGard		"../res/back/bkGard.pal.bin"
+BIN PAL_bkMaze		"../res/back/bkMaze.pal.bin"
+BIN PAL_bkGray		"../res/back/bkGray.pal.bin"
+BIN PAL_bkGreen		"../res/back/bkGreen.pal.bin"
+BIN PAL_bkFall		"../res/back/bkFall.pal.bin"
+BIN PAL_bkWater		"../res/back/bkWater.pal.bin"
+BIN PAL_bkMoon		"../res/back/bkMoon.pal.bin"
+BIN PAL_bkFog		"../res/back/bkFog.pal.bin"
+BIN PAL_bkRed		"../res/back/bkRed.pal.bin"
+
+BIN PAL_bk0		"../res/back/bk0.pal.bin"
+BIN PAL_bkBlack		"../res/back/bkBlack.pal.bin"
 
 
 # Alternate for waterway (Green background)

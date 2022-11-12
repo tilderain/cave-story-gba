@@ -90,6 +90,26 @@ extern const uint16_t  PAL_Mapi		[];
 extern const uint16_t  PAL_Miza		[];
 extern const uint16_t  PAL_Intro		[];
 
+extern const uint16_t BG_Green [];
+extern const uint16_t BG_Moon [];
+extern const uint16_t BG_Fog [];
+
+extern const uint16_t BG_bk0 [];
+extern const uint16_t BG_Black [];
+
+extern const uint16_t PAL_bkBlue	 [];
+extern const uint16_t PAL_bkGard	[];
+extern const uint16_t PAL_bkMaze	[];
+extern const uint16_t PAL_bkGray	[];
+extern const uint16_t PAL_bkGreen	[];
+extern const uint16_t PAL_bkFall	[];
+extern const uint16_t PAL_bkWater	[];
+extern const uint16_t PAL_bkMoon	[];
+extern const uint16_t PAL_bkFog	[];
+extern const uint16_t PAL_bk0	[];
+extern const uint16_t PAL_bkBlack	[];
+extern const uint16_t PAL_bkRed	[];
+
 extern const uint16_t SPR_Sega_data[];
 extern const uint16_t SPR_Sega2_data[];
 extern const uint16_t SPR_Quote_data[];
