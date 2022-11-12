@@ -279,15 +279,15 @@ $(PATCHROM): bin
 %.cpxm: %.pxm
 	$(SLZ) -c "$<" "$@"
 
-%.pat: %.mdt
-	$(MDTILER) -b "$(CURDIR)/$<"
+#%.pat: %.mdt
+#	$(MDTILER) -b "$(CURDIR)/$<"
 
 # Compression of tilesets
 %.uftc: %.pat
 	$(UFTC) -c "$<" "$@"
 
-%.pat: %.png
-	$(MDTILER) -b "$(CURDIR)/$<"
+#%.pat: %.png
+#	$(MDTILER) -b "$(CURDIR)/$<"
 
 # Convert VGM
 %.xgc: %.vgm
