@@ -246,20 +246,19 @@ typedef struct {
     //Palette *palette;
     uint16_t numAnimation;
     Animation **animations;
-	const uint16_t* sprite_data;
     //uint16_t maxNumTile;
     //uint16_t maxNumSprite;
 } SpriteDefinition;
 #pragma pack(pop)
 
-//#define SPR_TILES(spr, a, f) ((spr)->animations[a]->frames[f]->tileset->tiles)
+#define SPR_TILES(spr, a, f) ((spr)->animations[a]->frames[f]->tileset->tiles)
 
-static inline int16_t* SPR_TILES(const SpriteDefinition* spr, int a, int f)
+/*static inline int16_t* SPR_TILES(const SpriteDefinition* spr, int a, int f)
 {
 	int base = ((((spr)->animations[0]->frames[f]->w * (spr)->animations[0]->frames[f]->h))); // how many tiles to get to the next frame
 	int base2 =  ((base>>2) * a * spr->animations[0]->numFrame); // how many bytes to get to the next animation
 	return (spr)->sprite_data + ((base * f)>>2) + base2;
-}
+}*/
 
 // VBlank stuff
 extern volatile uint8_t vblank;

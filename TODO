@@ -8,6 +8,8 @@ fix bk scrolling
 bkmoon
 fix tile mapx_y
 
+fix pri tileshift
+
 fix particle effects
 disable xp merging
 fix missing sounds

@@ -137,7 +137,7 @@ void outTileset(tileset_* tileset, FILE* fs, FILE* fh, char* id, int global)
     // declare
     decl(fs, fh, NULL, temp, 2, FALSE);
     // output data
-    //outS((unsigned char*) tileset->tiles, 0, size, fs, 1);
+    outS((unsigned char*) tileset->tiles, 0, size, fs, 1);
     fprintf(fs, "\n");
 
     // tileset structure

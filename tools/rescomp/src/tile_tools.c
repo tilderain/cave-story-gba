@@ -207,7 +207,7 @@ int getTile(unsigned char *image8bpp, unsigned int *tileout, int x, int y, int p
                 return -1;
             }
 
-            *dst++ = ((src[0] & 0x0F) << 4) | ((src[1] & 0x0F) << 0);
+            *dst++ = ((src[1] & 0x0F) << 4) | ((src[0] & 0x0F) << 0);
             src += 2;
         }
 

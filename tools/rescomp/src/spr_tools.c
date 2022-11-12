@@ -42,9 +42,9 @@ frameSprite_* getFrameSprite(unsigned char *image8bpp, tileset_* tileset, int wi
     // error retrieving palette --> return NULL
     if (pal == -1) return NULL;
 
-    for(i = 0; i < w; i++)
+    for(j = 0; j < h; j++)
     {
-        for(j = 0; j < h; j++)
+    	for(i = 0; i < w; i++)
         {
             p = getTile(image8bpp, tile, i + x, j + y, wi * 8);
 

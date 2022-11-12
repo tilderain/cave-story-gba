@@ -473,8 +473,6 @@ void outSpriteDef(spriteDefinition_* spriteDef, FILE* fs, FILE* fh, char* id, in
     // set animations pointer
     fprintf(fs, "    .dc.l    %s_animations\n", id);
 
-	// set data pointer
-    fprintf(fs, "    .dc.l    %s_data\n", id);
     // set maximum number of tile used by a single animation frame (used for VRAM tile space allocation)
     //fprintf(fs, "    .dc.w    %d\n", spriteDef->maxNumTile);
     // set maximum number of VDP sprite used by a single animation frame (used for VDP sprite allocation)

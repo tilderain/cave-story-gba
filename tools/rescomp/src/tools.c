@@ -501,12 +501,12 @@ void outS(unsigned char* data, int inOffset, int size, FILE* fout, int intSize)
             if (intSize == 1)
             {
                 // we cannot use byte data because of GCC bugs with -G parameter
-                fprintf(fout, "%02X", data[offset + 0]);
+                fprintf(fout, "%02X", data[offset + 1]);
 
                 if ((offset - inOffset) > (size + 1))
                     fprintf(fout, "00");
                 else
-                    fprintf(fout, "%02X", data[offset + 1]);
+                    fprintf(fout, "%02X", data[offset + 0]);
 
                 offset += adjIntSize;
             }
