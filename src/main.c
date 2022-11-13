@@ -34,6 +34,7 @@ void aftervsync() {
 	if(ready) {
 		if(inFade) vdp_sprites_clear();
 		vdp_sprites_update();
+        if(gamemode == GM_GAME) stage_update(); // Scrolling
 		ready = FALSE;
 	}
 	//joy_update();
