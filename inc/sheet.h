@@ -14,7 +14,7 @@
 		uint16_t index = sheet_num ? sheets[sheet_num-1].index + sheets[sheet_num-1].size      \
 							  : TILE_SHEETINDEX;                                               \
 		sheets[sheet_num] = (Sheet) {                                                          \
-			sheetid, (frames)*(width)*(height), index, width, height                           \
+			sheetid, (frames)*(width)*(height), index, width, height, sdef                     \
 		};                                                                                     \
 		tiloc_index = sheets[sheet_num].index + sheets[sheet_num].size;                        \
 		SHEET_LOAD(sdef, frames, (width)*(height), sheets[sheet_num].index, 1, __VA_ARGS__);   \
@@ -107,6 +107,8 @@ typedef struct {
 	uint8_t size; // Total number of tiles used by the complete sheet
 	uint16_t index; // VDP tile index
 	uint8_t w, h; // Size of each frame
+	const SpriteDefinition *sprite; //Sprite currently in the sheet
+
 } Sheet;
 extern Sheet sheets[MAX_SHEETS];
 

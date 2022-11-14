@@ -197,7 +197,7 @@ typedef struct {
     //uint16_t length;
     uint16_t *data;
 } Palette;
-#pragma pack(pop)
+
 typedef struct {
     int16_t y;
     union {
@@ -211,6 +211,7 @@ typedef struct {
     int16_t x;
 } VDPSprite;
 
+
 typedef struct {
     int16_t y;          // respect VDP sprite field order
     uint16_t size;
@@ -218,7 +219,6 @@ typedef struct {
     uint16_t numTile;
 } VDPSpriteInf;
 
-#pragma pack(push, 2)
 typedef struct {
     uint16_t numSprite;
 	VDPSpriteInf **vdpSpritesInf;

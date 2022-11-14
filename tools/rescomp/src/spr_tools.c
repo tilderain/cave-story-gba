@@ -109,6 +109,8 @@ int spriteDimensions[NUM_SPRITE_SIZE][2] = {
 		{2,4},
 		{4,8},
 		};
+
+
 animFrame_* getAnimFrame(unsigned char *image8bpp, int wi, int fx, int fy, int wf, int hf, int time, int collisionType)
 {
     int i, j;
@@ -147,9 +149,9 @@ animFrame_* getAnimFrame(unsigned char *image8bpp, int wi, int fx, int fy, int w
 			preList[numSprite].y = hf - remain_h;
 			preList[numSprite].w = size_w;
 			preList[numSprite].h = size_h;
-			preList[numSprite].numTile = 0;
+			preList[numSprite].numTile = size;
 
-			printf("preList[%d] x %d y %d w %d h %d\n", numSprite, preList[numSprite].x, preList[numSprite].y, preList[numSprite].w, preList[numSprite].h);
+			//printf("preList[%d] x %d y %d w %d h %d\n", numSprite, preList[numSprite].x, preList[numSprite].y, preList[numSprite].w, preList[numSprite].h);
 
 			numSprite++;
 			remain_w -= size_w;
@@ -230,7 +232,8 @@ animFrame_* getAnimFrame(unsigned char *image8bpp, int wi, int fx, int fy, int w
         // set x and y offset
         frameSprite->x = preList[i].x;
         frameSprite->y = preList[i].y;
-
+		frameSprite->w = preList[i].w;
+		frameSprite->h = preList[i].h;
         // store frame sprite
         frameSprites[numSprite * 0] = frameSprite;
         frameSprites[numSprite * 1] = getFlippedFrameSprite(frameSprite, wf, hf, TRUE, FALSE);

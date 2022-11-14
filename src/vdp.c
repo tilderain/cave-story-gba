@@ -419,35 +419,29 @@ bool IsBitSet(uint16_t b, int pos)
 
 int get_sprite_size(uint8_t size)
 {
+	int w = (size&12) >> 2;
 	int h = size&3;
-	int w = size&12;
+	//printf("sizew %d sizeh %d\n", w, h);
 
 	if (w == 0 && h == 0)
 		return Sprite_8x8;
 	if (w == 1 && h == 1)
 		return Sprite_16x16;
-	if (w == 2 && h == 2)
-		return Sprite_32x32;
 	if (w == 3 && h == 3)
-		return Sprite_64x64;
+		return Sprite_32x32;
 	if (w == 1 && h == 0)
-		return Sprite_32x8;
-	if (w == 2 && h == 0)
-		return Sprite_32x16;
+		return Sprite_16x8;
 	if (w == 3 && h == 0)
-		return Sprite_64x32;
-	if (w == 3 && h == 2)
-		return Sprite_64x32;		
+		return Sprite_32x8;
+	if (w == 3 && h == 1)
+		return Sprite_32x16;	
 	if (w == 0 && h == 1)
 		return Sprite_8x16;
-	if (w == 0 && h == 2)
+	if (w == 0 && h == 3)
 		return Sprite_8x32;
-	if (w == 1 && h == 2)
-		return Sprite_16x32;
 	if (w == 1 && h == 3)
-	return Sprite_16x32;
-	if (w == 2 && h == 3)
-		return Sprite_32x64;
+		return Sprite_16x32;
+
 	return Sprite_16x16;
 }
 
@@ -459,8 +453,23 @@ void vdp_sprites_update() {
 	for(int i=0;i<sprite_count;i++)
 	{
 		int size = get_sprite_size(sprite_table[i].size);
-		obj_buffer[i].attr0 = OBJ_Y(sprite_table[i].y - 128);
-		obj_buffer[i].attr1 = OBJ_X(sprite_table[i].x - 128) | OBJ_SIZE(size);
+
+		char size_bits, shape_bits;
+
+    	switch (size) {
+    	    case Sprite_8x8:   size_bits = 0; shape_bits = 0; break;
+    	    case Sprite_16x16: size_bits = 1; shape_bits = 0; break;
+    	    case Sprite_32x32: size_bits = 2; shape_bits = 0; break;
+    	    case Sprite_16x8:  size_bits = 0; shape_bits = 1; break;
+    	    case Sprite_32x8:  size_bits = 1; shape_bits = 1; break;
+    	    case Sprite_32x16: size_bits = 2; shape_bits = 1; break;
+    	    case Sprite_8x16:  size_bits = 0; shape_bits = 2; break;
+    	    case Sprite_8x32:  size_bits = 1; shape_bits = 2; break;
+    	    case Sprite_16x32: size_bits = 2; shape_bits = 2; break;
+    	}
+
+		obj_buffer[i].attr0 = OBJ_Y(sprite_table[i].y - 128) | OBJ_SHAPE(shape_bits);
+		obj_buffer[i].attr1 = OBJ_X(sprite_table[i].x - 128) | OBJ_SIZE(size_bits);
 		if(IsBitSet(sprite_table[i].attr, 11))
 			obj_buffer[i].attr1 |= OBJ_HFLIP;
 		if(IsBitSet(sprite_table[i].attr, 12))
@@ -506,6 +515,12 @@ void vdp_sprites_update() {
 
 	//vdp_dma_vram((uint32_t) sprite_table, VDP_SPRITE_TABLE, sprite_count << 2);
 	sprite_count = 0;
+	/*for(int i=0;i<SPR_Balrog.animations[0]->frames[0]->numSprite;i++)
+	{
+		printf("Balrog %d, x %d y %d s %d n %d\n", i, SPR_Balrog.animations[0]->frames[0]->vdpSpritesInf[i]->x,
+		SPR_Balrog.animations[0]->frames[0]->vdpSpritesInf[i]->y, SPR_Balrog.animations[0]->frames[0]->vdpSpritesInf[i]->size, 
+		SPR_Balrog.animations[0]->frames[0]->vdpSpritesInf[i]->numTile);
+	}*/
 }
 
 // Font / Text
