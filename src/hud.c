@@ -62,13 +62,13 @@ void hud_create() {
 		.x = 16 + 128,
 		.y = (pal_mode ? 24 : 16) + 128,
 		.size = SPRITE_SIZE(4, 4),
-		.attr = TILE_ATTR(PAL0,1,0,0,TILE_HUDINDEX)
+		.attr = TILE_ATTR(PAL0,1,0,0,192)
 	};
 	sprHUD[1] = (VDPSprite) {
 		.x = 16 + 32 + 128,
 		.y = (pal_mode ? 24 : 16) + 128,
 		.size = SPRITE_SIZE(4, 4),
-		.attr = TILE_ATTR(PAL0,1,0,0,TILE_HUDINDEX+16)
+		.attr = TILE_ATTR(PAL0,1,0,0,220)
 	};
 	// Draw blank tiles next to weapon
 	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+8)*TILE_SIZE, 16, 2);

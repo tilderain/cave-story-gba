@@ -261,6 +261,9 @@ void DMA_doDma(uint8_t location, uint32_t from, uint16_t to, uint16_t len, int16
 {
 	//if(location == DMA_VRAM)
 	//	CpuFastSet(from, VRAM + (to), len | COPY32);
+	if(location == DMA_VRAM)
+	//	CpuFastSet(from, SPRITE_GFX + (to*16), (len*8) | COPY32);
+		DMA3COPY(from, SPRITE_GFX + (to), len | COPY32);
 	return;
     volatile uint16_t *pw;
     volatile uint32_t *pl;

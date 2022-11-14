@@ -2,9 +2,12 @@ use Terminusmodx as font
 
 fix eggcorridor/tyrant/mimiga xm
 
-fix sprite palettes
-fix map layer priority
-fix bk scrolling
+fix play once songs
+
+remove slz/mdt compression
+	/csmd makefile section
+
+original sprite palettes
 bkmoon
 fix tile mapx_y
 
@@ -13,12 +16,12 @@ fix pri tileshift
 fix particle effects
 disable xp merging
 fix missing sounds
+	-item get sound
 increase npc activation range
 
 add textbox window plane
 add fade effect
 
-add item get sound
 esc menu
 camp menu
 
@@ -34,6 +37,8 @@ fix spur damage
 stop moving when dying
 
 curly looking up
+
+fix <qua
 
 
 sram

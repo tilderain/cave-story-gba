@@ -214,6 +214,7 @@ clean:
 	rm -f res/patches/*.patch
 	rm -f src/xgm/z80_xgm.s src/xgm/z80_xgm.o80 src/xgm/z80_xgm.h out.lst
 	rm -f res/resources.h res/resources.s inc/ai_gen.h
+	rm -f bin/rescomp
 
 
 #---------------------------------------------------------------------------------
@@ -243,7 +244,7 @@ grit-gen:
 
 
 $(RESCOMP):
-	cc ../tools/rescomp/src/*.c -Itools/rescomp/inc -o $@
+	cc -g ../tools/rescomp/src/*.c -Itools/rescomp/inc -o $@
 
 resources.s: 
 	$(RESCOMP) ../res/resources.res 

@@ -77,11 +77,43 @@ frameSprite_* getFrameSprite(unsigned char *image8bpp, tileset_* tileset, int wi
     return result;
 }
 
+enum SPRITE_SIZECODE {
+		Sprite_8x8,		// OBJ_SHAPE(0) OBJ_SIZE(0)
+		Sprite_16x16,	// OBJ_SHAPE(0) OBJ_SIZE(1)
+		Sprite_32x32,	// OBJ_SHAPE(0) OBJ_SIZE(2)
+		Sprite_64x64,	// OBJ_SHAPE(0) OBJ_SIZE(3)
+		Sprite_16x8,	// OBJ_SHAPE(1) OBJ_SIZE(0)
+		Sprite_32x8,	// OBJ_SHAPE(1) OBJ_SIZE(1)
+		Sprite_32x16,	// OBJ_SHAPE(1) OBJ_SIZE(2)
+		Sprite_64x32,	// OBJ_SHAPE(1) OBJ_SIZE(3)
+		Sprite_8x16,	// OBJ_SHAPE(2) OBJ_SIZE(0)
+		Sprite_8x32,	// OBJ_SHAPE(2) OBJ_SIZE(1)
+		Sprite_16x32,	// OBJ_SHAPE(2) OBJ_SIZE(2)
+		Sprite_32x64	// OBJ_SHAPE(2) OBJ_SIZE(3)
+};
+
+#define NUM_SPRITE_SIZE 12
+
+int spriteOrder[] = {2, 6, 10, 5, 9, 1, 4, 8, 0};
+int spriteDimensions[NUM_SPRITE_SIZE][2] = {
+		{1,1},
+		{2,2},
+		{4,4},
+		{8,8},
+		{2,1},
+		{4,1},
+		{4,2},
+		{8,4},
+		{1,2},
+		{1,4},
+		{2,4},
+		{4,8},
+		};
 animFrame_* getAnimFrame(unsigned char *image8bpp, int wi, int fx, int fy, int wf, int hf, int time, int collisionType)
 {
     int i, j;
     int nbSprW, nbSprH;
-    int numSprite;
+    int numSprite = 0;
     int lastSprW, lastSprH;
     int ws, hs;
     animFrame_* result;
@@ -89,9 +121,45 @@ animFrame_* getAnimFrame(unsigned char *image8bpp, int wi, int fx, int fy, int w
     frameSprite_* frameSprite;
     tileset_* tileset;
 
-    nbSprW = (wf + 3) / 4;
-    nbSprH = (hf + 3) / 4;
-    numSprite = nbSprW * nbSprH;
+	frameSprite_ preList[128] = {0};
+
+	int size = spriteOrder[i];
+	int size_w = spriteDimensions[size][0];
+	int size_h = spriteDimensions[size][1];
+
+	//Get square that fits into topleft corner of sprite dimensions
+	int remain_h = hf;
+	while(remain_h > 0)
+	{
+		int remain_w = wf;
+		while(remain_w > 0)
+		{
+			for(i=0; i<NUM_SPRITE_SIZE;i++)
+			{
+				size = spriteOrder[i];
+				size_w = spriteDimensions[size][0];
+				size_h = spriteDimensions[size][1];
+
+				if(remain_w >= size_w && remain_h >= size_h)
+					break;
+			}
+			preList[numSprite].x = wf - remain_w;
+			preList[numSprite].y = hf - remain_h;
+			preList[numSprite].w = size_w;
+			preList[numSprite].h = size_h;
+			preList[numSprite].numTile = 0;
+
+			printf("preList[%d] x %d y %d w %d h %d\n", numSprite, preList[numSprite].x, preList[numSprite].y, preList[numSprite].w, preList[numSprite].h);
+
+			numSprite++;
+			remain_w -= size_w;
+		}
+		remain_h -= size_h;
+	}
+
+    //nbSprW = (wf + 3) / 4;
+    //nbSprH = (hf + 3) / 4;
+    //numSprite = nbSprW * nbSprH;
     lastSprW = wf & 3;
     if (lastSprW == 0) lastSprW = 4;
     lastSprH = hf & 3;
@@ -153,33 +221,24 @@ animFrame_* getAnimFrame(unsigned char *image8bpp, int wi, int fx, int fy, int w
         result->collision = collision;
     }
 
-    for(j = 0; j < nbSprH; j++)
+    for(i=0; i<numSprite;i++)
     {
-        if (j == (nbSprH - 1)) hs = lastSprH;
-        else hs = 4;
+        frameSprite = getFrameSprite(image8bpp, tileset, wi, (preList[i].x) + (fx*wf), (preList[i].y) + (fy*hf), preList[i].w, preList[i].h);
+        if (frameSprite == NULL)
+            return NULL;
 
-        for(i = 0; i < nbSprW; i++)
-        {
-            if (i == (nbSprW - 1)) ws = lastSprW;
-            else ws = 4;
+        // set x and y offset
+        frameSprite->x = preList[i].x;
+        frameSprite->y = preList[i].y;
 
-            frameSprite = getFrameSprite(image8bpp, tileset, wi, (fx * wf) + (i * 4), (fy * hf) + (j * 4), ws, hs);
-            if (frameSprite == NULL)
-                return NULL;
-
-            // set x and y offset
-            frameSprite->x = i * 32;
-            frameSprite->y = j * 32;
-
-            // store frame sprite
-            frameSprites[numSprite * 0] = frameSprite;
-            frameSprites[numSprite * 1] = getFlippedFrameSprite(frameSprite, wf, hf, TRUE, FALSE);
-            frameSprites[numSprite * 2] = getFlippedFrameSprite(frameSprite, wf, hf, FALSE, TRUE);
-            frameSprites[numSprite * 3] = getFlippedFrameSprite(frameSprite, wf, hf, TRUE, TRUE);
-            frameSprites++;
-        }
-    }
-
+        // store frame sprite
+        frameSprites[numSprite * 0] = frameSprite;
+        frameSprites[numSprite * 1] = getFlippedFrameSprite(frameSprite, wf, hf, TRUE, FALSE);
+        frameSprites[numSprite * 2] = getFlippedFrameSprite(frameSprite, wf, hf, FALSE, TRUE);
+        frameSprites[numSprite * 3] = getFlippedFrameSprite(frameSprite, wf, hf, TRUE, TRUE);
+        frameSprites++;
+	}
+    
     return result;
 }
 
