@@ -320,14 +320,28 @@ void entities_update(uint8_t draw) {
 		//if(npc_info[e->type].sprite == NULL) sprite_count = 0;
 		if(draw && !e->hidden) {
 			if(e->sheet != NOSHEET) {
-				sprite_index(e->sprite[0], e->vramindex + frameOffset[e->sheet][e->frame]);
-				sprite_hflip(e->sprite[0], e->dir);
+
 
 				int16_t bx = (e->x>>CSF) - camera.x_shifted + e->display_box.left + e->xoff, 
 						by = (e->y>>CSF) - camera.y_shifted - e->display_box.top;
 				int16_t x = min(f->w, 32);
+				int tile_offset = 0;
 				for(uint16_t i = 0; i < sprite_count; i++) {
-					sprite_pos(e->sprite[i], bx - (f->vdpSpritesInf[i]->x*8), by + (f->vdpSpritesInf[i]->y*8));
+					sprite_index(e->sprite[i], e->vramindex + frameOffset[e->sheet][e->frame] + tile_offset);
+					tile_offset += f->vdpSpritesInf[i]->numTile;
+					sprite_hflip(e->sprite[i], e->dir);
+					if(e->dir){
+						if(f->vdpSpritesInf[i]->x == 0){
+							sprite_pos(e->sprite[i], bx - x, by + (f->vdpSpritesInf[i]->y*8));
+						}else{
+							sprite_pos(e->sprite[i], bx - x + ((f->vdpSpritesInf[i]->x*8) - f->w), by + (f->vdpSpritesInf[i]->y*8));
+						}
+					}
+					else
+					{	
+						sprite_pos(e->sprite[i], bx + (f->vdpSpritesInf[i]->x*8) - x, by + (f->vdpSpritesInf[i]->y*8));
+					}
+
 				}
 				//int x = (e->x>>CSF) - camera.x_shifted - e->display_box.left + e->xoff;
 				//int y = (e->y>>CSF) - camera.y_shifted - e->display_box.top;
@@ -346,7 +360,11 @@ void entities_update(uint8_t draw) {
 							by = (e->y>>CSF) - camera.y_shifted - e->display_box.top;
 					int16_t x = min(f->w, 32);
 					for(uint16_t i = 0; i < sprite_count; i++) {
-						sprite_pos(e->sprite[i], bx - (f->vdpSpritesInf[i]->x*8) - x, by + (f->vdpSpritesInf[i]->y*8));
+						if(f->vdpSpritesInf[i]->x == 0){
+							sprite_pos(e->sprite[i], bx - x, by + (f->vdpSpritesInf[i]->y*8));
+						}else{
+							sprite_pos(e->sprite[i], bx - x + ((f->vdpSpritesInf[i]->x*8) - f->w), by + (f->vdpSpritesInf[i]->y*8));
+						}
 						sprite_hflip(e->sprite[i], 1);
 						//int xx = bx - x;
 						//int y = by;
