@@ -43,7 +43,7 @@ static const uint8_t *FileList[] = {
 
 uint8_t cfg_btn_jump = 5;
 uint8_t cfg_btn_shoot = 4;
-uint8_t cfg_btn_ffwd = 6;
+uint8_t cfg_btn_ffwd = 8;
 uint8_t cfg_btn_rswap = 8;
 uint8_t cfg_btn_lswap = 9;
 uint8_t cfg_btn_map = 10;
