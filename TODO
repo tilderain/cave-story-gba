@@ -9,6 +9,11 @@ remove slz/mdt compression
 
 original sprite palettes
 bkmoon
+
+<SSS
+
+correct balcony/prtoside colors
+
 fix tile mapx_y
 
 fix pri tileshift

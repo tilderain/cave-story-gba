@@ -10,7 +10,7 @@ if __name__ == "__main__":
     #    files += [folder + '/' + each for each in os.listdir(folder) if each.endswith('.bmp')]
     #    files += [folder + '/' + each for each in os.listdir(folder) if each.endswith('.png')]
 
-    for file in ['PrtCent.bmp', 'PrtEggX1.bmp', 'PrtEggX2.bmp', 'PrtJail.bmp', 'PrtSand.bmp', 'PrtStore.bmp', 'PrtWeed.bmp']:
+    for file in ['PrtCent.bmp', 'PrtEggX1.bmp', 'PrtEggX2.bmp', 'PrtJail.bmp', 'PrtSand.bmp', 'PrtStore.bmp', 'PrtOside.bmp', 'PrtWeed.bmp']:
         shutil.rmtree('./inter', ignore_errors=True)
         os.mkdir('./inter')
         ext = Path(file).suffix

@@ -63,7 +63,7 @@ const stage_info_def stage_info[STAGE_COUNT] = {
 	{ PXM_Oside,	PXE_Oside,	&PAL_Regu,	15,	7,	"Outer Wall" },
 	{ PXM_EgEnd2,	PXE_EgEnd2,	&PAL_Regu,	19,	0,	"Side Room" },
 	{ PXM_Itoh,		PXE_Itoh,	&PAL_LabB,	19,	14,	"Storehouse" },
-	{ PXM_Cent,		PXE_Cent,	&PAL_Regu,	4,	2,	"Plantation" },
+	{ PXM_Cent,		PXE_Cent,	&PAL_Regu,	4,	13,	"Plantation" },
 	{ PXM_Jail1,	PXE_Jail1,	&PAL_Regu,	11,	0,	"Jail No. 1" },
 	{ PXM_Momo,		PXE_Momo,	&PAL_Regu,	11,	0,	"Hideout" },
 	{ PXM_Lounge,	PXE_Lounge,	&PAL_Regu,	11,	0,	"Rest Area" },
