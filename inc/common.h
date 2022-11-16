@@ -217,6 +217,7 @@ typedef struct {
     uint16_t size;
     int16_t x;
     uint16_t numTile;
+	int16_t w;
 } VDPSpriteInf;
 
 typedef struct {

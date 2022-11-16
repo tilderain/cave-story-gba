@@ -324,17 +324,18 @@ void entities_update(uint8_t draw) {
 
 				int16_t bx = (e->x>>CSF) - camera.x_shifted + e->display_box.left + e->xoff, 
 						by = (e->y>>CSF) - camera.y_shifted - e->display_box.top;
-				int16_t x = min(f->w, 32);
+				int16_t x = min(f->vdpSpritesInf[0]->w*8, 32);
 				int tile_offset = 0;
 				for(uint16_t i = 0; i < sprite_count; i++) {
 					sprite_index(e->sprite[i], e->vramindex + frameOffset[e->sheet][e->frame] + tile_offset);
 					tile_offset += f->vdpSpritesInf[i]->numTile;
 					sprite_hflip(e->sprite[i], e->dir);
 					if(e->dir){
-						if(f->vdpSpritesInf[i]->x == 0){
-							sprite_pos(e->sprite[i], bx - x, by + (f->vdpSpritesInf[i]->y*8));
-						}else{
-							sprite_pos(e->sprite[i], bx - x + ((f->vdpSpritesInf[i]->x*8) - f->w), by + (f->vdpSpritesInf[i]->y*8));
+						sprite_pos(e->sprite[i], bx - x, by + (f->vdpSpritesInf[i]->y*8));		
+						if(x >= f->w) {
+							x = min(f->vdpSpritesInf[0]->w*8, 32);
+						} else {
+							x += (f->vdpSpritesInf[i+1]->w*8);
 						}
 					}
 					else
@@ -343,11 +344,6 @@ void entities_update(uint8_t draw) {
 					}
 
 				}
-				//int x = (e->x>>CSF) - camera.x_shifted - e->display_box.left + e->xoff;
-				//int y = (e->y>>CSF) - camera.y_shifted - e->display_box.top;
-				//x = (x + 4) / 8; y = (y + 80) / 8;
-				//iprintf("\x1b[%hu;%huH%s\n", y, x, "1");
-				//iprintf("ent %d %d ", x, y);
 			} else if(e->tiloc != NOTILOC) {
 
 				if(e->frame != e->oframe) {
@@ -358,24 +354,16 @@ void entities_update(uint8_t draw) {
 				if(e->dir) {
 					int16_t bx = (e->x>>CSF) - camera.x_shifted + e->display_box.left + e->xoff, 
 							by = (e->y>>CSF) - camera.y_shifted - e->display_box.top;
-					int16_t x = min(f->w, 32);
+				int16_t x = min(f->vdpSpritesInf[0]->w*8, 32);
 					for(uint16_t i = 0; i < sprite_count; i++) {
-						if(f->vdpSpritesInf[i]->x == 0){
-							sprite_pos(e->sprite[i], bx - x, by + (f->vdpSpritesInf[i]->y*8));
-						}else{
-							sprite_pos(e->sprite[i], bx - x + ((f->vdpSpritesInf[i]->x*8) - f->w), by + (f->vdpSpritesInf[i]->y*8));
-						}
+						sprite_pos(e->sprite[i], bx - x, by + (f->vdpSpritesInf[i]->y*8));
 						sprite_hflip(e->sprite[i], 1);
-						//int xx = bx - x;
-						//int y = by;
-						//xx = (xx + 4) / 8; y = (y + 80) / 8;
-						//iprintf("\x1b[%hu;%huH%s\n", y, xx, "2");
-						/*if(x >= f->w) {
-							x = min(f->w, 32);
-							by += 32;
+
+						if(x >= f->w) {
+							x = min(f->vdpSpritesInf[0]->w*8, 32);
 						} else {
-							x += min(f->w - x, 32);
-						}*/
+							x += (f->vdpSpritesInf[i+1]->w*8);
+						}
 					}
 				} else {
 					int16_t bx = (e->x>>CSF) - camera.x_shifted - e->display_box.left + e->xoff, 
@@ -384,16 +372,6 @@ void entities_update(uint8_t draw) {
 					for(uint16_t i = 0; i < sprite_count; i++) {
 						sprite_pos(e->sprite[i], bx + (f->vdpSpritesInf[i]->x*8), by + (f->vdpSpritesInf[i]->y*8));
 						sprite_hflip(e->sprite[i], 0);
-
-						//int xx = bx + x;
-						//int y = by;
-						//xx = (xx + 4) / 8; y = (y + 80) / 8;
-						//iprintf("\x1b[%hu;%huH%s\n", y, xx, "3");
-						/*x += 32;
-						if(x >= f->w) {
-							x = 0;
-							by += 32;
-						}*/
 					}
 				}
 			}

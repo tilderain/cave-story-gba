@@ -276,6 +276,7 @@ void outFrameSprite(frameSprite_* frameSprite, FILE* fs, FILE* fh, char* id, int
     fprintf(fs, "    .dc.w    %d\n", frameSprite->x);
     // Num tile
     fprintf(fs, "    .dc.w    %d\n", frameSprite->numTile);
+	fprintf(fs, "    .dc.w    %d\n", frameSprite->w);
     fprintf(fs, "\n");
 }
 
