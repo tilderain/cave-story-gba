@@ -324,7 +324,11 @@ void entities_update(uint8_t draw) {
 
 				int16_t bx = (e->x>>CSF) - camera.x_shifted + e->display_box.left + e->xoff, 
 						by = (e->y>>CSF) - camera.y_shifted - e->display_box.top;
-				int16_t x = min(f->vdpSpritesInf[0]->w*8, 32);
+				int16_t x;
+				if(e->dir)
+					x = min(f->vdpSpritesInf[0]->w*8, 32);
+				else
+					x = min(f->w, 32);
 				int tile_offset = 0;
 				for(uint16_t i = 0; i < sprite_count; i++) {
 					sprite_index(e->sprite[i], e->vramindex + frameOffset[e->sheet][e->frame] + tile_offset);
