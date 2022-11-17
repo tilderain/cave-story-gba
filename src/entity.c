@@ -322,11 +322,11 @@ void entities_update(uint8_t draw) {
 			if(e->sheet != NOSHEET) {
 
 
-				int16_t bx = (e->x>>CSF) - camera.x_shifted + e->display_box.left + e->xoff, 
+				int16_t bx = (e->x>>CSF) - camera.x_shifted - e->display_box.left + e->xoff,
 						by = (e->y>>CSF) - camera.y_shifted - e->display_box.top;
-				int16_t x = min(f->w, 32);
+				int16_t x = min(f->vdpSpritesInf[0]->w, 32);
 				if(e->dir)
-					x = min(f->vdpSpritesInf[0]->w, 32);
+					bx = (e->x>>CSF) - camera.x_shifted + e->display_box.left + e->xoff;
 
 				int tile_offset = 0;
 				for(uint16_t i = 0; i < sprite_count; i++) {
@@ -343,7 +343,7 @@ void entities_update(uint8_t draw) {
 					}
 					else
 					{	
-						sprite_pos(e->sprite[i], bx + (f->vdpSpritesInf[i]->x) - x, by + (f->vdpSpritesInf[i]->y));
+						sprite_pos(e->sprite[i], bx + (f->vdpSpritesInf[i]->x), by + (f->vdpSpritesInf[i]->y));
 					}
 
 				}
