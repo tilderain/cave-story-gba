@@ -269,14 +269,14 @@ void outFrameSprite(frameSprite_* frameSprite, FILE* fs, FILE* fh, char* id, int
     // FrameSprite = VDPSpriteInf structure in SGDK
     decl(fs, fh, "VDPSpriteInf", id, 2, global);
     // Y position
-    fprintf(fs, "    .dc.w    %d\n", frameSprite->y);
+    fprintf(fs, "    .dc.w    %d\n", frameSprite->y*8);
     // size infos
     fprintf(fs, "    .dc.w    %d\n", SPRITE_SIZE(frameSprite->w, frameSprite->h) << 0);
     // X position
-    fprintf(fs, "    .dc.w    %d\n", frameSprite->x);
+    fprintf(fs, "    .dc.w    %d\n", frameSprite->x*8);
     // Num tile
     fprintf(fs, "    .dc.w    %d\n", frameSprite->numTile);
-	fprintf(fs, "    .dc.w    %d\n", frameSprite->w);
+	fprintf(fs, "    .dc.w    %d\n", frameSprite->w*8);
     fprintf(fs, "\n");
 }
 

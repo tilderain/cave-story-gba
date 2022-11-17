@@ -324,27 +324,26 @@ void entities_update(uint8_t draw) {
 
 				int16_t bx = (e->x>>CSF) - camera.x_shifted + e->display_box.left + e->xoff, 
 						by = (e->y>>CSF) - camera.y_shifted - e->display_box.top;
-				int16_t x;
+				int16_t x = min(f->w, 32);
 				if(e->dir)
-					x = min(f->vdpSpritesInf[0]->w*8, 32);
-				else
-					x = min(f->w, 32);
+					x = min(f->vdpSpritesInf[0]->w, 32);
+
 				int tile_offset = 0;
 				for(uint16_t i = 0; i < sprite_count; i++) {
 					sprite_index(e->sprite[i], e->vramindex + frameOffset[e->sheet][e->frame] + tile_offset);
 					tile_offset += f->vdpSpritesInf[i]->numTile;
 					sprite_hflip(e->sprite[i], e->dir);
 					if(e->dir){
-						sprite_pos(e->sprite[i], bx - x, by + (f->vdpSpritesInf[i]->y*8));		
+						sprite_pos(e->sprite[i], bx - x, by + (f->vdpSpritesInf[i]->y));		
 						if(x >= f->w) {
-							x = min(f->vdpSpritesInf[0]->w*8, 32);
+							x = min(f->vdpSpritesInf[0]->w, 32);
 						} else {
-							x += (f->vdpSpritesInf[i+1]->w*8);
+							x += (f->vdpSpritesInf[i+1]->w);
 						}
 					}
 					else
 					{	
-						sprite_pos(e->sprite[i], bx + (f->vdpSpritesInf[i]->x*8) - x, by + (f->vdpSpritesInf[i]->y*8));
+						sprite_pos(e->sprite[i], bx + (f->vdpSpritesInf[i]->x) - x, by + (f->vdpSpritesInf[i]->y));
 					}
 
 				}
@@ -358,15 +357,15 @@ void entities_update(uint8_t draw) {
 				if(e->dir) {
 					int16_t bx = (e->x>>CSF) - camera.x_shifted + e->display_box.left + e->xoff, 
 							by = (e->y>>CSF) - camera.y_shifted - e->display_box.top;
-				int16_t x = min(f->vdpSpritesInf[0]->w*8, 32);
+					int16_t x = min(f->vdpSpritesInf[0]->w, 32);
 					for(uint16_t i = 0; i < sprite_count; i++) {
-						sprite_pos(e->sprite[i], bx - x, by + (f->vdpSpritesInf[i]->y*8));
+						sprite_pos(e->sprite[i], bx - x, by + (f->vdpSpritesInf[i]->y));
 						sprite_hflip(e->sprite[i], 1);
 
 						if(x >= f->w) {
-							x = min(f->vdpSpritesInf[0]->w*8, 32);
+							x = min(f->vdpSpritesInf[0]->w, 32);
 						} else {
-							x += (f->vdpSpritesInf[i+1]->w*8);
+							x += (f->vdpSpritesInf[i+1]->w);
 						}
 					}
 				} else {
@@ -374,7 +373,7 @@ void entities_update(uint8_t draw) {
 							by = (e->y>>CSF) - camera.y_shifted - e->display_box.top;
 					int16_t x = 0;
 					for(uint16_t i = 0; i < sprite_count; i++) {
-						sprite_pos(e->sprite[i], bx + (f->vdpSpritesInf[i]->x*8), by + (f->vdpSpritesInf[i]->y*8));
+						sprite_pos(e->sprite[i], bx + (f->vdpSpritesInf[i]->x), by + (f->vdpSpritesInf[i]->y));
 						sprite_hflip(e->sprite[i], 0);
 					}
 				}
