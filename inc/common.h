@@ -1,4 +1,5 @@
 #pragma once
+#include <malloc.h>
 //GBATODO
 #define SYS_hardReset() /*__asm__("move   #0x2700,%sr\n\t" \
                                 "move.l (0),%a7\n\t"     \
@@ -12,7 +13,7 @@
 // bool and stdint types
 #define FALSE   0
 #define TRUE    1
-#define NULL    0
+//#define NULL    0
 
 typedef signed char		int8_t;
 typedef signed short	int16_t;

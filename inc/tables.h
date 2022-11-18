@@ -55,14 +55,14 @@ typedef struct {
 // Information about each music track for song_play()
 #define SONG_COUNT 46
 typedef struct {
-	const int *song; // Location of XGM to be loaded
+	const int song; // Location of XGM to be loaded
 	char name[24]; // Name of the track (sound test)
 } song_info_def;
 
 // Information about each sound effect for sound_play()
 #define SOUND_COUNT 118
 typedef struct {
-    const int *sound; // Location of PCM data to playback
+    const int sound; // Location of PCM data to playback
     //const uint8_t *end; // Pointer to the end, to calculate length
 } sound_info_def;
 

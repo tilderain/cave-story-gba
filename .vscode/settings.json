@@ -20,6 +20,8 @@
 		"string": "c",
 		"string_view": "c",
 		"string.h": "c",
-		"tools.h": "c"
+		"tools.h": "c",
+		"effect.h": "c",
+		"audio.h": "c"
 	}
 }
