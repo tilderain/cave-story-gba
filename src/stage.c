@@ -55,8 +55,8 @@ uint16_t stageWidth, stageHeight = 0;
 // Copy of level layout data loaded into RAM
 // This takes up extra space, but there are times where scripts make modifications to the
 // level layout (allowing player to reach some areas) so it is necessary to do this
-EWRAM_DATA uint8_t stagePXM[8] = {NULL};
-EWRAM_DATA uint8_t stageBlocks[17924] = {NULL};
+EWRAM_DATA uint8_t stagePXM[8] = {0};
+EWRAM_DATA uint8_t stageBlocks[17924] = {0};
 // Which tileset (db/tileset.c) is used by the current stage
  uint8_t stageTileset = 0;
 // Prepares to draw off-screen tiles when stage_update() is later called

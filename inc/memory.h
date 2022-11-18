@@ -9,3 +9,5 @@ void* malloc(uint16_t size) __attribute__((malloc));
 
 void memset(void *to, uint8_t value, uint16_t len);
 void memcpy(void *to, const void *from, uint16_t len);*/
+
+#include <string.h>

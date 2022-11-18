@@ -57,7 +57,7 @@ struct Entity {
 	uint8_t sheet, tiloc;
 	uint16_t vramindex; // Sheet or tiles index
 	uint8_t framesize; // Number of tiles per frame
-	VDPSprite sprite[0]; // Raw sprite(s) to copy into sprite list
+	VDPSprite sprite[]; // Raw sprite(s) to copy into sprite list
 };
 
 // List of "active" entities. Updated and drawn every frame

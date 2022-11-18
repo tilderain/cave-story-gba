@@ -58,7 +58,7 @@ uint8_t currentWeapon = 0; // Index 0-7 of which slot in the array the currently
 // The player is an entity, as to better interact with entities & physics
 // Not all variables in Entity are used but most are
 Entity player = {NULL};
-VDPSprite playerSprite = {NULL};
+VDPSprite playerSprite = {0};
 
 //uint8_t playerShow;
 uint8_t playerIFrames = 0;
@@ -71,7 +71,7 @@ uint8_t controlsLocked = 0;
 // What is currently equipped (see the flags at the top of this file)
 uint16_t playerEquipment = 0;
 // What items the player has and will show up in the inventory screen
-uint8_t playerInventory[MAX_ITEMS] = {NULL};
+uint8_t playerInventory[MAX_ITEMS] = {0};
 
 uint8_t shoot_cooldown, mgun_chargetime, playerNoBump = 0;
 

@@ -112,7 +112,7 @@ void entity_reactivate(Entity *e) {
 			//if(npc_info[e->type].sprite == NULL) sprite_count = 0;
 			e->vramindex = tiloc_index + (e->tiloc << 2);
 			uint16_t tile_offset = 0;
-			for(uint8_t i = 0; i < f->numSprite; i++) {
+			for(uint8_t i = 0; i < sprite_count; i++) {
 				sprite_index(e->sprite[i], e->vramindex + tile_offset);
 				tile_offset += f->vdpSpritesInf[i]->numTile;
 			}

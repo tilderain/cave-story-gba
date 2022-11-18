@@ -234,6 +234,15 @@ static int doConvert(char *dirName, char *fileNameOut)
     return 0;
 }
 
+void remove_all_chars(char* str, char c) {
+    char *pr = str, *pw = str;
+    while (*pr) {
+        *pw = *pr++;
+        pw += (*pw != c);
+    }
+    *pw = '\0';
+}
+
 static int doComp(char *fileName, char *fileNameOut, int header)
 {
     char tempName[MAX_PATH_LEN];
@@ -297,6 +306,8 @@ static int doComp(char *fileName, char *fileNameOut, int header)
     strreplace(headerName, ':', '_');
     strreplace(headerName, '/', '_');
     strupper(headerName);
+
+	remove_all_chars(headerName, '.');
 
     fprintf(fileOutputH, "#ifndef _%s_H_\n", headerName);
     fprintf(fileOutputH, "#define _%s_H_\n\n", headerName);

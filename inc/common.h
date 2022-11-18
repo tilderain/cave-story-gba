@@ -1,8 +1,8 @@
 #pragma once
 //GBATODO
-#define SYS_hardReset() //__asm__("move   #0x2700,%sr\n\t" \
-                        //        "move.l (0),%a7\n\t"     \
-                        //        "jmp    _hard_reset")
+#define SYS_hardReset() /*__asm__("move   #0x2700,%sr\n\t" \
+                                "move.l (0),%a7\n\t"     \
+                                "jmp    _hard_reset")*/
 
 //GBATODO
 #define enable_ints //__asm__("move #0x2500,%sr")
@@ -55,8 +55,8 @@ extern uint8_t FPS;
 // depending on region. To try and keep the speed of the game (mostly) the same,
 // a table for time and speed are used. On PAL, the values just match the index,
 // and on NTSC they are roughly index*5/6 for speed and index*6/5 for time respectively.
-static const uint16_t *time_tab;
-static const int16_t *speed_tab;
+//static const uint16_t *time_tab;
+//static const int16_t *speed_tab;
 
 extern const uint16_t time_tab_ntsc[0x400];
 extern const int16_t speed_tab_ntsc[0x400];
@@ -239,9 +239,9 @@ typedef struct {
 } Animation;
 
 // Get tiles from SpriteDefinition
-//#define SPR_TILES(spr, a, f) ((spr)->sprite_data + \
- //32 * ((((spr)->animations[0]->frames[0]->w * (spr)->animations[0]->frames[0]->h)/128) * f + (a * )))
-
+/*#define SPR_TILES(spr, a, f) ((spr)->sprite_data + \
+ 32 * ((((spr)->animations[0]->frames[0]->w * (spr)->animations[0]->frames[0]->h)/128) * f + (a * )))
+*/
 
 typedef struct {
     //Palette *palette;

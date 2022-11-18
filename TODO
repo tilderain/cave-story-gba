@@ -4,6 +4,12 @@ fix eggcorridor/tyrant/mimiga xm
 
 fix play once songs
 
+fix monster x palette
+
+fix bkred in hell
+
+fix valueview
+
 remove slz/mdt compression
 	/csmd makefile section
 

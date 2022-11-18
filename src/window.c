@@ -19,6 +19,8 @@
 
 #include "window.h"
 
+#include <stdio.h>
+
 // Window location
 #define WINDOW_X1 1
 #define WINDOW_X2 38

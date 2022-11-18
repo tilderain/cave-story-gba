@@ -1,7 +1,7 @@
 #include "common.h"
 #include "string.h"
 
-static const char hexchars[] = "0123456789ABCDEF";
+/*static const char hexchars[] = "0123456789ABCDEF";
 
 uint16_t strlen(const char *str) {
     const char *src = str;
@@ -21,7 +21,7 @@ static uint16_t skip_atoi(const char **s) {
         i = (i * 10) + *((*s)++) - '0';
     }
     return i;
-}
+}*/
 
 /*static uint16_t vsprintf(char *buf, const char *fmt, va_list args) {
     char tmp_buffer[12];

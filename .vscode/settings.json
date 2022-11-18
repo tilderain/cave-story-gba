@@ -18,6 +18,8 @@
 		"ratio": "c",
 		"array": "c",
 		"string": "c",
-		"string_view": "c"
+		"string_view": "c",
+		"string.h": "c",
+		"tools.h": "c"
 	}
 }
