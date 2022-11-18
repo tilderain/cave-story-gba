@@ -33,9 +33,9 @@
 #define ANIM_FRAMES	4
 
 static const uint16_t cheat[2][10] = {
-	{ BUTTON_UP, BUTTON_DOWN, BUTTON_LEFT, BUTTON_RIGHT, NULL },
+	{ BUTTON_UP, BUTTON_DOWN, BUTTON_LEFT, BUTTON_RIGHT, 0 },
 	{ BUTTON_UP, BUTTON_UP, BUTTON_DOWN, BUTTON_DOWN, 
-	  BUTTON_LEFT, BUTTON_RIGHT, BUTTON_LEFT, BUTTON_RIGHT, NULL },
+	  BUTTON_LEFT, BUTTON_RIGHT, BUTTON_LEFT, BUTTON_RIGHT, 0 },
 };
 
 uint8_t tpal;
@@ -94,7 +94,7 @@ uint8_t titlescreen_main() {
 	vdp_puts(VDP_PLAN_A, "Config", 15, 20);
 	// Debug
 	{
-		char vstr[40];
+		//char vstr[40];
 		//sprintf(vstr, "Test Build - %s", __DATE__);
 		//vdp_puts(VDP_PLAN_A, vstr, 4, 26);
 	}
@@ -124,7 +124,7 @@ uint8_t titlescreen_main() {
 			if(!cheatEnable[i]) {
 				if(joy_pressed(cheat[i][cheatEntry[i]])) {
 					cheatEntry[i]++;
-					if(cheat[i][cheatEntry[i]] == NULL) {
+					if(cheat[i][cheatEntry[i]] == 0) {
 						cheatEnable[i] = TRUE;
 						sound_play(SND_COMPUTER_BEEP, 5);
 					}

@@ -133,8 +133,8 @@ static uint16_t skip_atoi(const char **s) {
                 if (field_width == -1) {
                     field_width = 2 * sizeof(void *);
                     zero_pad = 1;
-                } /* fallthrough */
-            /*case 'x':
+                } // fallthrough
+            case 'x':
             case 'X': {
                 s = &tmp_buffer[12];
                 *--s = 0;

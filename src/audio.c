@@ -57,16 +57,16 @@ void song_play(uint8_t id) {
 	if(id == songPlaying) return;
 	songResume = songPlaying;
 	// Track 0 in song_info is NULL, but others could be potentially
-	if(song_info_xm[id].song == NULL) {
+	if(song_info_xm[id].song == 0) {
 		id = 0;
-        xgm_music_pause();
+       //xgm_music_pause();
 	} else {
-        xgm_music_pause();
+        //xgm_music_pause();
         vdp_vsync(); aftervsync();
 		vdp_vsync();
-		xgm_music_play(song_info[id].song);
+		//xgm_music_play(song_info[id].song);
 	}
-	if(song_info_xm[id].song == NULL)
+	if(song_info_xm[id].song == 0)
 	{
 		mmStop();
 	}

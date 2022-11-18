@@ -39,7 +39,7 @@ int16_t cjkMapRow = 0;
 // TILE_HUDINDEX (+32 tiles) = 352
 // TILE_FACE_INDEX (+36 tiles) = 388
 static uint16_t CjkNextTile() {
-    uint16_t index;
+    uint16_t index = 0;
     switch(cjkVramMode) {
         case CJK_TITLE:
             index = cjkVramIndex + 2;

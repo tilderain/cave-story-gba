@@ -14,6 +14,8 @@
 #include "gba_video.h"
 #include "gba_sprites.h"
 
+#include <stdio.h>
+
 extern const uint32_t TILE_BLANK[8];
 static const uint16_t BLANK_DATA[0x80];
 const uint16_t PAL_FadeOut[64] = {
@@ -291,7 +293,7 @@ void vdp_color_next(uint16_t index, uint16_t color) {
 }
 
 uint16_t vdp_fade_step() {
-	return;
+	return 1;
 	if(!pal_fading) return 0;
 	if(++pal_fadecnt >= pal_fadespeed) {
 		pal_fadecnt = 0;
@@ -454,7 +456,7 @@ void vdp_sprites_update() {
 	{
 		int size = get_sprite_size(sprite_table[i].size);
 
-		char size_bits, shape_bits;
+		char size_bits = 0; char shape_bits = 0;
 
     	switch (size) {
     	    case Sprite_8x8:   size_bits = 0; shape_bits = 0; break;
@@ -549,7 +551,7 @@ void vdp_font_pal(uint16_t pal) {
 
 void vdp_puts(uint16_t plan, const char *str, uint16_t x, uint16_t y) {
 	//GBATODO
-	char text[128];
+	//char text[128];
 	iprintf("\x1b[%hu;%huH%s\n", (y>>2)*3, (x>>2)*3, str);
 	//sprintf(text, "\x1b[%hu;%huH%s\n", y, x, str);
 	//iprintf(text);

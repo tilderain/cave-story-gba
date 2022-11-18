@@ -75,7 +75,7 @@ AnimationFrame* get_animation_frame(uint16_t type)
 {
 	if(npc_info[type].sheet != NOSHEET)
 	{
-		uint8_t sheet;
+		uint8_t sheet = 0;
 		SHEET_FIND(sheet, npc_info[type].sheet);
 		return sheets[sheet].sprite->animations[0]->frames[0];
 	}
@@ -371,7 +371,7 @@ void entities_update(uint8_t draw) {
 				} else {
 					int16_t bx = (e->x>>CSF) - camera.x_shifted - e->display_box.left + e->xoff, 
 							by = (e->y>>CSF) - camera.y_shifted - e->display_box.top;
-					int16_t x = 0;
+					//int16_t x = 0;
 					for(uint16_t i = 0; i < sprite_count; i++) {
 						sprite_pos(e->sprite[i], bx + (f->vdpSpritesInf[i]->x), by + (f->vdpSpritesInf[i]->y));
 						sprite_hflip(e->sprite[i], 0);
@@ -953,7 +953,7 @@ uint8_t get_sprite_count(uint16_t type)
 {
 	if(npc_info[type].sheet != NOSHEET)
 	{
-		uint8_t sheet;
+		uint8_t sheet = 0;
 		SHEET_FIND(sheet, npc_info[type].sheet);
 		return sheets[sheet].sprite->animations[0]->frames[0]->numSprite;
 	}

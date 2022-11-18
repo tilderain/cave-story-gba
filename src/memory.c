@@ -10,7 +10,7 @@ static uint32_t _bss_end;
 static uint16_t* s_free;
 static uint16_t* s_heap;
 
-static uint16_t* pack(uint16_t nsize) {
+/*static uint16_t* pack(uint16_t nsize) {
     uint16_t psize;
     uint16_t *b = s_heap;
     uint16_t *best = b;
@@ -34,7 +34,7 @@ static uint16_t* pack(uint16_t nsize) {
         if(bsize >= nsize) return best;
     }
     return NULL;
-}
+}*/
 
 void mem_init() {
     // point to end of bss (start of heap)

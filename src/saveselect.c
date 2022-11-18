@@ -82,7 +82,7 @@ static uint8_t refresh_file(uint8_t index) {
 			vdp_puts(VDP_PLAN_A, stage_info[file.stage_id].name, 6, y);
 		}
 		// Play time
-		char timeStr[10] = {};
+		char timeStr[12] = {};
 		sprintf(timeStr, "%02hu:%02hu:%02hu", file.hour, file.minute, file.second);
 		vdp_puts(VDP_PLAN_A, timeStr, 26, y);
 		// Health bar

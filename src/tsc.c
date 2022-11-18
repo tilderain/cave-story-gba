@@ -216,7 +216,7 @@ uint8_t tsc_load(Event *eventList, const uint8_t *TSC, uint8_t max) {
 	uint8_t eventCount = TSC[0];
 	// Make sure it isn't more than can be handled
 	if(eventCount > max) {
-		char str[40];
+		char str[50];
 		sprintf(str, "Too many events: %hu\nIn TSC at: %06lX", eventCount, (uint32_t) TSC);
 		error_other(str);
 	}

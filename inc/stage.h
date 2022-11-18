@@ -174,3 +174,4 @@ void stage_update();
 void stage_setup_palettes();
 void stage_draw_screen();
 void stage_draw_background();
+void stage_draw_tile(uint16_t x, uint16_t y, const uint8_t* pxa);

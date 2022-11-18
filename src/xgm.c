@@ -20,7 +20,7 @@ static volatile uint16_t* const z80_halt_port  = (uint16_t*) 0xA11100;
 static volatile uint16_t* const z80_reset_port = (uint16_t*) 0xA11200;
 static volatile uint8_t* const z80_bank_reg    = (uint8_t*) 0xA06000;
 static volatile uint8_t* const z80_drv_command = (uint8_t*) 0xA00100;
-static volatile uint8_t* const z80_drv_status  = (uint8_t*) 0xA00102;
+//static volatile uint8_t* const z80_drv_status  = (uint8_t*) 0xA00102;
 static volatile uint8_t* const z80_drv_params  = (uint8_t*) 0xA00104;
 static volatile uint8_t* const z80_smp_table   = (uint8_t*) 0xA01C00;
 
@@ -116,7 +116,7 @@ static void psg_init() {
         *pb = 0x90 | (i << 5) | 0x0F;
     }
 }
-
+/*
 static uint16_t xgm_get_ready() {
     // bus already taken ? just check status
     if(z80_bus_taken()) {
@@ -128,7 +128,7 @@ static uint16_t xgm_get_ready() {
     z80_release();
     return rtn;
 }
-
+*/
 void xgm_init() {
 	z80_request();
 	z80_set_bank(0);

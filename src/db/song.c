@@ -9,7 +9,7 @@ const song_info_def song_info[SONG_COUNT] = {
 };
 
 const song_info_def song_info_xm[SONG_COUNT] = {
-	{ NULL, 			"Silence" },
+	{ 0, 			"Silence" },
 	{ MOD_MISCHIEVOUS_ROBOT, 	"Mischievous Robot" },
 	{ MOD_SAFETY, 		"Safety" },
 	{ MOD_GAMEOVER, 	"Game Over" },

@@ -120,7 +120,7 @@ void stage_load(uint16_t id) {
 			vdp_set_scrollmode(HSCROLL_PLANE, VSCROLL_PLANE);
 			if(background_info[stageBackground].tileset != NULL)
 			{
-				vdp_tiles_load(background_info[stageBackground].tileset, TILE_BACKINDEX, 
+				vdp_tiles_load((uint32_t*)background_info[stageBackground].tileset, TILE_BACKINDEX, 
 						background_info[stageBackground].width*background_info[stageBackground].height*8);
 						
 			}
@@ -137,7 +137,7 @@ void stage_load(uint16_t id) {
 			vdp_map_clear(VDP_PLAN_B);
             backScrollTable[0] = (SCREEN_HEIGHT >> 3) + 1;
 			//	gbatodo
-			vdp_tiles_load_from_rom(BG_Water, TILE_WATERINDEX, 64);
+			vdp_tiles_load_from_rom((uint32_t*)BG_Water, TILE_WATERINDEX, 64);
 		} else if(stageBackgroundType == 5) { // Fog
 			vdp_set_scrollmode(HSCROLL_TILE, VSCROLL_PLANE);
 			// Use background color from tileset
@@ -214,13 +214,13 @@ void stage_load_credits(uint8_t id) {
 }
 
 void stage_load_tileset() {
-    uint32_t *buf = (uint32_t*) 0xFF0100;
+    //uint32_t *buf = (uint32_t*) 0xFF0100;
     uint16_t numtile = tileset_info[stageTileset].size << 2;
     //for(uint16_t i = 0; i < numtile; i += 128) {
      //   uint16_t num = min(numtile - i, 128);
 		//GBATODO
         //decompress_uftc(buf, tileset_info[stageTileset].pat, i, num);
-        vdp_tiles_load(tileset_info[stageTileset].pat, TILE_TSINDEX, tileset_info[stageTileset].size*32);
+        vdp_tiles_load((uint32_t*)tileset_info[stageTileset].pat, TILE_TSINDEX, tileset_info[stageTileset].size*32);
     //}
 	// Inject the breakable block sprite into the tileset
 	stagePXA = tileset_info[stageTileset].PXA;
@@ -236,14 +236,14 @@ void stage_load_tileset() {
 	}
 }
 
-void decompress_slz(uint8_t *in, uint8_t *out) {
+void decompress_slz(const uint8_t *in, uint8_t *out) {
    // Retrieve uncompressed size
    uint16_t size = in[0] << 8 | in[1];
    in += 2;
    
    // To store the tokens
    uint8_t num_tokens = 1;
-   uint8_t tokens;
+   uint8_t tokens = 0;
    
    // Go through all compressed data until we're done decompressing
    while (size != 0) {
@@ -526,11 +526,11 @@ void stage_setup_palettes() {
 	vdp_colors_next(48, stage_info[stageID].npcPalette, 16);
 }
 
-void stage_draw_tile(uint16_t x, uint16_t y, uint8_t* pxa){
+void stage_draw_tile(uint16_t x, uint16_t y, const uint8_t* pxa){
 	uint16_t b = stage_get_block(x>>1, y>>1);
 	uint16_t t = b << 2; //((b&15) << 1) + ((b>>4) << 6);
 	uint16_t ta = pxa[b];
-	uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
+	//uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
 	int xloc = ((x*2)%64);
 	int yloc = ((y*2*32));
 
@@ -554,13 +554,13 @@ void stage_draw_tile(uint16_t x, uint16_t y, uint8_t* pxa){
 
 void stage_draw_screen() {
     const uint8_t *pxa = tileset_info[stageTileset].PXA;
-	uint16_t maprow[64];
+	//uint16_t maprow[64];
 	uint16_t y = sub_to_tile(camera.y) - 16;
 	for(uint16_t i = 32; i--; ) {
 		if(vblank) aftervsync(); // So we don't lag the music
 		vblank = 0;
 		
-		if(y < stageHeight + 32 << 1) {
+		if(y < (stageHeight + 32) << 1) {
 			uint16_t x = sub_to_tile(camera.x) - 16;
 			for(uint16_t j = 32; j--; ) {
 				//if(x >= stageWidth << 1) break;
@@ -608,7 +608,7 @@ u8 ind2 = 0;
 void stage_draw_background() {
 	uint16_t w = background_info[stageBackground].width;
 	uint16_t h = background_info[stageBackground].height;
-	uint16_t pal = background_info[stageBackground].palette;
+	//uint16_t pal = background_info[stageBackground].palette;
 	
 	for(uint16_t y = 0; y < 32; y++) {
 		for(uint16_t x = 0; x < 32; x++) {

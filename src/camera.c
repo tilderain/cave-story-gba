@@ -16,6 +16,8 @@
 
 #include "gamemode.h"
 
+#include "stage.h"
+
 // Since only one row or column of tiles is drawn at a time
 #define CAMERA_MAX_SPEED 	0xFFF
 #define FOCUS_SPEED 		5
@@ -35,7 +37,7 @@ uint8_t diag_tick;
 int32_t camera_xmin, camera_ymin = 0;
 uint32_t camera_xsize, camera_ysize = 0;
 
-cameraStruct camera = {NULL};
+cameraStruct camera = {0};
 
 void camera_init() {
 	camera.target = &player;
