@@ -114,7 +114,7 @@ MUSIC		:= maxmod_data
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork
 
-CFLAGS	:=	-g -Wall -Wno-builtin-declaration-mismatch -O2\
+CFLAGS	:=	-g -Wall -Wno-builtin-declaration-mismatch -O3\
 		-mcpu=arm7tdmi -mtune=arm7tdmi\
 		$(ARCH)
 

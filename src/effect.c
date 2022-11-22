@@ -13,6 +13,8 @@
 
 #include "effect.h"
 
+#include "gba.h"
+
 typedef struct {
 	VDPSprite sprite;
 	uint8_t type, ttl, timer, timer2;
@@ -55,7 +57,7 @@ void effects_clear_smoke() {
 	for(uint8_t i = 0; i < MAX_SMOKE; i++) effSmoke[i].ttl = 0;
 }
 
-void effects_update() {
+IWRAM_CODE void effects_update() {
 	for(uint8_t i = 0; i < MAX_DAMAGE; i++) {
 		if(!effDamage[i].ttl) continue;
 		effDamage[i].ttl--;

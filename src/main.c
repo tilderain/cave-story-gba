@@ -105,6 +105,7 @@ void maxmodInit( void )
     mmInit( &mySystem );
 }
 
+__attribute__((used)) const char save_detection[] = "SRAM_V113";
 
 int main() {
 	irqInit();

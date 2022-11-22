@@ -308,7 +308,7 @@ void stage_load_blocks() {
     stageHeight = stagePXM[6] | (stagePXM[7] << 8);
 	// Multiplication table for stage rows
 	stageTable = malloc(stageHeight << 1);
-	if(!stageTable) error_oom();
+//	if(!stageTable) error_oom();
 	uint16_t blockTotal = 0;
 	for(uint16_t y = 0; y < stageHeight; y++) {
 		stageTable[y] = blockTotal;

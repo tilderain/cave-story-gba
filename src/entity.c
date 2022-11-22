@@ -108,11 +108,11 @@ void entity_reactivate(Entity *e) {
 		TILOC_ADD(e->tiloc, e->framesize);
 		if(e->tiloc != NOTILOC) {
 		const AnimationFrame *f = get_animation_frame(e->type);
-			uint8_t sprite_count = f->numSprite;
+			//uint8_t sprite_count = f->numSprite;
 			//if(npc_info[e->type].sprite == NULL) sprite_count = 0;
 			e->vramindex = tiloc_index + (e->tiloc << 2);
 			uint16_t tile_offset = 0;
-			for(uint8_t i = 0; i < sprite_count; i++) {
+			for(uint8_t i = 0; i < e->sprite_count; i++) {
 				sprite_index(e->sprite[i], e->vramindex + tile_offset);
 				tile_offset += f->vdpSpritesInf[i]->numTile;
 			}
@@ -179,7 +179,7 @@ uint16_t entities_count() {
 	return entities_count_active() + entities_count_inactive();
 }
 
-void entities_update(uint8_t draw) {
+IWRAM_CODE void entities_update(uint8_t draw) {
 	uint16_t new_active_count = 0;
 	Entity *e = entityList;
 	
@@ -316,7 +316,7 @@ void entities_update(uint8_t draw) {
 		}
 		// Handle sprite movement/changes
 		const AnimationFrame *f = get_animation_frame(e->type);
-		uint8_t sprite_count = f->numSprite;
+		//uint8_t sprite_count = f->numSprite;
 		//if(npc_info[e->type].sprite == NULL) sprite_count = 0;
 		if(draw && !e->hidden) {
 			if(e->sheet != NOSHEET) {
@@ -329,7 +329,7 @@ void entities_update(uint8_t draw) {
 					bx = (e->x>>CSF) - camera.x_shifted + e->display_box.left + e->xoff;
 
 				int tile_offset = 0;
-				for(uint16_t i = 0; i < sprite_count; i++) {
+				for(uint16_t i = 0; i < e->sprite_count; i++) {
 					sprite_index(e->sprite[i], e->vramindex + frameOffset[e->sheet][e->frame] + tile_offset);
 					tile_offset += f->vdpSpritesInf[i]->numTile;
 					sprite_hflip(e->sprite[i], e->dir);
@@ -358,7 +358,7 @@ void entities_update(uint8_t draw) {
 					int16_t bx = (e->x>>CSF) - camera.x_shifted + e->display_box.left + e->xoff, 
 							by = (e->y>>CSF) - camera.y_shifted - e->display_box.top;
 					int16_t x = min(f->vdpSpritesInf[0]->w, 32);
-					for(uint16_t i = 0; i < sprite_count; i++) {
+					for(uint16_t i = 0; i < e->sprite_count; i++) {
 						sprite_pos(e->sprite[i], bx - x, by + (f->vdpSpritesInf[i]->y));
 						sprite_hflip(e->sprite[i], 1);
 
@@ -372,13 +372,13 @@ void entities_update(uint8_t draw) {
 					int16_t bx = (e->x>>CSF) - camera.x_shifted - e->display_box.left + e->xoff, 
 							by = (e->y>>CSF) - camera.y_shifted - e->display_box.top;
 					//int16_t x = 0;
-					for(uint16_t i = 0; i < sprite_count; i++) {
+					for(uint16_t i = 0; i < e->sprite_count; i++) {
 						sprite_pos(e->sprite[i], bx + (f->vdpSpritesInf[i]->x), by + (f->vdpSpritesInf[i]->y));
 						sprite_hflip(e->sprite[i], 0);
 					}
 				}
 			}
-			vdp_sprites_add(e->sprite, sprite_count);
+			vdp_sprites_add(e->sprite, e->sprite_count);
 		}
 		if(moveMeToFront) {
 			moveMeToFront = FALSE;
@@ -716,7 +716,7 @@ uint8_t collide_stage_ceiling(Entity *e) {
 	return result;
 }
 
-uint8_t entity_overlapping(Entity *a, Entity *b) {
+IWRAM_CODE uint8_t entity_overlapping(Entity *a, Entity *b) {
 	int16_t ax1 = sub_to_pixel(a->x) - (a->dir ? a->hit_box.right : a->hit_box.left),
 		ax2 = sub_to_pixel(a->x) + (a->dir ? a->hit_box.left : a->hit_box.right),
 		ay1 = sub_to_pixel(a->y) - a->hit_box.top,
@@ -728,7 +728,7 @@ uint8_t entity_overlapping(Entity *a, Entity *b) {
 	return (ax1 < bx2 && ax2 > bx1 && ay1 < by2 && ay2 > by1);
 }
 
-bounding_box entity_react_to_collision(Entity *a, Entity *b) {
+IWRAM_CODE bounding_box entity_react_to_collision(Entity *a, Entity *b) {
 	bounding_box result = { 0, 0, 0, 0 };
 	int16_t ax1 = sub_to_pixel(a->x_next) - (a->dir ? a->hit_box.right : a->hit_box.left),
 		ax2 = sub_to_pixel(a->x_next) + (a->dir ? a->hit_box.left : a->hit_box.right),
@@ -968,11 +968,12 @@ Entity *entity_create_ext(int32_t x, int32_t y, uint16_t type, uint16_t flags, u
 
 	const AnimationFrame *f = get_animation_frame(type);
 	uint8_t sprite_count = f->numSprite;
-	//if(npc_info[type].sprite == NULL) sprite_count = 0;
-	Entity *e = malloc(sizeof(Entity) + sizeof(VDPSprite) * sprite_count);
+	if(!npc_info[type].sprite_count) sprite_count = 0;
+
+		//Minimum 4 sprites
+	Entity *e = malloc(sizeof(Entity) + sizeof(VDPSprite) * sprite_count + (sizeof(VDPSprite)*4));
 	if(!e) error_oom();
-	memset(e, 0, sizeof(Entity) + sizeof(VDPSprite) * sprite_count);
-	
+	memset(e, 0, sizeof(Entity) + sizeof(VDPSprite) * sprite_count + (sizeof(VDPSprite)*4));
 	e->x = x;
 	e->y = y;
 	e->id = id;

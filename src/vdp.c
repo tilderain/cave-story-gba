@@ -375,7 +375,7 @@ void vdp_vscroll(uint16_t plan, int16_t vscroll) {
 
 // Sprites
 
-void vdp_sprite_add(const VDPSprite *spr) {
+IWRAM_CODE void vdp_sprite_add(const VDPSprite *spr) {
     // Exceeded max number of sprites
     if(sprite_count >= 80) return;
     // Prevent drawing off screen sprites
@@ -386,7 +386,7 @@ void vdp_sprite_add(const VDPSprite *spr) {
     }
 }
 
-void vdp_sprites_add(const VDPSprite *spr, uint16_t num) {
+IWRAM_CODE void vdp_sprites_add(const VDPSprite *spr, uint16_t num) {
 	for(uint16_t i = num; i--;) vdp_sprite_add(&spr[i]);
 }
 
@@ -447,7 +447,7 @@ int get_sprite_size(uint8_t size)
 	return Sprite_16x16;
 }
 
-void vdp_sprites_update() {
+IWRAM_CODE void vdp_sprites_update() {
 	if(!sprite_count) return;
 	//iprintf("%d %d\n", (&SPR_Quote)->animations[0]->frames[0]->w, (&SPR_Quote)->animations[0]->frames[0]->h);
 	sprite_table[sprite_count - 1].link = 0; // Mark end of sprite list

@@ -38,7 +38,7 @@ uint8_t FPS = 0;
 // Initializes or re-initializes the game after "try again"
 void game_reset(uint8_t load);
 
-void game_main(uint8_t load) {
+IWRAM_CODE void game_main(uint8_t load) {
 	gamemode = GM_GAME;
 
 	vdp_colors(0, PAL_FadeOut, 64);

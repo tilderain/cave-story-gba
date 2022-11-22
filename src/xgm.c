@@ -36,18 +36,22 @@ void z80_request() {
 }
 
 void z80_release() {
+	return;	
     *z80_halt_port = 0x0000;
 }
 
 static void z80_reset_start() {
+	return;	
     *z80_reset_port = 0x0000;
 }
 
 static void z80_reset_end() {
+	return;	
     *z80_reset_port = 0x0100;
 }
 
 static void z80_set_bank(const uint16_t bank) {
+	return;
     uint16_t i = 9;
     uint16_t value = bank;
     while(i--) {
@@ -57,6 +61,7 @@ static void z80_set_bank(const uint16_t bank) {
 }
 
 static void z80_clear() {
+	return;
     const uint8_t zero = 0;
     uint8_t* dst = (uint8_t*) 0xA00000;
     uint16_t len = 0x2000;
@@ -64,6 +69,7 @@ static void z80_clear() {
 }
 
 static void z80_upload(const uint16_t to, const uint8_t *from, uint16_t size) {
+	return;
     // copy data to Z80 RAM (need to use byte copy here)
     uint8_t* src = (uint8_t*) from;
     uint8_t* dst = (uint8_t*) (0xA00000 + to);
@@ -71,6 +77,7 @@ static void z80_upload(const uint16_t to, const uint8_t *from, uint16_t size) {
 }
 
 static void ym2612_write(const uint16_t port, const uint8_t data) {
+	return;
     volatile int8_t *pb = (int8_t*) 0xA04000;
     // wait while YM2612 busy
     while(*pb < 0);
@@ -79,6 +86,7 @@ static void ym2612_write(const uint16_t port, const uint8_t data) {
 }
 
 static void ym2612_reset() {
+	return;
     uint16_t bus_taken = z80_bus_taken();
     if(!bus_taken) z80_request();
     // enable left and right output for all channel
@@ -107,6 +115,7 @@ static void ym2612_reset() {
 }
 
 static void psg_init() {
+	return;
     volatile uint8_t *pb = (uint8_t*) 0xC00011;
     for (uint16_t i = 0; i < 4; i++) {
         // set tone to 0
@@ -130,6 +139,7 @@ static uint16_t xgm_get_ready() {
 }
 */
 void xgm_init() {
+	return;
 	z80_request();
 	z80_set_bank(0);
 	// upload Z80 driver and reset Z80
@@ -163,6 +173,7 @@ void xgm_init() {
 }
 
 void xgm_music_play(const uint8_t *song) {
+	return;
     uint8_t ids[0x100-4];
     uint32_t addr;
     // prepare sample id table
@@ -225,6 +236,7 @@ void xgm_music_stop() {
 }
 */
 void xgm_music_pause() {
+	return;
     disable_ints;
     z80_request();
     // set play XGM command
@@ -234,6 +246,7 @@ void xgm_music_pause() {
 }
 
 void xgm_pcm_set(const uint8_t id, const uint8_t *sample, const uint32_t len) {
+	return;
     // point to sample id table
     volatile uint8_t *pb = (uint8_t*) (0xA01C00 + (uint32_t)(id << 2));
     // write sample addr
@@ -244,6 +257,7 @@ void xgm_pcm_set(const uint8_t id, const uint8_t *sample, const uint32_t len) {
 }
 
 void xgm_pcm_play(const uint8_t id, const uint8_t priority, const uint16_t channel) {
+	return;
     disable_ints;
     z80_request();
     // set PCM priority and id

@@ -10,6 +10,12 @@ fix bkred in hell
 
 fix valueview
 
+teleporter anim
+hp anim
+
+<RMU
+<FMU
+
 remove slz/mdt compression
 	/csmd makefile section
 
