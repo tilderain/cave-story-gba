@@ -218,7 +218,6 @@ void stage_load_tileset() {
     uint16_t numtile = tileset_info[stageTileset].size << 2;
     //for(uint16_t i = 0; i < numtile; i += 128) {
      //   uint16_t num = min(numtile - i, 128);
-		//GBATODO
         //decompress_uftc(buf, tileset_info[stageTileset].pat, i, num);
         vdp_tiles_load((uint32_t*)tileset_info[stageTileset].pat, TILE_TSINDEX, tileset_info[stageTileset].size*32);
     //}

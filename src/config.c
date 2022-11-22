@@ -328,8 +328,7 @@ void config_main() {
 		ready = TRUE;
 		vdp_vsync(); aftervsync();
 	}
-	//GBATODO
-	//system_load_config();
+	system_load_config();
 }
 
 void act_default(uint8_t page) {

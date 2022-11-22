@@ -129,10 +129,10 @@ int main() {
     vdp_init();
 	//xgm_init();
 
-	//GBATODO
-	//if(system_checkdata() != SRAM_INVALID) {
-//		system_load_config();
-	//}
+
+	if(system_checkdata() != SRAM_INVALID) {
+		system_load_config();
+	}
     DMA_init(0, 0);
 	joy_init();
 	enable_ints;

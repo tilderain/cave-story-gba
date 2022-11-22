@@ -161,7 +161,6 @@ IWRAM_CODE void game_main(uint8_t load) {
 				effects_update();
                 PF_BGCOLOR(0xE0E);
 				if(!gameFrozen) {
-					//GBATODO
 					player_update();
 					entities_update(TRUE);
 				} else {

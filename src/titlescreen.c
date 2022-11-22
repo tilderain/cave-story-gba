@@ -54,11 +54,11 @@ uint8_t titlescreen_main() {
 	vdp_map_clear(VDP_PLAN_B);
 	vdp_sprites_clear();
 	// Check save data, only enable continue if save data exists
-	//GBATODO
-	//if(system_checkdata() != SRAM_INVALID) {
-		//besttime = system_load_counter(); // 290.rec data
-		//system_load_config();
-	//}
+
+	if(system_checkdata() != SRAM_INVALID) {
+		besttime = system_load_counter(); // 290.rec data
+		system_load_config();
+	}
 	// Change character & song based on 290.rec value
 	tpal = PAL1;
 	if(besttime <= 3*3000) {
@@ -162,8 +162,6 @@ uint8_t titlescreen_main() {
 		ready = TRUE;
 		vdp_vsync(); aftervsync();
 	}
-		//GBATODO remove this
-		//vdp_text_clear(VDP_PLAN_A, 13, 12, 13);
 	if(cheatEnable[0] && joy_pressed(btn[cfg_btn_pause])) {
 		cursor = 0;
 		
