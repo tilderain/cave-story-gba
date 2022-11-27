@@ -19,6 +19,8 @@ typedef struct {
     //const uint8_t *BTSC; // BR Portugese version of the Stage TSC
 	// Which palette to load for PAL3. Most use PAL_Regu but some differ
 	const uint16_t *npcPalette;
+	// Which palette to load for PAL4.
+	const uint16_t *npcPalette2;
 	uint8_t tileset; // Which tileset in tileset_info to use
 	uint8_t background; // Which background in background_info to use
 	char name[24]; // The name of the map, as displayed to the player

@@ -839,7 +839,7 @@ void ai_gaudi_egg(Entity *e) {
 			e->y -= 0x800;
 			e->x -= 0x800;
 		} else {	// on ceiling
-			sprite_vflip(e->sprite[0], 1);
+			e->frame = 2;
 			// for the egg @ entrance point that is on a ceiling slope
 			if (!collide_stage_ceiling(e)) {
 				e->y -= (14 << CSF);
@@ -848,7 +848,11 @@ void ai_gaudi_egg(Entity *e) {
 		e->state = 1;
 	} else if (e->state == 1) {
 		if (e->health < 90) {
-			e->frame = 1;
+			if (!(e->flags & NPC_OPTION2)) {	// on floor
+				e->frame = 1;
+			} else {
+				e->frame = 3;
+			}
 			e->attack = 0;
 			//e->eflags &= ~NPC_SHOOTABLE;
 			e->flags &= ~NPC_SHOOTABLE;

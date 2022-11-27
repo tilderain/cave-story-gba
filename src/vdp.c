@@ -493,19 +493,23 @@ IWRAM_CODE void vdp_sprites_update() {
 	temppointer2 = OBJ_COLORS + 33;
 	*temppointer2 = palette[0];
 	temppointer = BG_COLORS + 1;
-	for(int i=1; i<16; i++) {
+	for(int i=1; i<16; i++) { //OBJ Pal 0
 		
 		*temppointer++ = tileset_info[stage_info[stageID].tileset].palette[i];
 	}
-	for(int i=0; i<16; i++) {
+	for(int i=0; i<16; i++) { //OBJ Pal 1
 		
 		*temppointer++ = background_info[stageBackground].palette[i];
 	}
-	for(int i=1; i<16; i++) {
+	for(int i=1; i<16; i++) { //OBJ Pal 2
 		*temppointer2++ = tileset_info[stage_info[stageID].tileset].palette[i];
 	}
-	for(int i=0; i<16; i++) {
+	for(int i=0; i<16; i++) { //OBJ Pal 3
 		*temppointer2++ = stage_info[stageID].npcPalette[i];
+	}
+
+	for(int i=0; i<16; i++) { //OBJ Pal 3
+		*temppointer2++ = stage_info[stageID].npcPalette2[i];
 	}
 
 	BG_COLORS[241]=RGB5(17,31,31);

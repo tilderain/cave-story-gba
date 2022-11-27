@@ -325,7 +325,7 @@ void sheets_load_stage(uint16_t sid, uint8_t init_base, uint8_t init_tiloc) {
 			SHEET_ADD(SHEET_FIREWSHOT, &SPR_FireWShot, 3,2,4, 0,0, 0,1, 0,2);
 			SHEET_ADD(SHEET_LABSHOT, &SPR_LabShot, 3,2,2, 0,0, 0,1, 0,2);
 			SHEET_ADD(SHEET_GAUDISHOT, &SPR_GaudiShot, 3,2,2, 0,0, 0,1, 0,2);
-			SHEET_ADD(SHEET_GAUDIEGG, &SPR_GaudiEgg, 2,3,3, 0,0, 1,0);
+			SHEET_ADD(SHEET_GAUDIEGG, &SPR_GaudiEgg, 4,3,3, 0,0, 1,0, 2,0, 3,0);
 			SHEET_ADD(SHEET_TERM, &SPR_Term, 2,2,3, 0,0, 0,1);
 			SHEET_ADD(SHEET_BUYOB, &SPR_BuyoBase, 3,4,4, 0,0, 0,1, 0,2);
 			SHEET_ADD(SHEET_BUYO, &SPR_Buyo, 2,2,2, 0,0, 0,1);

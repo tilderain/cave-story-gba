@@ -23,6 +23,8 @@
 #define PAL1					1
 #define PAL2					2
 #define PAL3					3
+#define PAL4					4
+#define PAL5					5
 
 #define TILE_SIZE				32
 #define TILE_INDEX_MASK         0x7FF
