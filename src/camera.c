@@ -60,10 +60,10 @@ void camera_set_position(int32_t x, int32_t y) {
 	camera.x_shifted = (x >> CSF) - SCREEN_HALF_W;
 	camera.y_shifted = (y >> CSF) - SCREEN_HALF_H;
 	// Update quick fetch cutoff values
-	camera_xmin = camera.x - pixel_to_sub(SCREEN_HALF_W + 32);
-	camera_xsize = pixel_to_sub(SCREEN_WIDTH + 64);
-	camera_ymin = camera.y - pixel_to_sub(SCREEN_HALF_H + 32);
-	camera_ysize = pixel_to_sub(SCREEN_HEIGHT + 64);
+	camera_xmin = camera.x - pixel_to_sub(SCREEN_HALF_W + 96);
+	camera_xsize = pixel_to_sub(SCREEN_WIDTH + 160);
+	camera_ymin = camera.y - pixel_to_sub(SCREEN_HALF_H + 96);
+	camera_ysize = pixel_to_sub(SCREEN_HEIGHT + 160);
 }
 
 void camera_shake(uint16_t time) {
@@ -149,10 +149,10 @@ void camera_update() {
 	camera.x_shifted = (x_next >> CSF) - SCREEN_HALF_W;
 	camera.y_shifted = (y_next >> CSF) - SCREEN_HALF_H;
 	// Update quick fetch cutoff values
-	camera_xmin = camera.x - pixel_to_sub(SCREEN_HALF_W + 32);
-	camera_xsize = pixel_to_sub(SCREEN_WIDTH + 64);
-	camera_ymin = camera.y - pixel_to_sub(SCREEN_HALF_H + 32);
-	camera_ysize = pixel_to_sub(SCREEN_HEIGHT + 64);
+	camera_xmin = camera.x - pixel_to_sub(SCREEN_HALF_W + 96);
+	camera_xsize = pixel_to_sub(SCREEN_WIDTH + 160);
+	camera_ymin = camera.y - pixel_to_sub(SCREEN_HALF_H + 96);
+	camera_ysize = pixel_to_sub(SCREEN_HEIGHT + 160);
 	// Morph the stage if the camera is moving
 	morphingColumn = sub_to_tile(x_next) - sub_to_tile(camera.x);
 	morphingRow = sub_to_tile(y_next) - sub_to_tile(camera.y);

@@ -34,7 +34,6 @@ fix particle effects
 disable xp merging
 fix missing sounds
 	-item get sound
-increase npc activation range
 
 add textbox window plane
 add fade effect
