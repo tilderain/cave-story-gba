@@ -120,11 +120,11 @@ void hud_update() {
 		hud_refresh_weapon();
 	}
     if(hudLevel != playerWeapon[currentWeapon].level) {
-	//	hud_refresh_energy(TRUE);
+		hud_refresh_energy(TRUE);
 	}
-    //if(hudEnergy != playerWeapon[currentWeapon].energy) {
+    if(hudEnergy != playerWeapon[currentWeapon].energy) {
 		hud_refresh_energy(FALSE);
-	//}
+	}
     if(hudMaxAmmo != playerWeapon[currentWeapon].maxammo) {
 		// Max ammo changed refresh both
 		hud_refresh_maxammo();
@@ -168,7 +168,7 @@ void hud_refresh_health() {
 
 void hud_refresh_energy(uint8_t hard) {
 	// Energy or level changed
-	if(hudLevel != playerWeapon[currentWeapon].level || hudWeapon != currentWeapon) {
+	if(hudLevel != playerWeapon[currentWeapon].level || hudWeapon != playerWeapon[currentWeapon].type) {
 		hudLevel = playerWeapon[currentWeapon].level;
 		hard = TRUE;
 	}
