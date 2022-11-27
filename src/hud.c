@@ -105,6 +105,7 @@ void hud_hide() {
 }
 
 void hud_update() {
+	uint8_t weaponChange = FALSE;
 	//if(paused) return;
 	if(!showing) return;
 	vdp_sprites_add(sprHUD, 2);
@@ -114,8 +115,9 @@ void hud_update() {
 	}
     if(hudWeapon != playerWeapon[currentWeapon].type) {
 		hud_refresh_weapon();
+		weaponChange = TRUE;
 	}
-    if(hudLevel != playerWeapon[currentWeapon].level) {
+    if(hudLevel != playerWeapon[currentWeapon].level || weaponChange) {
 		hud_refresh_energy(TRUE);
 	}
     if(hudEnergy != playerWeapon[currentWeapon].energy) {
@@ -164,7 +166,7 @@ void hud_refresh_health() {
 
 void hud_refresh_energy(uint8_t hard) {
 	// Energy or level changed
-	if(hudLevel != playerWeapon[currentWeapon].level || hudWeapon != playerWeapon[currentWeapon].type) {
+	if(hudLevel != playerWeapon[currentWeapon].level) {
 		hudLevel = playerWeapon[currentWeapon].level;
 		hard = TRUE;
 	}
@@ -173,8 +175,7 @@ void hud_refresh_energy(uint8_t hard) {
 		if(playerWeapon[currentWeapon].level == 3){
 			tempMaxEnergy = hudMaxEnergy >> 2;
         	tempEnergy = hudEnergy >> 2;
-		} else
-		{
+		} else {
         	tempMaxEnergy = hudMaxEnergy >> 1;
         	tempEnergy = hudEnergy >> 1;
 		}
@@ -195,8 +196,7 @@ void hud_refresh_energy(uint8_t hard) {
 		}
 	} else {
 		hudEnergy = playerWeapon[currentWeapon].energy;
-		//hudEnergyPixel = ((hudEnergy<<5) + (hudEnergy<<3)) / hudMaxEnergy;
-        hudEnergyPixel = EnergyPixel[div10[hudMaxEnergy] - 1][hudEnergy];
+        hudEnergyPixel = EnergyPixel[div10[tempMaxEnergy] - 1][playerWeapon[currentWeapon].energy];
 		hudEnergyDest = hudEnergyPixel;
 		hudEnergyTimer = 0;
 	}
