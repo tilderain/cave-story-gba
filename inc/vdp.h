@@ -56,7 +56,7 @@
 // Allocation of EXTRA1 (128 tiles) - background & HUD
 #define TILE_BACKINDEX TILE_EXTRA1INDEX
 #define TILE_BACKSIZE 96
-#define TILE_HUDINDEX (TILE_BACKINDEX + TILE_BACKSIZE)
+#define TILE_HUDINDEX (64)
 #define TILE_HUDSIZE 32
 // Allocation of EXTRA2 (64 tiles) - Effects, window, misc
 #define TILE_NUMBERINDEX TILE_EXTRA2INDEX

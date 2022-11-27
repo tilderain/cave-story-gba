@@ -62,19 +62,19 @@ void hud_create() {
 		.x = 16 + 128,
 		.y = (pal_mode ? 24 : 16) + 128,
 		.size = SPRITE_SIZE(4, 4),
-		.attr = TILE_ATTR(PAL0,1,0,0,192)
+		.attr = TILE_ATTR(PAL0,1,0,0,TILE_HUDINDEX*2)
 	};
 	sprHUD[1] = (VDPSprite) {
 		.x = 16 + 32 + 128,
 		.y = (pal_mode ? 24 : 16) + 128,
 		.size = SPRITE_SIZE(4, 4),
-		.attr = TILE_ATTR(PAL0,1,0,0,220)
+		.attr = TILE_ATTR(PAL0,1,0,0,(TILE_HUDINDEX*2)+16)
 	};
 	// Draw blank tiles next to weapon
-	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+8)*TILE_SIZE, 16, 2);
-	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+9)*TILE_SIZE, 16, 2);
-	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+12)*TILE_SIZE, 16, 2);
-	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+13)*TILE_SIZE, 16, 2);
+	//DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+8)*TILE_SIZE, 16, 2);
+	//DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+9)*TILE_SIZE, 16, 2);
+	//DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+12)*TILE_SIZE, 16, 2);
+	//DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+13)*TILE_SIZE, 16, 2);
 }
 
 void hud_force_redraw() {
@@ -84,10 +84,10 @@ void hud_force_redraw() {
 	hud_refresh_maxammo();
 	hud_refresh_ammo();
     // Draw blank tiles next to weapon
-    DMA_queueDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+8)*TILE_SIZE, 16, 2);
-    DMA_queueDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+9)*TILE_SIZE, 16, 2);
-    DMA_queueDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+12)*TILE_SIZE, 16, 2);
-    DMA_queueDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+13)*TILE_SIZE, 16, 2);
+    //DMA_queueDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+8)*TILE_SIZE, 16, 2);
+    //DMA_queueDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+9)*TILE_SIZE, 16, 2);
+    //DMA_queueDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+12)*TILE_SIZE, 16, 2);
+    //DMA_queueDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+13)*TILE_SIZE, 16, 2);
 
     disable_ints;
     z80_request();
@@ -120,19 +120,19 @@ void hud_update() {
 		hud_refresh_weapon();
 	}
     if(hudLevel != playerWeapon[currentWeapon].level) {
-		hud_refresh_energy(TRUE);
+	//	hud_refresh_energy(TRUE);
 	}
-    if(hudEnergy != playerWeapon[currentWeapon].energy) {
+    //if(hudEnergy != playerWeapon[currentWeapon].energy) {
 		hud_refresh_energy(FALSE);
-	}
+	//}
     if(hudMaxAmmo != playerWeapon[currentWeapon].maxammo) {
 		// Max ammo changed refresh both
 		hud_refresh_maxammo();
-		hud_refresh_ammo();
+	//	hud_refresh_ammo();
 	}
-    if(hudAmmo != playerWeapon[currentWeapon].ammo ) {
+    //if(hudAmmo != playerWeapon[currentWeapon].ammo ) {
 		hud_refresh_ammo();
-	}
+	//}
 }
 
 void hud_refresh_health() {
@@ -151,7 +151,7 @@ void hud_refresh_health() {
 		fillHP -= 8;
 	}
 	// Heart icon and two digits displaying current health
-	memcpy(tileData[0], &SPR_TILES(&SPR_Hud2, 0, 0)[3*TSIZE], TILE_SIZE);
+	memcpy(tileData[0], &SPR_TILES(&SPR_Hud2, 0, 0)[12*TSIZE], TILE_SIZE);
 	uint8_t digit = div10[hudHealth];
 	if(digit) {
 		memcpy(tileData[1], &TS_Numbers.tiles[(digit)*TSIZE], TILE_SIZE);
@@ -160,8 +160,10 @@ void hud_refresh_health() {
 	}
 	memcpy(tileData[2], &TS_Numbers.tiles[mod10[hudHealth]*TSIZE], TILE_SIZE);
 	// Queue DMA transfer for health display
-	for(uint8_t i = 0; i < 8; i++)
-		DMA_queueDma(DMA_VRAM, (uint32_t)tileData[i], (TILE_HUDINDEX+3+i*4)*TILE_SIZE, 16, 2);
+	//for(uint8_t i = 0; i < 8; i++)
+	//DMA_queueDma(DMA_VRAM, (uint32_t)tileData[i], (TILE_HUDINDEX+6+i*4)*TILE_SIZE, 16, 2);
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[0], (TILE_HUDINDEX+6)*TILE_SIZE, 32, 2);
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[3], (TILE_HUDINDEX+14)*TILE_SIZE, 32, 2);
 }
 
 void hud_refresh_energy(uint8_t hard) {
@@ -230,12 +232,15 @@ void hud_refresh_energy(uint8_t hard) {
 		}
 	}
 	// "Lv." and 1 digit for the level
-	memcpy(tileData[XP_BAR+0], &SPR_TILES(&SPR_Hud2, 0, 0)[2*TSIZE], TILE_SIZE);
-	memcpy(tileData[XP_BAR+1], &SPR_TILES(&SPR_Hud2, 0, 0)[6*TSIZE], TILE_SIZE);
+	memcpy(tileData[XP_BAR+0], &SPR_TILES(&SPR_Hud2, 0, 0)[8*TSIZE], TILE_SIZE);
+	memcpy(tileData[XP_BAR+1], &SPR_TILES(&SPR_Hud2, 0, 0)[9*TSIZE], TILE_SIZE);
 	memcpy(tileData[XP_BAR+2], &TS_Numbers.tiles[hudLevel*TSIZE], TILE_SIZE);
 	// Queue DMA transfer for level/energy display
-	for(uint8_t i = 0; i < 8; i++)
-		DMA_queueDma(DMA_VRAM, (uint32_t)tileData[XP_BAR+i], (TILE_HUDINDEX+2+i*4)*TILE_SIZE, 16, 2);
+	//for(uint8_t i = 0; i < 8; i++)
+	//DMA_queueDma(DMA_VRAM, (uint32_t)tileData[XP_BAR+i], (TILE_HUDINDEX+4+i*4)*TILE_SIZE, 16, 2);
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[XP_BAR], (TILE_HUDINDEX+4)*TILE_SIZE, 16, 2);
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[XP_BAR+2], (TILE_HUDINDEX+5)*TILE_SIZE, 16, 2);
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[XP_BAR+4], (TILE_HUDINDEX+12)*TILE_SIZE, 32, 2);
 }
 
 void hud_refresh_weapon() {
@@ -244,8 +249,8 @@ void hud_refresh_weapon() {
 	memcpy(tileData[WPN+0], SPR_TILES(&SPR_ArmsImage, 0, hudWeapon), TILE_SIZE*2);
 	memcpy(tileData[WPN+2], &SPR_TILES(&SPR_ArmsImage, 0, hudWeapon)[TSIZE*2], TILE_SIZE*2);
 	// Queue DMA transfer for icon
-	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[WPN+0], (TILE_HUDINDEX)*TILE_SIZE, 32, 2);
-	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[WPN+2], (TILE_HUDINDEX+4)*TILE_SIZE, 32, 2);
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[WPN+0], (TILE_HUDINDEX)*TILE_SIZE, 16, 2);
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[WPN+2], (TILE_HUDINDEX+2)*TILE_SIZE, 16, 2);
 }
 
 void hud_refresh_ammo() {
@@ -265,17 +270,20 @@ void hud_refresh_ammo() {
 	} else { // Weapon doesn't use ammo
 		memcpy(tileData[AMMO+0], TILE_BLANK, TILE_SIZE);
 		memcpy(tileData[AMMO+1], TILE_BLANK, TILE_SIZE);
-		memcpy(tileData[AMMO+2], &SPR_TILES(&SPR_Hud2,0,0)[SPR_TILE(6, 0)*TSIZE], TILE_SIZE*2);
+		memcpy(tileData[AMMO+2], &SPR_TILES(&SPR_Hud2,0,0)[18*TSIZE], TILE_SIZE*2);
 	}
 	// Queue DMA transfer for ammo
-	for(uint8_t i = 0; i < 4; i++)
-		DMA_queueDma(DMA_VRAM, (uint32_t)tileData[AMMO+i], (TILE_HUDINDEX+16+i*4)*TILE_SIZE, 16, 2);
+	//for(uint8_t i = 0; i < 4; i++)
+	//	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[AMMO+i], (TILE_HUDINDEX+16+i*4)*TILE_SIZE, 16, 2);
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[AMMO], (TILE_HUDINDEX+8)*TILE_SIZE, 32, 2);
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[AMMO+2], (TILE_HUDINDEX+11)*TILE_SIZE, 16, 2);
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[AMMO+4], (TILE_HUDINDEX+10)*TILE_SIZE, 32, 2);
 }
 
 void hud_refresh_maxammo() {
 	// Bottom half of ammo display
 	hudMaxAmmo = playerWeapon[currentWeapon].maxammo;
-	memcpy(tileData[AMMO+4], &SPR_TILES(&SPR_Hud2,0,0)[SPR_TILE(4, 1)*TSIZE], TILE_SIZE);
+	memcpy(tileData[AMMO+4], &SPR_TILES(&SPR_Hud2,0,0)[20*TSIZE], TILE_SIZE);
 	if(hudMaxAmmo > 0) {
 		uint8_t ammoTemp = hudMaxAmmo;
 		if(ammoTemp >= 100) {
@@ -288,7 +296,7 @@ void hud_refresh_maxammo() {
 		memcpy(tileData[AMMO+7], &TS_Numbers.tiles[mod10[ammoTemp]*TSIZE], TILE_SIZE);
 	} else { // Weapon doesn't use ammo
 		memcpy(tileData[AMMO+5], TILE_BLANK, TILE_SIZE);
-		memcpy(tileData[AMMO+6], &SPR_TILES(&SPR_Hud2,0,0)[SPR_TILE(6, 0)*TSIZE], TILE_SIZE*2);
+		memcpy(tileData[AMMO+6], &SPR_TILES(&SPR_Hud2,0,0)[18*TSIZE], TILE_SIZE*2);
 	}
 	// Queue DMA transfer for max ammo
 	for(uint8_t i = 0; i < 4; i++)
