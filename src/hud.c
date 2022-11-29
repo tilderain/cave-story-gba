@@ -186,10 +186,11 @@ void hud_refresh_energy(uint8_t hard) {
 	}
 	if(!hard) {
 		if(hudEnergyTimer == 0) {
-            hudEnergyPixel = EnergyPixel[div10[hudMaxEnergy] - 1][hudEnergy];
-            hudEnergyDest = EnergyPixel[div10[hudMaxEnergy] - 1][playerWeapon[currentWeapon].energy];
-			//hudEnergyPixel = ((hudEnergy<<5) + (hudEnergy<<3)) / hudMaxEnergy;
-			//hudEnergyDest = ((playerWeapon[currentWeapon].energy<<5) + (playerWeapon[currentWeapon].energy<<3)) / hudMaxEnergy;
+            hudEnergyPixel = EnergyPixel[div10[tempMaxEnergy] - 1][tempEnergy];
+			if(playerWeapon[currentWeapon].type == WEAPON_SPUR)
+            	hudEnergyDest = EnergyPixel[div10[tempMaxEnergy] - 1][tempEnergy];
+			else
+				hudEnergyDest = EnergyPixel[div10[tempMaxEnergy] - 1][playerWeapon[currentWeapon].energy];
 			hudEnergyTimer = 3;
 		} else {
 			hudEnergyTimer--;
