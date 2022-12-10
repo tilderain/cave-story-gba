@@ -6,6 +6,8 @@
 
 #include "tools.h"
 
+#include "gba.h"
+
 uint16_t randbase;
 
 void setRandomSeed(uint16_t seed)
@@ -16,7 +18,7 @@ void setRandomSeed(uint16_t seed)
 
 uint16_t random()
 {
-    randbase ^= (randbase >> 1) ^ *((volatile uint16_t*) 0xC00008);
+    randbase ^= (randbase >> 1) ^ REG_VCOUNT;
     randbase ^= (randbase << 1);
 
     return randbase;

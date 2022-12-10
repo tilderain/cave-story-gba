@@ -135,7 +135,7 @@ IWRAM_CODE void game_main(uint8_t load) {
 					} else if(rtn == 2) {
 						vdp_colors(0, PAL_FadeOut, 64);
 						vdp_color(15, 0x000);
-						stageBackground = 255; // Force background redraw
+						stageBackground = 0; // Force background redraw
 						game_reset(TRUE); // Reload save
 						hud_show();
 						playerIFrames = 0;

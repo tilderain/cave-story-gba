@@ -66,7 +66,7 @@ uint16_t tileScrollY = 0;
 void vdp_init() {
 	//SCREEN_HEIGHT = 160;
 	// Store pal_mode and adjust some stuff based on it
-    pal_mode = *vdp_ctrl_port & 1;
+    //pal_mode = *vdp_ctrl_port & 1;
     //SCREEN_HEIGHT = pal_mode ? 240 : 224;
 	SCREEN_HALF_H = SCREEN_HEIGHT >> 1;
 	sprite_ymax = SCREEN_HEIGHT + 32;
@@ -493,24 +493,28 @@ IWRAM_CODE void vdp_sprites_update() {
 	temppointer2 = OBJ_COLORS + 33;
 	*temppointer2 = palette[0];
 	temppointer = BG_COLORS + 1;
-	for(int i=1; i<16; i++) { //OBJ Pal 0
-		
-		*temppointer++ = tileset_info[stage_info[stageID].tileset].palette[i];
-	}
-	for(int i=0; i<16; i++) { //OBJ Pal 1
-		
-		*temppointer++ = background_info[stageBackground].palette[i];
-	}
-	for(int i=1; i<16; i++) { //OBJ Pal 2
-		*temppointer2++ = tileset_info[stage_info[stageID].tileset].palette[i];
-	}
-	for(int i=0; i<16; i++) { //OBJ Pal 3
-		*temppointer2++ = stage_info[stageID].npcPalette[i];
-	}
+	if(stage_info[stageID].tileset != NULL)
+		for(int i=1; i<16; i++) { //OBJ Pal 0
 
-	for(int i=0; i<16; i++) { //OBJ Pal 3
-		*temppointer2++ = stage_info[stageID].npcPalette2[i];
-	}
+			*temppointer++ = tileset_info[stage_info[stageID].tileset].palette[i];
+		}
+	if(background_info[stageBackground].palette != NULL)
+		for(int i=0; i<16; i++) { //OBJ Pal 1
+
+			*temppointer++ = background_info[stageBackground].palette[i];
+		}
+	if(stage_info[stageID].tileset != NULL)	
+		for(int i=1; i<16; i++) { //OBJ Pal 2
+			*temppointer2++ = tileset_info[stage_info[stageID].tileset].palette[i];
+		}
+	if(stage_info[stageID].npcPalette != NULL)
+		for(int i=0; i<16; i++) { //OBJ Pal 3
+			*temppointer2++ = stage_info[stageID].npcPalette[i];
+		}
+	if(stage_info[stageID].npcPalette2 != NULL)
+		for(int i=0; i<16; i++) { //OBJ Pal 3
+			*temppointer2++ = stage_info[stageID].npcPalette2[i];
+		}
 
 	BG_COLORS[241]=RGB5(17,31,31);
 

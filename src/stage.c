@@ -34,7 +34,7 @@
 #define TILE_WATERINDEX (TILE_TSINDEX + 384)
 
 // Index of background in db/back.c and the effect type
-uint8_t stageBackground = 0xFF;
+uint8_t stageBackground = 0;
 
 int16_t backScrollTable[32];
 //uint8_t *stageBlocks = NULL;

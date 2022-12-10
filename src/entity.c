@@ -79,9 +79,13 @@ AnimationFrame* get_animation_frame(uint16_t type)
 		SHEET_FIND(sheet, npc_info[type].sheet);
 		return sheets[sheet].sprite->animations[0]->frames[0];
 	}
-	else
+	else if (npc_info[type].sprite)
 	{
 		return npc_info[type].sprite->animations[0]->frames[0];
+	}
+	else
+	{
+		return SPR_Sue.animations[0]->frames[0];
 	}
 }
 

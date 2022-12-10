@@ -122,6 +122,7 @@ uint8_t window_is_open() {
 }
 
 void window_clear() {
+	iprintf("\x1b[2J");
 	uint8_t x = showingFace ? TEXT_X1_FACE : TEXT_X1;
 	uint8_t y = windowOnTop ? TEXT_Y1_TOP : TEXT_Y1;
 	uint8_t w = showingFace ? 29 : 36;

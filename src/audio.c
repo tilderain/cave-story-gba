@@ -66,13 +66,19 @@ void song_play(uint8_t id) {
 		vdp_vsync();
 		//xgm_music_play(song_info[id].song);
 	}
-	if(song_info_xm[id].song == 0)
+
+	int song = song_info_xm[id].song;
+	if(song == 0)
 	{
 		mmStop();
 	}
+	else if (song == 3 || song == 10 || song == 15 || song == 16)
+	{
+		mmStart((mm_word)song_info_xm[id].song, MM_PLAY_ONCE);
+	}
 	else
 	{
-		mmStart((mm_word)song_info_xm[id].song, MM_PLAY_LOOP);
+		mmStart((mm_word)song_info_xm[id].song, MM_PLAY_ONCE);
 	}
 	songPlaying = id;
 }
