@@ -104,8 +104,8 @@ void player_init() {
 	player.hidden = FALSE;
 	player.dir = 0;
 	player.flags = NPC_IGNORE44|NPC_SHOWDAMAGE;
-	playerMaxHealth = 300;
-	player.health = 300;
+	playerMaxHealth = 3;
+	player.health = 3;
 	player.x = block_to_sub(10) + pixel_to_sub(8);
 	player.y = block_to_sub(8) + pixel_to_sub(8);
 	player.x_next = player.x;
@@ -122,12 +122,9 @@ void player_init() {
 	lookingDown = FALSE;
 	shoot_cooldown = 0;
 	mgun_chargetime = 0;
-	playerEquipment = EQUIP_BOOSTER20; // Nothing equipped
+	playerEquipment = 0; // Nothing equipped
 	for(uint8_t i = 0; i < MAX_ITEMS; i++) playerInventory[i] = 0; // Empty inventory
-	for(uint8_t i = 0; i < MAX_WEAPONS; i++) {
-		playerWeapon[i].type = 4; // No Weapons
-		playerWeapon[i].level = 3;
-	}
+	for(uint8_t i = 0; i < MAX_WEAPONS; i++) playerWeapon[i].type = 0; // No Weapons
 
 	playerMoveMode = 0;
 	currentWeapon = 0;
