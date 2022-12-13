@@ -898,7 +898,7 @@ void player_show_map_name(uint8_t ttl) {
 	// Transfer tile array to VRAM
     mapNameSpriteNum = 0;
     uint16_t x = SCREEN_HALF_W - (len<<2) + 128;
-    uint16_t y = SCREEN_HALF_H - 32 + 128;
+    uint16_t y = SCREEN_HALF_H - 32 + 128 + 12;
     for(uint16_t i = 0; i < len; i += 4) {
         uint8_t sind = i>>2;
         mapNameSprite[sind] = (VDPSprite) {
