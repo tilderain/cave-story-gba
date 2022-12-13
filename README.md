@@ -16,9 +16,12 @@ Various, details [here](doc/LICENSE.md)
 - Pixel
 
 Cave Story MD thanks:
-  I did not know how to sort this list, so I did it alphabetically.
 
-  - andwhyisit: A whole lot of testing. Automated builds.
-  - DavisOlivier: Helped with a few music tracks.
-  - Sik: Mega Drive tech support. Made the font used in-game.
-  - Other people I probably forgot
+```
+I did not know how to sort this list, so I did it alphabetically.
+
+- andwhyisit: A whole lot of testing. Automated builds.
+- DavisOlivier: Helped with a few music tracks.
+- Sik: Mega Drive tech support. Made the font used in-game.
+- Other people I probably forgot
+```
