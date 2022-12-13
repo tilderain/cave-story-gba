@@ -140,12 +140,12 @@ void player_init() {
 	const SpriteDefinition *spr = cfg_language == LANG_JA ? &SPR_J_Air : &SPR_Air;
 	vdp_tiles_load_from_rom(SPR_TILES(spr, 0, 0), TILE_AIRINDEX, 4);
 	airSprite[0] = (VDPSprite) {
-		.x = SCREEN_HALF_W - 28 + 128, .y = SCREEN_HALF_H - 24 + 128, 
+		.x = SCREEN_HALF_W - 28 + 128, .y = SCREEN_HALF_H - 12 + 128, 
 		.size = SPRITE_SIZE(4, 1), .attr = TILE_ATTR(PAL0,1,0,0,TILE_AIRINDEX)
 	};
 	airSprite[1] = (VDPSprite) {
-		.x = SCREEN_HALF_W + 8 + 128, .y = SCREEN_HALF_H - 24 + 128, 
-		.size = SPRITE_SIZE(3, 1), .attr = TILE_ATTR(PAL0,1,0,0,TILE_AIRINDEX+4)
+		.x = SCREEN_HALF_W + 8 + 128, .y = SCREEN_HALF_H - 12 + 128, 
+		.size = SPRITE_SIZE(4, 1), .attr = TILE_ATTR(PAL0,1,0,0,TILE_AIRINDEX+4)
 	};
 	// Air Tank sprite
 	vdp_tiles_load_from_rom(SPR_TILES(&SPR_Bubble, 0, 0), TILE_AIRTANKINDEX, 9);
@@ -891,7 +891,7 @@ void player_show_map_name(uint8_t ttl) {
         memcpy(nameTiles[len-1], &TS_SysFont.tiles[chr * 8], 32);
     }
     if(len) {
-        vdp_tiles_load(nameTiles[0], TILE_NAMEINDEX, 16);
+        vdp_tiles_load_from_rom(nameTiles[0], TILE_NAMEINDEX, 16);
     } else {
         return;
     }
@@ -923,7 +923,7 @@ static void draw_air_percent() {
 	memcpy(numberTiles[1], &TS_Numbers.tiles[div10[airTemp] * 8], 32);
 	memcpy(numberTiles[2], &TS_Numbers.tiles[mod10[airTemp] * 8], 32);
 	
-	vdp_tiles_load(numberTiles[0], TILE_AIRINDEX + 4, 3);
+	vdp_tiles_load_from_rom(numberTiles[0], TILE_AIRINDEX + 4, 3);
 	
 }
 
@@ -1051,14 +1051,14 @@ void player_draw() {
 				weaponSprite = (VDPSprite) {
 					.x = (player.x>>CSF) - (camera.x>>CSF) + SCREEN_HALF_W - 4 + 128,
 					.y = (player.y>>CSF) - (camera.y>>CSF) + SCREEN_HALF_H - 8 + 128,
-					.size = SPRITE_SIZE(1, 3),
+					.size = SPRITE_SIZE(1, 2),
 					.attr = TILE_ATTR(PAL1,0,vdir,vdir ? !player.dir : player.dir,TILE_WEAPONINDEX+3),
 				};
 			} else {
 				weaponSprite = (VDPSprite) {
 					.x = (player.x>>CSF) - (camera.x>>CSF) + SCREEN_HALF_W - 12 + 128,
 					.y = (player.y>>CSF) - (camera.y>>CSF) + SCREEN_HALF_H - 0 + 128,
-					.size = SPRITE_SIZE(3, 1),
+					.size = SPRITE_SIZE(2, 1),
 					.attr = TILE_ATTR(PAL1,0,0,player.dir,TILE_WEAPONINDEX),
 				};
 			}

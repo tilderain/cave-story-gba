@@ -44,7 +44,7 @@ void effects_init() {
 		memcpy(stiles[i], SPR_TILES(&SPR_Smoke, 0, i), 128);
 	}
 	// Transfer to VRAM
-	vdp_tiles_load(stiles[0], TILE_SMOKEINDEX, TILE_SMOKESIZE);
+	vdp_tiles_load_from_rom(stiles[0], TILE_SMOKEINDEX, TILE_SMOKESIZE);
 }
 
 void effects_clear() {
