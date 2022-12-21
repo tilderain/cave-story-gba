@@ -10,8 +10,9 @@ Work in progress port of [Cave Story MD](https://github.com/andwn/cave-story-md)
 ## License
 Various, details [here](doc/LICENSE.md)
 ## Thanks
-- andwn: Took on the insane task of porting this game to a 1988 console in the first place, and so without, this port would not exist.
+- andwn: Took on the insane task of porting this game to a 1988 console, and so without, this project would not exist.
 - gbadev discord: Moral support
+- Řrřola: Org2XM
 - Ravenworks
 - Pixel
 
