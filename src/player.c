@@ -765,12 +765,12 @@ static void player_update_booster() {
 		case BOOST_HOZ:
 		{
             if(!player.dir) { // Left
-                if(nblockl) {
+                if(blockl) {
                     player.y_speed = -SPEED_8(0xFF);
                     player.x += 0x100;
                 }
             } else { // Right
-                if(nblockr) {
+                if(blockr) {
                     player.y_speed = -SPEED_8(0xFF);
                     player.x -= 0x100;
                 }
