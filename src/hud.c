@@ -30,6 +30,7 @@ uint32_t tileData[28][8];
 uint8_t hudMaxHealth, hudHealth;
 uint8_t hudWeapon, hudMaxAmmo, hudAmmo;
 uint8_t hudLevel, hudMaxEnergy, hudEnergy;
+uint8_t hudMaxBlink;
 
 // Used for bar animation
 uint8_t hudEnergyPixel, hudEnergyTimer, hudEnergyDest;
@@ -170,6 +171,11 @@ void hud_refresh_energy(uint8_t hard) {
 		hudLevel = playerWeapon[currentWeapon].level;
 		hard = TRUE;
 	}
+
+    // The Spur's values are rather high, so if it's equipped half it in this temp variable,
+    // so that the lookup table can still be used
+    uint8_t tempMaxEnergy;
+    uint8_t tempEnergy;
 	if(playerWeapon[currentWeapon].type == WEAPON_SPUR) {
 		hudMaxEnergy = spur_time[pal_mode||cfg_60fps][playerWeapon[currentWeapon].level];
 		if(playerWeapon[currentWeapon].level == 3){
