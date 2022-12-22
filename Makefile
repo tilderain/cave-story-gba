@@ -237,7 +237,7 @@ prereq: $(CPXMS) $(XGCS) $(PCMS) $(CTSETS) $(ZOBJ) $(TSBS) $(PATS)
 
 head-gen:
 	rm -f inc/ai_gen.h
-	python3 aigen.py
+	python3 ../aigen.py
 
 grit-gen:
 	python3 ../gritgen.py
