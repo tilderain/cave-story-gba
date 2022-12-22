@@ -44,7 +44,7 @@ void mem_init() {
     // define available memory (sizeof(uint16_t) is the memory reserved to indicate heap end)
     uint32_t len = MEMORY_HIGH - (h + sizeof(uint16_t));
     // define heap
-    s_heap = (uint16_t*) &__heap_start;
+    //s_heap = (uint16_t*) &__heap_start;
     // and its size
     *s_heap = len;
     // free memory : whole heap
