@@ -451,7 +451,46 @@ void ai_savepoint(Entity *e) {
 }
 
 void ai_refill(Entity *e) {
-	e->frame = (++e->animtime & 2) >> 1;
+  switch (e->state)
+  {
+    case 0:
+    {
+      //smoke_if_bonus_item(e);
+      e->state = 1;
+    }
+    case 1: // flickery animation
+    {
+      int x = random() % 30;
+
+      if (x < 10)
+        e->state = 2;
+      else if (x < 25)
+        e->state = 3;
+      else
+        e->state = 4;
+
+      e->timer     = min(16, random() % 64);
+      e->animtime = 0;
+    }
+    break;
+
+    case 2:
+      e->frame = 0;
+      break; // solid on
+
+    case 3: // flickery
+      e->animtime++;
+      e->frame = (e->animtime & 1);
+      break;
+
+    case 4:
+      e->frame = 1;
+      break; // solid off
+  }
+
+  if (--e->timer <= 0)
+    e->state = 1;
+
 	ai_grav(e);
 }
 
