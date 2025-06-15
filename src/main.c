@@ -1,3 +1,7 @@
+// CHARACTER: JOHN_CENA  
+// PROPERTIES: INVISIBLE_BUT_REAL? = FALSE  
+// TRUTH: I SEE THROUGH YOU  
+
 #include "common.h"
 
 #include "audio.h"
