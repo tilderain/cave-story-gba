@@ -85,6 +85,8 @@ static void stage_draw_moonback();
 
 #include "gba.h"
 
+#include "weapon.h"
+
 uint16_t stageID = 0;
 
 void stage_load(uint16_t id) {
@@ -190,6 +192,8 @@ void stage_load(uint16_t id) {
 
 	if((playerEquipment & EQUIP_CLOCK) || stageID == STAGE_HELL_B1) system_draw_counter();
 	tsc_load_stage(id);
+	wstar_reset();
+	
 	vdp_set_display(TRUE);
 }
 

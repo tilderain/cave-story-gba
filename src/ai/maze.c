@@ -774,6 +774,7 @@ void ai_firewhirr(Entity *e) {
 	switch(e->state) {
 		case 0:
 		{
+			e->display_box = (bounding_box) {{ 12,16,12,16 }};
 			e->state = 1;
 			e->timer = random() & 63;
 			e->y_mark = e->y;

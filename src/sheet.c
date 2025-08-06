@@ -186,9 +186,10 @@ void sheets_load_stage(uint16_t sid, uint8_t init_base, uint8_t init_tiloc) {
 		SHEET_ADD(SHEET_MISSILE, &SPR_MisslP,  4,2,2, 0,0, 0,1, 1,0, 1,1);
 		SHEET_ADD(SHEET_ENERGY,  &SPR_EnergyS, 6,1,1, 0,0, 0,1, 0,2, 0,3, 0,4, 0,5);
 		SHEET_ADD(SHEET_ENERGYL, &SPR_EnergyL, 6,2,2, 0,0, 0,1, 0,2, 0,3, 0,4, 0,5);
+		SHEET_ADD(SHEET_WSTAR,   &SPR_WStar,   3,1,1, 0, 1, 2);
 	} else {
-		sheet_num = 4;
-		memset(&sheets[4], 0, sizeof(Sheet) * (MAX_SHEETS - 4));
+		sheet_num = 5;
+		memset(&sheets[5], 0, sizeof(Sheet) * (MAX_SHEETS - 5));
 	}
 	if(init_tiloc) {
 		memset(tilocs, 0, MAX_TILOCS);
