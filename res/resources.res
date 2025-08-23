@@ -28,6 +28,8 @@
 # Sprites
 # ----------------------------------------------------------------------------------------------
 
+SPRITE SPR_Arrow        "sprite/arrow.png"              1 2 NONE
+
 # Use PAL_Sega
 SPRITE SPR_Sega			"sprite/sega.png"			12 4 0 0 NONE
 SPRITE SPR_Sega2		"sprite/sega2.png"			12 4 0 0 NONE
