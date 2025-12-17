@@ -16,6 +16,37 @@
 
 #include <stdio.h>
 
+u8 saturate = true;
+uint16_t saturate_color(uint16_t color) {
+    if(!saturate) return color;
+
+    // 1. Unpack 5-bit RGB
+    int r = color & 0x1F;
+    int g = (color >> 5) & 0x1F;
+    int b = (color >> 10) & 0x1F;
+
+    // 2. Calculate average brightness (Grayscale)
+    int gray = (r + g + b) / 3;
+
+    // 3. Apply Intense Saturation (Difference * 2)
+    r = gray + ((r - gray) << 1);
+    g = gray + ((g - gray) << 1);
+    b = gray + ((b - gray) << 1);
+
+    // 4. Apply 1.375x Brightness
+    r = (r * 21) >> 4;
+    g = (g * 21) >> 4;
+    b = (b * 21) >> 4;
+
+
+    // 5. Clamp strictly to 0-31 range
+    if (r < 0) r = 0; else if (r > 31) r = 31;
+    if (g < 0) g = 0; else if (g > 31) g = 31;
+    if (b < 0) b = 0; else if (b > 31) b = 31;
+
+    // 6. Repack
+    return (uint16_t)(r | (g << 5) | (b << 10));
+}
 extern const uint32_t TILE_BLANK[8];
 static const uint16_t BLANK_DATA[0x80];
 const uint16_t PAL_FadeOut[64] = {
@@ -192,9 +223,19 @@ void vdp_dma_vram(uint32_t from, uint16_t to, uint16_t len) {
 }
 
 void vdp_dma_cram(uint32_t from, uint16_t to, uint16_t len) {
-	DMA3COPY(from, OBJ_COLORS + (to/2), len | COPY32);
-		return;
-	dma_do(from, len, ((0xC000 + (((uint32_t)to) & 0x3FFF)) << 16) + ((((uint32_t)to) >> 14)));
+    uint16_t* src = (uint16_t*)from;
+    
+    // 'to' is likely a byte offset (0xC000 based in Genesis), 
+    // so we divide by 2 to get the 16-bit index for GBA palette RAM.
+    volatile uint16_t* dst = OBJ_COLORS + (to / 2);
+
+    // Loop through each color
+    for (int i = 0; i < len; i++) {
+        uint16_t color = src[i];
+
+        //color = saturate_color(color);
+        dst[i] = saturate_color(color);
+    }
 }
 
 /*void vdp_dma_vsram(uint32_t from, uint16_t to, uint16_t len) {
@@ -375,7 +416,7 @@ void vdp_vscroll(uint16_t plan, int16_t vscroll) {
 
 // Sprites
 
-IWRAM_CODE void vdp_sprite_add(const VDPSprite *spr) {
+EWRAM_CODE void vdp_sprite_add(const VDPSprite *spr) {
     // Exceeded max number of sprites
     if(sprite_count >= 80) return;
     // Prevent drawing off screen sprites
@@ -386,7 +427,7 @@ IWRAM_CODE void vdp_sprite_add(const VDPSprite *spr) {
     }
 }
 
-IWRAM_CODE void vdp_sprites_add(const VDPSprite *spr, uint16_t num) {
+EWRAM_CODE void vdp_sprites_add(const VDPSprite *spr, uint16_t num) {
 	for(uint16_t i = num; i--;) vdp_sprite_add(&spr[i]);
 }
 
@@ -487,35 +528,34 @@ IWRAM_CODE void vdp_sprites_update() {
 	}
 	u16 *temppointer;
 	u16 *temppointer2;
-	// load the palette for the background, 7 colors
-	temppointer = BG_COLORS;
-	*temppointer = palette[0];
-	temppointer2 = OBJ_COLORS + 33;
-	*temppointer2 = palette[0];
-	temppointer = BG_COLORS + 1;
-	if(stage_info[stageID].tileset != NULL)
-		for(int i=1; i<16; i++) { //OBJ Pal 0
+    // load the palette for the background, 7 colors
+    temppointer = BG_COLORS;
+    *temppointer = saturate_color(palette[0]); 
+    temppointer2 = OBJ_COLORS + 33;
+    *temppointer2 = saturate_color(palette[0]);
+    temppointer = BG_COLORS + 1;
+    if(stage_info[stageID].tileset != NULL)
+        for(int i=1; i<16; i++) { // OBJ Pal 0
 
-			*temppointer++ = tileset_info[stage_info[stageID].tileset].palette[i];
-		}
-	if(background_info[stageBackground].palette != NULL)
-		for(int i=0; i<16; i++) { //OBJ Pal 1
-
-			*temppointer++ = background_info[stageBackground].palette[i];
-		}
-	if(stage_info[stageID].tileset != NULL)	
-		for(int i=1; i<16; i++) { //OBJ Pal 2
-			*temppointer2++ = tileset_info[stage_info[stageID].tileset].palette[i];
-		}
-	if(stage_info[stageID].npcPalette != NULL)
-		for(int i=0; i<16; i++) { //OBJ Pal 3
-			*temppointer2++ = stage_info[stageID].npcPalette[i];
-		}
-	if(stage_info[stageID].npcPalette2 != NULL)
-		for(int i=0; i<16; i++) { //OBJ Pal 3
-			*temppointer2++ = stage_info[stageID].npcPalette2[i];
-		}
-
+            *temppointer++ = saturate_color(tileset_info[stage_info[stageID].tileset].palette[i]);
+        }
+    if(background_info[stageBackground].palette != NULL)
+        for(int i=0; i<16; i++) { // OBJ Pal 1
+            *temppointer++ = saturate_color(background_info[stageBackground].palette[i]);
+        }
+    if(stage_info[stageID].tileset != NULL)    
+        for(int i=1; i<16; i++) { // OBJ Pal 2
+            *temppointer2++ = saturate_color(tileset_info[stage_info[stageID].tileset].palette[i]);
+        }
+    if(stage_info[stageID].npcPalette != NULL)
+        for(int i=0; i<16; i++) { // OBJ Pal 3
+            *temppointer2++ = saturate_color(stage_info[stageID].npcPalette[i]);
+        }
+    if(stage_info[stageID].npcPalette2 != NULL)
+        for(int i=0; i<16; i++) { // OBJ Pal 3
+            *temppointer2++ = saturate_color(stage_info[stageID].npcPalette2[i]);
+        }
+	//temp text color
 	BG_COLORS[241]=RGB5(17,31,31);
 
 	DMA3COPY(obj_buffer, OAM, ((sizeof(OBJATTR)*128)/2));
