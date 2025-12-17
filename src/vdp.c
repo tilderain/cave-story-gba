@@ -351,7 +351,7 @@ void vdp_hscroll(uint16_t plan, int16_t hscroll) {
 }
 
 void vdp_hscroll_tile(uint16_t plan, int16_t *hscroll) {
-	BG_OFFSET[plan].x = hscroll;
+	BG_OFFSET[plan].x = (int)hscroll;
 		return;
     vdp_set_autoinc(32);
     vdp_dma_vram((uint32_t) hscroll, VDP_HSCROLL_TABLE + (plan == VDP_PLAN_A ? 0 : 2), 32);

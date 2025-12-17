@@ -101,7 +101,7 @@ const stage_info_def stage_info[STAGE_COUNT] = {
 	{ PXM_Ostep,	PXE_Ostep,	PAL_Regu,		NULL,	25,	4,	"Corridor" },
 	{ PXM_e_Labo,	PXE_e_Labo,	PAL_Regu,		NULL,	12,	0,	"Credits" },
 	{ PXM_Pole,		PXE_Pole,	PAL_Gunsmith, 	NULL,	3,0,	"Hermit Gunsmith" },
-	{ PXM_Island,	PXE_Island,	&PAL_XX,		NULL,	21,	0,	"" },
+	{ PXM_Island,	PXE_Island,	PAL_Gunsmith,		NULL,	21,	0,	"" },
 	{ PXM_Ballo2,	PXE_Ballo2,	PAL_LabB,		NULL,	10,	14,	"Seal Chamber" },
 	{ PXM_e_Blcn,	PXE_e_Blcn,	PAL_Regu,		NULL,	21,	0,	"Credits" },
 	{ PXM_Clock,	PXE_Clock,	PAL_Regu,		NULL,	15,	7,	"Clock" },
