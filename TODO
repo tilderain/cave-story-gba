@@ -3,7 +3,23 @@ bkmoon
 ---use Terminusmodx as font
 ---too big?
 
-fix tyrant/mimiga/wanpak2 xm
+fix tyrant/grasstown xm
+
+fix sandzone ball count
+
+brighter color option
+
+smoke speed
+xp bar flash time
+splashing/ water drop anim
+
+polar star shoot fx
+bullet hit wall
+
+blood particle
+boomflash
+
+add randomness to bonk particles
 
 
 fix bkred in hell
@@ -19,6 +35,8 @@ reverse jumping frame
 
 teleporter anim
 hp anim
+
+sega logo
 
 <RMU
 <FMU
@@ -52,7 +70,7 @@ boss bar
 plantation enemies dont move
 
 fix spur damage
--- add randomness to bonk particles
+
 
 stop moving when dying
 
