@@ -3,9 +3,10 @@
 
 Work in progress port of [Cave Story MD](https://github.com/andwn/cave-story-md) by andwn, for the GBA.
 ## Compilation
-1. Setup [marsdev](https://github.com/andwn/marsdev) and `python`
-  - Marsdev targets: `m68k-toolchain z80-tools sik-tools`
-2. Get the gba-dev packages from devkitPro.
+Linux only confirmed, vibecode your way to a windows build.
+
+1. Setup `python` and `libpng-dev`
+2. Get the gba-dev packages from devkitPro : https://devkitpro.org/wiki/Getting_Started .
 3. Clone & `make -j8; `
 ## License
 Various, details [here](doc/LICENSE.md)
