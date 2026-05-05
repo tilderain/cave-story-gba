@@ -189,13 +189,19 @@ int textPixelX = 0;
 void window_draw_char(uint8_t c) {
     if (c == '\n') {
         textRow++;
+		if (textRow > 2) {
+   			// window_scroll_text(); // Replace the old instant scroll
+    		tscState = TSC_SOFT_SCROLL;
+    		s_scroll_timer = 0;
+    		return; // Stop drawing immediately
+		}
         textColumn = 0;
         spaceCounter = spaceOffset = 0;
         
         // Reset X position! Indent by 56 pixels if a face is showing.
         textPixelX = showingFace ? 56 : 0; 
         
-        if (textRow > 2) window_scroll_text();
+
     } else {
         // Line height is 16 pixels
         int py = textRow * 16; 

@@ -354,3 +354,34 @@ void canvas_init_fullscreen(void) {
     BG_OFFSET[3].x = 0;
     BG_OFFSET[3].y = 0;
 }
+
+void canvas_shift_pixels_up_2() {
+    volatile uint32_t *vram = (uint32_t *)(VRAM_TILE_BASE + CANVAS_TILE_BASE * 32);
+    
+    for (int col = 0; col < CANVAS_TILES_W; col++) {
+        for (int row = 0; row < CANVAS_TILES_H; row++) {
+            int current_tile_idx = (row * CANVAS_TILES_W + col) * 8; 
+            int next_tile_idx = ((row + 1) * CANVAS_TILES_W + col) * 8;
+
+            volatile uint32_t *curr_tile = &vram[current_tile_idx];
+
+            // Move Row 2 to 0, 3 to 1, etc. (Shifts up by 2 pixels)
+            curr_tile[0] = curr_tile[2];
+            curr_tile[1] = curr_tile[3];
+            curr_tile[2] = curr_tile[4];
+            curr_tile[3] = curr_tile[5];
+            curr_tile[4] = curr_tile[6];
+            curr_tile[5] = curr_tile[7];
+
+            // Pull 2 rows from the tile below
+            if (row < CANVAS_TILES_H - 1) {
+                volatile uint32_t *next_tile = &vram[next_tile_idx];
+                curr_tile[6] = next_tile[0];
+                curr_tile[7] = next_tile[1];
+            } else {
+                curr_tile[6] = 0;
+                curr_tile[7] = 0;
+            }
+        }
+    }
+}

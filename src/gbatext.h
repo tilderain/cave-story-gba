@@ -125,3 +125,5 @@ static inline void write_tile_pixel(int tile_idx, int lx, int ly, uint8_t color)
 #define CANVAS_TILES_H_FULL 20
 
 void canvas_init_fullscreen(void);
+
+void canvas_shift_pixels_up_2();

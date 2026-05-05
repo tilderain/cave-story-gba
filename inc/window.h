@@ -57,3 +57,5 @@ void window_show_item(uint16_t item);
 void window_show_weapon(uint16_t weapon);
 
 void window_update();
+
+extern uint8_t textRow, textColumn;
