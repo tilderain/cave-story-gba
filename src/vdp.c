@@ -268,12 +268,17 @@ void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint
 // Tile maps
 
 void vdp_map_xy(uint16_t plan, uint16_t tile, uint16_t x, uint16_t y) {
-	//iprintf("\x1b[%hu;%huH%s\n", (y>>2)*3, (x>>2)*3, tile);
-	//*((u16 *)MAP_BASE_ADR(BASE_STAGE) + x + (y*x/64)) = tile;
 	return;
-    uint32_t addr = plan + ((x + (y << PLAN_WIDTH_SFT)) << 1);
-    *vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);
-	*vdp_data_port = tile;
+    uint16_t gba_base;
+    switch(plan) {
+        case VDP_PLAN_A: gba_base = BASE_STAGE; break;
+        case VDP_PLAN_B: gba_base = BASE_BACK;  break;
+        case VDP_PLAN_W: gba_base = BASE_TEXT;  break;
+        default: return;
+    }
+    uint16_t *map = (uint16_t*)MAP_BASE_ADR(gba_base);
+    // GBA maps are 32x32. Offset = (y * 32) + x
+    map[(y & 31) * 32 + (x & 31)] = tile;
 }
 
 void vdp_map_hline(uint16_t plan, const uint16_t *tiles, uint16_t x, uint16_t y, uint16_t len) {
@@ -300,16 +305,28 @@ void vdp_map_fill_rect(uint16_t plan, uint16_t index, uint16_t x, uint16_t y, ui
 		//vdp_dma_vram((uint32_t) tiles, plan + ((x + ((y+yy) << PLAN_WIDTH_SFT)) << 1), w);
     }
 }
-
 void vdp_map_clear(uint16_t plan) {
-	iprintf("\x1b[2J");
+    uint32_t fill_val = 0;
+    // 512 words = 2048 bytes (32x32 tiles * 2 bytes each)
+    uint32_t count = 512 | (1 << 24); 
 
-	return;
-	uint16_t addr = plan;
-	while(addr < plan + 0x1000) {
-		vdp_dma_vram((uint32_t) BLANK_DATA, addr, 0x80);
-		addr += 0x100;
-	}
+    if (plan == VDP_PLAN_A) {
+        // Clear BOTH Stage layers used for the Genesis Plane A mapping
+        CpuFastSet(&fill_val, (void*)MAP_BASE_ADR(BASE_STAGE), count);      // BG1
+        CpuFastSet(&fill_val, (void*)MAP_BASE_ADR(BASE_STAGE_BACK), count); // BG2
+    } 
+    else if (plan == VDP_PLAN_B) {
+        // Clear the Tiled Background layer
+        CpuFastSet(&fill_val, (void*)MAP_BASE_ADR(BASE_BACK), count);      // BG0
+    } 
+    else if (plan == VDP_PLAN_W) {
+        // Clear the Text/Window layer
+        CpuFastSet(&fill_val, (void*)MAP_BASE_ADR(BASE_TEXT), count);      // BG3
+    }
+    else {
+        // Fallback: If a raw GBA base index was passed (like 25, 30, etc.)
+        CpuFastSet(&fill_val, (void*)MAP_BASE_ADR(plan), count);
+    }
 }
 
 // Palettes

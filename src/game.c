@@ -98,7 +98,7 @@ EWRAM_CODE void game_main(uint8_t load) {
 					vdp_tiles_load_from_rom(black, TILE_FACEINDEX, 1);
 					vdp_map_fill_rect(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,TILE_FACEINDEX), 0, 0, 40, 30, 0);
 				} else {
-					vdp_map_clear(VDP_PLAN_W);
+					//vdp_map_clear(VDP_PLAN_W);
 				}
 				vdp_set_window(0, pal_mode ? 30 : 28);
 				vdp_set_display(TRUE);

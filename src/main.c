@@ -171,6 +171,8 @@ EWRAM_CODE int main() {
 		if(select == 0) {
 			select = saveselect_main();
 			if(select >= 4) continue;
+			canvas_clear();
+			canvas_setup_tilemap(0);
 			game_main(select);
 			credits_main();
 		} else if(select == 2) {
