@@ -114,7 +114,11 @@ MUSIC		:= maxmod_data
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork
 
-CFLAGS	:=	-g -Wall -Wno-builtin-declaration-mismatch -Os\
+LTO ?= 0
+
+
+
+CFLAGS	:=	-g -Wall -Wno-builtin-declaration-mismatch -Os \
 		-mcpu=arm7tdmi -mtune=arm7tdmi\
 		$(ARCH)
 
@@ -123,7 +127,13 @@ CFLAGS	+=	$(INCLUDE)
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-g $(ARCH) -Wl,-Map,$(notdir $*.map)
+
+LDFLAGS = -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+
+ifeq ($(LTO),1)
+	CFLAGS  += -flto
+	LDFLAGS += -flto=auto
+endif
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
@@ -164,10 +174,10 @@ CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s))) 
 SFILES		+=	$(foreach dir,$(RESOURCES),$(notdir $(wildcard $(dir)/*.s))) 
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
-
+BINFILES := soundbank.bin
 ifneq ($(strip $(MUSIC)),)
-	export AUDIOFILES	:=	$(foreach dir,$(notdir $(wildcard $(MUSIC)/*.*)),$(CURDIR)/$(MUSIC)/$(dir))
-	BINFILES += soundbank.bin
+    export AUDIOFILES := $(foreach dir,$(notdir $(wildcard $(MUSIC)/*.*)),$(CURDIR)/$(MUSIC)/$(dir))
+	SFILES += resources.s
 endif
 
 #---------------------------------------------------------------------------------
@@ -228,26 +238,38 @@ else
 
 $(OUTPUT).gba	:	$(OUTPUT).elf
 
-$(OUTPUT).elf	:	prereq $(OFILES)
+$(OUTPUT).elf : prereq $(OFILES)
 
 $(OFILES_SOURCES) : $(HFILES)
 
-prereq: $(RESCOMP) resources.s head-gen grit-gen $(BINTOS) $(TSCOMP) $(WAVTORAW) 
+$(OFILES_SOURCES) : resources.h ../inc/ai_gen.h soundbank.h soundbank_bin.h
+
+soundbank_bin.h: soundbank.bin
+
+main.o: soundbank.h
+
+prereq: $(RESCOMP) resources.s resources.h ../inc/ai_gen.h grit-gen.stamp $(BINTOS) $(TSCOMP) $(WAVTORAW) soundbank.h
 prereq: $(CPXMS) $(XGCS) $(PCMS) $(CTSETS) $(ZOBJ) $(TSBS) $(PATS)
 
-head-gen:
-	rm -f inc/ai_gen.h
+
+../inc/ai_gen.h: ../aigen.py
 	python3 ../aigen.py
 
-grit-gen:
+		
+grit-gen.stamp: ../gritgen.py
 	python3 ../gritgen.py
+	touch $@
 
 
 $(RESCOMP):
 	cc -g ../tools/rescomp/src/*.c -Itools/rescomp/inc -o $@
 
-resources.s: 
-	$(RESCOMP) ../res/resources.res 
+resources.stamp: ../res/resources.res $(RESCOMP)
+	$(RESCOMP) $< resources.s
+	@touch $@ resources.s resources.h
+
+resources.s resources.h: resources.stamp
+	@:
 
 %.o: %.s 
 	@echo "AS $<"
@@ -338,10 +360,14 @@ res/patches/$(TARGET)-%.patch: res/patches/$(TARGET)-%.s
 #---------------------------------------------------------------------------------
 # rule to build soundbank from music files
 #---------------------------------------------------------------------------------
-soundbank.bin soundbank.h : $(AUDIOFILES)
-#---------------------------------------------------------------------------------
+soundbank.stamp: $(AUDIOFILES)
+	@echo "Generating Soundbank"
 	@mmutil $^ -osoundbank.bin -hsoundbank.h
+	@touch $@
 
+soundbank.bin soundbank.h: soundbank.stamp
+	@:
+soundbank.bin.o: soundbank.bin
 #---------------------------------------------------------------------------------
 # This rule links in binary data with the .bin extension
 #---------------------------------------------------------------------------------

@@ -6,7 +6,7 @@ Work in progress port of [Cave Story MD](https://github.com/andwn/cave-story-md)
 1. Setup [marsdev](https://github.com/andwn/marsdev) and `python`
   - Marsdev targets: `m68k-toolchain z80-tools sik-tools`
 2. Get the gba-dev packages from devkitPro.
-3. Clone & `make -j8; make -j8; make -j8; `
+3. Clone & `make -j8; `
 ## License
 Various, details [here](doc/LICENSE.md)
 ## Thanks
