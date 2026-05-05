@@ -16,6 +16,8 @@
 
 #include <stdio.h>
 
+#include "gbaram.h"
+
 u8 saturate = true;
 EWRAM_CODE uint16_t saturate_color(uint16_t color) {
     if(!saturate) return color;
@@ -600,33 +602,59 @@ void vdp_font_pal(uint16_t pal) {
 		return;
 	font_pal = pal;
 }
-
+#include "window.h"
 #include "gba.h"
-
+#include "gbatext.h"
 void vdp_puts(uint16_t plan, const char *str, uint16_t x, uint16_t y) {
-	//GBATODO
-	//char text[128];
-	iprintf("\x1b[%hu;%huH%s\n", (y>>2)*3, (x>>2)*3, str);
-	//sprintf(text, "\x1b[%hu;%huH%s\n", y, x, str);
-	//iprintf(text);
-	return;
-	uint32_t addr = plan + ((x + (y << PLAN_WIDTH_SFT)) << 1);
-	*vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);
-	for(uint16_t i = 0; i < 64 && *str; ++i) {
-		// Wrap around the plane, don't fall to next line
-		if(i + x == 64) {
-			addr -= x << 1;
-			*vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);
-		}
-		uint16_t c = *str++;
-		if(c == 1) { // Accent chars
-			c = (VDP_PLAN_W >> 5) - 1 + ((*str++) << 2);
-		} else {
-			c = TILE_FONTINDEX + c - 0x20;
-		}
-		uint16_t attr = TILE_ATTR(font_pal,1,0,0,c);
-		*vdp_data_port = attr;
-	}
+    // 1. Convert tile coordinates to canvas pixel coordinates.
+    // Standard tiles are 8x8. 
+    // In your system, the canvas usually starts at a specific tile offset.
+    // We subtract the window/canvas starting tile to get 'local' pixel coordinates.
+    
+    // Adjust these offsets based on where your 'canvas' sits in the tilemap
+    // If drawing to the message window:
+    int cur_px = (x - 2) * 8; 
+    int cur_py = (y - (windowOnTop ? 1 : 14)) * 8;
+
+    while (*str) {
+        uint8_t ascii = (uint8_t)*str++;
+        
+        if (ascii < 0x20 || ascii > 0x7F) continue;
+
+        uint8_t glyph_idx = ascii - 0x20;
+        const uint8_t *font_ptr = (const uint8_t *)thinfontTiles;
+        const uint8_t *glyph = &font_ptr[glyph_idx * 8];
+        int advance = thinfont_widths[glyph_idx];
+
+        // Draw the character into the canvas VRAM
+        for (int row = 0; row < 8; row++) {
+            uint8_t bits = glyph[row];
+            if (!bits) continue;
+            
+            for (int col = 0; col < 8; col++) {
+                if (bits & (0x80 >> col)) {
+                    int final_x = cur_px + col;
+                    int final_y = cur_py + row;
+
+                    // Bounds check for the canvas area
+                    if (final_x >= 0 && final_x < CANVAS_W && final_y >= 0 && final_y < CANVAS_H) {
+                        // Calculate which tile and pixel
+                        int tile_col = final_x >> 3;
+                        int tile_row = final_y >> 3;
+                        int tile_idx = CANVAS_TILE_BASE + (tile_row * CANVAS_TILES_W) + tile_col;
+                        
+                        // Draw Shadow (+1, +1) - Color 1 (Black)
+                        write_tile_pixel(tile_idx, (final_x + 1) & 7, (final_y + 1) & 7, 1);
+                        
+                        // Draw Text - Color 15 (White)
+                        write_tile_pixel(tile_idx, final_x & 7, final_y & 7, 15);
+                    }
+                }
+            }
+        }
+        // Move cursor forward proportionally
+        cur_px += advance;
+    }
 }
 
 void vdp_text_clear(uint16_t plan, uint16_t x, uint16_t y, uint16_t len) {

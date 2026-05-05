@@ -134,8 +134,14 @@ extern uint16_t *stageTable;
 // Copy of level layout data loaded into RAM
 // This takes up extra space, but there are times where scripts make modifications to the
 // level layout (allowing player to reach some areas) so it is necessary to do this
-extern uint8_t stagePXM[];
-extern uint8_t stageBlocks[];
+// 8 bytes (header) + 17924 bytes (data) = 17932 total
+
+extern uint8_t stage_buffer[17932];
+
+// For the rest of the code to keep working, we point to the buffer:
+#define stagePXM    (&stage_buffer[0])
+#define stageBlocks (&stage_buffer[8])
+
 extern const uint8_t *stagePXA;
 // Which tileset (db/tileset.c) is used by the current stage
 extern uint8_t stageTileset;

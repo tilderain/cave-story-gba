@@ -28,6 +28,8 @@
 
 #include "bank_data.h"
 
+#include "gbaram.h"
+
 // Could fit under the Oside map (192 tile gap)
 #define TILE_MOONINDEX (TILE_TSINDEX + 32*8)
 // Another tile gap, fits under both Almond and Cave
@@ -55,8 +57,12 @@ uint16_t stageWidth, stageHeight = 0;
 // Copy of level layout data loaded into RAM
 // This takes up extra space, but there are times where scripts make modifications to the
 // level layout (allowing player to reach some areas) so it is necessary to do this
-EWRAM_DATA uint8_t stagePXM[8] = {0};
-EWRAM_DATA uint8_t stageBlocks[17924] = {0};
+// 8 bytes (header) + 17924 bytes (data) = 17932 total
+EWRAM_DATA uint8_t stage_buffer[17932];
+
+// For the rest of the code to keep working, we point to the buffer:
+#define stagePXM    (&stage_buffer[0])
+#define stageBlocks (&stage_buffer[8])
 // Which tileset (db/tileset.c) is used by the current stage
  uint8_t stageTileset = 0;
 // Prepares to draw off-screen tiles when stage_update() is later called

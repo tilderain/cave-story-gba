@@ -131,9 +131,6 @@ const uint8_t thinfont_widths[96] = {
 // Internal VRAM access helpers
 // ---------------------------------------------------------------------------
 
-// VRAM base for BG tile data (char base 0 = 0x06000000)
-// Adjust if your BG3 uses a different char base
-#define VRAM_TILE_BASE  ((uint8_t*)0x06008000)
 
 // Get pointer to a tile's 4bpp data in VRAM (32 bytes per tile)
 static inline uint8_t* tile_ptr(int tile_idx) {
@@ -144,24 +141,7 @@ static inline uint8_t* tile_ptr(int tile_idx) {
 // tile_idx: absolute tile index in VRAM
 // lx, ly: local pixel within tile (0..7)
 // color: 4bpp palette index (0=transparent)
-static inline void write_tile_pixel(int tile_idx, int lx, int ly, uint8_t color) {
-    // 1 tile = 32 bytes = 16 halfwords.
-    // Cast VRAM base to volatile uint16_t* to force 16-bit writes
-    volatile uint16_t *tile = (volatile uint16_t *)VRAM_TILE_BASE + (tile_idx * 16);
-    
-    // Each row of 8 pixels is 4 bytes = 2 halfwords.
-    // lx >> 2 (lx / 4) tells us which halfword we are in for this row (0 or 1)
-    int hw_offset = (ly * 2) + (lx >> 2);
-    
-    // Calculate which nibble (0-3) we are modifying inside the halfword
-    int shift = (lx & 3) * 4;
-    
-    // 16-bit safe Read-Modify-Write
-    uint16_t hw = tile[hw_offset];
-    hw &= ~(0x000F << shift);         // Clear the 4 bits for our pixel
-    hw |= ((color & 0x0F) << shift);  // Set the 4 bits to our new color
-    tile[hw_offset] = hw;
-}
+
 
 // ---------------------------------------------------------------------------
 // Tilemap helper
