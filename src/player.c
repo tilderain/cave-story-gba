@@ -867,60 +867,125 @@ static void show_map_jname(uint8_t ttl) {
     mapNameTTL = ttl;
 }
 
+#include "gbatext.h"
+// Add this helper to player.c or a utility file to calculate string width
+int get_string_width(const char *str) {
+    int width = 0;
+    while (*str) {
+        uint8_t c = (uint8_t)*str++;
+        if (c >= 0x20 && c <= 0x7F) {
+            width += thinfont_widths[c - 0x20];
+        }
+    }
+    return width;
+}
+
+// Corrected map_name_put_pixel for GBA 4bpp Sprite VRAM
+static void map_name_put_pixel(int x, int y, uint8_t color) {
+    // Total area: 128px wide (4 sprites * 32px) by 16px tall
+    if (x < 0 || x >= 128 || y < 0 || y >= 16) return;
+
+    volatile uint16_t *vram = (volatile uint16_t *)0x06010000;
+    
+    int sprite_idx = (x >> 5);     // Which of the 4 sprites (0-3)
+    int sprite_x = (x & 31);       // X within that sprite (0-31)
+    int tile_x = (sprite_x >> 3);  // Which tile column in sprite (0-3)
+    int tile_y = (y >> 3);         // Which tile row in sprite (0-1)
+    
+    // 1D Mapping for 32x16: 4 tiles of top row, then 4 tiles of bottom row
+    // Each sprite takes 8 tiles (32 * 8 = 256 bytes)
+    int local_tile_idx = (tile_y * 4) + tile_x;
+    int absolute_tile_idx = TILE_NAMEINDEX + (sprite_idx * 8) + local_tile_idx;
+
+    int lx = x & 7; // pixel x inside tile
+    int ly = y & 7; // pixel y inside tile
+
+    volatile uint16_t *ptr = vram + (absolute_tile_idx * 16) + (ly * 2) + (lx >> 2);
+    int shift = (lx & 3) * 4;
+
+    uint16_t hw = *ptr;
+    hw &= ~(0x000F << shift);
+    hw |= ((color & 0x0F) << shift);
+    *ptr = hw;
+}
+
+static int map_name_draw_glyph(int px, int py, uint8_t ascii) {
+    if (ascii < 0x20 || ascii > 0x7F) return 4;
+
+    uint8_t glyph_idx = ascii - 0x20;
+    const uint8_t *font_ptr = (const uint8_t *)thinfontTiles;
+    const uint8_t *glyph = &font_ptr[glyph_idx * 8];
+    int advance = thinfont_widths[glyph_idx];
+
+    for (int row = 0; row < 8; row++) {
+        uint8_t bits = glyph[row];
+        if (!bits) continue;
+        for (int col = 0; col < 8; col++) {
+            if (bits & (0x80 >> col)) {
+                // Draw Shadow first (+1, +1)
+                map_name_put_pixel(px + col + 1, py + row + 1, 1);
+                // Draw Text
+                map_name_put_pixel(px + col, py + row, 15);
+            }
+        }
+    }
+    return advance;
+}
+
+
 void player_show_map_name(uint8_t ttl) {
-	// Boss bar overwrites the name
-	if(stageID == STAGE_WATERWAY_BOSS) return;
-	// Show kanji name
-	if(cfg_language >= LANG_JA && cfg_language <= LANG_KO) {
+    if (stageID == STAGE_WATERWAY_BOSS) return;
+
+    if (cfg_language >= LANG_JA && cfg_language <= LANG_KO) {
         show_map_jname(ttl);
         return;
     }
-	// English name
-    const uint8_t *str = (uint8_t*) stage_info[stageID].name;
-	if(cfg_language > 0) {
-		str = ((const uint8_t*)STAGE_NAMES) + (stageID << 5);
-	}
-	//iprintf(str);
-	//iprintf("%s", str);
-    //if((uint32_t) str >= 0x400000) {
-    //    str = (const uint8_t*)(0x380000 | ((uint32_t)str & 0x7FFFF));
-    //}
-	uint32_t nameTiles[16][8];
-	uint16_t len = 0;
-    uint16_t pos = 0;
-    while(len < 16) {
-        uint8_t chr = str[pos++];
-        if(chr == 0x01) {
-            chr = str[pos++];
-            chr += 0x5F;
-            len++;
-        } else {
-            chr -= 0x20;
-            if (chr < 0x60) len++;
-            else break;
-        }
-        memcpy(nameTiles[len-1], &TS_SysFont.tiles[chr * 8], 32);
+
+    const char *str = (const char*)stage_info[stageID].name;
+    if (cfg_language > 0) {
+        str = (const char*)(((const uint8_t*)STAGE_NAMES) + (stageID << 5));
     }
-    if(len) {
-        vdp_tiles_load_from_rom(nameTiles[0], TILE_NAMEINDEX, 16);
-    } else {
-        return;
+
+    // 1. Clear Sprite VRAM (32 tiles * 32 bytes = 1024 bytes)
+    uint32_t *vram32 = (uint32_t*)(0x06010000 + (TILE_NAMEINDEX * 32));
+    for(int i = 0; i < (1024 / 4); i++) vram32[i] = 0;
+
+    // 2. Centering calculation
+    int totalWidth = 0;
+    for (int i = 0; str[i] != '\0'; i++) {
+        uint8_t c = (uint8_t)str[i];
+        if (c >= 0x20 && c <= 0x7F) totalWidth += thinfont_widths[c - 0x20];
     }
-	// Transfer tile array to VRAM
-    mapNameSpriteNum = 0;
-    uint16_t x = SCREEN_HALF_W - (len<<2) + 128;
-    uint16_t y = SCREEN_HALF_H - 32 + 128 + 12;
-    for(uint16_t i = 0; i < len; i += 4) {
-        uint8_t sind = i>>2;
-        mapNameSprite[sind] = (VDPSprite) {
-            .x = x, .y = y, .size = SPRITE_SIZE(min(4,len-i), 1)
+    
+    int cursorX = (128 - totalWidth) / 2;
+    if (cursorX < 0) cursorX = 0;
+
+    // 3. Draw string to the 128x16 buffer
+    // py = 4 to center the 8px font vertically within the 16px sprite
+    const char *p = str;
+    while (*p) {
+        cursorX += map_name_draw_glyph(cursorX, 4, (uint8_t)*p++);
+    }
+
+    // 4. Set up the 4 sprites
+    mapNameSpriteNum = 4;
+    uint16_t screenX = SCREEN_HALF_W - 64 + 128;
+    uint16_t screenY = SCREEN_HALF_H - 44 + 148; // Slightly higher to account for taller sprite
+
+    for (int i = 0; i < 4; i++) {
+        mapNameSprite[i] = (VDPSprite) {
+            .x = screenX + (i * 32),
+            .y = screenY,
+            .size = SPRITE_SIZE(4, 2), // 32x16 pixels
+            // In 1D mapping, each 32x16 sprite is 8 tiles
+            .attr = TILE_ATTR(PAL0, 1, 0, 0, TILE_NAMEINDEX + (i * 8))
         };
-        mapNameSprite[sind].attr = TILE_ATTR(PAL0,1,0,0,TILE_NAMEINDEX+i);
-        x += 32;
-        mapNameSpriteNum++;
     }
+
     mapNameTTL = ttl;
 }
+
+
 
 static void draw_air_percent() {
 	uint8_t airTemp = airPercent;

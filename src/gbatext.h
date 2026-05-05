@@ -61,11 +61,11 @@
 
 // --- Font ---
 // Tonc 1bpp font, 96 glyphs (ASCII 0x20..0x7F), 8 bytes per glyph
-extern const unsigned int toncfontTiles[192];
+extern const uint8_t thinfontTiles[768];
 
 // Per-glyph pixel advance widths (index 0 = ASCII 0x20 = space)
 // Default fixed-width 8; override per-glyph for VWF
-extern const uint8_t glyph_widths[96];
+extern const uint8_t thinfont_widths[96];
 
 // --- API ---
 

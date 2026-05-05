@@ -94,6 +94,8 @@ uint16_t tileScrollY = 0;
 
 //uint8_t SCREEN_HEIGHT = 0;
 
+#include "gbatext.h"
+
 void vdp_init() {
 	//SCREEN_HEIGHT = 160;
 	// Store pal_mode and adjust some stuff based on it
@@ -152,6 +154,7 @@ void vdp_init() {
 	// screen mode & background to display
 	SetMode( MODE_0 | BG0_ON | BG1_ON | BG2_ON | BG3_ON | OBJ_ON | OBJ_1D_MAP);
 	
+	canvas_init();
 }
 
 #include "maxmod.h"

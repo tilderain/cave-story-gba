@@ -165,6 +165,7 @@ void window_close() {
 	showingItem = 0;
 	windowOpen = FALSE;
     //if(textMode == TM_MSG) textMode = TM_NORMAL;
+	canvas_clear();
 }
 
 void window_set_face(uint16_t face, uint8_t open) {

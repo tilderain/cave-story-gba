@@ -317,8 +317,8 @@ void canvas_setup_tilemap(uint8_t on_top) {
     canvas_clear();
     
     // Ensure BG3 hardware scroll offsets are forced to 0 so the tilemap isn't shifted
-    BG3HOFS = 0;
-    BG3VOFS = 0;
+   // BG3HOFS = 0;
+   // BG3VOFS = 0;
 }
 
 void canvas_scroll_up(void) {
