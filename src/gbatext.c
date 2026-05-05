@@ -281,33 +281,22 @@ void canvas_reset_scroll(void) {
 // ---------------------------------------------------------------------------
 
 void canvas_setup_tilemap(uint8_t on_top) {
-    s_canvas_is_fullscreen = 0; // We are in Window mode
-    // TEXT_Y1_TOP is row 1, TEXT_Y1 is row 14
+    s_canvas_is_fullscreen = 0;
     int map_row = on_top ? 1 : 14;  
-    
-    // TEXT_X1 is column 2
     int map_col = 2; 
 
-    // Clear the entire 32x32 BG3 tilemap to prevent ghost text from leftover pointers
-    for (int i = 0; i < 1024; i++) {
-        BG3_MAP_BASE[i] = 0;
-    }
+    // Clear tilemap
+    for (int i = 0; i < 1024; i++) BG3_MAP_BASE[i] = 0;
 
-    // Map our canvas tiles into the exact tilemap location of the window
-    for (int row = 0; row < CANVAS_TILES_H; row++) {
+    // IMPORTANT: Only map 6 rows of tiles to the screen
+    // The canvas is 8 rows high, so the last 2 rows are a hidden "gutter"
+    for (int row = 0; row < 6; row++) { 
         for (int col = 0; col < CANVAS_TILES_W; col++) {
-            int tile_idx = CANVAS_TILE_BASE + row * CANVAS_TILES_W + col;
-            
-            // Apply palette bank 2 (bits 12-15)
+            int tile_idx = CANVAS_TILE_BASE + (row * CANVAS_TILES_W) + col;
             BG3_MAP_BASE[(map_row + row) * 32 + (map_col + col)] = (uint16_t)(tile_idx | (2 << 12));
         }
     }
-
     canvas_clear();
-    
-    // Ensure BG3 hardware scroll offsets are forced to 0 so the tilemap isn't shifted
-   // BG3HOFS = 0;
-   // BG3VOFS = 0;
 }
 
 void canvas_scroll_up(void) {
@@ -359,13 +348,11 @@ void canvas_shift_pixels_up_2() {
     volatile uint32_t *vram = (uint32_t *)(VRAM_TILE_BASE + CANVAS_TILE_BASE * 32);
     
     for (int col = 0; col < CANVAS_TILES_W; col++) {
-        for (int row = 0; row < CANVAS_TILES_H; row++) {
+        // Process all 8 rows
+        for (int row = 0; row < 8; row++) {
             int current_tile_idx = (row * CANVAS_TILES_W + col) * 8; 
-            int next_tile_idx = ((row + 1) * CANVAS_TILES_W + col) * 8;
-
             volatile uint32_t *curr_tile = &vram[current_tile_idx];
 
-            // Move Row 2 to 0, 3 to 1, etc. (Shifts up by 2 pixels)
             curr_tile[0] = curr_tile[2];
             curr_tile[1] = curr_tile[3];
             curr_tile[2] = curr_tile[4];
@@ -373,8 +360,8 @@ void canvas_shift_pixels_up_2() {
             curr_tile[4] = curr_tile[6];
             curr_tile[5] = curr_tile[7];
 
-            // Pull 2 rows from the tile below
-            if (row < CANVAS_TILES_H - 1) {
+            if (row < 7) { // Pull from the tile below
+                int next_tile_idx = ((row + 1) * CANVAS_TILES_W + col) * 8;
                 volatile uint32_t *next_tile = &vram[next_tile_idx];
                 curr_tile[6] = next_tile[0];
                 curr_tile[7] = next_tile[1];
@@ -385,3 +372,5 @@ void canvas_shift_pixels_up_2() {
         }
     }
 }
+
+

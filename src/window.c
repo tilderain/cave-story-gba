@@ -47,6 +47,9 @@
 #define ITEM_Y_START	(SCREEN_HALF_H + 128)
 #define ITEM_Y_END		(SCREEN_HALF_H + 12 + 128)
 
+static int s_scroll_debt = 0; // Tracks how many pixels we still need to shift up
+
+
 const uint8_t ITEM_PAL[40] = {
 	0, 0, 1, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 1, 0, 0,
@@ -149,7 +152,8 @@ void window_clear_text() {
     
     // Reset X position!
     textPixelX = showingFace ? 56 : 0; 
-    
+    s_scroll_debt = 0; // Reset scroll debt
+
     memset(windowText, ' ', 36*3);
     cjk_reset(CJK_MESSAGE);
     
@@ -186,31 +190,36 @@ void window_set_face(uint16_t face, uint8_t open) {
 }
 
 int textPixelX = 0;
+
 void window_draw_char(uint8_t c) {
     if (c == '\n') {
         textRow++;
-		if (textRow > 2) {
-   			// window_scroll_text(); // Replace the old instant scroll
-    		tscState = TSC_SOFT_SCROLL;
-    		s_scroll_timer = 0;
-    		return; // Stop drawing immediately
-		}
-        textColumn = 0;
-        spaceCounter = spaceOffset = 0;
-        
-        // Reset X position! Indent by 56 pixels if a face is showing.
-        textPixelX = showingFace ? 56 : 0; 
-        
-
+        if (textRow > 2) {
+            // Trigger a 16-pixel scroll animation
+            s_scroll_debt += 16; 
+            
+            textRow = 2; // Stay on the bottom row
+            textColumn = 0;
+            spaceCounter = spaceOffset = 0;
+            textPixelX = showingFace ? 56 : 0;
+        } else {
+            textColumn = 0;
+            spaceCounter = spaceOffset = 0;
+            textPixelX = showingFace ? 56 : 0; 
+        }
     } else {
-        // Line height is 16 pixels
-        int py = textRow * 16; 
+        // THE FIX: Offset the Y position by the remaining scroll debt
+        // If we are at Row 2 (Y=32) and debt is 16, we draw at Y=48.
+        // On the next frame, debt is 14 and the buffer shifted up by 2,
+        // so the new character drawn at 32+14=46 aligns perfectly with 
+        // the previous one which moved from 48 to 46.
+        int py = (textRow * 16) + s_scroll_debt; 
         
-        // Draw the glyph. '1' is the palette index for the text color.
         textPixelX += canvas_put_glyph(textPixelX, py, c, 1);
         textColumn++;
     }
 }
+
 
 void window_draw_jchar(uint8_t iskanji, uint16_t c) {
 	if(!iskanji && c == '\n') {
@@ -421,12 +430,20 @@ void window_show_weapon(uint16_t item) {
 	TILES_QUEUE(SPR_TILES(&SPR_ItemWin,0,0), TILE_PROMPTINDEX+6, 18);
 }
 
+// Modify window_update to perform the shift if there is debt
 void window_update() {
-	if(showingItem) {
-		if(handSpr.y < ITEM_Y_END) handSpr.y++;
-	    vdp_sprite_add(&handSpr);
-	    vdp_sprites_add(promptSpr, 2);
-	}
+    // Handle the scrolling animation independently of the script state
+    if (s_scroll_debt > 0) {
+        canvas_shift_pixels_up_2(); // Shift 2 pixels per frame
+        s_scroll_debt -= 2;
+    }
+
+    if(showingItem) {
+        if(handSpr.y < ITEM_Y_END) handSpr.y++;
+        vdp_sprite_add(&handSpr);
+        vdp_sprites_add(promptSpr, 2);
+    }
+
 	if(tscState == TSC_WAITINPUT && textMode == TM_NORMAL) {
 		uint8_t x = showingFace ? TEXT_X1_FACE : TEXT_X1;
 		uint8_t y = windowOnTop ? TEXT_Y1_TOP : TEXT_Y1;

@@ -21,7 +21,6 @@ enum TSC_STATE {
 	TSC_PROMPT,			// Prompting yes/no
 	TSC_TELEMENU, 		// Displaying the teleporter menu
 	TSC_WAITGROUNDED, 	// Waiting for the player to touch the ground
-	TSC_SOFT_SCROLL,
 };
 
 // Number of events loaded by tsc_load(), for debugging

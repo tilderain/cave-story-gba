@@ -266,19 +266,6 @@ void tsc_call_event(uint16_t number) {
 uint8_t tsc_update() {
 	switch(tscState) {
 		case TSC_IDLE: break; // Nothing to update
-        case TSC_SOFT_SCROLL: {
-            canvas_shift_pixels_up_2(); // Move 2 pixels up
-            s_scroll_timer++;
-            
-            if (s_scroll_timer >= 8) { // 8 frames * 2px = 16px total
-                s_scroll_timer = 0;
-                textRow = 2;       // We are now on the bottom line
-                textColumn = 0;
-                textPixelX = showingFace ? 56 : 0;
-                tscState = TSC_RUNNING; // Resume script
-            }
-            return 0; // Block script execution during animation
-        }
 		case TSC_RUNNING:
 		{
 			for(;;) {
