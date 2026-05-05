@@ -109,6 +109,7 @@ void maxmodInit( void )
     mmInit( &mySystem );
 }
 
+#include "gbatext.h"
 __attribute__((used)) const char save_detection[] = "SRAM_V113";
 #define REG_WAITCNT *(volatile u16*)0x04000204
 EWRAM_CODE int main() {
@@ -160,6 +161,8 @@ EWRAM_CODE int main() {
 	//__asm__("divu #0,%d0"); // Zero Divide
 	//error_oom(); // Out of memory
 	//error_other("Test test!\nTest!"); // Fatal message
+
+	canvas_init_fullscreen();
 
 	splash_main();
 	intro_main();

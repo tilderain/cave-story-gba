@@ -120,3 +120,8 @@ static inline void write_tile_pixel(int tile_idx, int lx, int ly, uint8_t color)
     hw |= ((color & 0x0F) << shift);  // Set the 4 bits to our new color
     tile[hw_offset] = hw;
 }
+
+#define CANVAS_TILES_W_FULL 30
+#define CANVAS_TILES_H_FULL 20
+
+void canvas_init_fullscreen(void);

@@ -606,27 +606,18 @@ void vdp_font_pal(uint16_t pal) {
 #include "gba.h"
 #include "gbatext.h"
 void vdp_puts(uint16_t plan, const char *str, uint16_t x, uint16_t y) {
-    // 1. Convert tile coordinates to canvas pixel coordinates.
-    // Standard tiles are 8x8. 
-    // In your system, the canvas usually starts at a specific tile offset.
-    // We subtract the window/canvas starting tile to get 'local' pixel coordinates.
-    
-    // Adjust these offsets based on where your 'canvas' sits in the tilemap
-    // If drawing to the message window:
-    int cur_px = (x - 2) * 8; 
-    int cur_py = (y - (windowOnTop ? 1 : 14)) * 8;
+    // Multiply GBA Tile coordinates by 8 to get raw pixel coordinates
+    int cur_px = x * 8; 
+    int cur_py = y * 8;
 
     while (*str) {
         uint8_t ascii = (uint8_t)*str++;
-        
         if (ascii < 0x20 || ascii > 0x7F) continue;
 
         uint8_t glyph_idx = ascii - 0x20;
-        const uint8_t *font_ptr = (const uint8_t *)thinfontTiles;
-        const uint8_t *glyph = &font_ptr[glyph_idx * 8];
+        const uint8_t *glyph = &thinfontTiles[glyph_idx * 8];
         int advance = thinfont_widths[glyph_idx];
 
-        // Draw the character into the canvas VRAM
         for (int row = 0; row < 8; row++) {
             uint8_t bits = glyph[row];
             if (!bits) continue;
@@ -636,36 +627,28 @@ void vdp_puts(uint16_t plan, const char *str, uint16_t x, uint16_t y) {
                     int final_x = cur_px + col;
                     int final_y = cur_py + row;
 
-                    // Bounds check for the canvas area
-                    if (final_x >= 0 && final_x < CANVAS_W && final_y >= 0 && final_y < CANVAS_H) {
-                        // Calculate which tile and pixel
+                    // Write to the fullscreen bounds
+                    if (final_x >= 0 && final_x < 240 && final_y >= 0 && final_y < 160) {
                         int tile_col = final_x >> 3;
                         int tile_row = final_y >> 3;
-                        int tile_idx = CANVAS_TILE_BASE + (tile_row * CANVAS_TILES_W) + tile_col;
+                        int tile_idx = CANVAS_TILE_BASE + (tile_row * CANVAS_TILES_W_FULL) + tile_col;
                         
-                        // Draw Shadow (+1, +1) - Color 1 (Black)
-                        write_tile_pixel(tile_idx, (final_x + 1) & 7, (final_y + 1) & 7, 1);
-                        
-                        // Draw Text - Color 15 (White)
-                        write_tile_pixel(tile_idx, final_x & 7, final_y & 7, 15);
+
+						//write_tile_pixel(tile_idx, (final_x + 1) & 7, (final_y + 1) & 7, 15);
+						
+						// Draw Text - Uses the light color
+						write_tile_pixel(tile_idx, final_x & 7, final_y & 7, 1);
                     }
                 }
             }
         }
-        // Move cursor forward proportionally
         cur_px += advance;
     }
 }
 
+
 void vdp_text_clear(uint16_t plan, uint16_t x, uint16_t y, uint16_t len) {
-	//GBATODO
-	char space[256];
-	for(int i = 0;i<len;i++)
-	{
-		space[i] = ' ';
-	}
-	space[len] = '\0';
-	iprintf("\x1b[%hu;%huH%s", (y>>2)*3, (x>>2)*3, space);
+	//canvas_clear();
 	return;
     uint32_t addr = plan + ((x + (y << PLAN_WIDTH_SFT)) << 1);
 	*vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);

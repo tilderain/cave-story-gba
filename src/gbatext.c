@@ -1,5 +1,10 @@
+#include "common.h"
+
 #include "gbatext.h"
 #include <string.h>
+#include "vdp.h"
+
+static uint8_t s_canvas_is_fullscreen = 0;
 
 // ---------------------------------------------------------------------------
 // Tonc 1bpp font - 96 glyphs, ASCII 0x20 to 0x7F, 8 bytes each = 192 u32s
@@ -180,14 +185,22 @@ void canvas_init(void) {
 // canvas_clear - zero all canvas tile pixel data (makes canvas transparent)
 // ---------------------------------------------------------------------------
 void canvas_clear(void) {
-    // Cast to 32-bit pointer for fast, VRAM-safe writing
-    volatile uint32_t *vram_ptr = (volatile uint32_t *)(VRAM_TILE_BASE + CANVAS_TILE_BASE * 32);
-    int num_words = (CANVAS_TILES_W * CANVAS_TILES_H * 32) / 4;
-    
-    for (int i = 0; i < num_words; i++) {
-        vram_ptr[i] = 0;
+    static const uint32_t zero = 0;
+    void* dest = (void*)(VRAM_TILE_BASE + (CANVAS_TILE_BASE * 32));
+    uint32_t word_count;
+
+    if (s_canvas_is_fullscreen) {
+        // Clear all 600 tiles (Be careful: this WILL hit map data if maps are in CB3)
+        word_count = (CANVAS_TILES_W_FULL * CANVAS_TILES_H_FULL * 32) / 4;
+    } else {
+        // Clear only the 156 tiles used by the Window (approx 5KB)
+        // This is safe and won't touch CB3/Tilemaps
+        word_count = (CANVAS_TILES_W * CANVAS_TILES_H * 32) / 4;
     }
+
+    CpuFastSet(&zero, dest, word_count | (1 << 24));
 }
+
 // ---------------------------------------------------------------------------
 // canvas_put_glyph - blit one ASCII character into the canvas at pixel (px,py)
 // Returns the pixel advance width of the glyph
@@ -272,7 +285,9 @@ void canvas_reset_scroll(void) {
 // Re-points the canvas region of the tilemap and clears canvas pixels.
 // on_top: matches your windowOnTop flag
 // ---------------------------------------------------------------------------
+
 void canvas_setup_tilemap(uint8_t on_top) {
+    s_canvas_is_fullscreen = 0; // We are in Window mode
     // TEXT_Y1_TOP is row 1, TEXT_Y1 is row 14
     int map_row = on_top ? 1 : 14;  
     
@@ -317,4 +332,31 @@ void canvas_scroll_up(void) {
     for (int i = total_words - shift_words; i < total_words; i++) {
         vram[i] = 0;
     }
+}
+
+
+void canvas_init_fullscreen(void) {
+    s_canvas_is_fullscreen = 1; // We are in Fullscreen mode
+    // 1. Wipe the BG3 tilemap memory completely
+    volatile uint16_t* map = (volatile uint16_t*)MAP_BASE_ADR(BASE_TEXT); // Using your BG3 macro
+    for (int i = 0; i < 1024; i++) {
+        map[i] = 0;
+    }
+
+    // 2. Map the canvas tiles starting from 0,0 to cover the whole screen
+    for (int row = 0; row < CANVAS_TILES_H_FULL; row++) {
+        for (int col = 0; col < CANVAS_TILES_W_FULL; col++) {
+            int tile_idx = CANVAS_TILE_BASE + (row * CANVAS_TILES_W_FULL) + col;
+            
+            // Map the tile using palette 2 (or whichever your text uses)
+            map[(row * 32) + col] = (uint16_t)(tile_idx | CHAR_PALETTE(2)); 
+        }
+    }
+
+    // 3. Clear the pixel data inside those tiles
+    canvas_clear();
+    
+    // 4. Reset hardware scroll
+    BG_OFFSET[3].x = 0;
+    BG_OFFSET[3].y = 0;
 }
