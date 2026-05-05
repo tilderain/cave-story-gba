@@ -913,24 +913,26 @@ static int map_name_draw_glyph(int px, int py, uint8_t ascii) {
     if (ascii < 0x20 || ascii > 0x7F) return 4;
 
     uint8_t glyph_idx = ascii - 0x20;
-    const uint8_t *font_ptr = (const uint8_t *)thinfontTiles;
-    const uint8_t *glyph = &font_ptr[glyph_idx * 8];
+    // Indexing for 12 bytes per char
+    const uint8_t *glyph = &thinfontTiles[glyph_idx * 12];
     int advance = thinfont_widths[glyph_idx];
 
-    for (int row = 0; row < 8; row++) {
+    // Row loop updated to 12
+    for (int row = 0; row < 12; row++) {
         uint8_t bits = glyph[row];
         if (!bits) continue;
         for (int col = 0; col < 8; col++) {
             if (bits & (0x80 >> col)) {
-                // Draw Shadow first (+1, +1)
+                // Draw Shadow (+1, +1) in black (Color 1)
                 map_name_put_pixel(px + col + 1, py + row + 1, 1);
-                // Draw Text
+                // Draw Text in white (Color 15)
                 map_name_put_pixel(px + col, py + row, 15);
             }
         }
     }
     return advance;
 }
+
 
 
 void player_show_map_name(uint8_t ttl) {
@@ -946,45 +948,43 @@ void player_show_map_name(uint8_t ttl) {
         str = (const char*)(((const uint8_t*)STAGE_NAMES) + (stageID << 5));
     }
 
-    // 1. Clear Sprite VRAM (32 tiles * 32 bytes = 1024 bytes)
+    // 1. Clear Sprite VRAM (32 tiles * 32 bytes)
     uint32_t *vram32 = (uint32_t*)(0x06010000 + (TILE_NAMEINDEX * 32));
-    for(int i = 0; i < (1024 / 4); i++) vram32[i] = 0;
+    for(int i = 0; i < 256; i++) vram32[i] = 0;
 
-    // 2. Centering calculation
+    // 2. Proportional Centering
     int totalWidth = 0;
-    for (int i = 0; str[i] != '\0'; i++) {
-        uint8_t c = (uint8_t)str[i];
+    const char *w_ptr = str;
+    while (*w_ptr) {
+        uint8_t c = (uint8_t)*w_ptr++;
         if (c >= 0x20 && c <= 0x7F) totalWidth += thinfont_widths[c - 0x20];
     }
     
     int cursorX = (128 - totalWidth) / 2;
     if (cursorX < 0) cursorX = 0;
 
-    // 3. Draw string to the 128x16 buffer
-    // py = 4 to center the 8px font vertically within the 16px sprite
+    // 3. Render
     const char *p = str;
     while (*p) {
-        cursorX += map_name_draw_glyph(cursorX, 4, (uint8_t)*p++);
+        // py = 2 centers a 12px font inside a 16px sprite
+        cursorX += map_name_draw_glyph(cursorX, 2, (uint8_t)*p++);
     }
 
-    // 4. Set up the 4 sprites
+    // 4. Setup Sprites
     mapNameSpriteNum = 4;
     uint16_t screenX = SCREEN_HALF_W - 64 + 128;
-    uint16_t screenY = SCREEN_HALF_H - 44 + 148; // Slightly higher to account for taller sprite
+    uint16_t screenY = SCREEN_HALF_H - 44 + 140; // Adjust Y as needed
 
     for (int i = 0; i < 4; i++) {
         mapNameSprite[i] = (VDPSprite) {
             .x = screenX + (i * 32),
             .y = screenY,
-            .size = SPRITE_SIZE(4, 2), // 32x16 pixels
-            // In 1D mapping, each 32x16 sprite is 8 tiles
+            .size = SPRITE_SIZE(4, 2),
             .attr = TILE_ATTR(PAL0, 1, 0, 0, TILE_NAMEINDEX + (i * 8))
         };
     }
-
     mapNameTTL = ttl;
 }
-
 
 
 static void draw_air_percent() {

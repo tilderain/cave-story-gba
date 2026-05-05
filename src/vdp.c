@@ -606,7 +606,6 @@ void vdp_font_pal(uint16_t pal) {
 #include "gba.h"
 #include "gbatext.h"
 void vdp_puts(uint16_t plan, const char *str, uint16_t x, uint16_t y) {
-    // Multiply GBA Tile coordinates by 8 to get raw pixel coordinates
     int cur_px = x * 8; 
     int cur_py = y * 8;
 
@@ -615,10 +614,12 @@ void vdp_puts(uint16_t plan, const char *str, uint16_t x, uint16_t y) {
         if (ascii < 0x20 || ascii > 0x7F) continue;
 
         uint8_t glyph_idx = ascii - 0x20;
-        const uint8_t *glyph = &thinfontTiles[glyph_idx * 8];
+        // Updated for 12 bytes per character
+        const uint8_t *glyph = &thinfontTiles[glyph_idx * 12];
         int advance = thinfont_widths[glyph_idx];
 
-        for (int row = 0; row < 8; row++) {
+        // Loop through 12 rows instead of 8
+        for (int row = 0; row < 12; row++) {
             uint8_t bits = glyph[row];
             if (!bits) continue;
             
@@ -627,17 +628,16 @@ void vdp_puts(uint16_t plan, const char *str, uint16_t x, uint16_t y) {
                     int final_x = cur_px + col;
                     int final_y = cur_py + row;
 
-                    // Write to the fullscreen bounds
                     if (final_x >= 0 && final_x < 240 && final_y >= 0 && final_y < 160) {
                         int tile_col = final_x >> 3;
                         int tile_row = final_y >> 3;
+                        
+                        // Select correct tile based on fullscreen or windowed mode
+                        // For fullscreen (30 tiles wide):
                         int tile_idx = CANVAS_TILE_BASE + (tile_row * CANVAS_TILES_W_FULL) + tile_col;
                         
-
-						//write_tile_pixel(tile_idx, (final_x + 1) & 7, (final_y + 1) & 7, 15);
-						
-						// Draw Text - Uses the light color
-						write_tile_pixel(tile_idx, final_x & 7, final_y & 7, 1);
+                        // Draw the pixel (Color 1 is typical text color)
+                        write_tile_pixel(tile_idx, final_x & 7, final_y & 7, 1);
                     }
                 }
             }
