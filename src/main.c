@@ -53,7 +53,7 @@ void aftervsync() {
 // Mixing buffer (globals should go in IWRAM)
 // Mixing buffer SHOULD be in IWRAM, otherwise the CPU load
 // will _drastially_ increase
-u8 myMixingBuffer[ MM_MIXLEN_31KHZ ] __attribute((aligned(4)));
+IWRAM_DATA u8 myMixingBuffer[ MM_MIXLEN_31KHZ ] __attribute((aligned(4)));
 
 void myCoolVblankHandler()
 {
