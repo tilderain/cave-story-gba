@@ -28,13 +28,13 @@
 // Which tile index in VRAM does the canvas region start at?
 // Must not overlap font, window, face, stage tiles etc.
 // 3 rows * 32 cols = 96 tiles. Put this somewhere safe.
-#define CANVAS_TILE_BASE    0
+#define CANVAS_TILE_BASE    1
 
 // Canvas dimensions in tiles
 // Width should be >= screen tile width so text can scroll fully
 // 3 rows matching your existing textRow 0..2 layout
 #define CANVAS_TILES_W 26
-#define CANVAS_TILES_H 6
+#define CANVAS_TILES_H 8
 
 // Canvas pixel dimensions
 #define CANVAS_W            (CANVAS_TILES_W * 8)

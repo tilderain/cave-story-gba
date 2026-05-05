@@ -290,7 +290,7 @@ void canvas_setup_tilemap(uint8_t on_top) {
 
     // IMPORTANT: Only map 6 rows of tiles to the screen
     // The canvas is 8 rows high, so the last 2 rows are a hidden "gutter"
-    for (int row = 0; row < 6; row++) { 
+    for (int row = 0; row < 8; row++) { 
         for (int col = 0; col < CANVAS_TILES_W; col++) {
             int tile_idx = CANVAS_TILE_BASE + (row * CANVAS_TILES_W) + col;
             BG3_MAP_BASE[(map_row + row) * 32 + (map_col + col)] = (uint16_t)(tile_idx | (2 << 12));
