@@ -48,7 +48,7 @@ void aftervsync() {
 
     joy_update();
 }
-
+#include "gbaram.h"
 
 // Mixing buffer (globals should go in IWRAM)
 // Mixing buffer SHOULD be in IWRAM, otherwise the CPU load

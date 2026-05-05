@@ -74,11 +74,11 @@ void song_play(uint8_t id) {
 	}
 	else if (song == 3 || song == 10 || song == 15 || song == 16)
 	{
-		mmStart((mm_word)song_info_xm[id].song, MM_PLAY_ONCE);
+		mmStart((mm_word)song_info_snes[id].song, MM_PLAY_ONCE);
 	}
 	else
 	{
-		mmStart((mm_word)song_info_xm[id].song, MM_PLAY_ONCE);
+		mmStart((mm_word)song_info_snes[id].song, MM_PLAY_ONCE);
 	}
 	songPlaying = id;
 }

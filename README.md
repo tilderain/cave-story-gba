@@ -13,6 +13,7 @@ Various, details [here](doc/LICENSE.md)
 - andwn: Took on the insane task of porting this game to a 1988 console, and so without, this project would not exist.
 - gbadev discord: Moral support
 - Řrřola: Org2XM
+- Livvy94: Cave Story SNES Soundtrack
 - Ravenworks
 - Pixel
 

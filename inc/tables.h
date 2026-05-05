@@ -148,6 +148,7 @@ extern const background_info_def background_info[];
 
 extern const song_info_def song_info[];
 extern const song_info_def song_info_xm[];
+extern const song_info_def song_info_snes[];
 
 extern const sound_info_def sound_info[];
 
