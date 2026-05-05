@@ -184,20 +184,21 @@ void canvas_init(void) {
 // canvas_clear - zero all canvas tile pixel data (makes canvas transparent)
 // ---------------------------------------------------------------------------
 void canvas_clear(void) {
-    static const uint32_t zero = 0;
+    // OLD: static const uint32_t zero = 0;
+    // NEW: Fill every pixel with Palette Index 2 (The Blue we set above)
+    static const uint32_t blue_fill = 0x22222222; 
+    
     void* dest = (void*)(VRAM_TILE_BASE + (CANVAS_TILE_BASE * 32));
     uint32_t word_count;
 
     if (s_canvas_is_fullscreen) {
-        // Clear all 600 tiles (Be careful: this WILL hit map data if maps are in CB3)
         word_count = (CANVAS_TILES_W_FULL * CANVAS_TILES_H_FULL * 32) / 4;
     } else {
-        // Clear only the 156 tiles used by the Window (approx 5KB)
-        // This is safe and won't touch CB3/Tilemaps
         word_count = (CANVAS_TILES_W * CANVAS_TILES_H * 32) / 4;
     }
 
-    CpuFastSet(&zero, dest, word_count | (1 << 24));
+    // Use CpuFastSet to fill the memory with the blue index nibbles
+    CpuFastSet(&blue_fill, dest, word_count | (1 << 24));
 }
 
 // ---------------------------------------------------------------------------

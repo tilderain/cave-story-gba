@@ -155,7 +155,16 @@ void vdp_init() {
 
 	// screen mode & background to display
 	SetMode( MODE_0 | BG0_ON | BG1_ON | BG2_ON | BG3_ON | OBJ_ON | OBJ_1D_MAP);
-	
+	    REG_BLDCNT = (1 << 3) |          // 1st Target BG3
+                 (1 << 8) |          // 2nd Target BG0
+                 (1 << 9) |          // 2nd Target BG1
+                 (1 << 10)|          // 2nd Target BG2
+                 (1 << 12)|          // 2nd Target Sprites (OBJ)
+                 (1 << 6);           // Mode: Alpha Blending
+
+    // Set transparency levels
+    // EVA = Source weight (3/16), EVB = Destination weight (13/16)
+    REG_BLDALPHA = (1 << 8) | 16; 
 	canvas_init();
 }
 
@@ -540,11 +549,8 @@ IWRAM_CODE void vdp_sprites_update() {
 		if(IsBitSet(sprite_table[i].attr, 12))
 			obj_buffer[i].attr1 |= OBJ_VFLIP;
 			
-		int prio = sprite_table[i].attr>>15;
-		if(prio == 0)
-			prio = 2;
-		else
-			prio = 1;
+		int prio = (sprite_table[i].attr & 0x8000) ? 0 : 2; 
+		
 		obj_buffer[i].attr2 = OBJ_PRIORITY(prio) 
 			| OBJ_CHAR((sprite_table[i].attr&0x7FF)+0) | OBJ_PALETTE((sprite_table[i].attr>>13)&3);
 	}
@@ -582,6 +588,16 @@ IWRAM_CODE void vdp_sprites_update() {
 	BG_COLORS[16+16+1]=RGB5(31,31,31);
 	//BG_COLORS[16+16+2]=RGB5(31,31,31);
 	BG_COLORS[241]=RGB5(17,31,31);
+
+
+
+    uint16_t blueBG = (8 << 10) | (4 << 5) | 3; 
+
+    // Assuming BG3 (Window) uses Palette Bank 2 (index 32-47)
+    // Index 0 of the bank is usually transparency, 
+    // but the window "fill" tile usually uses a specific index.
+    // Based on your code, we'll set index 0 of palette 2:
+    BG_COLORS[32+2] = blueBG; 
 
 	DMA3COPY(obj_buffer, OAM, ((sizeof(OBJATTR)*128)/2));
 

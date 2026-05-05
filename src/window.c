@@ -79,6 +79,8 @@ uint8_t windowOnTop = 0;
 
 #include "gbatext.h"
 
+static int16_t faceXOffset = 0; // Current horizontal sliding offset
+
 void window_clear_text();
 void window_draw_face();
 
@@ -172,23 +174,27 @@ void window_close() {
 	canvas_clear();
 }
 
+#include "vdp.h"
+
 void window_set_face(uint16_t face, uint8_t open) {
     if(paused) return;
     if(open && !windowOpen) window_open(windowOnTop);
     
-    showingFace = face;
-    
-    // Adjust the X cursor dynamically just in case the face appears mid-text
-    textPixelX = showingFace ? 56 : 0; 
+    // Only reset the slide if the face is actually changing
+    if(showingFace != face) {
+        showingFace = face;
+        if(face > 0) {
+            faceXOffset = -12; // Start 12 pixels to the left (Original CS style)
+        }
+    }
     
     if(face > 0) {
-        window_draw_face();
+        vdp_tiles_load_from_rom(face_info[face].tiles->tiles, TILE_FACEINDEX, 36);
+        textPixelX = 56; 
     } else {
-        vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(4), TEXT_X1, 
-                windowOnTop ? TEXT_Y1_TOP : TEXT_Y1, 6, 6, 0);
+        textPixelX = 0;
     }
 }
-
 int textPixelX = 0;
 
 void window_draw_char(uint8_t c) {
@@ -444,6 +450,42 @@ void window_update() {
         vdp_sprites_add(promptSpr, 2);
     }
 
+
+    // 3. Handle Animated Face Slide
+    if(windowOpen && showingFace > 0) {
+        // Increment the slide offset until it hits 0
+        if(faceXOffset < 0) faceXOffset += 2; 
+
+        // Resting X: (WINDOW_X1 * 8) + 4 = 12
+        // We add the offset to this.
+        int16_t fx = (WINDOW_X1 * 8) + 4 + 128 + faceXOffset;
+        int16_t fy = (windowOnTop ? (WINDOW_Y1_TOP * 8) : (WINDOW_Y1 * 8)) + 4 + 128;
+
+        uint16_t tileOffset = TILE_FACEINDEX;
+
+        // Draw the 48x48 face as 6 horizontal strips (32x8 + 16x8)
+        for (int i = 0; i < 6; i++) {
+            // Strip i, Left side (32x8)
+            VDPSprite faceLeft = {
+                .x = fx,
+                .y = fy + (i * 8),
+                .size = SPRITE_SIZE(4, 1),
+                .attr = TILE_ATTR(face_info[showingFace].palette, 1, 0, 0, tileOffset)
+            };
+            vdp_sprite_add(&faceLeft);
+            tileOffset += 4;
+
+            // Strip i, Right side (16x8)
+            VDPSprite faceRight = {
+                .x = fx + 32,
+                .y = fy + (i * 8),
+                .size = SPRITE_SIZE(2, 1),
+                .attr = TILE_ATTR(face_info[showingFace].palette, 1, 0, 0, tileOffset)
+            };
+            vdp_sprite_add(&faceRight);
+            tileOffset += 2;
+        }
+    }
 	if(tscState == TSC_WAITINPUT && textMode == TM_NORMAL) {
 		uint8_t x = showingFace ? TEXT_X1_FACE : TEXT_X1;
 		uint8_t y = windowOnTop ? TEXT_Y1_TOP : TEXT_Y1;

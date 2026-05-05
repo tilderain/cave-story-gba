@@ -173,3 +173,5 @@ void vdp_font_load(const uint32_t *tiles);
 void vdp_font_pal(uint16_t pal);
 void vdp_puts(uint16_t plan, const char *str, uint16_t x, uint16_t y);
 void vdp_text_clear(uint16_t plan, uint16_t x, uint16_t y, uint16_t len);
+
+uint16_t saturate_color(uint16_t color);
