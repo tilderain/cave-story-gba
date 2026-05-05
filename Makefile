@@ -1,46 +1,24 @@
 
 
-
 #---------------------------------------------------
-#---------------CSMD makefile section---------------
+#--------------- GBA Makefile section --------------
 #---------------------------------------------------
-
-MARSDEV ?= ${HOME}/mars
-MARSBIN  = $(MARSDEV)/m68k-elf/bin
-TOOLSBIN = $(MARSDEV)/bin
 
 TARGET = doukutsu
 
-# Z80 Assembler to build XGM driver
-ASMZ80   = $(TOOLSBIN)/sjasm
-# SGDK Tools
+# Local Tools (These are built automatically via the Makefile)
 BINTOS   = ../bin/bintos
 RESCOMP  = ../bin/rescomp
 WAVTORAW = ../bin/wavtoraw
 XGMTOOL  = bin/xgmtool
-# Sik's Tools
-MDTILER  = $(TOOLSBIN)/mdtiler
-SLZ      = $(TOOLSBIN)/slz
-UFTC     = $(TOOLSBIN)/uftc
-# Cave Story Tools
 TSCOMP   = ../bin/tscomp
 PATCHROM = bin/patchrom
 
-# Some files needed are in a versioned directory
-GCC_VER := $(shell $(CC) -dumpversion)
-PLUGIN   = $(MARSDEV)/m68k-elf/libexec/gcc/m68k-elf/$(GCC_VER)
-LTO_SO   = liblto_plugin.so
-ifeq ($(OS),Windows_NT)
-    LTO_SO = liblto_plugin-0.dll
-endif
-
-INCS     = -Isrc -Ires -Iinc
-LIBS     = -L$(MARSDEV)/m68k-elf/lib/gcc/m68k-elf/$(GCC_VER)
-CCFLAGS  = -m68000 -Wall -Wextra -std=c99 -ffreestanding -fcommon -mshort
-OPTIONS  =
-ASFLAGS  = -m68000 --register-prefix-optional
-LDFLAGS  = -T mdssf.ld -nostdlib
-Z80FLAGS = -isrc/xgm
+# Sik's Tools Source and Binaries
+TOOLSMD  = ../toolsmd
+MDTILER  = ../bin/mdtiler
+SLZ      = ../bin/slz
+UFTC     = ../bin/uftc
 
 # Stage layout files to compress
 PXMS  = $(wildcard ../res/Stage/*.pxm)
@@ -249,8 +227,21 @@ soundbank_bin.h: soundbank.bin
 main.o: soundbank.h
 
 prereq: $(RESCOMP) resources.s resources.h ../inc/ai_gen.h grit-gen.stamp $(BINTOS) $(TSCOMP) $(WAVTORAW) soundbank.h
+prereq: $(MDTILER) $(SLZ) $(UFTC)
 prereq: $(CPXMS) $(XGCS) $(PCMS) $(CTSETS) $(ZOBJ) $(TSBS) $(PATS)
 
+# Sik's Tools compilation rules
+$(MDTILER):
+	@mkdir -p $(dir $@)
+	cc $(TOOLSMD)/mdtiler/tool/*.c -o $@ -lm -lpng
+
+$(SLZ):
+	@mkdir -p $(dir $@)
+	cc $(TOOLSMD)/slz/tool/*.c -o $@
+
+$(UFTC):
+	@mkdir -p $(dir $@)
+	cc $(TOOLSMD)/uftc/tool/*.c -o $@
 
 ../inc/ai_gen.h: ../aigen.py
 	python3 ../aigen.py
@@ -297,16 +288,17 @@ $(TSCOMP):
 $(PATCHROM): bin
 	cc tools/patchrom/patchrom.c -o $@
 
-
-# Compression of stage layouts
-%.cpxm: %.pxm
+# 1. Compress stage layouts (PXM -> CPXM)
+%.cpxm: %.pxm | $(SLZ)
 	$(SLZ) -c "$<" "$@"
 
-%.pat: %.mdt
-	$(MDTILER) -b "$(CURDIR)/$<"
+# 2. Convert Images to Patterns (PNG -> PAT)
+# -t specifies "tilemap order" (left-to-right, then top-to-bottom)
+%.pat: %.png | $(MDTILER)
+	$(MDTILER) -t "$<" "$@"
 
-# Compression of tilesets
-%.uftc: %.pat
+# 3. Compress Patterns (PAT -> UFTC)
+%.uftc: %.pat | $(UFTC)
 	$(UFTC) -c "$<" "$@"
 
 #%.pat: %.png
