@@ -26,3 +26,7 @@ res/resources.s
 mGBA*
 *.pal.bin
 *.img.bin
+
+allcpp.txt
+all.txt
+allh.txt

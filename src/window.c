@@ -21,25 +21,28 @@
 
 #include <stdio.h>
 
-// Window location
+// Window location (GBA is 30 columns wide and 20 rows tall)
 #define WINDOW_X1 1
-#define WINDOW_X2 38
-#define WINDOW_Y1 (pal_mode ? 21 : 20)
-#define WINDOW_Y2 (pal_mode ? 28 : 27)
+#define WINDOW_X2 28                  // Leaves a 1-tile margin on the right (GBA column 28)
+#define WINDOW_Y1 13                  // Placed at row 13 (so bottom box occupies rows 13-19)
+#define WINDOW_Y2 19                  // Placed at row 19 (the very bottom of GBA screen)
+
 // Text area location within window
-#define TEXT_X1 (WINDOW_X1 + 1)
-#define TEXT_X2 (WINDOW_X2 - 1)
-#define TEXT_Y1 (WINDOW_Y1 + 1)
-#define TEXT_Y2 (WINDOW_Y2 - 1)
-#define TEXT_X1_FACE (WINDOW_X1 + 8)
+#define TEXT_X1 (WINDOW_X1 + 1)       // Col 2
+#define TEXT_X2 (WINDOW_X2 - 1)       // Col 27
+#define TEXT_Y1 (WINDOW_Y1 + 1)       // Row 14 (where bottom text begins)
+#define TEXT_Y2 (WINDOW_Y2 - 1)       // Row 18
+#define TEXT_X1_FACE (WINDOW_X1 + 8)  // Col 9 (leaves room for face on GBA width)
+
 // On top
 #define WINDOW_Y1_TOP 0
-#define WINDOW_Y2_TOP 7
-#define TEXT_Y1_TOP (WINDOW_Y1_TOP + 1)
-#define TEXT_Y2_TOP (WINDOW_Y2_TOP - 1)
-// Prompt window location
-#define PROMPT_X 27
-#define PROMPT_Y 17
+#define WINDOW_Y2_TOP 6               // Top window occupies rows 0-6
+#define TEXT_Y1_TOP (WINDOW_Y1_TOP + 1) // Row 1 (where top text begins)
+#define TEXT_Y2_TOP (WINDOW_Y2_TOP - 1) // Row 5
+
+// Prompt window location (Yes/No dialog)
+#define PROMPT_X 18                   // Centered for GBA width
+#define PROMPT_Y 11                   // Placed perfectly above the bottom window
 
 #define ITEM_Y_START	(SCREEN_HALF_H + 128)
 #define ITEM_Y_END		(SCREEN_HALF_H + 12 + 128)
@@ -71,77 +74,87 @@ uint8_t blinkTime = 0;
 
 uint8_t windowOnTop = 0;
 
+#include "gbatext.h"
 
 void window_clear_text();
 void window_draw_face();
 
 void window_open(uint8_t mode) {
-	mapNameTTL = 0; // Hide map name to avoid tile conflict
-	//window_clear_text();
-	if(cfg_language >= LANG_JA && cfg_language <= LANG_KO) {
-		const uint32_t *data = &TS_MsgFont.tiles[('_' - 0x20) << 3];
-		vdp_tiles_load_from_rom(data, (0xB000 >> 5) + 3 + (29 << 2), 1);
-	}
-	textRow = textColumn = 0;
-	
-	windowOnTop = mode;
-	//if(mode || (cfg_language >= LANG_JA && cfg_language <= LANG_KO))
+    mapNameTTL = 0; // Hide map name to avoid tile conflict
+    if(cfg_language >= LANG_JA && cfg_language <= LANG_KO) {
+        const uint32_t *data = &TS_MsgFont.tiles[('_' - 0x20) << 3];
+        vdp_tiles_load_from_rom(data, (0xB000 >> 5) + 3 + (29 << 2), 1);
+    }
+    textRow = textColumn = 0;
+    
+    windowOnTop = mode;
     hud_hide();
 
-	uint16_t wy1 = mode ? WINDOW_Y1_TOP : WINDOW_Y1,
-		wy2 = mode ? WINDOW_Y2_TOP : WINDOW_Y2,
-		ty1 = mode ? TEXT_Y1_TOP : TEXT_Y1,
-		ty2 = mode ? TEXT_Y2_TOP : TEXT_Y2;
-	
-	vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(0), WINDOW_X1, wy1);
-	vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(1), TEXT_X1, wy1, 36, 1, 0);
-	vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(2), WINDOW_X2, wy1);
-	for(uint8_t y = ty1; y <= ty2; y++) {
+    uint16_t wy1 = mode ? WINDOW_Y1_TOP : WINDOW_Y1,
+        wy2 = mode ? WINDOW_Y2_TOP : WINDOW_Y2,
+        ty1 = mode ? TEXT_Y1_TOP : TEXT_Y1,
+        ty2 = mode ? TEXT_Y2_TOP : TEXT_Y2;
+    
+    vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(0), WINDOW_X1, wy1);
+    // Draw horizontal borders based on actual GBA window width (26 tiles)
+    vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(1), TEXT_X1, wy1, WINDOW_X2 - WINDOW_X1 - 1, 1, 0);
+    vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(2), WINDOW_X2, wy1);
+    for(uint8_t y = ty1; y <= ty2; y++) {
         vdp_map_xy(VDP_PLAN_W, 0, 0, y);
-		vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(3), WINDOW_X1, y);
-		//vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(4), TEXT_X1, y, 36, 1, 0);
-		vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(5), WINDOW_X2, y);
-        vdp_map_xy(VDP_PLAN_W, 0, 39, y);
-	}
-	vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(6), WINDOW_X1, wy2);
-	vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(7), TEXT_X1, wy2, 36, 1, 0);
-	vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(8), WINDOW_X2, wy2);
+        vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(3), WINDOW_X1, y);
+        vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(5), WINDOW_X2, y);
+        vdp_map_xy(VDP_PLAN_W, 0, 29, y); // Row width is 30 columns (index 29 is the rightmost)
+    }
+    vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(6), WINDOW_X1, wy2);
+    vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(7), TEXT_X1, wy2, WINDOW_X2 - WINDOW_X1 - 1, 1, 0);
+    vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(8), WINDOW_X2, wy2);
 
     window_clear();
-	
-	if(!paused) {
-		if(showingFace > 0) window_draw_face();
-		vdp_set_window(0, mode ? 8 : (pal_mode ? 245 : 244));
-	} else showingFace = 0;
+    
+    if(!paused) {
+        if(showingFace > 0) window_draw_face();
+        vdp_set_window(0, mode ? 8 : 104); // Sets vertical GBA window split (104px = Row 13)
+    } else showingFace = 0;
 
     if(textMode == TM_MSG) textMode = TM_NORMAL;
 
-	windowOpen = TRUE;
+    windowOpen = TRUE;
+
+    canvas_setup_tilemap(mode);  // clears canvas, resets scroll, fixes tilemap
 }
+
 
 uint8_t window_is_open() {
 	return windowOpen;
 }
 
 void window_clear() {
-	iprintf("\x1b[2J");
-	uint8_t x = showingFace ? TEXT_X1_FACE : TEXT_X1;
-	uint8_t y = windowOnTop ? TEXT_Y1_TOP : TEXT_Y1;
-	uint8_t w = showingFace ? 29 : 36;
+    iprintf("\x1b[2J");
+    uint8_t x = showingFace ? TEXT_X1_FACE : TEXT_X1;
+    uint8_t y = windowOnTop ? TEXT_Y1_TOP : TEXT_Y1;
+    uint8_t w = showingFace ? 19 : 26; // GBA friendly text widths
 
     disable_ints;
     z80_request();
-	vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(4), x, y, w, 6, 0);
+    vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(4), x, y, w, 6, 0);
     z80_release();
     enable_ints;
 
-	window_clear_text();
+    window_clear_text();
 }
 
+
 void window_clear_text() {
-	textRow = textColumn = spaceCounter = spaceOffset = 0;
-	memset(windowText, ' ', 36*3);
+    textRow = textColumn = spaceCounter = spaceOffset = 0;
+    
+    // Reset X position!
+    textPixelX = showingFace ? 56 : 0; 
+    
+    memset(windowText, ' ', 36*3);
     cjk_reset(CJK_MESSAGE);
+    
+    // Wipe the canvas graphics in VRAM
+    canvas_clear(); 
 }
 
 void window_close() {
@@ -155,57 +168,41 @@ void window_close() {
 }
 
 void window_set_face(uint16_t face, uint8_t open) {
-	if(paused) return;
-	if(open && !windowOpen) window_open(windowOnTop);
-	showingFace = face;
-	if(face > 0) {
-		window_draw_face();
-	} else {
-		vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(4), TEXT_X1, 
-				windowOnTop ? TEXT_Y1_TOP : TEXT_Y1, 6, 6, 0);
-	}
+    if(paused) return;
+    if(open && !windowOpen) window_open(windowOnTop);
+    
+    showingFace = face;
+    
+    // Adjust the X cursor dynamically just in case the face appears mid-text
+    textPixelX = showingFace ? 56 : 0; 
+    
+    if(face > 0) {
+        window_draw_face();
+    } else {
+        vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(4), TEXT_X1, 
+                windowOnTop ? TEXT_Y1_TOP : TEXT_Y1, 6, 6, 0);
+    }
 }
 
+int textPixelX = 0;
 void window_draw_char(uint8_t c) {
-	//GBATODO
-	iprintf("%c", c);
-
-	if(c == '\n') {
-		textRow++;
-		textColumn = 0;
-		spaceCounter = spaceOffset = 0;
-		if(textRow > 2) {
-			window_scroll_text();
-		}
-	} else {
-		// Check if the line has leading spaces, and skip drawing a space occasionally,
-		// so that the sign text will be centered
-		if(textColumn == spaceCounter && c == ' ') {
-			spaceCounter++;
-		} else {
-			spaceCounter = 0;
-		}
-		windowText[textRow][textColumn - spaceOffset] = c;
-		// Figure out where this char is gonna go
-		uint8_t msgTextX = showingFace ? TEXT_X1_FACE : TEXT_X1;
-		msgTextX += textColumn - spaceOffset;
-		uint8_t msgTextY = (windowOnTop ? TEXT_Y1_TOP:TEXT_Y1) + textRow * 2;
-		// And draw it
-		if(c >= 0x80) {
-		    // Extended charset, you'll never guess where I put it
-		    uint16_t index = (VDP_PLAN_W >> 5) + 3;
-		    index += (c - 0x80) << 2;
-            vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0, 1, 0, 0, index-4), msgTextX, msgTextY);
-		} else {
-		    // Low ASCII charset
-            //vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0, 1, 0, 0,
-             //       TILE_FONTINDEX + c - 0x20), msgTextX, msgTextY);
-			vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0, 1, 0, 0,
-                    c), msgTextX, msgTextY);
-        }
-		textColumn++;
-		if(spaceCounter % 5 == 1 || spaceCounter == 2) spaceOffset++;
-	}
+    if (c == '\n') {
+        textRow++;
+        textColumn = 0;
+        spaceCounter = spaceOffset = 0;
+        
+        // Reset X position! Indent by 56 pixels if a face is showing.
+        textPixelX = showingFace ? 56 : 0; 
+        
+        if (textRow > 2) window_scroll_text();
+    } else {
+        // Line height is 16 pixels
+        int py = textRow * 16; 
+        
+        // Draw the glyph. '1' is the palette index for the text color.
+        textPixelX += canvas_put_glyph(textPixelX, py, c, 1);
+        textColumn++;
+    }
 }
 
 void window_draw_jchar(uint8_t iskanji, uint16_t c) {
@@ -236,18 +233,17 @@ void window_draw_jchar(uint8_t iskanji, uint16_t c) {
 }
 
 void window_scroll_text() {
-	// Push bottom 2 rows to top
-	for(uint8_t row = 0; row < 2; row++) {
-		if(vblank) aftervsync(); // So we don't lag the music
-		vblank = 0;
-		
-		uint8_t msgTextX = showingFace ? TEXT_X1_FACE : TEXT_X1;
-		uint8_t msgTextY = (windowOnTop ? TEXT_Y1_TOP:TEXT_Y1) + row * 2;
-		for(uint8_t col = 0; col < 36 - (showingFace > 0) * 8; col++) {
-			windowText[row][col] = windowText[row + 1][col];
-			uint8_t c = windowText[row][col];
+    // Push bottom 2 rows to top
+    for(uint8_t row = 0; row < 2; row++) {
+        if(vblank) aftervsync();
+        vblank = 0;
+        
+        uint8_t msgTextX = showingFace ? TEXT_X1_FACE : TEXT_X1;
+        uint8_t msgTextY = (windowOnTop ? TEXT_Y1_TOP:TEXT_Y1) + row * 2;
+        for(uint8_t col = 0; col < 26 - (showingFace > 0) * 7; col++) { // GBA bounds
+            windowText[row][col] = windowText[row + 1][col];
+            uint8_t c = windowText[row][col];
             if(c >= 0x80) {
-                // Extended charset, you'll never guess where I put it
                 uint16_t index = (VDP_PLAN_W >> 5) + 3;
                 index += (c - 0x80) << 2;
                 vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0, 1, 0, 0, index-4), msgTextX, msgTextY);
@@ -255,21 +251,26 @@ void window_scroll_text() {
                 vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0, 1, 0, 0,
                         TILE_FONTINDEX + c - 0x20), msgTextX, msgTextY);
             }
-			msgTextX++;
-		}
-	}
-	// Clear third row
-	uint8_t msgTextX = showingFace ? TEXT_X1_FACE : TEXT_X1;
-	uint8_t msgTextY = (windowOnTop ? TEXT_Y1_TOP:TEXT_Y1) + 4;
-	uint8_t msgTextW = showingFace ? 29 : 36;
-	memset(windowText[2], ' ', 36);
-	vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(4), msgTextX, msgTextY, msgTextW, 1, 0);
-	// Reset to beginning of third row
-	textRow = 2;
-	textColumn = 0;
-	spaceCounter = spaceOffset = 0;
-}
+            msgTextX++;
+        }
+    }
+    // Clear third row
+    uint8_t msgTextX = showingFace ? TEXT_X1_FACE : TEXT_X1;
+    uint8_t msgTextY = (windowOnTop ? TEXT_Y1_TOP:TEXT_Y1) + 4;
+    uint8_t msgTextW = showingFace ? 19 : 26; // GBA bounds
+    memset(windowText[2], ' ', 36);
+    vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(4), msgTextX, msgTextY, msgTextW, 1, 0);
+    // Reset to beginning of third row
+    textRow = 2;
+    textColumn = 0;
+    spaceCounter = spaceOffset = 0;
 
+    // Reset X position for the new line!
+    textPixelX = showingFace ? 56 : 0;
+
+    // Scroll the actual canvas graphics up!
+    canvas_scroll_up();
+}
 uint8_t window_get_textmode() {
 	return textMode;
 }

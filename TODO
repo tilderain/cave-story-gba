@@ -1,4 +1,7 @@
-use Terminusmodx as font
+bkmoon
+
+---use Terminusmodx as font
+---too big?
 
 fix tyrant/mimiga/wanpak2 xm
 
@@ -24,7 +27,6 @@ remove slz/mdt compression
 	/csmd makefile section
 
 original sprite palettes
-bkmoon
 
 <SSS
 

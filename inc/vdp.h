@@ -7,6 +7,7 @@
 #define BASE_STAGE 30
 #define BASE_STAGE_BACK 31
 #define BASE_BACK 25
+#define BASE_TEXT 29
 
 #define PLAN_WIDTH				32
 #define PLAN_HEIGHT				32

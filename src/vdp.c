@@ -17,7 +17,7 @@
 #include <stdio.h>
 
 u8 saturate = true;
-uint16_t saturate_color(uint16_t color) {
+EWRAM_CODE uint16_t saturate_color(uint16_t color) {
     if(!saturate) return color;
 
     // 1. Unpack 5-bit RGB
@@ -147,7 +147,7 @@ void vdp_init() {
 	BGCTRL[2] = BG_PRIORITY(2) | BG_SIZE(0) | CHAR_BASE(0) | SCREEN_BASE(BASE_STAGE_BACK);
 
 	//Text/ Window
-	BGCTRL[3] |= BG_PRIORITY(0);
+	BGCTRL[3] = BG_PRIORITY(0) | BG_SIZE(0) | CHAR_BASE(2) | SCREEN_BASE(BASE_TEXT);
 
 	// screen mode & background to display
 	SetMode( MODE_0 | BG0_ON | BG1_ON | BG2_ON | BG3_ON | OBJ_ON | OBJ_1D_MAP);
@@ -528,7 +528,7 @@ IWRAM_CODE void vdp_sprites_update() {
 	}
 	u16 *temppointer;
 	u16 *temppointer2;
-    // load the palette for the background, 7 colors
+	// load the palette for the background, 7 colors
     temppointer = BG_COLORS;
     *temppointer = saturate_color(palette[0]); 
     temppointer2 = OBJ_COLORS + 33;
@@ -556,6 +556,9 @@ IWRAM_CODE void vdp_sprites_update() {
             *temppointer2++ = saturate_color(stage_info[stageID].npcPalette2[i]);
         }
 	//temp text color
+	//BG_COLORS[16+16+0]=RGB5(31,31,31);
+	BG_COLORS[16+16+1]=RGB5(31,31,31);
+	//BG_COLORS[16+16+2]=RGB5(31,31,31);
 	BG_COLORS[241]=RGB5(17,31,31);
 
 	DMA3COPY(obj_buffer, OAM, ((sizeof(OBJATTR)*128)/2));
