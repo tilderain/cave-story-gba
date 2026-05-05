@@ -184,7 +184,7 @@ void window_set_face(uint16_t face, uint8_t open) {
     if(showingFace != face) {
         showingFace = face;
         if(face > 0) {
-            faceXOffset = -12; // Start 12 pixels to the left (Original CS style)
+            faceXOffset = -48; // Start 12 pixels to the left (Original CS style)
         }
     }
     
@@ -452,20 +452,76 @@ void window_update() {
 
 
     // 3. Handle Animated Face Slide
+    
     if(windowOpen && showingFace > 0) {
+        static int16_t last_drawn_offset = -999;
+        static uint16_t last_drawn_face = 0;
+
+        // Force a VRAM update when the face graphic changes
+        if (showingFace != last_drawn_face) {
+            last_drawn_face = showingFace;
+            last_drawn_offset = -999; 
+        }
+
         // Increment the slide offset until it hits 0
-        if(faceXOffset < 0) faceXOffset += 2; 
+        if(faceXOffset < 0) faceXOffset += 6; 
+
+        // If the slide offset changed, we shift the pixels in VRAM
+        if(last_drawn_offset != faceXOffset) {
+            last_drawn_offset = faceXOffset;
+            
+            // Calculate how many pixels to cut off from the left
+            int x_offset = -faceXOffset;
+            const uint32_t *src = face_info[showingFace].tiles->tiles;
+            
+            // Pointer directly to the Face Tiles in Sprite VRAM
+            uint32_t *dst = (uint32_t *)(0x06010000 + TILE_FACEINDEX * 32);
+
+            int bit_shift = x_offset * 4; // 4 bits per pixel (4bpp)
+            int word_shift = bit_shift / 32; 
+            int bit_rem = bit_shift % 32;    
+
+            // Shift the 48x48 image leftward in VRAM
+            for(int ty = 0; ty < 6; ty++) { 
+                for(int py = 0; py < 8; py++) { 
+                    uint32_t row_words[6];
+                    for(int tx = 0; tx < 6; tx++) {
+                        row_words[tx] = src[(ty * 6 + tx) * 8 + py];
+                    }
+
+                    uint32_t out_words[6] = {0};
+                    
+                    if(bit_rem == 0) {
+                        for(int tx = 0; tx < 6 - word_shift; tx++) {
+                            out_words[tx] = row_words[tx + word_shift];
+                        }
+                    } else {
+                        // Bitwise shift across the 32-bit boundaries
+                        for(int tx = 0; tx < 6 - word_shift; tx++) {
+                            uint32_t curr = row_words[tx + word_shift];
+                            uint32_t next = (tx + word_shift + 1 < 6) ? row_words[tx + word_shift + 1] : 0;
+                            out_words[tx] = (curr >> bit_rem) | (next << (32 - bit_rem));
+                        }
+                    }
+
+                    // Write the shifted row to VRAM
+                    for(int tx = 0; tx < 6; tx++) {
+                        dst[(ty * 6 + tx) * 8 + py] = out_words[tx];
+                    }
+                }
+            }
+        }
 
         // Resting X: (WINDOW_X1 * 8) + 4 = 12
-        // We add the offset to this.
-        int16_t fx = (WINDOW_X1 * 8) + 4 + 128 + faceXOffset;
+        // Notice we DO NOT add faceXOffset here anymore! 
+        // The sprite stays anchored while the VRAM shift creates the sliding mask effect.
+        int16_t fx = (WINDOW_X1 * 8) + 4 + 128;
         int16_t fy = (windowOnTop ? (WINDOW_Y1_TOP * 8) : (WINDOW_Y1 * 8)) + 4 + 128;
 
         uint16_t tileOffset = TILE_FACEINDEX;
 
         // Draw the 48x48 face as 6 horizontal strips (32x8 + 16x8)
         for (int i = 0; i < 6; i++) {
-            // Strip i, Left side (32x8)
             VDPSprite faceLeft = {
                 .x = fx,
                 .y = fy + (i * 8),
@@ -475,7 +531,6 @@ void window_update() {
             vdp_sprite_add(&faceLeft);
             tileOffset += 4;
 
-            // Strip i, Right side (16x8)
             VDPSprite faceRight = {
                 .x = fx + 32,
                 .y = fy + (i * 8),
