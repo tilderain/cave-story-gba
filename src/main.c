@@ -59,6 +59,7 @@ void myCoolVblankHandler()
 {
 	//REG_IME = 0;
 	mmVBlank();
+	mmFrame();
 	//REG_IME = 1;
 	
 	vblank = true;

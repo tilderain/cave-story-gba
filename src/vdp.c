@@ -173,7 +173,7 @@ void vdp_init() {
 void vdp_vsync() {
 	VBlankIntrWait();
 
-		mmFrame();
+		//mmFrame();
 		vblank = false;
 	
 
