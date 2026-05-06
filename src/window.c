@@ -69,7 +69,8 @@ uint8_t windowTextTick = 0;
 uint8_t spaceCounter = 0, spaceOffset = 0;
 
 uint8_t promptAnswer = TRUE;
-VDPSprite promptSpr[2], handSpr;
+VDPSprite promptSpr[2];
+VDPSprite handSpr, handSprR;
 
 uint16_t showingItem = 0;
 
@@ -370,13 +371,23 @@ uint8_t window_prompt_update() {
 }
 
 void window_draw_face() {
-    disable_ints;
-    z80_request();
-	vdp_tiles_load_from_rom(face_info[showingFace].tiles->tiles, TILE_FACEINDEX, face_info[showingFace].tiles->numTile);
-	vdp_map_fill_rect(VDP_PLAN_W, TILE_ATTR(face_info[showingFace].palette, 1, 0, 0, TILE_FACEINDEX), 
-			TEXT_X1, (windowOnTop ? TEXT_Y1_TOP : TEXT_Y1), 6, 6, 1);
-    z80_release();
-    enable_ints;
+    // 1. Get current face definition
+    const face_info_def *f = &face_info[showingFace];
+    
+    // Safety check: Don't try to draw if there are no tiles or palette data
+    if (f->tiles == NULL || f->pal_ptr == NULL) return;
+
+    // 2. Load the 16 colors for this face into GBA Palette Line 4
+    vdp_colors(64, f->pal_ptr, 16);
+
+    // 3. Load the 36 tiles (6x6) into VRAM
+    vdp_tiles_load_from_rom(f->tiles->tiles, TILE_FACEINDEX, 36);
+
+    // 4. Draw the 6x6 face into the window plane
+    // We pass '4' to TILE_ATTR so the hardware knows to use the colors we just loaded
+    vdp_map_fill_rect(VDP_PLAN_W, 
+        TILE_ATTR(4, 1, 0, 0, TILE_FACEINDEX), 
+        TEXT_X1, (windowOnTop ? TEXT_Y1_TOP : TEXT_Y1), 6, 6, 1);
 }
 
 void window_show_item(uint16_t item) {
@@ -386,15 +397,23 @@ void window_show_item(uint16_t item) {
 	const SpriteDefinition *sprDef = &SPR_ItemImage;
 	uint16_t pal = PAL1;
 	if(ITEM_PAL[item]) {
-		sprDef = &SPR_ItemImageG;
+		sprDef = &SPR_ItemImage;
 		pal = PAL0;
 	}
-	handSpr = (VDPSprite) {
-		.x = SCREEN_HALF_W - 12 + 128,
-		.y = ITEM_Y_START,
-		.size = SPRITE_SIZE(3, 2),
-		.attr = TILE_ATTR(pal,1,0,0,TILE_PROMPTINDEX)
-	};
+    int pal_line = 6;
+    handSpr = (VDPSprite) {
+        .x = SCREEN_HALF_W - 12 + 128,
+        .y = ITEM_Y_START,
+        .size = SPRITE_SIZE(2, 2) | (pal_line << 4),
+        .attr = TILE_ATTR(0,1,0,0,TILE_PROMPTINDEX)
+    };
+    // Right side (8x16)
+    handSprR = (VDPSprite) {
+        .x = SCREEN_HALF_W - 12 + 16 + 128,
+        .y = ITEM_Y_START,
+        .size = SPRITE_SIZE(1, 2) | (pal_line << 4),
+        .attr = TILE_ATTR(0,1,0,0,TILE_PROMPTINDEX + 4) // Offset tile by 4
+    };
 	promptSpr[0] = (VDPSprite) {
 		.x = SCREEN_HALF_W - 24 + 128,
 		.y = SCREEN_HALF_H + 8 + 128,
@@ -445,7 +464,11 @@ void window_update() {
     }
 
     if(showingItem) {
-        if(handSpr.y < ITEM_Y_END) handSpr.y++;
+        if(handSpr.y < ITEM_Y_END) {
+            handSpr.y++;
+            handSprR.y++;
+        }
+        if(handSprR.y) vdp_sprite_add(&handSprR); 
         vdp_sprite_add(&handSpr);
         vdp_sprites_add(promptSpr, 2);
     }
@@ -456,6 +479,11 @@ void window_update() {
     if(windowOpen && showingFace > 0) {
         static int16_t last_drawn_offset = -999;
         static uint16_t last_drawn_face = 0;
+
+        const face_info_def *f = &face_info[showingFace];
+
+        // 2. Load the 16 colors for this face into GBA Palette Line 4
+        vdp_colors(64, f->pal_ptr, 16);
 
         // Force a VRAM update when the face graphic changes
         if (showingFace != last_drawn_face) {
@@ -525,8 +553,8 @@ void window_update() {
             VDPSprite faceLeft = {
                 .x = fx,
                 .y = fy + (i * 8),
-                .size = SPRITE_SIZE(4, 1),
-                .attr = TILE_ATTR(face_info[showingFace].palette, 1, 0, 0, tileOffset)
+                .size = SPRITE_SIZE(4, 1)  | (4 << 4),
+                .attr = TILE_ATTR(3, 1, 0, 0, tileOffset)
             };
             vdp_sprite_add(&faceLeft);
             tileOffset += 4;
@@ -534,8 +562,8 @@ void window_update() {
             VDPSprite faceRight = {
                 .x = fx + 32,
                 .y = fy + (i * 8),
-                .size = SPRITE_SIZE(2, 1),
-                .attr = TILE_ATTR(face_info[showingFace].palette, 1, 0, 0, tileOffset)
+                .size = SPRITE_SIZE(2, 1)  | (4 << 4),
+                .attr = TILE_ATTR(3, 1, 0, 0, tileOffset)
             };
             vdp_sprite_add(&faceRight);
             tileOffset += 2;

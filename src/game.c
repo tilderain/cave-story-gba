@@ -221,4 +221,12 @@ void game_reset(uint8_t load) {
 	//vdp_colors_next(0, PAL_Main.data, 16);
 	//vdp_colors_next(16, PAL_Sym.data, 16);
 	//vdp_colors(0, PAL_FadeOut, 64);
+
+	for (int i = 0; i < 16; i++) {
+        OBJ_COLORS[80 + i] = saturate_color(PAL_armsimage[i]);
+    }
+
+    for (int i = 0; i < 16; i++) {
+        OBJ_COLORS[96 + i]  = saturate_color(PAL_itemimage[i]);   // Line 6
+    }
 }

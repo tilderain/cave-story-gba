@@ -26,7 +26,7 @@
 #include "pause.h"
 
 // Item menu stuff
-VDPSprite itemSprite[MAX_ITEMS];
+VDPSprite itemSprite[MAX_ITEMS][2];
 int8_t selectedItem = 0;
 
 void draw_itemmenu(uint8_t resetCursor) {
@@ -97,7 +97,7 @@ void draw_itemmenu(uint8_t resetCursor) {
         // X tile pos and VRAM index to put the ArmsImage tiles
         uint16_t x = 4 + i*6;
         uint16_t index = TILE_FACEINDEX + 16 + i*4;
-        vdp_tiles_load_from_rom(SPR_TILES(&SPR_ArmsImageM, 0, w->type), index, 4);
+        vdp_tiles_load_from_rom(SPR_TILES(&SPR_ArmsImage, 0, w->type), index, 4);
         // 4 mappings for ArmsImage icon
         vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index),   x,   y);
         vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index+2), x+1, y);
@@ -141,6 +141,9 @@ void draw_itemmenu(uint8_t resetCursor) {
     DRAW_LETTER(17,10,y);
     DRAW_LETTER(17,11,y);
     uint8_t held = 0;
+
+    uint8_t item_base_y = 44; 
+    uint8_t item_base_x = 30; 
     for(uint16_t i = 0; i < MAX_ITEMS; i++) {
         //playerInventory[i] = 35; // :^)
         uint16_t item = playerInventory[i];
@@ -149,21 +152,30 @@ void draw_itemmenu(uint8_t resetCursor) {
             const SpriteDefinition *sprDef = &SPR_ItemImage;
             uint16_t pal = PAL1;
             if(ITEM_PAL[item]) {
-                sprDef = &SPR_ItemImageG;
+                sprDef = &SPR_ItemImage;
                 pal = PAL0;
             }
             // Clobber the entity/bullet shared sheets
             vdp_tiles_load_from_rom(SPR_TILES(sprDef, item, 0), TILE_SHEETINDEX+held*6, 6);
             //SHEET_LOAD(sprDef, 1, 6, TILE_SHEETINDEX+held*6, TRUE, item,0);
-            itemSprite[i] = (VDPSprite){
-                    .x = 36 + (i % 6) * 32 + 128,
-                    .y = 88 + (i / 6) * 16 + 128 + (top * 8),
-                    .size = SPRITE_SIZE(3, 2),
-                    .attr = TILE_ATTR(pal,1,0,0,TILE_SHEETINDEX+held*6)
+            int pal_line = 6;
+            itemSprite[i][0] = (VDPSprite){
+                .x = item_base_x + (i % 6) * 32 + 128,
+                .y = item_base_y + (i / 6) * 16 + 128 + (top * 8),
+                .size = SPRITE_SIZE(2, 2) | (pal_line << 4),
+                .attr = TILE_ATTR(0,1,0,0,TILE_SHEETINDEX+held*6) 
+            };
+            
+            // Right 8x16 Sprite (2 tiles)
+            itemSprite[i][1] = (VDPSprite){
+                .x = item_base_x + (i % 6) * 32 + 16 + 128,  // Offset X by 16px
+                .y = item_base_y + (i / 6) * 16 + 128 + (top * 8),
+                .size = SPRITE_SIZE(1, 2) | (pal_line << 4), // 8x16 GBA size
+                .attr = TILE_ATTR(0,1,0,0,TILE_SHEETINDEX+held*6 + 4) // Offset tile by 4
             };
             held++;
         } else {
-            itemSprite[i] = (VDPSprite) {};
+            itemSprite[i][0] = (VDPSprite) {}; itemSprite[i][1] = (VDPSprite) {};
         }
     }
     z80_release();
@@ -316,7 +328,12 @@ uint8_t update_pause() {
                 }
             }
         }
-        for(uint8_t i = MAX_ITEMS; i--; ) if(itemSprite[i].y) vdp_sprite_add(&itemSprite[i]);
+        for(uint8_t i = MAX_ITEMS; i--; ) {
+            if(itemSprite[i][0].y) {
+                vdp_sprite_add(&itemSprite[i][0]);
+                vdp_sprite_add(&itemSprite[i][1]);
+            }
+        }
     }
     return TRUE;
 }

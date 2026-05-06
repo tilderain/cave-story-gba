@@ -70,10 +70,11 @@ typedef struct {
 
 // Information about each character face image
 #define FACE_COUNT 30
+
 typedef struct {
-	const TileSet *tiles; // Graphical tile data
-	// Like backgrounds, faces share palettes. This is which of the 4 currently loaded to use
-	uint16_t palette;
+	const TileSet *tiles;      // Graphical tile data (36 tiles)
+	const uint16_t *pal_ptr;   // Pointer to the .pal.bin data
+	uint16_t palette;          // The sub-palette index (PAL0 or PAL3)
 } face_info_def;
 
 // Information about each NPC type, indexes are the same as npc.tbl

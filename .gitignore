@@ -30,3 +30,11 @@ mGBA*
 allcpp.txt
 all.txt
 allh.txt
+
+CSE2-portable
+
+**.ss**
+config.toml
+gba_bios.bin
+Mesen
+NanoBoyAdvance

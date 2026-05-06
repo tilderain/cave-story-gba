@@ -1,11 +1,14 @@
 import os, os.path, subprocess
 
+# Helper: Converts 4 bytes from a file into an integer (Big Endian)
 def bytes_to_int(bytes):
     result = 0
     for b in bytes:
         result = (result << 8) + int(b)
     return result
 
+# Helper: Generates a .mdt configuration file for the 'grit' tool
+# This helps grit understand how to map specific images
 def gen_mdt(fn, offset):
 	with open(fn, "rb") as f:
 		f.read(16)
@@ -19,6 +22,8 @@ def gen_mdt(fn, offset):
 		f.write("offset " + str(offset) + "\n")
 		f.write("map 0 0 " + str(width) + " " + str(height) + "\n")
 
+# A massive list of every sprite in the game and its dimensions in TILES (8x8 pixels)
+# Format: ["filename.png", width_in_tiles, height_in_tiles]
 sprTable = [
 # Use PAL_Sega
 ["sega.png"   ,12,4],
@@ -367,6 +372,7 @@ sprTable = [
 ["itemimage_g.png" ,3,2],
 	]
 
+# Specifically for UI elements and unique large objects
 sprTableExtra = [
 ["itemwindow.png" 		,6,3],
 ["prompt.png" 			,8,3],
@@ -375,35 +381,62 @@ sprTableExtra = [
 ]
 
 casts = ["casts.png",3,3]
+
 if __name__ == '__main__':
+	wd = os.getcwd() # Store current working directory
+
+	# --- 1. PROCESS STAGE TILESETS ---
+	# Looks for Prt*.png files in various stage subfolders
 	folder = "../res/Stage/"
 	folders = ['White/', 'Mimi/', 'Maze/', 'Hell/', 'Eggs/']
-	wd = os.getcwd()
+	
 	os.chdir(folder)
+	# Process root stage folder
 	for fn in os.listdir("."):
 		if fn.startswith("Prt") and fn.endswith(".png"):
+			# grit flags: -gt (GBA tiles), -gB4 (4bpp), -ftb (binary output), -m! (no map), -fh! (no header)
 			subprocess.run(['grit', fn, '-gt', '-gB4', '-ftb', '-m!', '-fh!'])
+	
+	# Process subfolders
 	for f in folders:
 		os.chdir(wd)
 		os.chdir(folder + f)
 		for fn in os.listdir("."):
 			if fn.startswith("Prt") and fn.endswith(".png"):
 				subprocess.run(['grit', fn, '-gt', '-gB4', '-ftb', '-m!', '-fh!'])
+
+	# --- 2. PROCESS BACKGROUNDS ---
 	os.chdir(wd)
 	os.chdir("../res/back/")
 	for fn in os.listdir("."):
 		if fn.startswith("bk") and (fn.endswith(".png") or fn.endswith(".bmp")):
 			subprocess.run(['grit', fn, '-gt', '-gB4', '-ftb', '-m!', '-fh!'])
+
+	# --- 3. PROCESS SPRITES ---
 	os.chdir(wd)
 	os.chdir("../res/sprite/")
-#	for fn in os.listdir("."):
-#		if fn.endswith(".png"):
-#			subprocess.run(['grit', fn, '-gt', '-gB4', '-ftb', '-m!', '-fh!', '-Mh2', '-Mw2'])
 	for entry in sprTable:
+		# Uses the dimensions from sprTable to slice meta-sprites correctly (-Mw and -Mh)
 		subprocess.run(['grit', entry[0], '-gt', '-gB4', '-ftb', '-m!', '-fh!', '-Mw' + str(entry[1]), '-Mh' + str(entry[2])])
+
+	# --- 4. PROCESS FACE PORTRAITS (NEW) ---
+	os.chdir(wd)
+	os.chdir("../res/face/")
+	for i in range(30): # face00.png to face29.png
+		fn = "face{:02d}.png".format(i)
+		if os.path.exists(fn):
+			# Faces are 48x48 pixels, which is 6x6 tiles
+			subprocess.run(['grit', fn, '-gt', '-gB4', '-ftb', '-m!', '-fh!', '-Mw6', '-Mh6'])
+
+	# --- 5. PROCESS EXTRA UI ELEMENTS ---
 	os.chdir(wd)
 	os.chdir("../res/")
 	for entry in sprTableExtra:
 		subprocess.run(['grit', entry[0], '-gt', '-gB4', '-ftb', '-m!', '-fh!', '-Mw' + str(entry[1]), '-Mh' + str(entry[2])])
+
+	# --- 6. PROCESS CREDITS ---
 	os.chdir("credits")
 	subprocess.run(['grit', casts[0], '-gt', '-gB4', '-ftb', '-m!', '-fh!', '-Mw' + str(casts[1]), '-Mh' + str(casts[2])])
+
+	os.chdir(wd) # Return to start
+	print("Asset conversion complete.")

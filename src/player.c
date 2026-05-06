@@ -1127,14 +1127,14 @@ void player_draw() {
 				weaponSprite = (VDPSprite) {
 					.x = (player.x>>CSF) - (camera.x>>CSF) + SCREEN_HALF_W - 4 + 128,
 					.y = (player.y>>CSF) - (camera.y>>CSF) + SCREEN_HALF_H - 8 + 128,
-					.size = SPRITE_SIZE(1, 2),
+					.size = SPRITE_SIZE(1, 2) | (5 << 4),
 					.attr = TILE_ATTR(PAL1,0,vdir,vdir ? !player.dir : player.dir,TILE_WEAPONINDEX+3),
 				};
 			} else {
 				weaponSprite = (VDPSprite) {
 					.x = (player.x>>CSF) - (camera.x>>CSF) + SCREEN_HALF_W - 12 + 128,
 					.y = (player.y>>CSF) - (camera.y>>CSF) + SCREEN_HALF_H - 0 + 128,
-					.size = SPRITE_SIZE(2, 1),
+					.size = SPRITE_SIZE(2, 1) | (5 << 4),
 					.attr = TILE_ATTR(PAL1,0,0,player.dir,TILE_WEAPONINDEX),
 				};
 			}

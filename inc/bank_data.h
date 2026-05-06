@@ -90,6 +90,19 @@ extern const uint16_t  PAL_Mapi		[];
 extern const uint16_t  PAL_Miza		[];
 extern const uint16_t  PAL_Intro		[];
 
+extern const uint16_t PAL_face00[], PAL_face01[], PAL_face02[], PAL_face03[], PAL_face04[],
+                     PAL_face05[], PAL_face06[], PAL_face07[], PAL_face08[], PAL_face09[],
+                     PAL_face10[], PAL_face11[], PAL_face12[], PAL_face13[], PAL_face14[],
+                     PAL_face15[], PAL_face16[], PAL_face17[], PAL_face18[], PAL_face19[],
+                     PAL_face20[], PAL_face21[], PAL_face22[], PAL_face23[], PAL_face24[],
+                     PAL_face25[], PAL_face26[], PAL_face27[], PAL_face28[], PAL_face29[];
+
+extern const uint16_t PAL_armsimage[];
+extern const uint16_t PAL_itemimage[];
+
+extern const uint16_t PAL_textbox[];
+
+
 extern const uint16_t BG_Green [];
 extern const uint16_t BG_Moon [];
 extern const uint16_t BG_Fog [];

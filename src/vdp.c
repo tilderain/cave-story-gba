@@ -18,7 +18,7 @@
 
 #include "gbaram.h"
 
-u8 saturate = true;
+u8 saturate = false;
 EWRAM_CODE uint16_t saturate_color(uint16_t color) {
     if(!saturate) return color;
 
@@ -551,8 +551,15 @@ IWRAM_CODE void vdp_sprites_update() {
 			
 		int prio = (sprite_table[i].attr & 0x8000) ? 0 : 2; 
 		
-		obj_buffer[i].attr2 = OBJ_PRIORITY(prio) 
-			| OBJ_CHAR((sprite_table[i].attr&0x7FF)+0) | OBJ_PALETTE((sprite_table[i].attr>>13)&3);
+    	int pal = sprite_table[i].size >> 4; 
+    	if (pal == 0) {
+    	    // Fallback to the standard Genesis 2-bit palette if none was provided
+    	    pal = (sprite_table[i].attr >> 13) & 3; 
+    	}
+
+    	obj_buffer[i].attr2 = OBJ_PRIORITY(prio) 
+    	    | OBJ_CHAR((sprite_table[i].attr&0x7FF)+0) 
+    	    | OBJ_PALETTE(pal);
 	}
 	u16 *temppointer;
 	u16 *temppointer2;
