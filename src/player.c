@@ -868,7 +868,6 @@ static void show_map_jname(uint8_t ttl) {
 }
 
 #include "gbatext.h"
-// Add this helper to player.c or a utility file to calculate string width
 int get_string_width(const char *str) {
     int width = 0;
     while (*str) {

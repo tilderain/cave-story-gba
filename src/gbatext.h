@@ -82,6 +82,7 @@ int  canvas_puts(int px, int py, const char *str, uint8_t color);
 // Draw a single glyph, return advance width
 int  canvas_put_glyph(int px, int py, uint8_t ascii, uint8_t color);
 
+void canvas_clear_region(int px, int py, int pixel_w, int pixel_h);
 // Set the hardware scroll so the canvas appears over the textbox frame
 // call_x is in canvas pixels (0 = left edge of canvas visible)
 void canvas_set_scroll(int canvas_x);
@@ -127,3 +128,5 @@ static inline void write_tile_pixel(int tile_idx, int lx, int ly, uint8_t color)
 void canvas_init_fullscreen(void);
 
 void canvas_shift_pixels_up_2();
+
+extern uint8_t s_canvas_is_fullscreen;

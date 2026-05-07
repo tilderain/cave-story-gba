@@ -1,50 +1,68 @@
-bkmoon
 
----use Terminusmodx as font
----too big?
 
-fix tyrant/grasstown xm
+HUD Status Bar
 
-fix sandzone ball count
+Title screen
+--Settings
+	brighter color option
 
-brighter color option
+Textbox 
+merge upstream
+Fade
+Camp 
 
-smoke speed
-xp bar flash time
-splashing/ water drop anim
+Accuracy pass - mychar
+-bullet
+-npc
+	smoke speed
+	xp bar flash time
+	splashing/ water drop anim
+	add randomness to bonk particles
+	fix sandzone ball count
 
+	fix valueview
+
+Sort OBJ Vram
+==GFX==
+Per sheet palette ?
 polar star shoot fx
 bullet hit wall
-
 blood particle
 boomflash
-
-add randomness to bonk particles
-
-
+bkmoon
 fix bkred in hell
-
-fix valueview
-
 fix second healthbar tile offset
-
 reverse chinfish direction
-merge upstream
-
 reverse jumping frame
+original sprite palettes
+boss bar
 
 teleporter anim
 hp anim
+<RMU
+<FMU
+
+curly looking up
+ironhead
+======
+
+
+Soft reset
+
+
+
+
+fix tyrant/grasstown xm
+
 
 sega logo
 
-<RMU
-<FMU
+
 
 remove slz/mdt compression
 	/csmd makefile section
 
-original sprite palettes
+
 
 <SSS
 
@@ -62,26 +80,21 @@ fix missing sounds
 add textbox window plane
 add fade effect
 
-esc menu
-camp menu
 
-boss bar
 
 plantation enemies dont move
 
 fix spur damage
-
+fix <qua
 
 stop moving when dying
 
-curly looking up
 
-fix <qua
+
+
 
 weapon bobbing
 
-ironhead
 
 FON many
-
 map system

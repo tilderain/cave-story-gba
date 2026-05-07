@@ -27,7 +27,7 @@ if __name__ == '__main__':
 			gen_mdt(folder + fn, 0x4000 + 16)
 	
 	# Sound Test Background
-	gen_mdt("res/back/soundtest.png", 0x2000 + 16)
+	#gen_mdt("res/back/soundtest.png", 0x2000 + 16)
 	
 	# Moon Background
 	gen_mdt("res/back/bkMoonTop.png", 0x4000 + (0xD000 >> 5))

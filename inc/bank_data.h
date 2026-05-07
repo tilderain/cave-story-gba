@@ -90,6 +90,8 @@ extern const uint16_t  PAL_Mapi		[];
 extern const uint16_t  PAL_Miza		[];
 extern const uint16_t  PAL_Intro		[];
 
+extern const uint16_t  PAL_SndTest		[];
+
 extern const uint16_t PAL_face00[], PAL_face01[], PAL_face02[], PAL_face03[], PAL_face04[],
                      PAL_face05[], PAL_face06[], PAL_face07[], PAL_face08[], PAL_face09[],
                      PAL_face10[], PAL_face11[], PAL_face12[], PAL_face13[], PAL_face14[],

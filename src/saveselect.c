@@ -36,11 +36,11 @@ enum { CM_LOAD, CM_COPY, CM_PASTE, CM_DELETE, CM_CONFIRM };
 
 static void draw_cursor_mode(uint8_t mode) {
 	switch(mode) {
-		case CM_LOAD:    vdp_puts(VDP_PLAN_A, " Load Save Data ", 12, 2); break;
-		case CM_COPY:    vdp_puts(VDP_PLAN_A, " Copy Save Data ", 12, 2); break;
-		case CM_PASTE:   vdp_puts(VDP_PLAN_A, "Paste Save Data ", 12, 2); break;
-		case CM_DELETE:  vdp_puts(VDP_PLAN_A, "Delete Save Data", 12, 2); break;
-		case CM_CONFIRM: vdp_puts(VDP_PLAN_A, " Are you sure?  ", 12, 2); break;
+		case CM_LOAD:    vdp_puts(VDP_PLAN_A, " Load Save Data ", 7, 0); break;
+		case CM_COPY:    vdp_puts(VDP_PLAN_A, " Copy Save Data ", 7, 0); break;
+		case CM_PASTE:   vdp_puts(VDP_PLAN_A, "Paste Save Data ", 7, 0); break;
+		case CM_DELETE:  vdp_puts(VDP_PLAN_A, "Delete Save Data", 7, 0); break;
+		case CM_CONFIRM: vdp_puts(VDP_PLAN_A, " Are you sure?  ", 7, 0); break;
 	}
 }
 
@@ -55,20 +55,20 @@ static uint16_t GetNextChar(uint16_t stage, uint16_t index) {
 }
 
 static uint8_t refresh_file(uint8_t index) {
-	uint16_t y = 4 + index * 5;
+	uint16_t y = 2 + index * 4; // Start at Row 2, span 4 rows per file
 	SaveEntry file;
 	
 	system_peekdata(index, &file);
     disable_ints;
     z80_request();
-	vdp_text_clear(VDP_PLAN_A, 6, y, 16); // Erase any previous stage name text
+	vdp_text_clear(VDP_PLAN_A, 5, y, 25); // Erase any previous stage name text
 	if(cfg_language >= LANG_JA && cfg_language <= LANG_KO) {
-        vdp_text_clear(VDP_PLAN_A, 6, y+1, 16); // And a second line underneath
+        vdp_text_clear(VDP_PLAN_A, 5, y+1, 25); // And a second line underneath
     }
 	if(file.used) {
 		// Map name
 		if(cfg_language >= LANG_JA && cfg_language <= LANG_KO) {
-			uint16_t x = 6;
+			uint16_t x = 5;
 			uint16_t name_index = 0;
 			for(uint16_t pos = 0; name_index < 16; pos++) {
 				uint16_t c = GetNextChar(file.stage_id, name_index++);
@@ -79,12 +79,14 @@ static uint8_t refresh_file(uint8_t index) {
 			}
             cjk_newline();
 		} else {
-			vdp_puts(VDP_PLAN_A, stage_info[file.stage_id].name, 6, y);
+			vdp_puts(VDP_PLAN_A, stage_info[file.stage_id].name, 5, y);
 		}
+		
 		// Play time
 		char timeStr[12] = {};
 		sprintf(timeStr, "%02hu:%02hu:%02hu", file.hour, file.minute, file.second);
-		vdp_puts(VDP_PLAN_A, timeStr, 26, y);
+		vdp_puts(VDP_PLAN_A, timeStr, 21, y);
+		
 		// Health bar
 		{
 			uint32_t tileData[8][8];
@@ -106,59 +108,63 @@ static uint8_t refresh_file(uint8_t index) {
 			uint16_t tile = TILE_SHEETINDEX + index*8;
 			DMA_doDma(DMA_VRAM, (uint32_t)tileData[0], tile*32, 16*8, 2);
 			for(int i = 0; i < 8; i++) {
-				vdp_map_xy(VDP_PLAN_A, TILE_ATTR(PAL0,0,0,0,tile+i), 6+i, y+2);
+				vdp_map_xy(VDP_PLAN_A, TILE_ATTR(PAL0,0,0,0,tile+i), 5+i, y+2); // Shifted to y+2
 			}
 		}
+		
 		// Weapon list
 		for(uint16_t i = 0; i < 5; i++) {
 			if(!file.weapon[i]) continue;
 			// X tile pos and VRAM index to put the ArmsImage tiles
-			uint16_t x = 24 + i*2;
+			uint16_t x = 15 + i*2;
 			uint16_t tile = TILE_FACEINDEX - 40 + index*20 + i*4;
 			vdp_tiles_load_from_rom(SPR_TILES(&SPR_ArmsImage, 0, file.weapon[i]), tile, 4);
-			// 4 mappings for ArmsImage icon
+			
+			// 4 mappings for ArmsImage icon (Shifted to y+2 and y+3)
 			vdp_map_xy(VDP_PLAN_A, TILE_ATTR(PAL0,0,0,0,tile),   x,   y+2);
 			vdp_map_xy(VDP_PLAN_A, TILE_ATTR(PAL0,0,0,0,tile+2), x+1, y+2);
 			vdp_map_xy(VDP_PLAN_A, TILE_ATTR(PAL0,0,0,0,tile+1), x,   y+3);
 			vdp_map_xy(VDP_PLAN_A, TILE_ATTR(PAL0,0,0,0,tile+3), x+1, y+3);
 		}
 	} else {
+		// Empty File Handling
 		if(cfg_language == LANG_JA) {
-			cjk_draw(VDP_PLAN_A, 0x100+584, 6, y, 0, 1); // 新
-			cjk_draw(VDP_PLAN_A, 0x100+61,  7, y, 0, 1); // し
-			cjk_draw(VDP_PLAN_A, 0x100+42,  9, y, 0, 1); // い
+			cjk_draw(VDP_PLAN_A, 0x100+584, 5, y, 0, 1); // 新
+			cjk_draw(VDP_PLAN_A, 0x100+61,  6, y, 0, 1); // し
+			cjk_draw(VDP_PLAN_A, 0x100+42,  8, y, 0, 1); // い
             cjk_newline();
         } else if(cfg_language == LANG_ZH) {
-            cjk_draw(VDP_PLAN_A, 0x100+1172, 6, y, 0, 1); // 新
-            cjk_draw(VDP_PLAN_A, 0x100+267,  7, y, 0, 1); // 的
+            cjk_draw(VDP_PLAN_A, 0x100+1172, 5, y, 0, 1); // 新
+            cjk_draw(VDP_PLAN_A, 0x100+267,  6, y, 0, 1); // 的
             cjk_newline();
         } else if(cfg_language == LANG_KO) {
-            cjk_draw(VDP_PLAN_A, 0x100+384, 6, y, 0, 1); // 새
-            cjk_draw(VDP_PLAN_A, 0x100+250, 7, y, 0, 1); // 로
-            cjk_draw(VDP_PLAN_A, 0x100+516, 9, y, 0, 1); // 운
+            cjk_draw(VDP_PLAN_A, 0x100+384, 5, y, 0, 1); // 새
+            cjk_draw(VDP_PLAN_A, 0x100+250, 6, y, 0, 1); // 로
+            cjk_draw(VDP_PLAN_A, 0x100+516, 8, y, 0, 1); // 운
             cjk_newline();
         } else {
-            vdp_puts(VDP_PLAN_A, "New Game", 6, y);
+            vdp_puts(VDP_PLAN_A, "New Game", 5, y);
         }
-		vdp_text_clear(VDP_PLAN_A, 26, y, 10);
-		vdp_text_clear(VDP_PLAN_A, 6, y+2, 8);
-		vdp_text_clear(VDP_PLAN_A, 24, y+2, 12);
-		vdp_text_clear(VDP_PLAN_A, 24, y+3, 12);
+		vdp_text_clear(VDP_PLAN_A, 21, y, 10);
+		vdp_text_clear(VDP_PLAN_A, 5, y+2, 8);
+		vdp_text_clear(VDP_PLAN_A, 15, y+2, 12);
+		vdp_text_clear(VDP_PLAN_A, 15, y+3, 12);
 	}
     z80_release();
     enable_ints;
 	return file.used;
 }
 
+
 const struct {
 	int16_t x, y;
 } cursor_pos[OPTIONS] = {
-	{  4*8,  5*8 +  0*8 },
-	{  4*8,  5*8 +  5*8 },
-	{  4*8,  5*8 + 10*8 },
-	{  4*8,  5*8 + 15*8 },
-	{  4*8,  5*8 + 20*8 },
-	{ 14*8,  5*8 + 20*8 },
+	{  24,  2*8 - 2 },  // File 1 (Row 2)
+	{  24,  6*8 - 2 },  // File 2 (Row 6)
+	{  24, 10*8 - 2 },  // File 3 (Row 10)
+	{  24, 14*8 - 2 },  // File 4 (Row 14)
+	{  32, 18*8 - 2 },  // Copy   (Row 18, Text at X=6)
+	{ 112, 18*8 - 2 },  // Delete (Row 18, Text at X=16)
 };
 
 extern uint8_t tpal;
@@ -188,8 +194,9 @@ uint8_t saveselect_main() {
 	for(uint16_t i = 0; i < SRAM_FILE_MAX; i++) {
         file_used[i] = refresh_file(i);
     }
-	vdp_puts(VDP_PLAN_A, "Copy", 6, 25);
-	vdp_puts(VDP_PLAN_A, "Delete", 16, 25);
+	vdp_puts(VDP_PLAN_A, "Copy", 6, 18);
+	vdp_puts(VDP_PLAN_A, "Delete", 16, 18);
+	
 	
 	vdp_set_display(TRUE);
 

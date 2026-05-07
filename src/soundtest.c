@@ -9,16 +9,15 @@
 #include "system.h"
 #include "tables.h"
 #include "vdp.h"
-
 #include "gamemode.h"
 
-
-#include "bank_data.h"
+#include "gba.h"
+#include "gbatext.h"
 
 #define DRAW_BYTE(b, x, y) { \
 	char byte[4]; \
 	sprintf(byte, "%02hX", b); \
-	vdp_puts(VDP_PLAN_A, byte, x, y); \
+	vdp_puts_shadow(VDP_PLAN_A, byte, x, y); \
 }
 
 enum { STOPPED, PLAYING, PAUSED };
@@ -28,93 +27,108 @@ enum { STOPPED, PLAYING, PAUSED };
 
 // Track # and name
 void draw_track_info(uint8_t track) {
-	DRAW_BYTE(track, 2, 6);
-	vdp_text_clear(VDP_PLAN_A, 5, 6, 33);
-	vdp_puts(VDP_PLAN_A, song_info_xm[track].name, 5, 6);
+	DRAW_BYTE(track, 9, 6); // Positioned right after "Track: "
+	vdp_text_clear(VDP_PLAN_A, 2, 8, 28);
+	vdp_puts_shadow(VDP_PLAN_A, song_info_xm[track].name, 2, 8);
 }
 
 void draw_status(uint8_t status) {
+	vdp_text_clear(VDP_PLAN_A, 2, 4, 10);
 	switch(status) {
-		case STOPPED: vdp_puts(VDP_PLAN_A, "Stopped", 2, 4); break;
-		case PLAYING: vdp_puts(VDP_PLAN_A, "Playing", 2, 4); break;
-		case PAUSED:  vdp_puts(VDP_PLAN_A, "Paused ", 2, 4); break;
+		case STOPPED: vdp_puts_shadow(VDP_PLAN_A, "Stopped", 2, 4); break;
+		case PLAYING: vdp_puts_shadow(VDP_PLAN_A, "Playing", 2, 4); break;
+		case PAUSED:  vdp_puts_shadow(VDP_PLAN_A, "Paused ", 2, 4); break;
 	}
 }
 
+extern const uint8_t PAT_SndTest[];
+extern const uint8_t PAT_SndTest_END[];
+#define PAT_SndTest_SIZE ((uint32_t)(PAT_SndTest_END - PAT_SndTest))
+
 void soundtest_main() {
-	gamemode = GM_SOUNDTEST;
-	
-	uint8_t track = 0;
-	uint8_t status = STOPPED, oldstatus = STOPPED;
-	
-	vdp_set_display(FALSE);
-	
-	vdp_sprites_clear();
-	vdp_map_clear(VDP_PLAN_A);
-	// Background picture
-	vdp_tiles_load_from_rom((uint32_t*) PAT_SndTest, 16, 208);
-	uint16_t index = pal_mode ? 0 : 80 << 1;
-	for(uint16_t y = 0; y < (pal_mode ? 30 : 28); y++) {
-		DMA_doDma(DMA_VRAM, (uint32_t) &MAP_SndTest[index], VDP_PLAN_B + (y << 7), 40, 2);
-		index += 40 << 1;
-	}
+    gamemode = GM_SOUNDTEST;
+    
+    uint8_t track = 0;
+    uint8_t status = STOPPED, oldstatus = STOPPED;
+    
+    vdp_set_display(FALSE);
+    
+    // 1. Clear ALL background maps to prevent stage tiles bleeding through
+    vdp_sprites_clear();
+    vdp_map_clear(VDP_PLAN_A); // clears BASE_STAGE + BASE_STAGE_BACK (BG1, BG2)
+    vdp_map_clear(VDP_PLAN_B); // clears BASE_BACK (BG0)
+    vdp_map_clear(VDP_PLAN_W); // clears BASE_TEXT (BG3)
 
-	draw_status(status);
-	vdp_puts(VDP_PLAN_A, "Sound Test", 15, 2);
-	vdp_puts(VDP_PLAN_A, "Track: ", 2, 8);
-	{
-		char str[32];
-		sprintf(str, "%s-Play %s-Stop %s-Quit",
-		    btnName[cfg_btn_jump], btnName[cfg_btn_shoot], btnName[cfg_btn_pause]);
-		vdp_puts(VDP_PLAN_A, str, 2, 15);
-	}
-	
-	DRAW_BYTE(track, 10, 8);
-	
-	vdp_colors(0, PAL_Main, 16);
-	vdp_colors(16, PAL_SndTest.data, 16);
-	
-	vdp_set_display(TRUE);
+    canvas_init_fullscreen(); 
 
-	song_stop();
-	oldstate = 65535;
+    // 2. Load tiles into CHAR_BASE(1) — exactly where BGCTRL[0] expects them
+    uint32_t *dst_tiles = (uint32_t *)(0x06000000 + (1 * 16384));
+    DMA3COPY(PAT_SndTest, dst_tiles, (5696 / 4) | COPY32);
+
+    // 3. Copy map directly — grit output is already 32x32 GBA-native format
+    //    Confirmed: 1024 entries, 32-wide stride, tile 1 = bg fill, no zeros
+    uint16_t *gba_map = (uint16_t*)MAP_BASE_ADR(BASE_BACK);
+    DMA3COPY(MAP_SndTest, gba_map, (1024 / 2) | COPY32);
+
+    // 4. Reset BG0 scroll
+    BG_OFFSET[0].x = 0;
+    BG_OFFSET[0].y = 0;
+
+    // 5. Draw UI text
+    draw_status(status);
+    vdp_puts_shadow(VDP_PLAN_A, "Sound Test", 10, 2);
+    vdp_puts_shadow(VDP_PLAN_A, "Track: ", 2, 6);
+    {
+        char str[32];
+        sprintf(str, "%s-Play %s-Stop %s-Quit",
+            btnName[cfg_btn_jump], btnName[cfg_btn_shoot], btnName[cfg_btn_pause]);
+        vdp_puts_shadow(VDP_PLAN_A, str, 2, 17);
+    }
+    draw_track_info(track);
+    
+	vdp_colors_bg(0, PAL_SndTest, 16);
+
+    
+    vdp_set_display(TRUE);
+
+    song_stop();
+    oldstate = 65535;
     while(TRUE) {
-		// Switch between tracks
-		// Skip the gap between the last song and first sfx
-		if(joy_pressed(BUTTON_LEFT)) {
-			if(track == 0) track = FIRST_SOUND + SOUND_COUNT - 1;
-			else if(track == FIRST_SOUND) track = SONG_COUNT - 1;
-			else track--;
-			DRAW_BYTE(track, 10, 8);
-		} else if(joy_pressed(BUTTON_RIGHT)) {
-			if(track == SONG_COUNT - 1) track = FIRST_SOUND;
-			else if(track == FIRST_SOUND + SOUND_COUNT - 1) track = 0;
-			else track++;
-			DRAW_BYTE(track, 10, 8);
-		}
-		if(joy_pressed(btn[cfg_btn_jump])) {
-			// Play
-			if(track < SONG_COUNT) {
-				song_play(track);
-				status = PLAYING;
-				draw_track_info(track);
-			} else if(track >= FIRST_SOUND && track < FIRST_SOUND + SOUND_COUNT){
-				sound_play(track - FIRST_SOUND, 5);
-			}
-		} else if(joy_pressed(btn[cfg_btn_shoot])) {
-			// Stop
-			song_stop();
-			status = STOPPED;
-		}
-		if(joy_pressed(btn[cfg_btn_pause])) {
-			return;
-		}
-		if(status != oldstatus) {
-			draw_status(status);
-			oldstatus = status;
-		}
-		ready = TRUE;
-		vdp_vsync();
-		aftervsync();
+		vdp_colors_bg(0, PAL_SndTest, 16);
+
+        if(joy_pressed(BUTTON_LEFT)) {
+            if(track == 0) track = FIRST_SOUND + SOUND_COUNT - 1;
+            else if(track == FIRST_SOUND) track = SONG_COUNT - 1;
+            else track--;
+            draw_track_info(track);
+        } else if(joy_pressed(BUTTON_RIGHT)) {
+            if(track == SONG_COUNT - 1) track = FIRST_SOUND;
+            else if(track == FIRST_SOUND + SOUND_COUNT - 1) track = 0;
+            else track++;
+            draw_track_info(track);
+        }
+        
+        if(joy_pressed(btn[cfg_btn_jump])) {
+            if(track < SONG_COUNT) {
+                song_play(track);
+                status = PLAYING;
+            } else if(track >= FIRST_SOUND && track < FIRST_SOUND + SOUND_COUNT){
+                sound_play(track - FIRST_SOUND, 5);
+            }
+        } else if(joy_pressed(btn[cfg_btn_shoot])) {
+            song_stop();
+            status = STOPPED;
+        }
+        
+        if(joy_pressed(btn[cfg_btn_pause])) return;
+        
+        if(status != oldstatus) {
+            draw_status(status);
+            oldstatus = status;
+        }
+        
+        ready = TRUE;
+        vdp_vsync();
+        aftervsync();
     }
 }

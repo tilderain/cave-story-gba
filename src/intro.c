@@ -32,10 +32,16 @@ void intro_main() {
 	effects_init();
 	camera_init();
     camera.target = NULL;
+
+	int32_t cam_locked_x = player.x + pixel_to_sub(150);
+	int32_t cam_locked_y = player.y + pixel_to_sub(150);
+	camera_set_position(cam_locked_x, cam_locked_y);
+
 	tsc_init();
 	stage_load(STAGE_INTRO);
 	//vdp_colors_next(16, PAL_Intro.data, 16);
 	tsc_call_event(100);
+	
 	// Create "Studio Pixel Presents" text
 	//vdp_puts(VDP_PLAN_A, "Studio Pixel Presents", 10, 8);
     vdp_puts(VDP_PLAN_A, "Based on the Work of", 10, 6);
@@ -47,6 +53,18 @@ void intro_main() {
             vdp_text_clear(VDP_PLAN_A, 10, 6, 20);
             vdp_text_clear(VDP_PLAN_A, 10, 8, 20);
 		}
+
+
+		camera.target = NULL;
+	int32_t cam_locked_x = player.x + pixel_to_sub(165);
+	int32_t cam_locked_y = player.y + pixel_to_sub(140);
+		camera_set_position(cam_locked_x, cam_locked_y);
+
+		vdp_hscroll(VDP_PLAN_A, -sub_to_pixel(camera.x) + SCREEN_HALF_W + 8);
+		vdp_vscroll(VDP_PLAN_A, sub_to_pixel(camera.y) - SCREEN_HALF_H - 8);
+		vdp_hscroll(VDP_PLAN_B, -sub_to_pixel(camera.x) / 4 + SCREEN_HALF_W);
+		vdp_vscroll(VDP_PLAN_B, sub_to_pixel(camera.y) / 4 - SCREEN_HALF_H);
+	
 		camera_update();
 		tsc_update();
 		entities_update(TRUE);

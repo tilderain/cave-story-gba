@@ -18,6 +18,8 @@
 
 #include "gbaram.h"
 
+#include "gamemode.h" 
+
 u8 saturate = false;
 IWRAM_CODE uint16_t saturate_color(uint16_t color) {
     if(!saturate) return color;
@@ -345,6 +347,25 @@ void vdp_colors(uint16_t index, const uint16_t *values, uint16_t count) {
     for(uint16_t i = count; i--;) pal_current[index+i] = values[i];
 }
 
+void vdp_colors_bg(uint16_t index, const uint16_t *values, uint16_t count) {
+    // 0x05000000 is the start of GBA Background Palette RAM
+    volatile uint16_t* bg_pal_ram = (volatile uint16_t*)0x05000000;
+    
+    for (uint16_t i = 0; i < count; i++) {
+        // Use the existing saturate_color helper to convert/enhance the color
+        uint16_t processed_color = saturate_color(values[i]);
+        
+        // Write to hardware
+        bg_pal_ram[index + i] = processed_color;
+        
+        // Update the engine's internal tracking array if it's within the first 64 entries
+        // (Used by the fade system)
+        if ((index + i) < 64) {
+            pal_current[index + i] = values[i];
+        }
+    }
+}
+
 void vdp_color(uint16_t index, uint16_t color) {
 	//BG_PALETTE[index] = color;
 	pal_current[index] = color;
@@ -470,7 +491,7 @@ void vdp_sprites_clear() {
 
 static OBJATTR obj_buffer[128] = { 0 };
 const u16 palette[] = {
-	RGB8(0x00,0x00,0x00),
+	RGB8(0,0,0),
 	RGB8(0xFF,0xFF,0xFF),
 	RGB8(0xF5,0xFF,0xFF),
 	RGB8(0xDF,0xFF,0xF2),
@@ -565,7 +586,14 @@ IWRAM_CODE void vdp_sprites_update() {
 	u16 *temppointer2;
 	// load the palette for the background, 7 colors
     temppointer = BG_COLORS;
-    *temppointer = saturate_color(palette[0]); 
+
+    if (gamemode == GM_TITLE || gamemode == GM_SAVESEL || gamemode == GM_CONFIG) {
+        *temppointer = (4 | (4 << 5) | (4 << 10));
+	} else if (gamemode == GM_GAME) {
+		*temppointer = (0 | (0 << 5) | (4 << 10));
+	} else {
+        *temppointer = saturate_color(palette[0]); // Default back to black
+    }
     temppointer2 = OBJ_COLORS + 33;
     *temppointer2 = saturate_color(palette[0]);
     temppointer = BG_COLORS + 1;
@@ -574,7 +602,7 @@ IWRAM_CODE void vdp_sprites_update() {
 
             *temppointer++ = saturate_color(tileset_info[stage_info[stageID].tileset].palette[i]);
         }
-    if(background_info[stageBackground].palette != NULL)
+    if(background_info[stageBackground].palette != NULL && gamemode != GM_SOUNDTEST)
         for(int i=0; i<16; i++) { // OBJ Pal 1
             *temppointer++ = saturate_color(background_info[stageBackground].palette[i]);
         }
@@ -685,12 +713,49 @@ void vdp_puts(uint16_t plan, const char *str, uint16_t x, uint16_t y) {
         cur_px += advance;
     }
 }
+void vdp_puts_shadow(uint16_t plan, const char *str, uint16_t x, uint16_t y) {
+    int px = x * 8;
+    int py = y * 8;
+
+    // Measure string width
+    int w = 0;
+    for (const char *s = str; *s; s++)
+        if ((uint8_t)*s >= 32 && (uint8_t)*s <= 127)
+            w += thinfont_widths[(uint8_t)*s - 32];
+
+    // Clear region (+1 for shadow overhang on right/bottom)
+    canvas_clear_region(px, py, 240 - px, 14); // clear to end of screen width
 
 
+    canvas_puts(px + 1, py + 1, str, 2); // shadow
+    canvas_puts(px,     py,     str, 1); // text
+}
 void vdp_text_clear(uint16_t plan, uint16_t x, uint16_t y, uint16_t len) {
-	//canvas_clear();
-	return;
-    uint32_t addr = plan + ((x + (y << PLAN_WIDTH_SFT)) << 1);
-	*vdp_ctrl_wide = ((0x4000 + ((addr) & 0x3FFF)) << 16) + (((addr) >> 14) | 0x00);
-	while(len--) *vdp_data_port = 0;
+    int px = x * 8;
+    int py = y * 8;
+    int pixel_len = len * 8;
+    
+    // Choose 0 (transparent) for fullscreen, or 2 (blue textbox) for windowed.
+    // Ensure s_canvas_is_fullscreen is accessible here, otherwise just use 0.
+    extern uint8_t s_canvas_is_fullscreen; 
+    uint8_t bg_color = s_canvas_is_fullscreen ? 0 : 2;
+
+    // Erase the 12-pixel height of our font
+    for (int row = 0; row < 12; row++) {
+        for (int col = 0; col < pixel_len; col++) {
+            int final_x = px + col;
+            int final_y = py + row;
+
+            if (final_x >= 0 && final_x < 240 && final_y >= 0 && final_y < 160) {
+                int tile_col = final_x >> 3;
+                int tile_row = final_y >> 3;
+                
+                int tile_idx = s_canvas_is_fullscreen 
+                    ? CANVAS_TILE_BASE + (tile_row * CANVAS_TILES_W_FULL) + tile_col 
+                    : CANVAS_TILE_BASE + (tile_row * CANVAS_TILES_W) + tile_col;
+                
+                write_tile_pixel(tile_idx, final_x & 7, final_y & 7, bg_color);
+            }
+        }
+    }
 }

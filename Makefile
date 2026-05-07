@@ -231,9 +231,6 @@ prereq: $(MDTILER) $(SLZ) $(UFTC)
 prereq: $(CPXMS) $(XGCS) $(PCMS) $(CTSETS) $(ZOBJ) $(TSBS) $(PATS)
 
 # Sik's Tools compilation rules
-$(MDTILER):
-	@mkdir -p $(dir $@)
-	cc $(TOOLSMD)/mdtiler/tool/*.c -o $@ -lm -lpng
 
 $(SLZ):
 	@mkdir -p $(dir $@)

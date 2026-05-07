@@ -424,7 +424,7 @@ TILESET TS_SysFont		"font_tran.png" 		0
 #TILESET TS_SysFontExt   "font_tran_ext.png"     0
 
 # Sound Test
-PALETTE PAL_SndTest		"back/soundtest.png"
+#PALETTE PAL_SndTest		"back/soundtest.bmp"
 
 # Window
 TILESET TS_Window		"window.png" 			0

@@ -93,6 +93,9 @@ BIN PAL_Mapi		"../res/sprite/mapignon.pal.bin"
 BIN PAL_Miza		"../res/sprite/misery2.pal.bin"
 BIN PAL_Intro		"../res/sprite/bubbleintro.pal.bin"
 
+BIN PAL_SndTest     "../res/back/soundtest.pal.bin"
+
+
 # Character Face Palettes
 BIN PAL_face00 "../res/face/face00.pal.bin"
 BIN PAL_face01 "../res/face/face01.pal.bin"

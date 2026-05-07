@@ -88,13 +88,14 @@ uint8_t titlescreen_main() {
 	};
 	uint8_t sprFrame = 0, sprTime = ANIM_SPEED;
 	// Menu and version text
-	vdp_puts(VDP_PLAN_A, "Cave Story", 0, 1);
+	vdp_puts(VDP_PLAN_A, "Cave Story", 12, 5);
 
 
 
-	vdp_puts(VDP_PLAN_A, "Start Game", 15, 12);
-	vdp_puts(VDP_PLAN_A, "Sound Test", 15, 16);
-	vdp_puts(VDP_PLAN_A, "Config", 15, 20);
+	vdp_puts(VDP_PLAN_A, "Start Game", 12, 10);
+	vdp_puts(VDP_PLAN_A, "Continue", 12, 12);
+	vdp_puts(VDP_PLAN_A, "Sound Test", 12, 14);
+	vdp_puts(VDP_PLAN_A, "Config", 12, 16);
 	// Debug
 	{
 		//char vstr[40];
@@ -102,7 +103,7 @@ uint8_t titlescreen_main() {
 		//vdp_puts(VDP_PLAN_A, vstr, 4, 26);
 	}
 	// Release
-	vdp_puts(VDP_PLAN_A, "Mega Drive Version 0.6.0 2020.07", 4, 26);
+	vdp_puts(VDP_PLAN_A, "Mega Drive Version 0.6.0 2020.07", 4, 18);
 	vdp_tiles_load_from_rom(cfg_language == LANG_JA ? TS_J_Title.tiles : TS_Title.tiles, TILE_USERINDEX, TS_Title.numTile);
 	vdp_map_fill_rect(VDP_PLAN_B, TILE_ATTR(PAL0,0,0,0,TILE_USERINDEX),        11,  3, 18, 4, 1);
 	vdp_map_fill_rect(VDP_PLAN_B, TILE_ATTR(PAL0,0,0,0,TILE_USERINDEX + 18*4), 11, 23, 18, 2, 1);
@@ -157,7 +158,10 @@ uint8_t titlescreen_main() {
 			sprite_index(sprCursor, TILE_SHEETINDEX+32+sprFrame*4);
 		}
 		// Draw quote sprite at cursor position
-		sprite_pos(sprCursor, 13*8-4, (12*8+cursor*16)-4);
+		sprite_pos(sprCursor, 10*8-4, (80 + cursor * 16) - 4);
+
+
+
 		vdp_sprite_add(&sprCursor);
 
 		if(besttime > 0 && besttime < 300000) system_draw_counter();
@@ -248,6 +252,7 @@ uint8_t titlescreen_main() {
 	//if(cursor > 3) {
 	//	song_stop();
 	//}
+	canvas_clear(); 
 	sound_play(SND_MENU_SELECT, 0);
 	return cursor;
 }

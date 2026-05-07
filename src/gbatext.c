@@ -4,7 +4,7 @@
 #include <string.h>
 #include "vdp.h"
 
-static uint8_t s_canvas_is_fullscreen = 0;
+uint8_t s_canvas_is_fullscreen = 0;
 
 // ---------------------------------------------------------------------------
 // Tonc 1bpp font - 96 glyphs, ASCII 0x20 to 0x7F, 8 bytes each = 192 u32s
@@ -184,9 +184,13 @@ void canvas_init(void) {
 // canvas_clear - zero all canvas tile pixel data (makes canvas transparent)
 // ---------------------------------------------------------------------------
 void canvas_clear(void) {
-    // OLD: static const uint32_t zero = 0;
-    // NEW: Fill every pixel with Palette Index 2 (The Blue we set above)
-    static const uint32_t blue_fill = 0x22222222; 
+    static const uint32_t blue_fill = 0x22222222;        // Palette index 2
+    static const uint32_t transparent_fill = 0x00000000; // Palette index 0
+    
+    // Choose fill color based on mode
+    // Windowed (s_canvas_is_fullscreen == 0) -> Blue
+    // Fullscreen (s_canvas_is_fullscreen == 1) -> Transparent
+    const uint32_t *fill_ptr = s_canvas_is_fullscreen ? &transparent_fill : &blue_fill;
     
     void* dest = (void*)(VRAM_TILE_BASE + (CANVAS_TILE_BASE * 32));
     uint32_t word_count;
@@ -197,8 +201,8 @@ void canvas_clear(void) {
         word_count = (CANVAS_TILES_W * CANVAS_TILES_H * 32) / 4;
     }
 
-    // Use CpuFastSet to fill the memory with the blue index nibbles
-    CpuFastSet(&blue_fill, dest, word_count | (1 << 24));
+    // Fill the memory with the chosen color
+    CpuFastSet(fill_ptr, dest, word_count | (1 << 24));
 }
 
 // ---------------------------------------------------------------------------
@@ -209,34 +213,48 @@ int canvas_put_glyph(int px, int py, uint8_t ascii, uint8_t color) {
     if (ascii < 32 || ascii > 127) return 4;
 
     uint8_t glyph_idx = ascii - 32;
-    // Indexing for 12 bytes per character
     const uint8_t *glyph = &thinfontTiles[glyph_idx * 12];
     int advance = thinfont_widths[glyph_idx];
+    int stride = s_canvas_is_fullscreen ? CANVAS_TILES_W_FULL : CANVAS_TILES_W;
 
-    // Loop through all 12 rows
     for (int row = 0; row < 12; row++) {
         uint8_t bits = glyph[row];
         if (!bits) continue;
         
         for (int col = 0; col < 8; col++) {
-            // Check bits from left to right (MSB to LSB)
             if (!(bits & (0x80 >> col))) continue;
 
             int screen_x = px + col;
             int screen_y = py + row;
 
-            if (screen_x < 0 || screen_x >= CANVAS_W) continue;
-            if (screen_y < 0 || screen_y >= CANVAS_H) continue;
+            if (screen_x < 0 || screen_x >= 240) continue;
+            if (screen_y < 0 || screen_y >= 160) continue;
 
             int tile_col = screen_x >> 3;
             int tile_row = screen_y >> 3;
-            int tile_idx = CANVAS_TILE_BASE + tile_row * CANVAS_TILES_W + tile_col;
+            int tile_idx = CANVAS_TILE_BASE + tile_row * stride + tile_col; // <-- use stride
 
             write_tile_pixel(tile_idx, screen_x & 7, screen_y & 7, color);
         }
     }
 
-    return advance; // Now uses the proportional width + 1 for spacing
+    return advance;
+}
+
+void canvas_clear_region(int px, int py, int pixel_w, int pixel_h) {
+    int stride = s_canvas_is_fullscreen ? CANVAS_TILES_W_FULL : CANVAS_TILES_W;
+    for (int row = 0; row < pixel_h; row++) {
+        for (int col = 0; col < pixel_w; col++) {
+            int screen_x = px + col;
+            int screen_y = py + row;
+            if (screen_x < 0 || screen_x >= 240) continue;
+            if (screen_y < 0 || screen_y >= 160) continue;
+            int tile_col = screen_x >> 3;
+            int tile_row = screen_y >> 3;
+            int tile_idx = CANVAS_TILE_BASE + tile_row * stride + tile_col;
+            write_tile_pixel(tile_idx, screen_x & 7, screen_y & 7, 0);
+        }
+    }
 }
 
 
@@ -348,8 +366,10 @@ void canvas_init_fullscreen(void) {
 void canvas_shift_pixels_up_2() {
     volatile uint32_t *vram = (uint32_t *)(VRAM_TILE_BASE + CANVAS_TILE_BASE * 32);
     
+    // Pick the background color based on mode
+    uint32_t bg_fill = s_canvas_is_fullscreen ? 0 : 0x22222222;
+
     for (int col = 0; col < CANVAS_TILES_W; col++) {
-        // Process all 8 rows
         for (int row = 0; row < 8; row++) {
             int current_tile_idx = (row * CANVAS_TILES_W + col) * 8; 
             volatile uint32_t *curr_tile = &vram[current_tile_idx];
@@ -361,14 +381,15 @@ void canvas_shift_pixels_up_2() {
             curr_tile[4] = curr_tile[6];
             curr_tile[5] = curr_tile[7];
 
-            if (row < 7) { // Pull from the tile below
+            if (row < 7) { 
                 int next_tile_idx = ((row + 1) * CANVAS_TILES_W + col) * 8;
                 volatile uint32_t *next_tile = &vram[next_tile_idx];
                 curr_tile[6] = next_tile[0];
                 curr_tile[7] = next_tile[1];
             } else {
-                curr_tile[6] = 0;
-                curr_tile[7] = 0;
+                // Fill the bottom-most row with the background color
+                curr_tile[6] = bg_fill;
+                curr_tile[7] = bg_fill;
             }
         }
     }

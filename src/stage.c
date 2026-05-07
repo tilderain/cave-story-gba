@@ -123,7 +123,7 @@ void stage_load(uint16_t id) {
 	if(background_info[stage_info[id].background].type == 4 || stageBackground != stage_info[id].background) {
 		stageBackground = stage_info[id].background;
 		stageBackgroundType = background_info[stageBackground].type;
-		vdp_set_backcolor(0); // Color index 0 for everything except fog
+		//vdp_set_backcolor(0); // Color index 0 for everything except fog
 		if(stageBackgroundType == 0 || stageBackgroundType == 3) { // Tiled image
 			vdp_set_scrollmode(HSCROLL_PLANE, VSCROLL_PLANE);
 			if(background_info[stageBackground].tileset != NULL)
