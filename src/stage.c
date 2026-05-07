@@ -633,6 +633,7 @@ void stage_draw_background() {
 }
 
 static void stage_draw_moonback() {
+	return;
 	const uint32_t *topTiles, *btmTiles;
 	const uint16_t *topMap, *btmMap;
 	if(stageBackgroundType == 1) {

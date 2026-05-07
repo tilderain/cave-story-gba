@@ -1112,34 +1112,64 @@ void player_draw() {
 		//iprintf("%d, %d", x, y);
 		//iprintf("\x1b[%hu;%huH%s\n", y, x, "\"");
 		
+        int16_t px = sub_to_pixel(player.x) - sub_to_pixel(camera.x) + SCREEN_HALF_W;
+        int16_t py = sub_to_pixel(player.y) - sub_to_pixel(camera.y) + SCREEN_HALF_H;
 
 		vdp_sprite_add(&playerSprite);
+
+
 		if(playerWeapon[currentWeapon].type > 0 && playerWeapon[currentWeapon].type != WEAPON_BLADE) {
-			uint16_t vert = 0, vdir = 0;
-			if(player.frame==LOOKUP || player.frame==UPWALK1 || player.frame==UPWALK2) {
-				vert = 1;
-				vdir = 0;
-			} else if(player.frame==JUMPDN) {
-				vert = 1;
-				vdir = 1;
-			}
-			if(vert) {
-				weaponSprite = (VDPSprite) {
-					.x = (player.x>>CSF) - (camera.x>>CSF) + SCREEN_HALF_W - 4 + 128,
-					.y = (player.y>>CSF) - (camera.y>>CSF) + SCREEN_HALF_H - 8 + 128,
-					.size = SPRITE_SIZE(1, 2) | (5 << 4),
-					.attr = TILE_ATTR(PAL1,0,vdir,vdir ? !player.dir : player.dir,TILE_WEAPONINDEX+3),
-				};
-			} else {
-				weaponSprite = (VDPSprite) {
-					.x = (player.x>>CSF) - (camera.x>>CSF) + SCREEN_HALF_W - 12 + 128,
-					.y = (player.y>>CSF) - (camera.y>>CSF) + SCREEN_HALF_H - 0 + 128,
-					.size = SPRITE_SIZE(2, 1) | (5 << 4),
-					.attr = TILE_ATTR(PAL1,0,0,player.dir,TILE_WEAPONINDEX),
-				};
-			}
-			vdp_sprite_add(&weaponSprite);
-		}
+            int16_t arms_x, arms_y;
+            uint16_t vert = 0, vdir = 0;
+
+            // 1. Vertical Base & Step Bobbing
+            // PutMyChar bobbing occurs on frames 1, 3, 6, 8. 
+            // GBA equivalent: WALK1(1), WALK2(2), UPWALK1(4), UPWALK2(5)
+            arms_y = py + 1;
+            if(player.frame == 1 || player.frame == 2 || player.frame == 4 || player.frame == 5) {
+                arms_y += 1;
+            }
+
+            // 2. Position Shifting (Match PutMyChar logic)
+            if(player.frame == 3 || player.frame == 4 || player.frame == 5) { 
+                // LOOKUP or UP-WALK
+                vert = 1; vdir = 0; 
+                arms_y -= 8;
+                // Vertical gun shifts horizontally based on direction to stay in hand
+                arms_x = (player.dir == 0) ? (px - 6) : (px - 2); 
+            } else if(player.frame == 6 || player.frame == 7) { 
+                // LOOKDOWN or JUMP-DOWN
+                vert = 1; vdir = 1;
+                arms_y += 6; // Lowered for downward aim
+                arms_x = (player.dir == 0) ? (px - 6) : (px - 2);
+            } else {
+                // HORIZONTAL
+                // arms_y - 2 centers the 8px tall gun against the 16px player
+                arms_y -= 2; 
+                // PC Offset: Left = -8, Right = 0. 
+                // GBA calibration: px-14 and px-2 fixes the 1px drift.
+                arms_x = (player.dir == 0) ? (px - 14) : (px - 2);
+            }
+
+            if(vert) {
+                // Vertical Gun (8x16)
+                weaponSprite = (VDPSprite) {
+                    .x = arms_x + 128, 
+                    .y = arms_y - 8 + 128,
+                    .size = SPRITE_SIZE(1, 2) | (5 << 4),
+                    .attr = TILE_ATTR(0, 0, vdir, vdir ? !player.dir : player.dir, TILE_WEAPONINDEX + 3),
+                };
+            } else {
+                // Horizontal Gun (16x8)
+                weaponSprite = (VDPSprite) {
+                    .x = arms_x + 128,
+                    .y = arms_y + 128,
+                    .size = SPRITE_SIZE(2, 1) | (5 << 4),
+                    .attr = TILE_ATTR(0, 0, 0, player.dir, TILE_WEAPONINDEX),
+                };
+            }
+            vdp_sprite_add(&weaponSprite);
+        }
 		if(player.underwater && (playerEquipment & EQUIP_AIRTANK)) {
 			sprite_pos(airTankSprite, 
 					(player.x>>CSF) - (camera.x>>CSF) + SCREEN_HALF_W - 12,

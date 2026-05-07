@@ -19,7 +19,7 @@
 #include "gbaram.h"
 
 u8 saturate = false;
-EWRAM_CODE uint16_t saturate_color(uint16_t color) {
+IWRAM_CODE uint16_t saturate_color(uint16_t color) {
     if(!saturate) return color;
 
     // 1. Unpack 5-bit RGB
@@ -447,7 +447,7 @@ void vdp_vscroll(uint16_t plan, int16_t vscroll) {
 
 // Sprites
 
-EWRAM_CODE void vdp_sprite_add(const VDPSprite *spr) {
+IWRAM_CODE void vdp_sprite_add(const VDPSprite *spr) {
     // Exceeded max number of sprites
     if(sprite_count >= 80) return;
     // Prevent drawing off screen sprites
@@ -458,7 +458,7 @@ EWRAM_CODE void vdp_sprite_add(const VDPSprite *spr) {
     }
 }
 
-EWRAM_CODE void vdp_sprites_add(const VDPSprite *spr, uint16_t num) {
+IWRAM_CODE void vdp_sprites_add(const VDPSprite *spr, uint16_t num) {
 	for(uint16_t i = num; i--;) vdp_sprite_add(&spr[i]);
 }
 
