@@ -103,3 +103,5 @@ void song_stop();
 void song_resume();
 // Returns ID of current song
 uint8_t song_get_playing();
+
+extern uint8_t snes_ost_enabled;

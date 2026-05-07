@@ -117,6 +117,7 @@ void maxmodInit( void )
 __attribute__((used)) const char save_detection[] = "SRAM_V113";
 #define REG_WAITCNT *(volatile u16*)0x04000204
 EWRAM_CODE int main() {
+	RegisterRamReset(RESET_VRAM | RESET_PALETTE | RESET_OAM);
 
 	REG_WAITCNT = 0x4316;
 	irqInit();

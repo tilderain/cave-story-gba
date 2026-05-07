@@ -50,31 +50,26 @@ void soundtest_main() {
     
     uint8_t track = 0;
     uint8_t status = STOPPED, oldstatus = STOPPED;
+    uint8_t old_snes_ost = 255; // force first draw
     
     vdp_set_display(FALSE);
     
-    // 1. Clear ALL background maps to prevent stage tiles bleeding through
     vdp_sprites_clear();
-    vdp_map_clear(VDP_PLAN_A); // clears BASE_STAGE + BASE_STAGE_BACK (BG1, BG2)
-    vdp_map_clear(VDP_PLAN_B); // clears BASE_BACK (BG0)
-    vdp_map_clear(VDP_PLAN_W); // clears BASE_TEXT (BG3)
+    vdp_map_clear(VDP_PLAN_A);
+    vdp_map_clear(VDP_PLAN_B);
+    vdp_map_clear(VDP_PLAN_W);
 
     canvas_init_fullscreen(); 
 
-    // 2. Load tiles into CHAR_BASE(1) — exactly where BGCTRL[0] expects them
     uint32_t *dst_tiles = (uint32_t *)(0x06000000 + (1 * 16384));
     DMA3COPY(PAT_SndTest, dst_tiles, (5696 / 4) | COPY32);
 
-    // 3. Copy map directly — grit output is already 32x32 GBA-native format
-    //    Confirmed: 1024 entries, 32-wide stride, tile 1 = bg fill, no zeros
     uint16_t *gba_map = (uint16_t*)MAP_BASE_ADR(BASE_BACK);
     DMA3COPY(MAP_SndTest, gba_map, (1024 / 2) | COPY32);
 
-    // 4. Reset BG0 scroll
     BG_OFFSET[0].x = 0;
     BG_OFFSET[0].y = 0;
 
-    // 5. Draw UI text
     draw_status(status);
     vdp_puts_shadow(VDP_PLAN_A, "Sound Test", 10, 2);
     vdp_puts_shadow(VDP_PLAN_A, "Track: ", 2, 6);
@@ -86,15 +81,13 @@ void soundtest_main() {
     }
     draw_track_info(track);
     
-	vdp_colors_bg(0, PAL_SndTest, 16);
-
-    
+    vdp_colors_bg(0, PAL_SndTest, 16);
     vdp_set_display(TRUE);
 
     song_stop();
     oldstate = 65535;
     while(TRUE) {
-		vdp_colors_bg(0, PAL_SndTest, 16);
+        vdp_colors_bg(0, PAL_SndTest, 16);
 
         if(joy_pressed(BUTTON_LEFT)) {
             if(track == 0) track = FIRST_SOUND + SOUND_COUNT - 1;
@@ -108,6 +101,14 @@ void soundtest_main() {
             draw_track_info(track);
         }
         
+        // Toggle SNES OST with up/down
+        if(joy_pressed(BUTTON_UP) || joy_pressed(BUTTON_DOWN)) {
+            snes_ost_enabled = !snes_ost_enabled;
+            // If a track is playing, restart it with new setting
+            if(status == PLAYING && track < SONG_COUNT)
+                song_play(track);
+        }
+
         if(joy_pressed(btn[cfg_btn_jump])) {
             if(track < SONG_COUNT) {
                 song_play(track);
@@ -125,6 +126,12 @@ void soundtest_main() {
         if(status != oldstatus) {
             draw_status(status);
             oldstatus = status;
+        }
+
+        // Redraw OST label only when it changes
+        if(snes_ost_enabled != old_snes_ost) {
+            vdp_puts_shadow(VDP_PLAN_A, snes_ost_enabled ? "OST: SNES   " : "OST: Original", 2, 10);
+            old_snes_ost = snes_ost_enabled;
         }
         
         ready = TRUE;
