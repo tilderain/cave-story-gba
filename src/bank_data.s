@@ -149,7 +149,7 @@ BIN BG_Black		"../res/back/bkBlack.img.bin"
 
 BIN BG_Green		"../res/back/bkGreen.img.bin" 
 
-BIN BG_Moon		"../res/back/bkMoon.img.bin" 
+//BIN BG_Moon		"../res/back/bkMoon.img.bin" 
 BIN BG_Fog		"../res/back/bkFog.img.bin" 
 
 BIN PAL_bkBlue		"../res/back/bkBlue.pal.bin"
@@ -410,10 +410,8 @@ BIN     NPC_TABLE		"../res/npc.tbl"
 
 /* Background tilemaps */
 # Moon
-BIN		PAT_MoonTop		"../res/back/bkMoonTop.pat"
-BIN		MAP_MoonTop		"../res/back/bkMoonTop.map"
-BIN		PAT_MoonBtm		"../res/back/bkMoonBottom.pat"
-BIN		MAP_MoonBtm		"../res/back/bkMoonBottom.map"
+PCM		PAT_bkMoon		"../res/back/bkMoon.pat"
+BIN		MAP_bkMoon		"../res/back/bkMoon.map"
 # Fog
 BIN		PAT_FogTop		"../res/back/bkFogTop.pat"
 BIN		MAP_FogTop		"../res/back/bkFogTop.map"

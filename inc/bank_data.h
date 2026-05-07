@@ -346,10 +346,11 @@ extern const uint8_t stop_xgm;
 
 extern const uint8_t NPC_TABLE[];
 
-extern const uint8_t PAT_MoonTop[];
-extern const uint8_t MAP_MoonTop[];
-extern const uint8_t PAT_MoonBtm[];
-extern const uint8_t MAP_MoonBtm[];
+
+extern const uint8_t PAT_bkMoon[];
+extern const uint8_t PAT_bkMoon_end[];
+extern const uint16_t MAP_bkMoon[];
+
 extern const uint8_t PAT_FogTop[];
 extern const uint8_t MAP_FogTop[];
 extern const uint8_t PAT_FogBtm[];

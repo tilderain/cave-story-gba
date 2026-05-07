@@ -72,6 +72,8 @@ EWRAM_DATA uint8_t stage_buffer[17932];
  uint16_t backScrollTimer = 0;
  uint8_t stageBackgroundType = 0;
 
+IWRAM_DATA uint16_t moon_scroll_table[160];
+
 static void stage_load_tileset();
 static void stage_load_blocks();
 
@@ -393,34 +395,32 @@ void stage_update() {
 		vdp_hscroll(VDP_PLAN_B, -sub_to_pixel(camera.x) / 4 + SCREEN_HALF_W);
 		vdp_vscroll(VDP_PLAN_B, sub_to_pixel(camera.y) / 4 - SCREEN_HALF_H);
 	} else if(stageBackgroundType == 1 || stageBackgroundType == 5) {
-		// PLAN_A Tile scroll
-		int16_t off[32];
-		off[0] = -sub_to_pixel(camera.x) + SCREEN_HALF_W;
-		for(uint8_t i = 1; i < 32; i++) {
-			off[i] = off[0];
-		}
-		vdp_hscroll_tile(VDP_PLAN_A, off);
+		// 1. Scroll Foreground Stage normally
+		vdp_hscroll(VDP_PLAN_A, -sub_to_pixel(camera.x) + SCREEN_HALF_W);
 		vdp_vscroll(VDP_PLAN_A, sub_to_pixel(camera.y) - SCREEN_HALF_H);
-		// Moon background has different spots scrolling horizontally at different speeds
+
+		// 2. Parallax Background Logic (Moon/Clouds)
 		backScrollTimer--;
 		
-		if(pal_mode) {
-			uint8_t y = 28;
-			for(;y >= 22; --y) backScrollTable[y] = backScrollTimer << 1;
-			for(;y >= 18; --y) backScrollTable[y] = backScrollTimer;
-			for(;y >= 15; --y) backScrollTable[y] = backScrollTimer >> 1;
-			for(;y >= 11; --y) backScrollTable[y] = backScrollTimer >> 2;
-			vdp_hscroll_tile(VDP_PLAN_B, backScrollTable);
-			//VDP_setVerticalScroll(VDP_PLAN_B, -8);
-		} else {
-			uint8_t y = 27;
-			for(;y >= 21; --y) backScrollTable[y] = backScrollTimer << 1;
-			for(;y >= 17; --y) backScrollTable[y] = backScrollTimer;
-			for(;y >= 14; --y) backScrollTable[y] = backScrollTimer >> 1;
-			for(;y >= 10; --y) backScrollTable[y] = backScrollTimer >> 2;
-			vdp_hscroll_tile(VDP_PLAN_B, backScrollTable);
-			//VDP_setVerticalScroll(VDP_PLAN_B, 0);
+		uint16_t t = backScrollTimer;
+		for(int i = 0; i < 160; i++) {
+			// Define the horizontal scroll for each line based on height
+			if (i < 88)       moon_scroll_table[i] = t >> 2; // Top (Moon/Slow Clouds)
+			else if (i < 112) moon_scroll_table[i] = t >> 1; // Mid clouds
+			else if (i < 136) moon_scroll_table[i] = t;      // Faster clouds
+			else              moon_scroll_table[i] = t << 1; // Bottom fast clouds
 		}
+
+		// 3. Setup HBlank DMA
+		// We use DMA channel 0 (highest priority)
+		// Source: our table, Destination: BG0 Horizontal Offset Register
+		// Mode: HBlank, Repeat: Yes
+		REG_DMA0CNT = 0; // Stop any previous DMA
+		REG_DMA0SAD = (uint32_t)moon_scroll_table;
+		REG_DMA0DAD = (uint32_t)&REG_BG0HOFS; // Use BG0 if VDP_PLAN_B is BG0
+		REG_DMA0CNT = 1 | DMA_DST_FIXED | DMA_REPEAT | DMA_HBLANK | DMA_ENABLE;
+
+		vdp_vscroll(VDP_PLAN_B, 0); // Keep vertical static
 	} else if(stageBackgroundType == 3) {
 		// Lock camera at specific spot
 		camera.target = NULL;
@@ -633,44 +633,21 @@ void stage_draw_background() {
 }
 
 static void stage_draw_moonback() {
-	return;
-	const uint32_t *topTiles, *btmTiles;
-	const uint16_t *topMap, *btmMap;
-	if(stageBackgroundType == 1) {
-		// Moon
-		topTiles = (uint32_t*) PAT_MoonTop;
-		btmTiles = (uint32_t*) PAT_MoonBtm;
-		topMap = (uint16_t*) MAP_MoonTop;
-		btmMap = (uint16_t*) MAP_MoonBtm;
-	} else {
-		// Fog
-		topTiles = (uint32_t*) PAT_FogTop;
-		btmTiles = (uint32_t*) PAT_FogBtm;
-		topMap = (uint16_t*) MAP_FogTop;
-		btmMap = (uint16_t*) MAP_FogBtm;
-	}
-	// Load the top section in the designated background area
-	vdp_tiles_load_from_rom(topTiles, TILE_BACKINDEX, 12);
-	// Load the clouds under the map, it just fits
-	vdp_tiles_load_from_rom(btmTiles, TILE_MOONINDEX, 188);
-	for(uint8_t y = 0; y < 32; y++) backScrollTable[y] = 0;
-	vdp_vscroll(VDP_PLAN_B, 0);
-	// Top part
-	uint16_t index = pal_mode ? 0 : 40;
-	for(uint16_t y = 0; y < (pal_mode ? 11 : 10); y++) {
-		DMA_doDma(DMA_VRAM, (uint32_t) &topMap[index], VDP_PLAN_B + (y << 7), 40, 2);
-		index += 40;
-	}
-	
-	if(vblank) aftervsync(); // So we don't lag the music
-	vblank = 0;
-	
-	// Bottom part
-	index = 0;
-	for(uint16_t y = (pal_mode ? 11 : 10); y < (pal_mode ? 32 : 28); y++) {
-		DMA_doDma(DMA_VRAM, (uint32_t) &btmMap[index], VDP_PLAN_B + (y << 7),             32, 2);
-		DMA_doDma(DMA_VRAM, (uint32_t) &btmMap[index], VDP_PLAN_B + (y << 7) + (32 << 1), 32, 2);
-		index += 32;
-	}
-	backScrollTimer = 0;
+    uint32_t tile_count = (PAT_bkMoon_end - PAT_bkMoon) / 32;
+    vdp_tiles_load((const uint32_t*)PAT_bkMoon, TILE_BACKINDEX, tile_count * 8);
+
+    uint16_t *map = (uint16_t*)MAP_BASE_ADR(BASE_BACK);
+    
+    for(int i = 0; i < 1024; i++) map[i] = 0;
+
+    for(uint16_t y = 0; y < 32; y++) {
+        for(uint16_t x = 0; x < 32; x++) { // GBA is 30 tiles wide
+            // SKIP 10 tiles (x + 10) to point to the right side of the 40-wide map
+            uint16_t source_tile = MAP_bkMoon[y * 40 + (x + 5)];
+            
+            uint16_t final_tile = (source_tile & 0x03FF);
+            map[y * 32 + x] = (source_tile & 0x0C00) | final_tile | CHAR_PALETTE(1);
+        }
+    }
+    backScrollTimer = 0;
 }

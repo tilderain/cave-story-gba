@@ -29,6 +29,9 @@ volatile uint8_t ready = 0;
 volatile uint8_t vblank = 0;
 
 void aftervsync() {
+
+	REG_DMA0CNT = 0; 
+	
 	disable_ints;
     z80_request();
 
