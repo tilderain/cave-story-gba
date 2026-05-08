@@ -105,3 +105,4 @@ void song_resume();
 uint8_t song_get_playing();
 
 extern uint8_t snes_ost_enabled;
+extern uint8_t alt_drums_enabled;

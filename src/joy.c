@@ -18,11 +18,18 @@ const uint16_t btn[12] = {
 	BUTTON_Z, BUTTON_Y, BUTTON_X, BUTTON_MODE
 };
 
+const char btnName[12][12] = {
+	"Up", "Dn", "Lt", "Rt",
+	"B", "A", "(MD A)", "St",
+	"R", "L", "Sl", "(MD Mode)"
+};
+
+/*
 const char btnName[12][4] = {
 	"Up", "Dn", "Lt", "Rt",
 	"B", "C", "A", "St",
 	"Z", "Y", "X", "Md"
-};
+};*/
 
 uint8_t joytype = JOY_TYPE_PAD6;
 uint16_t joystate, oldstate = 0;

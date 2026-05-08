@@ -20,6 +20,7 @@ uint8_t songPlaying, songResume;
 uint8_t soundChannel;
 
 uint8_t snes_ost_enabled = true;
+uint8_t alt_drums_enabled = true;
 
 void sound_init() {
     songPlaying = songResume = 0;
@@ -58,7 +59,7 @@ void song_play(uint8_t id) {
 		}
 		return;
 	}
-	if(id == songPlaying) return;
+	if(id == songPlaying && gamemode != GM_SOUNDTEST) return;
 	songResume = songPlaying;
 	// Track 0 in song_info is NULL, but others could be potentially
 	if(song_info_xm[id].song == 0) {
@@ -86,7 +87,10 @@ void song_play(uint8_t id) {
 
 		else
 		{
-			mmStart((mm_word)song_info_xm[id].song, MM_PLAY_ONCE);
+			if(alt_drums_enabled)
+				mmStart((mm_word)song_info_xm_d[id].song, MM_PLAY_ONCE);
+			else
+				mmStart((mm_word)song_info_xm[id].song, MM_PLAY_ONCE);
 			mmSetModuleVolume(1024);
 		}
 

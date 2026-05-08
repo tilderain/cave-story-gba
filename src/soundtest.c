@@ -51,6 +51,7 @@ void soundtest_main() {
     uint8_t track = 0;
     uint8_t status = STOPPED, oldstatus = STOPPED;
     uint8_t old_snes_ost = 255; // force first draw
+    uint8_t old_drums_enabled = 255;
     
     vdp_set_display(FALSE);
     
@@ -75,8 +76,9 @@ void soundtest_main() {
     vdp_puts_shadow(VDP_PLAN_A, "Track: ", 2, 6);
     {
         char str[32];
-        sprintf(str, "%s-Play %s-Stop %s-Quit",
-            btnName[cfg_btn_jump], btnName[cfg_btn_shoot], btnName[cfg_btn_pause]);
+        sprintf(str, "%s-Play %s-Stop %s-Quit %s-OST %s-Drum",
+            btnName[cfg_btn_jump], btnName[cfg_btn_shoot], btnName[cfg_btn_pause],
+            btnName[1], btnName[cfg_btn_lswap]);
         vdp_puts_shadow(VDP_PLAN_A, str, 2, 17);
     }
     draw_track_info(track);
@@ -109,6 +111,13 @@ void soundtest_main() {
                 song_play(track);
         }
 
+        if((joy_pressed(btn[cfg_btn_lswap]) || joy_pressed(btn[cfg_btn_rswap]) && !snes_ost_enabled)) {
+            alt_drums_enabled = !alt_drums_enabled;
+            // If a track is playing, restart it with new setting
+            if(status == PLAYING && track < SONG_COUNT)
+                song_play(track);
+        }
+
         if(joy_pressed(btn[cfg_btn_jump])) {
             if(track < SONG_COUNT) {
                 song_play(track);
@@ -132,8 +141,17 @@ void soundtest_main() {
         if(snes_ost_enabled != old_snes_ost) {
             vdp_puts_shadow(VDP_PLAN_A, snes_ost_enabled ? "OST: SNES   " : "OST: Original", 2, 10);
             old_snes_ost = snes_ost_enabled;
+            old_drums_enabled = 255;
         }
-        
+        // Redraw OST label only when it changes
+        if(snes_ost_enabled == false && (alt_drums_enabled != old_drums_enabled)) {
+            vdp_puts_shadow(VDP_PLAN_A, alt_drums_enabled ? "Drums: Beta   " : "Drums: Original", 2, 14);
+            old_drums_enabled = alt_drums_enabled;
+        }
+        else if (snes_ost_enabled)
+        {
+            vdp_puts_shadow(VDP_PLAN_A, alt_drums_enabled ? "           " : "           ", 2, 14);
+        }
         ready = TRUE;
         vdp_vsync();
         aftervsync();
