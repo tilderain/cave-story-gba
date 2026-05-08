@@ -972,7 +972,7 @@ void player_show_map_name(uint8_t ttl) {
     // 4. Setup Sprites
     mapNameSpriteNum = 4;
     uint16_t screenX = SCREEN_HALF_W - 64 + 128;
-    uint16_t screenY = SCREEN_HALF_H - 44 + 140; // Adjust Y as needed
+    uint16_t screenY = SCREEN_HALF_H - 44 + 144; // Adjust Y as needed
 
     for (int i = 0; i < 4; i++) {
         mapNameSprite[i] = (VDPSprite) {
