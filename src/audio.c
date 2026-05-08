@@ -40,6 +40,8 @@ static mm_sfxhand sfx_handles[SOUND_COUNT] = {0};
 
 void sound_play(uint8_t id, uint8_t priority) {
     if(id >= 0x90 && id < 0xA0) id -= 0x40;
+
+	if(id == 0) return;
     
     if(sfx_handles[id] && mmEffectActive(sfx_handles[id]))
         mmEffectCancel(sfx_handles[id]);

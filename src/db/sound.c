@@ -12,8 +12,8 @@ const sound_info_def sound_info[SOUND_COUNT] = {
     { SFX_04 }, // 4 - Switch Weapon
     { SFX_05 }, // 5 - Prompt
     { SFX_06 }, // 6 - Hop
-    { 0 },
-    { SFX_08 }, // 8 - ????
+    { SFX_07 }, // 7 - Run
+    { SFX_08 }, // 8 - Step
     { 0 },
     { 0 },
     { SFX_0B }, // 11 - Door Open
@@ -38,46 +38,46 @@ const sound_info_def sound_info[SOUND_COUNT] = {
     { SFX_1E }, // 30 - Critter Hop
     { SFX_1F }, // 31 - Shot Bounce
     { SFX_20 }, // 32 - Polar Star
-    { SFX_21 }, // 33 - ????
+    { SFX_21 }, // 33 - snd_21
     { SFX_22 }, // 34 - Fireball
-    { SFX_23 },
+    { SFX_23 }, // 35 - Explosion 1
     { 0 },
-    { SFX_25 },
-    { SFX_26 },
-    { SFX_27 },
-    { SFX_28 },
-    { 0 },
-    { SFX_2A }, // Get Missile
-    { SFX_2B },
-    { SFX_2C },
+    { SFX_25 }, // 37 - Gun Click
+    { SFX_26 }, // 38 - Get Item
+    { SFX_27 }, // 39 - EM Fire
+    { SFX_28 }, // 40 - Stream 1
+    { SFX_29 }, // 41 - Quake
+    { SFX_2A }, // 42 - Get Missile
+    { SFX_2B }, // 43 - Computer Beep
+    { SFX_2C }, // 44 - Missile Hit
     { SFX_2D }, // 45 - Energy Bounce
-    { SFX_2E },
-    { SFX_2F },
-    { SFX_30 },
+    { SFX_2E }, // 46 - IronH Shot Fly
+    { SFX_2F }, // 47 - Explosion 2
+    { SFX_30 }, // 48 - snd_30
     { SFX_31 }, // 49 - Polar star Lv 3
-    { SFX_32 },
-    { SFX_33 },
-    { SFX_34 },
-    { SFX_35 },
-    { SFX_36 },
-    { SFX_37 },
-    { SFX_38 }, // Splash
-    { SFX_39 },
-    { SFX_3A },
-    { SFX_3B }, // Spur charge 1
-    { SFX_3C }, // 2
-    { SFX_3D }, // 3
-    { SFX_3E },
-    { SFX_3F },
+    { SFX_32 }, // 50 - Mimiga Squeak
+    { SFX_33 }, // 51 - Enemy Hurt
+    { SFX_34 }, // 52 - Enemy Hurt Big
+    { SFX_35 }, // 53 - Enemy Hurt Small
+    { SFX_36 }, // 54 - Enemy Hurt Cool
+    { SFX_37 }, // 55 - Enemy Squeak 2
+    { SFX_38 }, // 56 - Splash
+    { SFX_39 }, // 57 - Enemy Damage
+    { SFX_3A }, // 58 - snd_3a
+    { SFX_3B }, // 59 - Spur charge 1
+    { SFX_3C }, // 60 - Spur charge 2
+    { SFX_3D }, // 61 - Spur charge 3
+    { SFX_3E }, // 62 - Spur fire lv2
+    { SFX_3F }, // 63 - Spur fire lv3
     { SFX_40 }, // 64 - Spur fire max
     { SFX_41 }, // 65 - Spur full charge
     { 0 },
     { 0 },
     { 0 },
     { 0 },
-    { SFX_46 },
-    { SFX_47 },
-    { SFX_48 },
+    { SFX_46 }, // 70 - Expl Small
+    { SFX_47 }, // 71 - Little Crash
+    { SFX_48 }, // 72 - Big Crash
     { 0 },
     { 0 },
     { 0 },
@@ -92,12 +92,12 @@ const sound_info_def sound_info[SOUND_COUNT] = {
     { 0 },
     { 0 },
     { 0 },
-    { 0 },//{ SFX_96, SFX_96_end },
-    { 0 },//{ SFX_97, SFX_97_end },
-    { 0 },//{ SFX_98, SFX_98_end },
-    { 0 },//{ SFX_99, SFX_99_end },
-    { 0 },//{ SFX_9A, SFX_9A_end },
-    { 0 },//{ SFX_9B, SFX_9B_end },
+    { SFX_96 }, // 0x56 (86) -> 0x96 - snd_96
+    { SFX_97 }, // 0x57 (87) -> 0x97 - snd_97
+    { SFX_98 }, // 0x58 (88) -> 0x98 - snd_98
+    { SFX_99 }, // 0x59 (89) -> 0x99 - snd_99
+    { SFX_9A }, // 0x5A (90) -> 0x9A - snd_9a
+    { SFX_9B }, // 0x5B (91) -> 0x9B - snd_9b
     { 0 },
     { 0 },
     { 0 },
@@ -107,22 +107,22 @@ const sound_info_def sound_info[SOUND_COUNT] = {
     { 0 },
     { 0 },
     { 0 },
-    { SFX_64 },
-    { SFX_65 },
-    { SFX_66 },
-    { SFX_67 },
-    { SFX_68 },
-    { SFX_69 },
-    { SFX_6A },
-    { SFX_6B },
-    { SFX_6C },
-    { SFX_6D },
-    { SFX_6E },
-    { SFX_6F },
-    { SFX_70 }, // 0x70 (112)
-    { SFX_71 },
-    { SFX_72 },
-    { SFX_73 },
-    { SFX_74 },
-    { SFX_75 }, // 0x75 (117)
+    { SFX_64 }, // 100 - Bubble Pop
+    { SFX_65 }, // 101 - Lightning Strike
+    { SFX_66 }, // 102 - Jaws
+    { SFX_67 }, // 103 - Curly Charge Gun
+    { SFX_68 }, // 104 - snd_68
+    { SFX_69 }, // 105 - Puppy Bark
+    { SFX_6A }, // 106 - snd_6a
+    { SFX_6B }, // 107 - Block Move
+    { SFX_6C }, // 108 - snd_6c
+    { SFX_6D }, // 109 - Critter Fly
+    { SFX_6E }, // 110 - snd_6e
+    { SFX_6F }, // 111 - snd_6f
+    { SFX_70 }, // 0x70 (112) - snd_70
+    { SFX_71 }, // 113 - snd_71
+    { SFX_72 }, // 114 - Core Hurt
+    { SFX_73 }, // 115 - Core Thrust
+    { SFX_74 }, // 116 - snd_74
+    { SFX_75 }, // 0x75 (117) - snd_75
 };
