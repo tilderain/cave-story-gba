@@ -38,3 +38,6 @@ config.toml
 gba_bios.bin
 Mesen
 NanoBoyAdvance
+
+/org2xm/*.xm
+/org2xm/*.it
