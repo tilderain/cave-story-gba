@@ -77,9 +77,17 @@ void song_play(uint8_t id) {
 	else
 	{
 		if(snes_ost_enabled)
+		{
 			mmStart((mm_word)song_info_snes[id].song, MM_PLAY_ONCE);
+			mmSetModuleVolume(800);
+		}
+
 		else
+		{
 			mmStart((mm_word)song_info_xm[id].song, MM_PLAY_ONCE);
+			mmSetModuleVolume(1024);
+		}
+
 	}
 	songPlaying = id;
 }
