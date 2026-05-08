@@ -305,7 +305,7 @@ void window_set_textmode(uint8_t mode) {
 uint8_t window_tick() {
 	if(textMode > 0) return TRUE;
 	windowTextTick++;
-	if(windowTextTick > 2 || (windowTextTick > 1 && (joystate&btn[cfg_btn_jump]))) {
+	if(windowTextTick > 2 || (windowTextTick > 1 && ((joystate&btn[cfg_btn_jump]) || (joystate&btn[cfg_btn_shoot])))) {
 		windowTextTick = 0;
 		return TRUE;
 	} else {

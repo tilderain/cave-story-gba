@@ -122,7 +122,7 @@ void camera_update() {
 	if(y_next - camera.y > CAMERA_MAX_SPEED) y_next = camera.y + CAMERA_MAX_SPEED;
 	// Don't let the camera leave the stage
 	uint16_t bounds = cameraShake ? 2 : 8;
-	if(stageID == 18 && !pal_mode) { // Special case for shelter
+	if(stageID == 18 && !pal_mode && camera.target == &player) { // Special case for shelter
 		x_next = pixel_to_sub(SCREEN_HALF_W + 8);
 		y_next = pixel_to_sub(SCREEN_HALF_H + 16);
 	} else {

@@ -239,6 +239,19 @@ uint8_t tsc_load(Event *eventList, const uint8_t *TSC, uint8_t max) {
 
 void tsc_call_event(uint16_t number) {
     window_set_textmode(TM_NORMAL);
+
+	// Hardcoded check for Room 18 (Shelter) 
+	// Focus camera on the entity with event 220 when specific events trigger
+	if (stageID == 18) {
+		if (number == 500 || number == 501 || number == 502 || 
+			number == 700 || number == 701 || number == 702) {
+			
+			Entity *e = entity_find_by_event(220);
+			if (e) {
+				camera.target = e;
+			}
+		}
+	}
 	// Events under 50 will be in Head.tsc
 	if(number < 50) {
 		for(uint8_t i = 0; i < HEAD_EVENT_COUNT; i++) {
