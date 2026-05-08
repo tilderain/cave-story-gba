@@ -36,15 +36,15 @@ void sound_init() {
     soundChannel = 1;
 }
 
+static mm_sfxhand sfx_handles[SOUND_COUNT] = {0};
+
 void sound_play(uint8_t id, uint8_t priority) {
-	if(id >= 0x90 && id < 0xA0) id -= 0x40;
-	mmEffect((mm_word)sound_info[id].sound);
-	return;
-	if(cfg_sfx_mute && gamemode != GM_SOUNDTEST) return;
-	if(id >= 0x90 && id < 0xA0) id -= 0x40;
-	//if(id >= SOUND_COUNT || sound_info[id].end == 0) return;
-	xgm_pcm_play(0x40 + id, priority, soundChannel++);
-	if(soundChannel > 3) soundChannel = 1;
+    if(id >= 0x90 && id < 0xA0) id -= 0x40;
+    
+    if(sfx_handles[id] && mmEffectActive(sfx_handles[id]))
+        mmEffectCancel(sfx_handles[id]);
+    
+    sfx_handles[id] = mmEffect((mm_word)sound_info[id].sound);
 }
 
 void song_play(uint8_t id) {

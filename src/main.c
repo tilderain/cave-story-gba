@@ -111,6 +111,8 @@ void maxmodInit( void )
 
     // Initialize Maxmod
     mmInit( &mySystem );
+
+	mmSetEffectsVolume(1024);
 }
 
 #include "gbatext.h"
