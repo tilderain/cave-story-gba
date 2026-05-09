@@ -75,7 +75,7 @@ include $(DEVKITARM)/gba_rules
 TARGET		:= $(notdir $(CURDIR))
 BUILD		:= build
 SOURCES		:= src
-INCLUDES	:= inc res
+INCLUDES	:= inc res src
 RESOURCES   := res
 DATA		:=
 MUSIC		:= maxmod_data
