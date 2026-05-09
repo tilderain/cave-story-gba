@@ -226,7 +226,7 @@ main.o: soundbank.h
 
 prereq: $(RESCOMP) resources.s resources.h ../inc/ai_gen.h grit-gen.stamp $(BINTOS) $(TSCOMP) $(WAVTORAW) soundbank.h
 prereq: $(SLZ)
-prereq: $(CPXMS) $(XGCS) $(PCMS) $(CTSETS) $(ZOBJ) $(TSBS) $(PATS)
+prereq: $(CPXMS) $(XGCS) $(PCMS) $(CTSETS) $(ZOBJ) $(TSBS)
 
 # Sik's Tools compilation rules
 

@@ -387,6 +387,7 @@ const credits_info_def credits_info[] = {
 
 const illustration_info_def illustration_info[20] = {
 	{ NULL,                  0,   NULL,                  NULL       },
+	/*
 	{ (uint32_t*) PAT_Ill01, 411, (uint16_t*) MAP_Ill01, &PAL_Ill01 },
 	{ (uint32_t*) PAT_Ill02, 411, (uint16_t*) MAP_Ill02, &PAL_Ill02 },
 	{ (uint32_t*) PAT_Ill03, 411, (uint16_t*) MAP_Ill03, &PAL_Ill03 },
@@ -405,5 +406,5 @@ const illustration_info_def illustration_info[20] = {
 	{ (uint32_t*) PAT_Ill16, 411, (uint16_t*) MAP_Ill16, &PAL_Ill16 },
 	{ (uint32_t*) PAT_Ill17, 411, (uint16_t*) MAP_Ill17, &PAL_Ill17 },
 	{ (uint32_t*) PAT_Ill18, 411, (uint16_t*) MAP_Ill18, &PAL_Ill18 },
-	{ NULL,                  0,   NULL,                  NULL       },
+	{ NULL,                  0,   NULL,                  NULL       },*/
 };
