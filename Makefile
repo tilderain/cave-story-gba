@@ -240,6 +240,10 @@ $(UFTC):
 	@mkdir -p $(dir $@)
 	cc $(TOOLSMD)/uftc/tool/*.c -o $@
 
+$(MDTILER):
+	@mkdir -p $(dir $@)
+	cc $(TOOLSMD)/mdtiler/tool/*.c -lpng -o $@
+
 ../inc/ai_gen.h: ../aigen.py
 	python3 ../aigen.py
 
