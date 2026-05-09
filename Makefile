@@ -1,5 +1,3 @@
-
-
 #---------------------------------------------------
 #--------------- GBA Makefile section --------------
 #---------------------------------------------------
@@ -7,6 +5,7 @@
 TARGET = doukutsu
 
 # Local Tools (These are built automatically via the Makefile)
+MMUTIL   = ../bin/mmutil
 BINTOS   = ../bin/bintos
 RESCOMP  = ../bin/rescomp
 WAVTORAW = ../bin/wavtoraw
@@ -72,10 +71,6 @@ include $(DEVKITARM)/gba_rules
 # INCLUDES is a list of directories containing extra header files
 # DATA is a list of directories containing binary data
 # GRAPHICS is a list of directories containing files to be processed by grit
-#
-# All directories are specified relative to the project directory where
-# the makefile is found
-#
 #---------------------------------------------------------------------------------
 TARGET		:= $(notdir $(CURDIR))
 BUILD		:= build
@@ -91,8 +86,6 @@ MUSIC		:= maxmod_data
 ARCH	:=	-mthumb -mthumb-interwork
 
 LTO ?= 0
-
-
 
 CFLAGS	:=	-g -Wall -Wno-builtin-declaration-mismatch -Os \
 		-mcpu=arm7tdmi -mtune=arm7tdmi\
@@ -116,7 +109,6 @@ endif
 #---------------------------------------------------------------------------------
 LIBS	:= -lmm -lgba
 
-
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
@@ -124,11 +116,6 @@ LIBS	:= -lmm -lgba
 LIBDIRS	:=	$(LIBGBA)
 
 #---------------------------------------------------------------------------------
-# no real need to edit anything past this point unless you need to add additional
-# rules for different file extensions
-#---------------------------------------------------------------------------------
-
-
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
@@ -160,13 +147,9 @@ endif
 # use CXX for linking C++ projects, CC for standard C
 #---------------------------------------------------------------------------------
 ifeq ($(strip $(CPPFILES)),)
-#---------------------------------------------------------------------------------
 	export LD	:=	$(CC)
-#---------------------------------------------------------------------------------
 else
-#---------------------------------------------------------------------------------
 	export LD	:=	$(CXX)
-#---------------------------------------------------------------------------------
 endif
 #---------------------------------------------------------------------------------
 
@@ -200,8 +183,7 @@ clean:
 	rm -f res/patches/*.patch
 	rm -f src/xgm/z80_xgm.s src/xgm/z80_xgm.o80 src/xgm/z80_xgm.h out.lst
 	rm -f res/resources.h res/resources.s inc/ai_gen.h
-	rm -f bin/rescomp
-
+	rm -f bin/rescomp bin/mmutil
 
 #---------------------------------------------------------------------------------
 else
@@ -209,8 +191,6 @@ else
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-
-
 
 $(OUTPUT).gba	:	$(OUTPUT).elf
 
@@ -229,19 +209,16 @@ prereq: $(SLZ)
 prereq: $(CPXMS) $(XGCS) $(PCMS) $(CTSETS) $(ZOBJ) $(TSBS)
 
 # Sik's Tools compilation rules
-
 $(SLZ):
 	@mkdir -p $(dir $@)
 	cc $(TOOLSMD)/slz/tool/*.c -o $@
 
 ../inc/ai_gen.h: ../aigen.py
 	python ../aigen.py
-
 		
 grit-gen.stamp: ../gritgen.py
 	python ../gritgen.py
 	touch $@
-
 
 $(RESCOMP):
 	cc -g ../tools/rescomp/src/*.c -Itools/rescomp/inc -o $@
@@ -260,11 +237,8 @@ resources.s resources.h: resources.stamp
 %.s: %.res
 	$(RESCOMP) $< $@
 
-
 $(BINTOS): 
 	cc ../tools/bintos/src/*.c -o $@
-	
-
 
 $(XGMTOOL): bin
 	cc ../tools/xgmtool/src/*.c -Itools/xgmtool/inc -o $@ -lm
@@ -279,12 +253,14 @@ $(TSCOMP):
 $(PATCHROM): bin
 	cc tools/patchrom/patchrom.c -o $@
 
+# Local mmutil build
+$(MMUTIL):
+	@mkdir -p $(dir $@)
+	cc -O3 ../mmutil/source/*.c -o $@ -lm -Wno-multichar -Wno-unused-result -DPACKAGE_VERSION=\"6.7\"
+
 # 1. Compress stage layouts (PXM -> CPXM)
 %.cpxm: %.pxm | $(SLZ)
 	$(SLZ) -c "$<" "$@"
-
-#%.pat: %.png
-#	$(MDTILER) -b "$(CURDIR)/$<"
 
 # Convert VGM
 %.xgc: %.vgm
@@ -322,31 +298,26 @@ res/patches/$(TARGET)-%.patch: res/patches/$(TARGET)-%.s
 	$(LD) $(LDFLAGS) "temp.o" -o "temp.elf"
 	$(OBJC) -O binary "temp.elf" "$@"
 
-
 %.s: %.res
 	$(RESCOMP) $< $@
 
 #---------------------------------------------------------------------------------
-# The bin2o rule should be copied and modified
-# for each extension used in the data directories
-#---------------------------------------------------------------------------------
-
-#---------------------------------------------------------------------------------
 # rule to build soundbank from music files
 #---------------------------------------------------------------------------------
-soundbank.stamp: $(AUDIOFILES)
+soundbank.stamp: $(AUDIOFILES) $(MMUTIL)
 	@echo "Generating Soundbank"
-	@mmutil $^ -osoundbank.bin -hsoundbank.h
+	@$(MMUTIL) $(AUDIOFILES) -osoundbank.bin -hsoundbank.h
 	@touch $@
 
 soundbank.bin soundbank.h: soundbank.stamp
 	@:
+
 soundbank.bin.o: soundbank.bin
+
 #---------------------------------------------------------------------------------
 # This rule links in binary data with the .bin extension
 #---------------------------------------------------------------------------------
 %.bin.o	%_bin.h :	%.bin
-#---------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	@$(bin2o)
 
