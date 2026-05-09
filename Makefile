@@ -16,9 +16,7 @@ PATCHROM = bin/patchrom
 
 # Sik's Tools Source and Binaries
 TOOLSMD  = ../toolsmd
-MDTILER  = ../bin/mdtiler
 SLZ      = ../bin/slz
-UFTC     = ../bin/uftc
 
 # Stage layout files to compress
 PXMS  = $(wildcard ../res/Stage/*.pxm)
@@ -227,7 +225,7 @@ soundbank_bin.h: soundbank.bin
 main.o: soundbank.h
 
 prereq: $(RESCOMP) resources.s resources.h ../inc/ai_gen.h grit-gen.stamp $(BINTOS) $(TSCOMP) $(WAVTORAW) soundbank.h
-prereq: $(MDTILER) $(SLZ) $(UFTC)
+prereq: $(SLZ)
 prereq: $(CPXMS) $(XGCS) $(PCMS) $(CTSETS) $(ZOBJ) $(TSBS) $(PATS)
 
 # Sik's Tools compilation rules
@@ -236,20 +234,12 @@ $(SLZ):
 	@mkdir -p $(dir $@)
 	cc $(TOOLSMD)/slz/tool/*.c -o $@
 
-$(UFTC):
-	@mkdir -p $(dir $@)
-	cc $(TOOLSMD)/uftc/tool/*.c -o $@
-
-$(MDTILER):
-	@mkdir -p $(dir $@)
-	cc $(TOOLSMD)/mdtiler/tool/*.c -lpng -o $@
-
 ../inc/ai_gen.h: ../aigen.py
-	python3 ../aigen.py
+	python ../aigen.py
 
 		
 grit-gen.stamp: ../gritgen.py
-	python3 ../gritgen.py
+	python ../gritgen.py
 	touch $@
 
 
@@ -292,15 +282,6 @@ $(PATCHROM): bin
 # 1. Compress stage layouts (PXM -> CPXM)
 %.cpxm: %.pxm | $(SLZ)
 	$(SLZ) -c "$<" "$@"
-
-# 2. Convert Images to Patterns (PNG -> PAT)
-# -t specifies "tilemap order" (left-to-right, then top-to-bottom)
-%.pat: %.png | $(MDTILER)
-	$(MDTILER) -t "$<" "$@"
-
-# 3. Compress Patterns (PAT -> UFTC)
-%.uftc: %.pat | $(UFTC)
-	$(UFTC) -c "$<" "$@"
 
 #%.pat: %.png
 #	$(MDTILER) -b "$(CURDIR)/$<"
