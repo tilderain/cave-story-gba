@@ -3,10 +3,8 @@
 
 Work in progress port of [Cave Story MD](https://github.com/andwn/cave-story-md) by andwn, for the GBA.
 ## Compilation
-Linux only confirmed, vibecode your way to a windows build.
-
-1. Setup `python` and `libpng-dev`
-2. Get the gba-dev packages from devkitPro : https://devkitpro.org/wiki/Getting_Started .
+1. Install devkitPro : https://devkitpro.org/wiki/Getting_Started .
+2. Go into devkitPro shell and do `pacman -S gba-dev base-devel gcc python`
 3. Clone & `make -j8; `
 ## License
 Various, details [here](doc/LICENSE.md)
