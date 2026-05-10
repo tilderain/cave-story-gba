@@ -196,15 +196,11 @@ $(OUTPUT).gba	:	$(OUTPUT).elf
 
 $(OUTPUT).elf : prereq $(OFILES)
 
-$(OFILES_SOURCES) : $(HFILES)
-
-$(OFILES_SOURCES) : resources.h ../src/ai_gen.h soundbank.h soundbank_bin.h
-
 soundbank_bin.h: soundbank.bin
 
-main.o: soundbank.h
+audio.o xgm.o main.o: soundbank.h soundbank_bin.h
 
-prereq: $(RESCOMP) resources.s resources.h ../src/ai_gen.h grit-gen.stamp $(BINTOS) $(TSCOMP) $(WAVTORAW) soundbank.h
+prereq: $(RESCOMP) resources.s resources.h ../src/ai_gen.h grit-gen.stamp $(BINTOS) $(TSCOMP) $(WAVTORAW)
 prereq: $(SLZ)
 prereq: $(CPXMS) $(XGCS) $(PCMS) $(CTSETS) $(ZOBJ) $(TSBS)
 
