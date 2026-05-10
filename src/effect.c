@@ -21,6 +21,7 @@ typedef struct {
 	uint8_t type, ttl, timer, timer2;
 	int16_t x, y;
 	int8_t x_speed, y_speed;
+	uint8_t digit_count; 
 } Effect;
 
 static Effect effDamage[MAX_DAMAGE], effSmoke[MAX_SMOKE], effMisc[MAX_MISC];
@@ -33,7 +34,7 @@ uint8_t dqueued = 0;
 
 // Create a memory buffer of 4 tiles containing a string like "+3" or "-127"
 // Then copy to VRAM via DMA transfer
-uint32_t dtiles[4][8];
+uint32_t dtiles[MAX_DAMAGE][4][8];
 
 // Add this dedicated memory for the fades:
 static VDPSprite fadeSpr[3][8];
@@ -77,18 +78,37 @@ void effects_clear_smoke() {
 
 IWRAM_CODE void effects_update() {
 	for(uint8_t i = 0; i < MAX_DAMAGE; i++) {
-		if(!effDamage[i].ttl) continue;
-		effDamage[i].ttl--;
-		if(damageFollow[i].e) {
-			effDamage[i].x = (damageFollow[i].e->x >> CSF) + (damageFollow[i].xoff - 8);
-			effDamage[i].y = (damageFollow[i].e->y >> CSF) + (damageFollow[i].yoff) - (30 - (effDamage[i].ttl >> 1));
-		} else {
-			effDamage[i].y -= effDamage[i].ttl & 1;
-		}
-		sprite_pos(effDamage[i].sprite,
-			effDamage[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W,
-			effDamage[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H);
-	vdp_sprite_add(&effDamage[i].sprite);
+    	if(!effDamage[i].ttl) continue;
+    	effDamage[i].ttl--;
+    	if(effDamage[i].ttl < 8) {
+    	    uint8_t start = 3 - effDamage[i].digit_count;
+    	    for(uint8_t x = start; x < 4; x++) {
+    	        for(uint8_t y = 0; y < 7; y++) {
+    	            dtiles[i][x][y] = dtiles[i][x][y + 1];
+    	        }
+    	        dtiles[i][x][7] = 0;
+    	    }
+    			DMA_doDma(DMA_VRAM,
+    			          (uint32_t) dtiles[i][3 - effDamage[i].digit_count],
+    			          (TILE_NUMBERINDEX + (i << 2)) * 16,
+    			          (effDamage[i].digit_count + 1) * 8,
+    			          2);
+    	} else {
+    	        if(damageFollow[i].e) {
+    	            // Only move upward while ttl > 30
+    	            if(effDamage[i].ttl > 30) damageFollow[i].yoff -= effDamage[i].ttl & 1;
+	
+    	            effDamage[i].x = (damageFollow[i].e->x >> CSF) + (damageFollow[i].xoff - 8);
+    	            effDamage[i].y = (damageFollow[i].e->y >> CSF) + (damageFollow[i].yoff - 8);
+    	        } else {
+    	            // Only move upward while ttl > 30
+    	            if(effDamage[i].ttl > 30) effDamage[i].y -= effDamage[i].ttl & 1;
+    	        }
+    	    }
+    	sprite_pos(effDamage[i].sprite,
+    	    effDamage[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W,
+    	    effDamage[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H);
+    	vdp_sprite_add(&effDamage[i].sprite);
 	}
 	for(uint8_t i = 0; i < MAX_SMOKE; i++) {
 		if(!effSmoke[i].ttl) continue;
@@ -249,21 +269,20 @@ void effect_create_damage(int16_t num, Entity *follow, int16_t xoff, int16_t yof
 	if(dqueued) return;
 	for(uint8_t i = 0; i < MAX_DAMAGE; i++) {
 		if(effDamage[i].ttl) continue;
-		// Negative numbers are red and show '-' (Damage)
-		// Positive are white and show '+' (Weapon energy)
 		uint8_t negative = (num < 0);
 		num = abs(num);
-		uint8_t digitCount = 0; // Number of digit tiles: 1, 2, or 3 after loop
-		// Create right to left, otherwise digits show up backwards
+		uint8_t digitCount = 0;
 		uint16_t tileIndex;
+		// Clear the slot first so unused tiles don't have leftover data
+		memset(dtiles[i], 0, sizeof(dtiles[i]));
 		for(; num; digitCount++) {
 			tileIndex = ((negative ? 11 : 0) + mod10[num]) << 3;
-			memcpy(dtiles[3 - digitCount], &TS_Numbers.tiles[tileIndex], 32);
+			memcpy(dtiles[i][3 - digitCount], &TS_Numbers.tiles[tileIndex], 32);
 			num = div10[num];
 		}
 		tileIndex = ((negative ? 11 : 0) + 10) * 8;
-		memcpy(dtiles[3 - digitCount], &TS_Numbers.tiles[tileIndex], 32); // - or +
-		
+		memcpy(dtiles[i][3 - digitCount], &TS_Numbers.tiles[tileIndex], 32); // - or +
+
 		if(follow) {
 			damageFollow[i].e = follow;
 			damageFollow[i].xoff = xoff;
@@ -280,8 +299,10 @@ void effect_create_damage(int16_t num, Entity *follow, int16_t xoff, int16_t yof
 			.size = SPRITE_SIZE(digitCount+1, 1),
 			.attr = TILE_ATTR(PAL0, 1, 0, 0, TILE_NUMBERINDEX + (i<<2))
 		};
-		TILES_QUEUE(dtiles[3-digitCount], TILE_NUMBERINDEX + (i<<2), digitCount+1);
+		TILES_QUEUE(dtiles[i][3-digitCount], TILE_NUMBERINDEX + (i<<2), digitCount+1);
 		dqueued = TRUE;
+
+		effDamage[i].digit_count = digitCount;
 		break;
 	}
 }
