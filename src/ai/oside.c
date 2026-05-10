@@ -61,8 +61,8 @@ void ai_night_spirit(Entity *e) {
 			
 			if (!(e->timer & 7)) {
 				Entity *shot = entity_create(e->x, e->y, OBJ_NIGHT_SPIRIT_SHOT, 0);
-				shot->x_speed = 0x180 + random() & 0x3FF);
-				shot->y_speed = -0x200 + random() & 0x3FF);
+				shot->x_speed = 0x180 + (random() & 0x3FF);
+				shot->y_speed = -0x200 + (random() & 0x3FF);
 				
 				sound_play(SND_BUBBLE, 3);
 			}

@@ -258,7 +258,7 @@ void ai_gaudi(Entity *e) {
 		case 10:		// walking
 		{
 			e->state = 11;
-			e->timer = random() & 63) + 30;		// how long to walk for
+			e->timer = (random() & 63) + 30;		// how long to walk for
 			moveMeToFront = TRUE;
 		}
 		/* fallthrough */
@@ -361,7 +361,7 @@ void ai_gaudiFlying(Entity *e) {
 		/* fallthrough */
 		case 1:
 		{
-			e->timer = 80 + random() & 63);
+			e->timer = 80 + (random() & 63);
 			e->state = 2;
 		}
 		/* fallthrough */
@@ -637,8 +637,8 @@ void ai_pooh_black(Entity *e) {
                     bubble->alwaysActive = TRUE;
                     bubble->x = e->x - 0x2000 + (random() & 0x3FFF);
                     bubble->y = e->y - 0x2000 + (random() & 0x3FFF);
-                    bubble->x_speed = -0x400 + random() & 0x7FF);
-                    bubble->y_speed = -0x400 + random() & 0x7FF);
+                    bubble->x_speed = -0x400 + (random() & 0x7FF);
+                    bubble->y_speed = -0x400 + (random() & 0x7FF);
 			    }
 				// fly away after hit enough times
 				if (++e->timer > 100) {
@@ -944,8 +944,8 @@ void ai_fuzz(Entity *e) {
 	} else {
 		if (e->linkedEntity->state == STATE_DESTROY) {
 			e->alwaysActive = TRUE;
-			e->x_speed = -0x1FF + (random() & 0x3FF));
-			e->y_speed = -0x1FF + (random() & 0x3FF));
+			e->x_speed = -0x1FF + (random() & 0x3FF);
+			e->y_speed = -0x1FF + (random() & 0x3FF);
 			e->state = 1;
 		} else if(!e->linkedEntity->alwaysActive) {
 			e->state = STATE_DELETE;

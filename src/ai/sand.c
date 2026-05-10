@@ -453,7 +453,7 @@ void ai_crow_with_skull(Entity *e) {
 	e->linkedEntity = skull;
 	
 	// switch over to the main crow AI, but only move up & down
-	e->y_speed = -0x100 + (random() & 0xFF));
+	e->y_speed = -0x100 + (random() & 0xFF);
 	e->x_mark = e->x;
 	e->y_mark = e->y - (32<<CSF) + (random() & 0x7FFF);
 	e->state = 101;
@@ -824,7 +824,7 @@ void ai_skeleton(Entity *e) {
 			e->state = 21;
 			e->frame = 1;
 			e->timer2 = 0;
-			e->y_speed = -(0x200 + random() & 0x3FF));
+			e->y_speed = -(0x200 + (random() & 0x3FF));
 			e->grounded = FALSE;
 			
 			// jump towards player, unless we've been hurt; in that case jump away

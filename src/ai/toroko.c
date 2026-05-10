@@ -125,7 +125,7 @@ void ai_torokoBoss(Entity *e) {
 		case 10:	// wait a moment then ATTACK!!
 		{
 			e->state = 11;
-			e->timer = random() & 0x7F) + 20;
+			e->timer = (random() & 0x7F) + 20;
 			e->x_speed = 0;
 		}
 		/* fallthrough */

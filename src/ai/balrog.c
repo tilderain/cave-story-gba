@@ -811,10 +811,10 @@ void ai_balrog_missile(Entity *e) {
 	
 	if (e->state == 0) {
 		// recoil in oppisite direction
-		e->x_speed = random() & 0x1FF);
+		e->x_speed = (random() & 0x1FF);
 		if(e->dir) e->x_speed = -e->x_speed;
 		
-		e->y_speed = -random() & 0x1FF);
+		e->y_speed = -(random() & 0x1FF);
 		e->state = 1;
 	}
 	

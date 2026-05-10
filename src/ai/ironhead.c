@@ -64,8 +64,8 @@ void ai_ironhead(Entity *e) {
 			e->x_mark = e->x;
 			e->y_mark = e->y;
 			
-			e->y_speed = -0x200 + random() & 0x3FF);
-			e->x_speed = -0x200 + random() & 0x3FF);
+			e->y_speed = -0x200 + (random() & 0x3FF);
+			e->x_speed = -0x200 + (random() & 0x3FF);
 			
 			e->flags |= NPC_SHOOTABLE;
 		} /* fallthrough */
@@ -157,7 +157,7 @@ void ai_ironh_fishy(Entity *e) {
 		{
 			e->state = 10;
 			e->animtime = 0;
-			e->y_speed = -0x200 + random() & 0x3FF);
+			e->y_speed = -0x200 + (random() & 0x3FF);
 			e->x_speed = 0x800;
 		} /* fallthrough */
 		case 10:			// harmless fishy
@@ -214,7 +214,7 @@ void ai_ironh_shot(Entity *e) {
 void ai_brick_spawner(Entity *e) {
 	if (!e->state) {
 		e->state = 1;
-		e->timer = 30 + random() & 127);
+		e->timer = 30 + (random() & 127);
 	}
 	
 	if (!e->timer) {	// time to spawn a block
@@ -239,10 +239,10 @@ void ai_ironh_brick(Entity *e) {
 			e->hit_box = e->display_box = (bounding_box) { 16, 16, 16, 16 };
 		}
 		
-		e->x_speed = 0xFF + random() & 0xFF);
+		e->x_speed = 0xFF + (random() & 0xFF);
 		e->x_speed *= e->dir ? 2 : -2;
 		
-		e->y_speed = -0x200 + random() & 0x3FF);
+		e->y_speed = -0x200 + (random() & 0x3FF);
 		e->state = 1;
 	}
 	

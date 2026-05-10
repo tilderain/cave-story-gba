@@ -185,7 +185,7 @@ void ai_igor_balcony(Entity *e) {
 					Entity *shot = entity_create(e->x + (e->dir ? 0x800 : -0x800),
 												 e->y, OBJ_IGOR_SHOT, 0);
 					shot->x_speed = e->dir ? 0x600 : -0x600;
-					shot->y_speed = -0x280 + (random() & 0x3FF));
+					shot->y_speed = -0x280 + (random() & 0x3FF);
 				}
 			}
 			

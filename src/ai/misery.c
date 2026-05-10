@@ -202,7 +202,7 @@ void ai_misery_stand(Entity *e) {
 			if (e->timer == 30 || e->timer == 40 || e->timer == 50) {
 				Entity *shot = entity_create(e->x+pixel_to_sub(16), e->y, OBJ_IGOR_SHOT, 0);
 				shot->x_speed = 0x600;
-				shot->y_speed = -random() & 0x1FF);
+				shot->y_speed = -(random() & 0x1FF);
 				
 				sound_play(SND_SNAKE_FIRE, 5);
 			}

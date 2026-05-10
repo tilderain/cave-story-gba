@@ -96,8 +96,8 @@ void ai_toroko(Entity *e) {
 		case 4:
 		{
 			ANIMATE(e, 2, 1,7,2,7);
-			if((e->y_speed < 0 && collide_stage_leftwall(e)) ||
-				(e->y_speed > 0 && collide_stage_rightwall(e))) { 
+			if((e->x_speed < 0 && collide_stage_leftwall(e)) ||
+				(e->x_speed > 0 && collide_stage_rightwall(e))) {
 				TURN_AROUND(e);
 			}
 			MOVE_X(0x3E0);

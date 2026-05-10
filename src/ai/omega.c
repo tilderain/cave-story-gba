@@ -180,9 +180,9 @@ void ai_omega(Entity *e) {
 					sound_play(SND_EM_FIRE, 5);
 					Entity *shot = entity_create(e->x, e->y, OBJ_OMEGA_SHOT, 0);
 					if(e->form == 2) {
-						shot->x_speed = -0x180 + (random() & 0xFF) * 3);
+						shot->x_speed = -0x180 + (random() & 0xFF) * 3;
 					} else {
-						shot->x_speed = -0x100 + random() & 0x1FF);
+						shot->x_speed = -0x100 + (random() & 0x1FF);
 					}
 					shot->y_speed = -0x330;
 					if(e->form == 2 || (random() & 7)) {

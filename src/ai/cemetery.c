@@ -265,7 +265,7 @@ void ai_ma_pignon(Entity *e) {
 				e->state = MP_In_Air;
 				e->frame = HOP;
 				
-				e->x_speed = -0x400 + random() & 0x7FF);
+				e->x_speed = -0x400 + (random() & 0x7FF);
 				e->y_speed = -0x800;
 				e->grounded = FALSE;
 				

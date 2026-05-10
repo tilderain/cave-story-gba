@@ -116,7 +116,7 @@ void ai_batCircle(Entity *e) {
 			e->x_speed = cos[angle];
 			e->y_speed = sin[angle];
 			e->x_mark = e->x + (e->x_speed << 3);
-			e->y_mark = e->y + (e->x_speed << 3);
+			e->y_mark = e->y + (e->y_speed << 3);
 			e->state++;
 		}
 		/* fallthrough */

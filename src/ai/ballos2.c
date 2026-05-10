@@ -597,7 +597,7 @@ void ai_ballos_bone_spawner(Entity *e) {
 		{
 			e->timer++;
 			if((e->timer & 15) == 1 && entity_on_screen(e)) {
-				int16_t xi = random() & 0x3FF);
+				int16_t xi = random() & 0x3FF;
 				if (!e->dir) xi = -xi;
 				
 				Entity *bone = entity_create(e->x, e->y, OBJ_BALLOS_BONE, 0);
@@ -837,7 +837,7 @@ void ai_bute_archer_red(Entity *e) {
 			if((++e->animtime & 3) == 0) e->frame ^= 1;
 			if((!e->dir && e->x < e->x_mark) || (e->dir && e->x > e->x_mark)) {
 				e->state++;
-				e->timer = random() & 0x7F);
+				e->timer = random() & 0x7F;
 				e->frame = 2;
 			}
 		}
