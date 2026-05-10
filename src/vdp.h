@@ -76,6 +76,12 @@
 #define TILE_QMARKSIZE 1
 #define TILE_WHIMINDEX (TILE_QMARKINDEX + TILE_QMARKSIZE)
 #define TILE_WHIMSIZE 2
+
+
+
+
+#define TILE_FADEINDEX      (TILE_QMARKINDEX + TILE_QMARKSIZE)
+#define TILE_FADESIZE       2
 // 12 tiles at the end for nemesis vertical frames
 #define TILE_NEMINDEX (0xFE80 >> 5)
 // 8 tiles after window plane for blade L3

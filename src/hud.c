@@ -10,6 +10,7 @@
 #include "tables.h"
 #include "vdp.h"
 #include "weapon.h"
+#include "effect.h"
 
 #include "hud.h"
 #include "xgm.h"
@@ -76,7 +77,9 @@ void hud_create() {
 	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+3)*TILE_SIZE, 16, 2);
 }
 
-void hud_force_redraw() {
+
+void hud_force_redraw(void) {
+	if(fadeSweepTimer > 0) return;
 	hud_refresh_health();
     hud_refresh_weapon();
     hud_refresh_energy(TRUE);
@@ -108,7 +111,8 @@ void hud_hide() {
 void hud_update() {
 	uint8_t weaponChange = FALSE;
 	//if(paused) return;
-	if(!showing) return;
+	if(!showing || fadeSweepTimer > 0) return;
+	
 	vdp_sprites_add(sprHUD, 2);
 	// Only refresh one part of the HUD in a single frame, at most 8 tiles will be sent
 	if(hudMaxHealth != playerMaxHealth || hudHealth != player.health) {

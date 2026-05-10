@@ -14,6 +14,7 @@
 #include "effect.h"
 
 #include "gba.h"
+#include "hud.h"
 
 typedef struct {
 	VDPSprite sprite;
@@ -34,6 +35,23 @@ uint8_t dqueued = 0;
 // Then copy to VRAM via DMA transfer
 uint32_t dtiles[4][8];
 
+// Add this dedicated memory for the fades:
+static VDPSprite fadeSpr[3][8];
+
+uint8_t fadeSweepDir;
+#define bval (1<<15) | TILE_FADEINDEX
+static const uint16_t winmap[40] = { 
+	bval,bval,bval,bval,bval,bval,bval,bval,bval,bval,
+	bval,bval,bval,bval,bval,bval,bval,bval,bval,bval,
+	bval,bval,bval,bval,bval,bval,bval,bval,bval,bval,
+	bval,bval,bval,bval,bval,bval,bval,bval,bval,bval,
+};
+static const uint32_t tblack[8] = {
+	0x11111111,0x11111111,0x11111111,0x11111111,
+	0x11111111,0x11111111,0x11111111,0x11111111,
+};
+
+int8_t fadeSweepTimer;
 void effects_init() {
 	for(uint8_t i = 0; i < MAX_DAMAGE; i++) effDamage[i].ttl = 0;
 	for(uint8_t i = 0; i < MAX_SMOKE; i++) effSmoke[i].ttl = 0;
@@ -456,5 +474,121 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
             break;
 		}
 		break;
+	}
+}
+
+static void fade_setup(VDPSprite *spr0, VDPSprite *spr1, VDPSprite *spr2, uint8_t dir, uint8_t fadein) {
+	// Fill window plane
+	for(uint16_t y = 0; y < SCREEN_HEIGHT / 8; y++) {
+	//	DMA_doDma(DMA_VRAM, (uint32_t) winmap, VDP_PLAN_W + y*128, 40, 2);
+	}
+
+    // Load all 3 frames (4x4 tiles each) sequentially starting at TILE_HUDINDEX
+    // Frame 0: TILE_HUDINDEX (64)
+    // Frame 1: TILE_HUDINDEX + 16 (80)
+    // Frame 2: TILE_HUDINDEX + 32 (96)
+    SHEET_LOAD(&SPR_Fade, 3, 4*4, TILE_HUDINDEX, TRUE, 0, 1, 2);
+
+    // This is the solid black tile used for the window/background
+    DMA_doDma(DMA_VRAM, (uint32_t) tblack, TILE_FADEINDEX*TILE_SIZE, TILE_SIZE/2, 2);
+	// Setup sprites
+	for(uint16_t i = 0; i < (pal_mode ? 8 : 7); i++) {
+		spr0[i].y = 0x80 + i * 32;
+		spr1[i].y = 0x80 + i * 32;
+		spr2[i].y = 0x80 + i * 32;
+		if(fadein) {
+			if(dir) { // Start from right
+				spr0[i].x = 0x80 + SCREEN_WIDTH + 64;
+				spr1[i].x = 0x80 + SCREEN_WIDTH + 32;
+				spr2[i].x = 0x80 + SCREEN_WIDTH + 0;
+			} else { // Start from left
+				spr0[i].x = 0x80 - 96;
+				spr1[i].x = 0x80 - 64;
+				spr2[i].x = 0x80 - 32;
+			}
+		} else {
+			if(dir) { // Start from right
+				spr0[i].x = 0x80 + SCREEN_WIDTH + 0;
+				spr1[i].x = 0x80 + SCREEN_WIDTH + 32;
+				spr2[i].x = 0x80 + SCREEN_WIDTH + 64;
+			} else { // Start from left
+				spr0[i].x = 0x80 - 32;
+				spr1[i].x = 0x80 - 64;
+				spr2[i].x = 0x80 - 96;
+			}
+		}
+		if(i == 7) {
+			spr0[i].size = SPRITE_SIZE(4,2);
+			spr1[i].size = SPRITE_SIZE(4,2);
+			spr2[i].size = SPRITE_SIZE(4,2);
+		} else {
+			spr0[i].size = SPRITE_SIZE(4,4);
+			spr1[i].size = SPRITE_SIZE(4,4);
+			spr2[i].size = SPRITE_SIZE(4,4);
+		}
+
+        spr0[i].attr = TILE_ATTR(PAL0, 1, 0, (fadein?dir:!dir), TILE_HUDINDEX + 32);
+        spr1[i].attr = TILE_ATTR(PAL0, 1, 0, (fadein?dir:!dir), TILE_HUDINDEX );
+        spr2[i].attr = TILE_ATTR(PAL0, 1, 0, (fadein?dir:!dir), TILE_HUDINDEX + 16);
+	}
+}
+
+void do_fadeout_sweep(uint8_t dir) {
+	fade_setup(fadeSpr[0], fadeSpr[1], fadeSpr[2], dir, FALSE);
+	// Fade loop
+	for(uint16_t f = 0; f < SCREEN_WIDTH / 16 + 6; f++) {
+		// Update Sprites
+		for(uint16_t i = 0; i < (pal_mode ? 8 : 7); i++) {
+			fadeSpr[0][i].x += dir ? -16 : 16;
+			fadeSpr[1][i].x += dir ? -16 : 16;
+			fadeSpr[2][i].x += dir ? -16 : 16;
+		}
+		vdp_sprites_add(fadeSpr[0], pal_mode ? 8 : 7);
+		vdp_sprites_add(fadeSpr[1], pal_mode ? 8 : 7);
+		vdp_sprites_add(fadeSpr[2], pal_mode ? 8 : 7);
+		player_draw();
+		entities_draw();
+		//sys_wait_vblank();
+		// Update window plane
+		if(f > 5) {
+			const uint8_t x = dir ? (20 - (f-5)) | 0x80 : f-5;
+			vdp_set_window(x, 0);
+		}
+		ready = TRUE;
+		aftervsync();
+	}
+	vdp_colors(0, PAL_FadeOut, 64);
+	vdp_set_window(0, 0);
+}
+void start_fadein_sweep(uint8_t dir) {
+	fade_setup(fadeSpr[0], fadeSpr[1], fadeSpr[2], dir, TRUE);
+	fadeSweepTimer = SCREEN_WIDTH / 16 + 6;
+	fadeSweepDir = dir;
+	// Cover screen with window (black), and load target palette immediately
+	vdp_set_window(20, 0);
+	//vdp_colors_apply_next_now();
+}
+void update_fadein_sweep(void) {
+	fadeSweepTimer--;
+	if(fadeSweepTimer >= 0) {
+		// Update VDPSprites
+		for(uint16_t i = 0; i < (pal_mode ? 8 : 7); i++) {
+			fadeSpr[0][i].x += fadeSweepDir ? -16 : 16;
+			fadeSpr[1][i].x += fadeSweepDir ? -16 : 16;
+			fadeSpr[2][i].x += fadeSweepDir ? -16 : 16;
+		}
+		vdp_sprites_add(fadeSpr[0], pal_mode ? 8 : 7);
+		vdp_sprites_add(fadeSpr[1], pal_mode ? 8 : 7);
+		vdp_sprites_add(fadeSpr[2], pal_mode ? 8 : 7);
+		// Update window plane
+		if(fadeSweepTimer > 5) {
+			const uint8_t x = fadeSweepDir ? (fadeSweepTimer-5) : (20 - (fadeSweepTimer-5)) | 0x80;
+			vdp_set_window(x, 0);
+		} else {
+			vdp_set_window(0, 0);
+		}
+	} else {
+		// After the fade is done, need to restore HUD tiles we clobbered
+		hud_force_redraw();
 	}
 }

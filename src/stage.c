@@ -93,11 +93,14 @@ void stage_load(uint16_t id) {
 
 	iprintf("Loading stage %d\n", id);
 	vdp_set_display(FALSE);
+
 	oldstate = 65535;
 	// Prevents an issue where a column of the previous map would get drawn over the new one
 	DMA_clearQueue();
 	stageID = id;
+
 	// Clear out or deactivate stuff from the old stage
+	fadeSweepTimer = -1;
 	effects_clear();
 	entities_clear();
 	if(stageTable) {
@@ -193,7 +196,7 @@ void stage_load(uint16_t id) {
 	if((playerEquipment & EQUIP_CLOCK) || stageID == STAGE_HELL_B1) system_draw_counter();
 	tsc_load_stage(id);
 	wstar_reset();
-	
+
 	vdp_set_display(TRUE);
 }
 

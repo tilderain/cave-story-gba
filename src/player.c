@@ -502,7 +502,7 @@ void player_update() {
 		player_update_interaction();
 	}
 	player_draw();
-	if(mapNameTTL > 0) {
+	if(mapNameTTL > 0 && fadeSweepTimer < 12) {
 		mapNameTTL--;
 		vdp_sprites_add(mapNameSprite, mapNameSpriteNum);
 	}

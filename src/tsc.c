@@ -1100,11 +1100,13 @@ uint8_t execute_command() {
 		{
 			args[0] = tsc_read_word();
 			stage_setup_palettes();
-			if(gamemode != GM_CREDITS) {
+			if(gamemode == GM_INTRO) {
+				vdp_fade(PAL_FadeOut, NULL, 4, TRUE);
+			} else if(gamemode != GM_CREDITS) {
 				inFade = FALSE; // Unlock sprites from updating
 				vdp_vsync(); // Wait a frame to let the sprites redraw
 				aftervsync();
-				vdp_fade(PAL_FadeOut, NULL, 4, TRUE);
+				start_fadein_sweep(player.dir);
 			} else {
 				vdp_color_next(0, 0x200);
 				vdp_fade(PAL_FadeOutBlue, NULL, 4, TRUE);
@@ -1120,9 +1122,11 @@ uint8_t execute_command() {
                 entities_draw();
                 ready = TRUE;
                 aftervsync();
-				vdp_fade(NULL, PAL_FadeOut, 4, FALSE);
-				// Blank the sprite list in VRAM
-				//vdp_sprites_clear();
+				if(gamemode == GM_INTRO) {
+					vdp_fade(NULL, PAL_FadeOut, 4, FALSE);
+				} else {
+					do_fadeout_sweep(player.dir);
+				}
 				inFade = TRUE;
 			} else {
 				vdp_fade(NULL, PAL_FadeOutBlue, 4, TRUE);

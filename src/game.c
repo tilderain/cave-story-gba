@@ -73,18 +73,19 @@ IWRAM_CODE void game_main(uint8_t load) {
 			paused = update_pause();
 		} else {
 			// Pressing start opens the item menu (unless a script is running)
+
 			if(joy_pressed(btn[cfg_btn_lswap]))
 			{
 				saturate ^= 1;
 				stage_setup_palettes();
 			}
-			if(joy_pressed(btn[cfg_btn_pause]) && !tscState) {
+			if(joy_pressed(btn[cfg_btn_pause]) && !tscState && !fadeSweepTimer) {
 				// This unloads the stage's script and loads the "ArmsItem" script in its place
 				tsc_load_stage(255);
 				draw_itemmenu(TRUE);
 				paused = TRUE;
 			} else if(joy_pressed(btn[cfg_btn_map]) && joytype == JOY_TYPE_PAD6 
-					&& !tscState && (playerEquipment & EQUIP_MAPSYSTEM)) {
+					&& !tscState && !fadeSweepTimer && (playerEquipment & EQUIP_MAPSYSTEM)) {
 				// Shorthand to open map system
                 disable_ints;
                 z80_request();
@@ -126,7 +127,11 @@ IWRAM_CODE void game_main(uint8_t load) {
 			} else {
 				// HUD on top
                 PF_BGCOLOR(0x008);
-				hud_update();
+				if(fadeSweepTimer >= 0) {
+					update_fadein_sweep();
+				} else {
+					hud_update();
+				}
 				// Run the next set of commands in a script if it is running
                 PF_BGCOLOR(0x080);
 				uint8_t rtn = tsc_update();

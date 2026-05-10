@@ -93,6 +93,9 @@ SPRITE SPR_SpurB2		"sprite/spurb2.png"			2 2 0 0 NONE
 SPRITE SPR_SpurB3		"sprite/spurb3.png"			2 2 0 0 NONE
 SPRITE SPR_WStar        "sprite/wstar.png"          1 1 NONE
 
+
+SPRITE SPR_Fade         "sprite/fade.png"           4 4 NONE
+
 # Use PAL_sym
 SPRITE SPR_Polar		"sprite/polar.png"			6 1 0 0 NONE
 SPRITE SPR_PolarB1		"sprite/polarb1.png"		2 2 0 0 NONE
