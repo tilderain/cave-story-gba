@@ -1130,9 +1130,9 @@ void player_draw() {
 
 		if(tscState == TSC_IDLE)
 			vdp_map_clear(VDP_PLAN_W);
-		int x = sub_to_pixel(player.x) - sub_to_pixel(camera.x) + SCREEN_HALF_W - 8;
-		int y = sub_to_pixel(player.y) - sub_to_pixel(camera.y) + SCREEN_HALF_H - 8;
-		x = (x + 4) / 8; y = (y + 80) / 8;
+		//int x = sub_to_pixel(player.x) - sub_to_pixel(camera.x) + SCREEN_HALF_W - 8;
+		//int y = sub_to_pixel(player.y) - sub_to_pixel(camera.y) + SCREEN_HALF_H - 8;
+		//x = (x + 4) / 8; y = (y + 80) / 8;
 		//iprintf("%d, %d", x, y);
 		//iprintf("\x1b[%hu;%huH%s\n", y, x, "\"");
 		
