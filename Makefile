@@ -196,6 +196,8 @@ $(OUTPUT).gba	:	$(OUTPUT).elf
 
 $(OUTPUT).elf : prereq $(OFILES)
 
+$(OFILES_SOURCES): resources.h ../src/ai_gen.h soundbank.h grit-gen.stamp
+
 soundbank_bin.h: soundbank.bin
 
 audio.o xgm.o main.o: soundbank.h soundbank_bin.h
