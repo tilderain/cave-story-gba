@@ -179,16 +179,23 @@ void window_close(void) {
 #include "vdp.h"
 
 void window_set_face(uint16_t face, uint8_t open) {
-	if(paused) return;
-	if(open && !windowOpen) window_open(windowOnTop);
-	showingFace = face;
-	if(face > 0) {
-		window_draw_face();
-	} else {
-		if(fadeSweepTimer >= 0) return;
-		vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(4), TEXT_X1,
-				windowOnTop ? TEXT_Y1_TOP : TEXT_Y1, 6, 6, 0);
-	}
+    if(paused) return;
+    if(open && !windowOpen) window_open(windowOnTop);
+    
+    // Only reset the slide if the face is actually changing
+    if(showingFace != face) {
+        showingFace = face;
+        if(face > 0) {
+            faceXOffset = -48; // Start 12 pixels to the left (Original CS style)
+        }
+    }
+    
+    if(face > 0) {
+        vdp_tiles_load_from_rom(face_info[face].tiles->tiles, TILE_FACEINDEX, 36);
+        textPixelX = 56; 
+    } else {
+        textPixelX = 0;
+    }
 }
 int textPixelX = 0;
 
@@ -364,12 +371,24 @@ uint8_t window_prompt_update() {
 	return FALSE;
 }
 
-void window_draw_face(void) {
-	//vdp_tiles_load(face_info[showingFace].tiles, TILE_FACEINDEX, 0);
-	if(fadeSweepTimer >= 0) return;
+void window_draw_face() {
+    // 1. Get current face definition
+    const face_info_def *f = &face_info[showingFace];
+    
+    // Safety check: Don't try to draw if there are no tiles or palette data
+    if (f->tiles == NULL || f->pal_ptr == NULL) return;
 
-	vdp_map_fill_rect(VDP_PLAN_W, TILE_ATTR(face_info[showingFace].palette, 1, 0, 0, TILE_FACEINDEX),
-                      TEXT_X1, (windowOnTop ? TEXT_Y1_TOP : TEXT_Y1), 6, 6, 1);
+    // 2. Load the 16 colors for this face into GBA Palette Line 4
+    vdp_colors(64, f->pal_ptr, 16);
+
+    // 3. Load the 36 tiles (6x6) into VRAM
+    vdp_tiles_load_from_rom(f->tiles->tiles, TILE_FACEINDEX, 36);
+
+    // 4. Draw the 6x6 face into the window plane
+    // We pass '4' to TILE_ATTR so the hardware knows to use the colors we just loaded
+    vdp_map_fill_rect(VDP_PLAN_W, 
+        TILE_ATTR(4, 1, 0, 0, TILE_FACEINDEX), 
+        TEXT_X1, (windowOnTop ? TEXT_Y1_TOP : TEXT_Y1), 6, 6, 1);
 }
 
 void window_show_item(uint16_t item) {

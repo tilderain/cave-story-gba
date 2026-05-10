@@ -79,7 +79,7 @@ IWRAM_CODE void game_main(uint8_t load) {
 				saturate ^= 1;
 				stage_setup_palettes();
 			}
-			if(joy_pressed(btn[cfg_btn_pause]) && !tscState && !fadeSweepTimer) {
+			if(joy_pressed(btn[cfg_btn_pause]) && !tscState && fadeSweepTimer <= 0) {
 				// This unloads the stage's script and loads the "ArmsItem" script in its place
 				tsc_load_stage(255);
 				draw_itemmenu(TRUE);
