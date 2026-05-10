@@ -9,7 +9,7 @@ void onspawn_cloud_spawner(Entity *e) {
 // makes the clouds from the falling scene (good ending)
 void ai_cloud_spawner(Entity *e) {
 	if(!e->timer) {
-		e->timer = TIME_8(e->dir ? 100 : 50);
+		e->timer = e->dir ? 100 : 50;
 		e->timer2 = random() & 3;
 		//if(e->timer2 == 0) e->timer2++;
 		
@@ -21,11 +21,11 @@ void ai_cloud_spawner(Entity *e) {
 		if(!e->dir)	{
 			cloud->x = e->x + block_to_sub(-7 + (random() & 15));
 			cloud->y = e->y;
-			cloud->y_speed = -SPEED_12(0xFFF >> e->timer2);	// each type half as fast as the last
+			cloud->y_speed = -0xFFF >> e->timer2;	// each type half as fast as the last
 		} else { // horizontal clouds (flying with Kazuma)
 			cloud->x = e->x;
 			cloud->y = e->y + block_to_sub(-7 + (random() & 15));
-			cloud->x_speed = -SPEED_10(0x3FF >> e->timer2);
+			cloud->x_speed = -0x3FF >> e->timer2;
 		}
 		
 		// cut down on the amount of time Kazuma is flying
@@ -140,8 +140,8 @@ void ai_balrog_flying(Entity *e) {
 		case 20:	// fly away
 		{
 			e->state = 21;
-			e->x_speed = -SPEED_10(0x3FF);
-			e->y_speed = SPEED_10(0x200);
+			e->x_speed = -0x3FF;
+			e->y_speed = 0x200;
 		} /* fallthrough */
 		case 21:
 		{
@@ -279,7 +279,7 @@ void ai_turning_human(Entity *e) {
 		} /* fallthrough */
 		case 1:
 		{
-			if(++e->timer > TIME_8(80)) {
+			if(++e->timer > 80) {
 				e->state = 10;
 				e->frame += 2;
 				e->timer = 0;
@@ -302,7 +302,7 @@ void ai_turning_human(Entity *e) {
 			e->timer++;
 			if(e->timer & 1) e->frame ^= 1;
 			
-			if (e->timer > TIME_8(50)) {
+			if (e->timer > 50) {
 				e->state = 20;
 				e->frame = (e->flags & NPC_OPTION2) ? 12 : 4;
 				// wait for slightly different times before falling
@@ -319,9 +319,9 @@ void ai_turning_human(Entity *e) {
 		
 		case 30:	// falling
 		{
-			if(e->y_speed < SPEED_12(0x5C0)) e->y_speed += SPEED_8(0x40);
+			if(e->y_speed < 0x5C0) e->y_speed += 0x40;
 			// sneeze
-			if(++e->timer > TIME_8(50)) {
+			if(++e->timer > 50) {
 				e->state = 40;
 				e->timer = 0;
 				e->frame++;	// head-back to sneeze
@@ -337,8 +337,8 @@ void ai_turning_human(Entity *e) {
 		case 40:	// sneezing
 		{
 			e->timer++;
-			if(e->timer == TIME_8(30)) e->frame++;
-			else if(e->timer > TIME_8(40)) e->state = 50;
+			if(e->timer == 30) e->frame++;
+			else if(e->timer > 40) e->state = 50;
 		}
 		break;
 		
@@ -351,8 +351,8 @@ void ai_turning_human(Entity *e) {
 		case 51:	// ..and blink
 		{
 			e->timer++;
-			if(e->timer == TIME_8(30)) e->frame++;
-			else if(e->timer == TIME_8(40)) e->frame--;
+			if(e->timer == 30) e->frame++;
+			else if(e->timer == 40) e->frame--;
 		}
 		break;
 	}
@@ -370,7 +370,7 @@ void ai_ahchoo(Entity *e) {
 		{
 			if(e->timer < 4) e->y -= (2 << CSF);
 			// sneezing frame
-			if(e->timer > TIME_8(30)) {
+			if(e->timer > 30) {
 				e->frame = 1;	// "choo!"
 				e->timer = 0;
 				e->state = 1;
@@ -382,7 +382,7 @@ void ai_ahchoo(Entity *e) {
 		
 		case 1:		// shaking "choo!"
 		{
-			if(e->timer < TIME_8(48)) {	// shake
+			if(e->timer < 48) {	// shake
 				e->x = e->x_mark + (-1 + (random() & 3));
 				e->y = e->y_mark + (-1 + (random() & 3));
 			} else {	// return to original pos
@@ -390,7 +390,7 @@ void ai_ahchoo(Entity *e) {
 				e->y_mark = e->y;
 			}
 			
-			if(e->timer > TIME_8(70)) e->state = STATE_DELETE;
+			if(e->timer > 70) e->state = STATE_DELETE;
 		}
 		break;
 	}
@@ -498,7 +498,7 @@ void ai_the_cast(Entity *e) {
 	
 	if(!e->state) {
 		e->dir = cast_data[e->id].dir;
-		if(e->y_speed < SPEED_12(0x5C0)) e->y_speed += SPEED_8(0x40);
+		if(e->y_speed < 0x5C0) e->y_speed += 0x40;
 		e->y += e->y_speed;
 		if((e->y >> CSF) + e->hit_box.bottom >= 200) {
 			if(e->tiloc != NOTILOC) {

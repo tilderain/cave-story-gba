@@ -6,7 +6,7 @@ void ai_behemoth(Entity *e) {
 		{
 			ANIMATE(e, 12, 0,1,0,2);
 			if(e->x_speed == 0) TURN_AROUND(e);
-			MOVE_X(SPEED_8(0xFF));
+			MOVE_X(0xFF);
 			if(e->damage_time) {
 				e->frame = 3;
 				e->state = 1;
@@ -26,12 +26,12 @@ void ai_behemoth(Entity *e) {
 					e->timer = 0;
 					e->animtime = 0;
 					e->attack = 5;
-					MOVE_X(SPEED_10(0x300));
+					MOVE_X(0x300);
 				} else {
 					e->state = 0;
 					e->animtime = 0;
 					e->attack = 1;
-					MOVE_X(SPEED_8(0xFF));
+					MOVE_X(0xFF);
 				}
 			}
 		}
@@ -40,8 +40,8 @@ void ai_behemoth(Entity *e) {
 		{
 			ANIMATE(e, 8, 4,5);
 			if(e->x_speed == 0) TURN_AROUND(e);
-			MOVE_X(SPEED_10(0x300));
-			if(++e->timer > TIME_8(200)) {
+			MOVE_X(0x300);
+			if(++e->timer > 200) {
 				e->state = 0;
 				e->attack = 1;
 				e->frame = 0;
@@ -50,8 +50,8 @@ void ai_behemoth(Entity *e) {
 		break;
 	}
 	
-	if(!e->grounded) e->y_speed += SPEED_8(0x40);
-	LIMIT_Y(SPEED_12(0x5FF));
+	if(!e->grounded) e->y_speed += 0x40;
+	LIMIT_Y(0x5FF);
 	
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
@@ -72,9 +72,9 @@ void ai_beetle(Entity *e) {
 		} /* fallthrough */
 		case 1: // wait for player on the wall
 		{
-			if(++e->timer > TIME_8(50) && PLAYER_DIST_Y(e, 16 << CSF)) {
+			if(++e->timer > 50 && PLAYER_DIST_Y(e, 16 << CSF)) {
 				TURN_AROUND(e);
-				MOVE_X(SPEED_10(0x200));
+				MOVE_X(0x200);
 				e->state = 2;
 			}
 		}
@@ -104,11 +104,11 @@ void ai_beetleFollow(Entity *e) {
 	e->alwaysActive = TRUE;
 	ANIMATE(e, 4, 1,0);
 	FACE_PLAYER(e);
-	e->x_speed += e->dir ? SPEED_8(12) : -SPEED_8(12);
-	if(abs(e->x_speed) > SPEED_10(0x360)) 
-		e->x_speed = e->dir ? SPEED_10(0x360) : -SPEED_10(0x360);
+	e->x_speed += e->dir ? 12 : -12;
+	if(abs(e->x_speed) > 0x360) 
+		e->x_speed = e->dir ? 0x360 : -0x360;
 	e->y_speed += (e->y > e->y_mark) ? -4 : 4;
-	LIMIT_Y(SPEED_10(0x1FF));
+	LIMIT_Y(0x1FF);
 	if(e->damage_time) {
 		e->x += e->x_speed >> 1;
 		e->y += e->y_speed >> 1;
@@ -129,21 +129,21 @@ void ai_basu(Entity *e) {
 	e->timer++;
 	FACE_PLAYER(e);
 	e->x_speed += e->dir ? 5 : -5;
-	LIMIT_X(SPEED_10(0x2FF));
+	LIMIT_X(0x2FF);
 	e->y_speed += (e->y > e->y_mark) ? -2 : 2;
-	LIMIT_Y(SPEED_10(0x1FF));
+	LIMIT_Y(0x1FF);
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
-	if(e->x_speed < 0 && collide_stage_leftwall(e)) e->x_speed = SPEED(0x200);
-	if(e->x_speed > 0 && collide_stage_rightwall(e)) e->x_speed = -SPEED(0x200);
+	if(e->x_speed < 0 && collide_stage_leftwall(e)) e->x_speed = 0x200;
+	if(e->x_speed > 0 && collide_stage_rightwall(e)) e->x_speed = -0x200;
 	e->x = e->x_next;
 	e->y = e->y_next;
 	// Fire projectile
-	if(e->timer > TIME_8(150) && PLAYER_DIST_X(e, 0x14000)) {
+	if(e->timer > 150 && PLAYER_DIST_X(e, 0x14000)) {
 		e->timer = 0;
 		sound_play(SND_EM_FIRE, 5);
 		Entity *shot = entity_create(e->x, e->y, OBJ_GIANT_BEETLE_SHOT, 0);
-		THROW_AT_TARGET(shot, player.x, player.y, SPEED(0x300));
+		THROW_AT_TARGET(shot, player.x, player.y, 0x300);
 	}
 }
 
@@ -161,7 +161,7 @@ void ai_basil(Entity *e) {
 	} else if(sub_to_pixel(e->x) > sub_to_pixel(camera.x) + SCREEN_HALF_W + 64) {
 		e->dir = 0;
 	}
-	MOVE_X(SPEED(0x500));
+	MOVE_X(0x500);
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y; // Must store y_next for collision to work
 	if(e->x_speed < 0) collide_stage_leftwall(e);

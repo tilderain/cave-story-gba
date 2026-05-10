@@ -725,20 +725,20 @@ uint8_t collide_stage_ceiling(Entity *e) {
 	if(result) {
 		if(e == &player) {
 			e->jump_time = 0;
-			if(!playerNoBump && e->y_speed < -SPEED_10(0x200)) {
+			if(!playerNoBump && e->y_speed < -0x200) {
 				sound_play(SND_BONK_HEAD, 2);
 				effect_create_misc(EFF_BONKL, (e->x >> CSF) - 4, (e->y >> CSF) - 6, FALSE);
 				effect_create_misc(EFF_BONKR, (e->x >> CSF) + 4, (e->y >> CSF) - 6, FALSE);
 				if(shoot_cooldown) {
 					playerNoBump = TRUE;
 				} else {
-					e->y_speed = min(-e->y_speed >> 1, e->underwater ? SPEED_8(0x80) : SPEED_8(0xFF));
+					e->y_speed = min(-e->y_speed >> 1, e->underwater ? 0x80 : 0xFF);
 				}
 			} else if(!shoot_cooldown || !joy_down(BUTTON_DOWN)) {
 				e->y_speed = 0;
 			}
-		} else if(e->y_speed < -SPEED_10(0x200)) {
-			e->y_speed = min(-e->y_speed >> 1, e->underwater ? SPEED_8(0x80) : SPEED_8(0xFF));
+		} else if(e->y_speed < -0x200) {
+			e->y_speed = min(-e->y_speed >> 1, e->underwater ? 0x80 : 0xFF);
 		} else {
 			e->y_speed = 0;
 		}
@@ -772,7 +772,7 @@ IWRAM_CODE bounding_box entity_react_to_collision(Entity *a, Entity *b) {
 		by2 = sub_to_pixel(b->y) + b->hit_box.bottom;
 	if(!(ax1 < bx2 && ax2 > bx1 && ay1 < by2 && ay2 > by1)) return result;
 	// This is an attempt to fix falling into platforms that are moving up
-	if(abs(a->y_speed - b->y_speed) < SPEED_12(0x600)) {
+	if(abs(a->y_speed - b->y_speed) < 0x600) {
 		// Wall reaction
 		ax1 = sub_to_pixel(a->x_next) - a->hit_box.left + 1;
 		ax2 = sub_to_pixel(a->x_next) + a->hit_box.right - 1;
@@ -1189,7 +1189,7 @@ void generic_npc_states(Entity *e) {
 			static const uint8_t f[] = { 1, 0, 2, 0 };
 			if(++e->animtime >= 32) e->animtime = 0;
 			e->frame = f[e->animtime >> 3];
-			MOVE_X(SPEED_10(0x200));
+			MOVE_X(0x200);
 		}
 		break;
 		case 5:		// face away

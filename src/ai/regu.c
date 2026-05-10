@@ -18,7 +18,7 @@ void ai_doctor(Entity *e) {
 		/* fallthrough */
 		case 11:
 		{
-			if (++e->timer2 > TIME(8*6)) {
+			if (++e->timer2 > 8*6) {
 				e->frame = 0;
 				e->state = 1; 
 			}
@@ -34,8 +34,8 @@ void ai_doctor(Entity *e) {
 		/* fallthrough */
 		case 21:
 		{
-			e->y_speed += (e->y > e->y_mark) ? -SPEED(0x20) : SPEED(0x20);
-			LIMIT_Y(SPEED(0x200));
+			e->y_speed += (e->y > e->y_mark) ? -0x20 : 0x20;
+			LIMIT_Y(0x200);
 		}
 		break;
 		case 30:	// he teleports away
@@ -64,7 +64,7 @@ void ai_doctor(Entity *e) {
 		{
 			//if (DoTeleportIn(o, 1)) {
 				e->state = 20;
-				e->y_speed = -SPEED(0x200);
+				e->y_speed = -0x200;
 			//}
 		}
 		break;
@@ -100,20 +100,20 @@ void ai_toroko(Entity *e) {
 				(e->y_speed > 0 && collide_stage_rightwall(e))) { 
 				TURN_AROUND(e);
 			}
-			MOVE_X(SPEED(0x3E0));
+			MOVE_X(0x3E0);
 		}
 		break;
 		case 6:		// hop and run away!!
 		{
 			e->state = 7;
 			e->frame = 1;
-			e->y_speed = -SPEED(0x400);
+			e->y_speed = -0x400;
 			e->grounded = FALSE;
 		}
 		/* fallthrough */
 		case 7:
 		{
-			MOVE_X(SPEED(0x100));
+			MOVE_X(0x100);
 			if(e->grounded) e->state = 3;
 		}
 		break;
@@ -124,7 +124,7 @@ void ai_toroko(Entity *e) {
 			e->frame = 1;
 			e->timer = 0;
 			e->state = 9;
-			e->y_speed = -SPEED(0x200);
+			e->y_speed = -0x200;
 			e->grounded = FALSE;
 		}
 		/* fallthrough */
@@ -137,10 +137,10 @@ void ai_toroko(Entity *e) {
 		{
 			e->state = 11;
 			e->frame = 5;
-			e->y_speed = -SPEED(0x400);
+			e->y_speed = -0x400;
 			e->grounded = FALSE;
 			sound_play(SND_ENEMY_SQUEAK, 5);
-			MOVE_X(SPEED(0x200));
+			MOVE_X(0x200);
 		}
 		break;
 		case 11:	// falling down
@@ -166,8 +166,8 @@ void ai_toroko(Entity *e) {
 	if(e->state != 500) {
 		e->x = e->x_next;
 		e->y = e->y_next;
-		if(!e->grounded) e->y_speed += SPEED(0x40);
-		LIMIT_Y(SPEED(0x5FF));
+		if(!e->grounded) e->y_speed += 0x40;
+		LIMIT_Y(0x5FF);
 	}
 
 	// I hate this
@@ -192,7 +192,7 @@ void ai_toroko_tele_in(Entity *e) {
 		case 1:
 		{
 			//if (DoTeleportIn(o, 2)) {
-			if(++e->timer > TIME(50)) {
+			if(++e->timer > 50) {
 				e->frame = 1;
 				e->state = 2;
 			}
@@ -213,8 +213,8 @@ void ai_toroko_tele_in(Entity *e) {
 	e->y = e->y_next;
 	// fall unless teleporting
 	if (e->state >= 2) {
-		if(!e->grounded) e->y_speed += SPEED(0x20);
-		LIMIT_Y(SPEED(0x5FF));
+		if(!e->grounded) e->y_speed += 0x20;
+		LIMIT_Y(0x5FF);
 	}
 }
 
@@ -268,7 +268,7 @@ void ai_sue(Entity *e) {
 		/* fallthrough */
 		case 7:
 		{
-			if (++e->timer > TIME_8(10)) e->state = 0;
+			if (++e->timer > 10) e->state = 0;
 		}
 		break;
 		// got punched extra hard by Igor
@@ -279,8 +279,8 @@ void ai_sue(Entity *e) {
 			e->frame = 5;
 			e->timer = 0;
 			sound_play(SND_ENEMY_SQUEAK, 5);
-			e->y_speed = -SPEED_10(0x200);
-			MOVE_X(-SPEED_10(0x3FF));
+			e->y_speed = -0x200;
+			MOVE_X(-0x3FF);
 		}
 		/* fallthrough */
 		case 9:
@@ -366,7 +366,7 @@ void ai_sue(Entity *e) {
 		case 21:
 		{
 			ANIMATE(e, 8, 1,0,2,0);
-			MOVE_X(SPEED_10(0x3FF));
+			MOVE_X(0x3FF);
 			if (e->x < player.x - (8<<CSF)) {
 				e->dir = 1;
 				e->state = 0;
@@ -378,14 +378,14 @@ void ai_sue(Entity *e) {
 		case 31:
 		{
 			ANIMATE(e, 8, 1,0,2,0);
-			MOVE_X(SPEED_10(0x3FF));
+			MOVE_X(0x3FF);
 		}
 		break;
 		case 40:	// she jumps off the island
 		{
 			e->state = 41;
 			e->frame = 8;
-			e->y_speed = -SPEED_10(0x3FF);
+			e->y_speed = -0x3FF;
 			e->grounded = FALSE;
 		}
 		break;
@@ -404,8 +404,8 @@ void ai_sue(Entity *e) {
 	e->x = e->x_next;
 	e->y = e->y_next;
 
-	if(!e->grounded) e->y_speed += SPEED(0x40);
-	LIMIT_Y(SPEED(0x5FF));
+	if(!e->grounded) e->y_speed += 0x40;
+	LIMIT_Y(0x5FF);
 }
 
 void ai_sue_teleport_in(Entity *e) {
@@ -447,8 +447,8 @@ void ai_sue_teleport_in(Entity *e) {
 	e->y = e->y_next;
 	// fall unless teleporting
 	if (e->state >= 2) {
-		if(!e->grounded) e->y_speed += SPEED(0x20);
-		LIMIT_Y(SPEED(0x5FF));
+		if(!e->grounded) e->y_speed += 0x20;
+		LIMIT_Y(0x5FF);
 	}
 }
 
@@ -486,14 +486,14 @@ void ai_king(Entity *e) {
 		{
 			e->state = 7;
 			e->timer = 0;
-			e->y_speed = -SPEED(0x400);
+			e->y_speed = -0x400;
 			e->grounded = FALSE;
 		}
 		/* fallthrough */
 		case 7:			// he falls and is knocked out
 		{
 			e->frame = 4;
-			MOVE_X(SPEED(0x280));
+			MOVE_X(0x280);
 			e->y_speed += 0x40;
 			if (e->timer++ && e->grounded) e->state = 5;
 		}
@@ -502,13 +502,13 @@ void ai_king(Entity *e) {
 		case 9:
 		{
 			ANIMATE(e, 8, 1,0,2,0);
-			MOVE_X(SPEED(0x200));
+			MOVE_X(0x200);
 		}
 		break;
 		case 10:		// run
 		{
 			ANIMATE(e, 4, 1,0,2,0);
-			MOVE_X(SPEED(0x400));
+			MOVE_X(0x400);
 		}
 		break;
 		case 20:		// pull out sword
@@ -526,7 +526,7 @@ void ai_king(Entity *e) {
 			e->state = 31;
 			e->timer = 0;
 			e->frame = 4;
-			MOVE_X(SPEED(0x600));
+			MOVE_X(0x600);
 			e->y_speed = 0;
 		}
 		/* fallthrough */
@@ -541,9 +541,9 @@ void ai_king(Entity *e) {
 				e->dir = 1;
 				e->state = 7;
 				e->timer = 0;
-				e->y_speed = -SPEED(0x400);
+				e->y_speed = -0x400;
 				e->grounded = FALSE;
-				e->x_speed = SPEED(0x280);
+				e->x_speed = 0x280;
 				sound_play(SND_LITTLE_CRASH, 5);
 				effect_create_smoke(e->x >> CSF, e->y >> CSF);
 			}
@@ -558,7 +558,7 @@ void ai_king(Entity *e) {
 		case 41:
 		{
 			e->hidden = (++e->timer & 2);
-			if (e->timer > TIME_8(100)) {
+			if (e->timer > 100) {
 				effect_create_smoke(e->x >> CSF, e->y >> CSF);
 				e->state = 42;
 				e->hidden = FALSE;
@@ -570,12 +570,12 @@ void ai_king(Entity *e) {
 		case 60:		// jump (used when he lunges with sword)
 			e->frame = 0;
 			e->state = 61;
-			e->y_speed = -SPEED(0x5FF);
-			e->x_speed = SPEED(0x380);
+			e->y_speed = -0x5FF;
+			e->x_speed = 0x380;
 			sword->dir = 0;
 		break;
 		case 61:		// jumping
-			e->y_speed += SPEED(0x80);
+			e->y_speed += 0x80;
 			if (e->grounded) {
 				e->state = 0;
 				e->x_speed = 0;
@@ -593,7 +593,7 @@ void ai_king(Entity *e) {
 	
 	if(stageID == 0x23) e->dir = 1; // Stop turning left asshole
 	
-	LIMIT_Y(SPEED(0x5FF));
+	LIMIT_Y(0x5FF);
 }
 
 void ai_blue_robot(Entity *e) {
@@ -604,8 +604,8 @@ void ai_blue_robot(Entity *e) {
 	e->frame = 0;
 	RANDBLINK(e, 1, 200);
 	e->y = e->y_next;
-	if(!e->grounded) e->y_speed += SPEED(0x40);
-	LIMIT_Y(SPEED(0x5FF));
+	if(!e->grounded) e->y_speed += 0x40;
+	LIMIT_Y(0x5FF);
 }
 
 void ai_kanpachi_fish(Entity *e) {
@@ -702,8 +702,8 @@ void ai_booster_falling(Entity *e) {
 		case 10:		// falling
 		{
 			e->frame = 5;
-			e->y_speed += SPEED(0x40);
-			LIMIT_Y(SPEED(0x5FF));
+			e->y_speed += 0x40;
+			LIMIT_Y(0x5FF);
 		}
 		break;
 		case 20:		// dying (flickering away)
@@ -716,7 +716,7 @@ void ai_booster_falling(Entity *e) {
 		case 21:
 		{
 			e->hidden = (++e->timer & 2);
-			if (e->timer > TIME(100)) {
+			if (e->timer > 100) {
 				//SmokeClouds(o, 4, 16, 16);
 				e->state = STATE_DELETE;
 			}
@@ -760,7 +760,7 @@ void ai_npc_at_computer(Entity *e) {
 		
 		case PAUSE_SLOUCH:
 		{
-			if (++e->timer > TIME_8(40)) {
+			if (++e->timer > 40) {
 				e->state = PAUSE_UPRIGHT;
 				e->frame = 2;
 				e->timer = 0;
@@ -770,7 +770,7 @@ void ai_npc_at_computer(Entity *e) {
 		
 		case PAUSE_UPRIGHT:
 		{
-			if (++e->timer > TIME_8(80)) {
+			if (++e->timer > 80) {
 				e->state = TYPING;
 				e->frame = 0;
 				e->timer = 0;

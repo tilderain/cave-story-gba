@@ -677,7 +677,7 @@ uint8_t system_checkdata() {
 
 uint32_t system_counter_ticks() {
 	// Counter considers a second 50 frames, even for NTSC
-	return SPEED_8(counter.frame) + counter.second*50 + counter.minute*60*50;
+	return counter.frame + counter.second*50 + counter.minute*60*50;
 }
 
 uint32_t system_load_counter() {

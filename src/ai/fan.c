@@ -37,7 +37,7 @@ void ai_fan(Entity *e) {
 				effect_create_misc(EFF_FANL, ex - 8, ey + ((random() & 15) - 8), FALSE);
 			}
 			if(px > ex - (6<<4) && px < ex && py > ey - 12 && py < ey + 12) {
-				player.x_speed -= SPEED_8(0x88);
+				player.x_speed -= 0x88;
 				if(player.x_speed < -FAN_HSPEED) player.x_speed = -FAN_HSPEED;
 			}
 		}
@@ -56,8 +56,8 @@ void ai_fan(Entity *e) {
 			    }
 			    // In lift range
 			    if(px > ex - 12 && px < ex + 12) {
-                    player.y_speed -= SPEED_8(0x88);
-                    if (player.y_speed < -SPEED(0x5FF)) player.y_speed = -SPEED(0x5FF);
+                    player.y_speed -= 0x88;
+                    if (player.y_speed < -0x5FF) player.y_speed = -0x5FF;
                     if (player.y_speed < 0) player.jump_time = 4;
                     // Fix player not being able to jump off edge next to a slope
                     player.grounded = FALSE;
@@ -72,7 +72,7 @@ void ai_fan(Entity *e) {
 				effect_create_misc(EFF_FANR, ex + 8, ey + ((random() & 15) - 8), FALSE);
 			}
 			if(px > ex && px < ex + (6<<4) && py > ey - 12 && py < ey + 12) {
-				player.x_speed += SPEED_8(0x88);
+				player.x_speed += 0x88;
 				if(player.x_speed > FAN_HSPEED) player.x_speed = FAN_HSPEED;
 			}
 		}
@@ -84,8 +84,8 @@ void ai_fan(Entity *e) {
 				effect_create_misc(EFF_FAND, ex + ((random() & 15) - 8), ey + 8, FALSE);
 			}
 			if(py > ey && py < ey + (6<<4) && px > ex - 12 && px < ex + 12) {
-				player.y_speed += SPEED_8(0x88);
-				if(player.y_speed > SPEED(0x5FF)) player.y_speed = SPEED(0x5FF);
+				player.y_speed += 0x88;
+				if(player.y_speed > 0x5FF) player.y_speed = 0x5FF;
 			}
 		}
 		break;

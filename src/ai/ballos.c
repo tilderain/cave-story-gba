@@ -189,15 +189,15 @@ void ai_ballos_f1(Entity *e) {
 		} /* fallthrough */
 		case AS_COME_DOWN+1:
 		{
-			if (++e->timer > TIME_8(30)) e->state++;
+			if (++e->timer > 30) e->state++;
 		}
 		break;
 		
 		// falling
 		case AS_COME_DOWN+2:
 		{
-			e->y_speed += SPEED_8(0x40);
-			LIMIT_Y(SPEED_12(0xC00));
+			e->y_speed += 0x40;
+			LIMIT_Y(0xC00);
 			
 			if(e->y + e->y_speed > CRASH_Y) {
 				e->y_speed = 0;
@@ -209,7 +209,7 @@ void ai_ballos_f1(Entity *e) {
 				}
 				camera_shake(30);
 				SMOKE_AREA((e->x >> CSF) - 40, (e->y >> CSF) + 40, 80, 16, 6);
-				if(player.grounded) player.y_speed = -SPEED_10(0x200);
+				if(player.grounded) player.y_speed = -0x200;
 			}
 		}
 		break;
@@ -239,16 +239,16 @@ void ai_ballos_f1(Entity *e) {
 			// this corresponds to:
 			if(++e->timer2 >= 3) {
 				e->timer2 = 0;
-				e->timer = TIME_8(150);
+				e->timer = 150;
 			} else {
-				e->timer = TIME_8(50);
+				e->timer = 50;
 			}
 		} /* fallthrough */
 		case AS_PREPARE_JUMP+1:
 		{
 			if(e->timer == 0) {
-				e->y_speed = -SPEED_12(0xC00);
-				e->x_speed = (e->x < player.x) ? SPEED_10(0x200) : -SPEED_10(0x200);
+				e->y_speed = -0xC00;
+				e->x_speed = (e->x < player.x) ? 0x200 : -0x200;
 				e->state = AS_JUMPING;
 			} else e->timer--;
 		}
@@ -256,10 +256,10 @@ void ai_ballos_f1(Entity *e) {
 		
 		case AS_JUMPING:
 		{
-			if(e->y_speed < SPEED_12(0xBB0)) e->y_speed += SPEED_8(0x55);
+			if(e->y_speed < 0xBB0) e->y_speed += 0x55;
 			
-			if(e->x + e->x_speed < F1_LEFT) e->x_speed = SPEED_10(0x200);
-			if(e->x + e->x_speed > F1_RIGHT) e->x_speed = -SPEED_10(0x200);
+			if(e->x + e->x_speed < F1_LEFT) e->x_speed = 0x200;
+			if(e->x + e->x_speed > F1_RIGHT) e->x_speed = -0x200;
 			
 			if(e->y + e->y_speed > CRASH_Y) {
 				// player smush damage
@@ -267,7 +267,7 @@ void ai_ballos_f1(Entity *e) {
 					player_inflict_damage(16);
 				}
 				// player hopping from the vibration
-				if(player.grounded) player.y_speed = -SPEED_10(0x200);
+				if(player.grounded) player.y_speed = -0x200;
 				camera_shake(30);
 				
 				entity_create(e->x - pixel_to_sub(12), e->y + pixel_to_sub(52), OBJ_BALLOS_BONE_SPAWNER, 0)->dir = 0;
@@ -291,14 +291,14 @@ void ai_ballos_f1(Entity *e) {
 		} /* fallthrough */
 		case AS_DEFEATED+1:
 		{
-			if(e->y_speed < SPEED_12(0xBC0)) e->y_speed += SPEED_8(0x40);
+			if(e->y_speed < 0xBC0) e->y_speed += 0x40;
 			
 			if(e->y + e->y_speed > CRASH_Y) {
 				e->y_speed = 0;
 				e->state++;
 				camera_shake(30);
 				//SmokeXY(e->x, e->y + 0x5000, 16, 40, 0);
-				if (player.grounded) player.y_speed = -SPEED_10(0x200);
+				if (player.grounded) player.y_speed = -0x200;
 				// ... and wait for script to trigger form 2
 			}
 		}
@@ -373,7 +373,7 @@ void ai_ballos_f2(Entity *e) {
 		} /* fallthrough */
 		case BS_LEFT:		// left on floor
 		{
-			e->x_speed = -SPEED_10(BS_SPEED);
+			e->x_speed = -BS_SPEED;
 			e->y_speed = 0;
 			if(e->x + e->x_speed < ARENA_LEFT) e->state = BS_UP;
 		}
@@ -382,14 +382,14 @@ void ai_ballos_f2(Entity *e) {
 		case BS_UP:
 		{
 			e->x_speed = 0;
-			e->y_speed = -SPEED_10(BS_SPEED);
+			e->y_speed = -BS_SPEED;
 			if(e->y + e->y_speed < ARENA_TOP) e->state = BS_RIGHT;
 		}
 		break;
 		// right on ceiling
 		case BS_RIGHT:
 		{
-			e->x_speed = SPEED_10(BS_SPEED);
+			e->x_speed = BS_SPEED;
 			e->y_speed = 0;
 			// all rotators destroyed?
 			if (rotators_left <= 0 && ++e->timer > 3) {
@@ -407,7 +407,7 @@ void ai_ballos_f2(Entity *e) {
 		case BS_DOWN:
 		{
 			e->x_speed = 0;
-			e->y_speed = SPEED_10(BS_SPEED);
+			e->y_speed = BS_SPEED;
 			if(e->y + e->y_speed > ARENA_BOTTOM) e->state = BS_LEFT;
 		}
 		break;
@@ -476,7 +476,7 @@ void ai_ballos_f3(Entity *e) {
 			e->y += (YPOSITION - e->y) >> 3;
 			e->timer++;
 			
-			if (e->timer == TIME_8(50)) {
+			if (e->timer == 50) {
 				// create platforms
 				platform_speed = 0;
 				
@@ -486,7 +486,7 @@ void ai_ballos_f3(Entity *e) {
 				}
 			}
 			
-			if (e->timer > TIME_8(100)) {
+			if (e->timer > 100) {
 				platform_speed = -1;
 				
 				e->state = CS_SPAWN_SPIKES;
@@ -633,7 +633,7 @@ void ai_ballos_f3(Entity *e) {
 			if((e->timer & 15) == 0)
 				sound_play(SND_MISSILE_HIT, 5);
 			
-			if(e->timer > TIME_8(150)) {
+			if(e->timer > 150) {
 				e->timer = 0;
 				e->state = 1002;
 				
@@ -647,7 +647,7 @@ void ai_ballos_f3(Entity *e) {
 		{
 			camera_shake(40);
 			
-			if(++e->timer >= TIME_8(50)) {
+			if(++e->timer >= 50) {
 				tsc_hide_boss_health(); // Health bar sticks around if we don't do this
 				entities_clear_by_type(OBJ_BUTE_ARCHER_RED);
 				entities_clear_by_type(OBJ_BALLOS_SPIKES);
@@ -884,18 +884,18 @@ void ai_ballos_rotator(Entity *e) {
 		
 		case 40:	// destroyed during phase 3, bouncing
 		{
-			if(e->y_speed < SPEED_12(0x5E0)) e->y_speed += SPEED_8(0x20);
+			if(e->y_speed < 0x5E0) e->y_speed += 0x20;
 			
-			if(blk(e->x, -16, e->y, 0) == 0x41) e->x_speed = SPEED_8(0xFF);
-			if(blk(e->x, 16, e->y, 0) == 0x41) e->x_speed = -SPEED_8(0xFF);
+			if(blk(e->x, -16, e->y, 0) == 0x41) e->x_speed = 0xFF;
+			if(blk(e->x, 16, e->y, 0) == 0x41) e->x_speed = -0xFF;
 			
 			if(e->y_speed >= 0 && blk(e->x, 0, e->y, 16) == 0x41) {
 				// first time they hit they head toward player, after that
 				// they keep going in same direction until hit wall
 				if(e->x_speed == 0) {
-					e->x_speed = (e->x < player.x) ? SPEED_8(0xFF) : -SPEED_8(0xFF);
+					e->x_speed = (e->x < player.x) ? 0xFF : -0xFF;
 				}
-				e->y_speed = -SPEED_12(0x800);
+				e->y_speed = -0x800;
 				sound_play(SND_QUAKE, 5);
 			}
 
@@ -993,7 +993,7 @@ void ai_ballos_platform(Entity *e) {
 		} /* fallthrough */
 		case 1001:
 		{
-			e->y_speed += SPEED_8(0x40);
+			e->y_speed += 0x40;
 			
 			if (e->x > block_to_sub(stageHeight + 1)) e->state = STATE_DELETE;
 		}

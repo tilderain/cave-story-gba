@@ -59,20 +59,20 @@ void ai_energy(Entity *e) {
 		}
 		e->state = STATE_DELETE;
 	} else {
-		if(e->timer > TIME_10(500)) {
+		if(e->timer > 500) {
 			e->state = STATE_DELETE;
 			return;
-		} else if(e->timer > TIME_10(350)) {
+		} else if(e->timer > 350) {
 			e->hidden = (e->timer & 3) > 1;
 		}
 
 		e->x += e->x_speed;
 		e->y += e->y_speed;
 		if(e->left_gravity) {
-			e->x_speed -= SPEED_8(6);
-			if(blk(e->x, -4, e->y, 0) == 0x41) e->x_speed = SPEED_8(0xFF);
+			e->x_speed -= 6;
+			if(blk(e->x, -4, e->y, 0) == 0x41) e->x_speed = 0xFF;
 		} else {
-			if(e->y_speed < SPEED_10(0x3E0)) e->y_speed += SPEED_8(0x40);
+			if(e->y_speed < 0x3E0) e->y_speed += 0x40;
 			if(e->x_speed > 0) e->x_speed--;
 			if(e->x_speed < 0) e->x_speed++;
 			// Check below / above first
@@ -80,7 +80,7 @@ void ai_energy(Entity *e) {
 			uint8_t block_above = blk(e->x, 0, e->y, -e->display_box.top);
 			if(block_below == 0x41 || block_below == 0x43) {
 				e->y_speed = -e->y_speed >> 1;
-				if(e->y_speed > -SPEED_10(0x3FF)) e->y_speed = -SPEED_10(0x3FF);
+				if(e->y_speed > -0x3FF) e->y_speed = -0x3FF;
 				sound_play(SND_XP_BOUNCE, 0);
 			} else if(block_below & BLOCK_SLOPE) {
 				uint8_t index = block_below & 0xF;
@@ -90,14 +90,14 @@ void ai_energy(Entity *e) {
 					int8_t overlap = (yy & 15) - heightmap[index & 3][xx & 15];
 					if(overlap >= 0) {
 						e->y -= overlap;
-						if(e->y_speed >= SPEED_10(0x200)) sound_play(SND_XP_BOUNCE, 0);
+						if(e->y_speed >= 0x200) sound_play(SND_XP_BOUNCE, 0);
 						e->y_speed = -e->y_speed;
-						if(e->y_speed > -SPEED_10(0x3FF)) e->y_speed = -SPEED_10(0x3FF);
+						if(e->y_speed > -0x3FF) e->y_speed = -0x3FF;
 					}
 				}
 			} else if(block_above == 0x41 || block_above == 0x43) {
 				e->y_speed = -e->y_speed >> 1;
-				if(e->y_speed < SPEED_10(0x300)) e->y_speed = SPEED_10(0x300);
+				if(e->y_speed < 0x300) e->y_speed = 0x300;
 			}
 			// Check in front
 			uint8_t block_front = blk(e->x, e->x_speed > 0 ? 4 : -4, e->y, -1);
@@ -123,13 +123,13 @@ void ai_missile(Entity *e) {
 	if(e->flags & NPC_OPTION1) {
 		if((++e->animtime & 3) == 0) e->frame ^= 1;
 		if(stageID == STAGE_WATERWAY_BOSS || stageID == STAGE_OUTER_WALL) {
-			e->x_speed -= SPEED_8(6);
+			e->x_speed -= 6;
 			e->x += e->x_speed;
 		}
-		if(e->timer > TIME_10(500)) {
+		if(e->timer > 500) {
 			e->state = STATE_DELETE;
 			return;
-		} else if(e->timer > TIME_10(350)) {
+		} else if(e->timer > 350) {
 			e->hidden = (e->timer & 2);
 		}
 	} else if(!e->state) {
@@ -160,13 +160,13 @@ void ai_heart(Entity *e) {
 	if(e->flags & NPC_OPTION1) {
 		if((++e->animtime & 3) == 0) e->frame ^= 1;
 		if(stageID == STAGE_WATERWAY_BOSS || stageID == STAGE_OUTER_WALL) {
-			e->x_speed -= SPEED_8(6);
+			e->x_speed -= 6;
 			e->x += e->x_speed;
 		}
-		if(e->timer > TIME_10(500)) {
+		if(e->timer > 500) {
 			e->state = STATE_DELETE;
 			return;
-		} else if(e->timer > TIME_10(350)) {
+		} else if(e->timer > 350) {
 			e->hidden = (e->timer & 2);
 		}
 	} else if(!e->state) {

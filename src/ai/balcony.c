@@ -92,7 +92,7 @@ void ai_igor_balcony(Entity *e) {
 		} /* fallthrough */
 		case 1:
 		{
-			if(++e->animtime >= TIME_8(20)) {
+			if(++e->animtime >= 20) {
 				e->animtime = 0;
 				if(++e->frame > STAND2) e->frame = STAND1;
 			}
@@ -116,7 +116,7 @@ void ai_igor_balcony(Entity *e) {
 			static const uint8_t f[] = { WALK1,STAND1,WALK2,STAND1 };
 			if(++e->animtime >= 32) e->animtime = 0;
 			e->frame = f[e->animtime >> 3];
-			MOVE_X(SPEED(0x200));
+			MOVE_X(0x200);
 			
 			if (blockr || blockl || PLAYER_DIST_X(e, pixel_to_sub(64))) {
 				e->x_speed = 0;
@@ -132,9 +132,9 @@ void ai_igor_balcony(Entity *e) {
 			
 			if (++e->timer > 10) {
 				e->state = 21;
-				e->y_speed = -SPEED_12(0x5ff);
+				e->y_speed = -0x5ff;
 				e->grounded = FALSE;
-				MOVE_X(SPEED_10(0x200));
+				MOVE_X(0x200);
 				sound_play(SND_IGOR_JUMP, 5);
 				moveMeToFront = TRUE;
 			}
@@ -144,7 +144,7 @@ void ai_igor_balcony(Entity *e) {
 		case 21:	// jumping
 		{
 			e->frame = JUMP;	// in-air frame
-			MOVE_X(SPEED_10(0x200));
+			MOVE_X(0x200);
 			if (e->grounded) {
 				camera_shake(20);
 				e->x_speed = 0;
@@ -176,7 +176,7 @@ void ai_igor_balcony(Entity *e) {
 			
 			// flash mouth
 			e->frame = MOUTH1;
-			if (e->timer < TIME(50) && (e->timer & 4)) e->frame = MOUTH2;
+			if (e->timer < 50 && (e->timer & 4)) e->frame = MOUTH2;
 			
 			// fire shots
 			if (e->timer > 30) {
@@ -184,8 +184,8 @@ void ai_igor_balcony(Entity *e) {
 					sound_play(SND_BLOCK_DESTROY, 5);
 					Entity *shot = entity_create(e->x + (e->dir ? 0x800 : -0x800),
 												 e->y, OBJ_IGOR_SHOT, 0);
-					shot->x_speed = e->dir ? SPEED_12(0x600) : -SPEED_12(0x600);
-					shot->y_speed = -SPEED_12(0x280) + SPEED_12((random() & 0x3FF));
+					shot->x_speed = e->dir ? 0x600 : -0x600;
+					shot->y_speed = -0x280 + (random() & 0x3FF));
 				}
 			}
 			
@@ -200,8 +200,8 @@ void ai_igor_balcony(Entity *e) {
 	e->x = e->x_next;
 	e->y = e->y_next;
 	
-	if(!e->grounded) e->y_speed += SPEED_8(0x33);
-	LIMIT_Y(SPEED_12(0x5ff));
+	if(!e->grounded) e->y_speed += 0x33;
+	LIMIT_Y(0x5ff);
 }
 
 void ai_block_spawner(Entity *e) {
@@ -251,7 +251,7 @@ void ai_block_spawner(Entity *e) {
 				entity_create(x, (player.y - block_to_sub(14)), 
 							OBJ_FALLING_BLOCK, (random() & 1) ? NPC_OPTION2 : 0);
 									  
-				e->timer = TIME_8(15) + (random() & 15);
+				e->timer = 15 + (random() & 15);
 			}
 		}
 		break;
@@ -296,18 +296,18 @@ void ai_falling_block(Entity *e) {
 			if (e->y > pixel_to_sub(128)) {
 				e->state = 11;
 			}
-			e->y_speed += SPEED(0x40);
-			LIMIT_Y(SPEED(0x5FF));
+			e->y_speed += 0x40;
+			LIMIT_Y(0x5FF);
 		}
 		break;
 		
 		case 11:	// passed thru ceiling in Hell B2
 		{
-			e->y_speed += SPEED(0x40);
-			LIMIT_Y(SPEED(0x5FF));
+			e->y_speed += 0x40;
+			LIMIT_Y(0x5FF);
 			
 			if (blk(e->x, 0, e->y, (NPC_OPTION2 ? 8 : 20)) == 0x41) {
-				e->y_speed = -SPEED(0x280);
+				e->y_speed = -0x280;
 				
 				e->state = 20;
 				SMOKE_AREA((e->x >> CSF) - 8, (e->y >> CSF) + (NPC_OPTION2 ? 8 : 16), 16, 1, 1);
@@ -319,8 +319,8 @@ void ai_falling_block(Entity *e) {
 		case 20:	// already bounced on ground, falling offscreen
 		{
 			e->attack = 0;
-			e->y_speed += SPEED(0x40);
-			LIMIT_Y(SPEED(0x5FF));
+			e->y_speed += 0x40;
+			LIMIT_Y(0x5FF);
 			
 			if (e->y >= block_to_sub(stageHeight + 1)) {
 				e->state = STATE_DELETE;
@@ -352,7 +352,7 @@ void ai_doctor_ghost(Entity *e) {
 				if((e->timer & 15) == 0) r->timer = 200;
 			}
 			
-			if(e->timer > TIME_8(150))
+			if(e->timer > 150)
 				e->state++;
 		}
 		break;
@@ -364,7 +364,7 @@ void ai_doctor_ghost(Entity *e) {
 		} /* fallthrough */
 		case 21:
 		{
-			if (++e->timer > TIME_8(250)) {
+			if (++e->timer > 250) {
 				entities_clear_by_type(OBJ_RED_ENERGY);
 				e->state++;
 			}
@@ -380,7 +380,7 @@ void ai_red_energy(Entity *e) {
 		case A_UP:
 		{
 			e->frame = random() & 1;
-			e->y_speed -= SPEED_8(0x40);
+			e->y_speed -= 0x40;
 			e->y += e->y_speed;
 			if (blk(e->x, 0, e->y, 0) == 0x41) e->state = STATE_DELETE;
 		}
@@ -389,9 +389,9 @@ void ai_red_energy(Entity *e) {
 		case A_DOWN:
 		{
 			e->frame = random() & 1;
-			if(e->y_speed < SPEED_12(0x5C0)) e->y_speed += SPEED_8(0x40);
+			if(e->y_speed < 0x5C0) e->y_speed += 0x40;
 			e->y += e->y_speed;
-			if((++e->timer > TIME_8(50)) || (blk(e->x, 0, e->y, 0) == 0x41)) e->state = STATE_DELETE;
+			if((++e->timer > 50) || (blk(e->x, 0, e->y, 0) == 0x41)) e->state = STATE_DELETE;
 		}
 		break;
 		
@@ -406,10 +406,10 @@ void ai_red_energy(Entity *e) {
 				e->x_speed = -0xFF + (random() & 0x1FF);
 				e->y_speed = -0xFF + (random() & 0x1FF);
 			}
-			if(e->x < e->linkedEntity->x)		{ if(e->x_speed < SPEED_10(0x3ff)) e->x_speed += SPEED_8(12); }
-			else if(e->x > e->linkedEntity->x)	{ if(e->x_speed > -SPEED_10(0x3ff)) e->x_speed -= SPEED_8(12); }
-			if(e->y < e->linkedEntity->y)		{ if(e->y_speed < SPEED_10(0x3ff)) e->y_speed += SPEED_8(12); }
-			else if(e->y > e->linkedEntity->y)	{ if(e->y_speed > -SPEED_10(0x3ff)) e->y_speed -= SPEED_8(12); }
+			if(e->x < e->linkedEntity->x)		{ if(e->x_speed < 0x3ff) e->x_speed += 12; }
+			else if(e->x > e->linkedEntity->x)	{ if(e->x_speed > -0x3ff) e->x_speed -= 12; }
+			if(e->y < e->linkedEntity->y)		{ if(e->y_speed < 0x3ff) e->y_speed += 12; }
+			else if(e->y > e->linkedEntity->y)	{ if(e->y_speed > -0x3ff) e->y_speed -= 12; }
 			
 			e->x += e->x_speed;
 			e->y += e->y_speed;

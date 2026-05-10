@@ -80,7 +80,7 @@ void ai_grav(Entity *e) {
 	if(e->grounded) {
 		e->grounded = collide_stage_floor_grounded(e);
 	} else {
-		e->y_speed += SPEED_8(0x40);
+		e->y_speed += 0x40;
 		e->grounded = collide_stage_floor(e);
 	}
 	e->x = e->x_next;
@@ -186,7 +186,7 @@ void ai_trigger_special(Entity *e) {
 void ai_genericproj(Entity *e) {
 	e->flags ^= NPC_SHOOTABLE;
 	if((++e->animtime & 3) == 0) e->frame ^= 1;
-	if(++e->timer > TIME_8(250) || blk(e->x, 0, e->y, 0) == 0x41) {
+	if(++e->timer > 250 || blk(e->x, 0, e->y, 0) == 0x41) {
 		effect_create_smoke(e->x >> CSF, e->y >> CSF);
 		e->state = STATE_DELETE;
 	} else {
@@ -230,7 +230,7 @@ void ai_teleIn(Entity *e) {
 		} /* fallthrough */
 		case 1:
 		{
-			if(++e->timer > TIME_8(5)) {
+			if(++e->timer > 5) {
 				e->timer = 0;
 				if(e->frame != 0 && e->frame != 15) {
 					e->frame--;
@@ -250,7 +250,7 @@ void ai_teleIn(Entity *e) {
 				e->state++;
 				e->y_speed = 0;
 			} else {
-				e->y_speed += SPEED_8(0x40);
+				e->y_speed += 0x40;
 			}
 			e->y = e->y_next;
 		}
@@ -280,7 +280,7 @@ void onspawn_teleOut(Entity *e) {
 	SNAP_TO_GROUND(e);
 	// PAL was jumping too high here
 	if(pal_mode || cfg_60fps) e->y_speed = -0x360;
-	else e->y_speed = -SPEED_10(0x3E0);
+	else e->y_speed = -0x3E0;
 	// Mimiga mask
 	if(playerEquipment & EQUIP_MIMIMASK) e->frame = 15;
 }
@@ -290,7 +290,7 @@ void ai_teleOut(Entity *e) {
 		case 0: // Hopping up
 		{
 			e->dir = player.dir;
-			if(++e->timer >= TIME_8(20)) {
+			if(++e->timer >= 20) {
 				e->state++;
 				e->timer = 0;
 				e->y_speed = 0;
@@ -299,14 +299,14 @@ void ai_teleOut(Entity *e) {
 				if(light) light->state = 1;
 				sound_play(SND_TELEPORT, 5);
 			} else {
-				e->y_speed += SPEED_8(0x43);
+				e->y_speed += 0x43;
 				e->y += e->y_speed;
 			}
 		}
 		break;
 		case 1: // Show teleport animation
 		{
-			if(++e->timer > TIME_8(5)) {
+			if(++e->timer > 5) {
 				e->timer = 0;
 				e->frame++;
 				if(e->frame == 15 || e->frame == 30) {
@@ -337,7 +337,7 @@ void ai_teleLight(Entity *e) {
 
 void ai_player(Entity *e) {
 	uint8_t collide = TRUE;
-	if(!e->grounded) e->y_speed += SPEED_8(0x40);
+	if(!e->grounded) e->y_speed += 0x40;
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
 	switch(e->state) {
@@ -389,14 +389,14 @@ void ai_player(Entity *e) {
 		case 21:
 		{
 			e->hidden = (++e->timer & 2);
-			if(e->timer > TIME_8(50)) {
+			if(e->timer > 50) {
 				e->state = STATE_DELETE;
 			}
 		}
 		break;
 		case 50:	// walking
 		{
-			MOVE_X(SPEED_10(0x200));
+			MOVE_X(0x200);
 			e->frame = 1;
 		}
 		break;
@@ -408,7 +408,7 @@ void ai_player(Entity *e) {
 			sprite_vflip(e->sprite[0], 1);
 			e->grounded = FALSE;
 			collide = FALSE;
-			if(e->y_speed > SPEED_10(0x1FF)) e->y_speed = SPEED_10(0x1FF);
+			if(e->y_speed > 0x1FF) e->y_speed = 0x1FF;
 		}
 		break;
 		case 80:	// face away
@@ -424,7 +424,7 @@ void ai_player(Entity *e) {
 		{
 			collide = FALSE;
 			e->grounded = FALSE;
-			if(++e->timer > TIME_8(25)) e->state = 103;
+			if(++e->timer > 25) e->state = 103;
 		}
 		break;
 		case 103:
@@ -569,7 +569,7 @@ void ai_gunsmith(Entity *e) {
 	if (e->flags & NPC_OPTION2) {
 		// Animate Zzz effect above head
 		if(!e->timer) effect_create_misc(EFF_ZZZ, (e->x >> CSF) + 8, (e->y >> CSF) - 8, FALSE);
-		if(++e->timer > TIME_8(100)) e->timer = 0;
+		if(++e->timer > 100) e->timer = 0;
 	} else {
 		e->frame = 1;
 		RANDBLINK(e, 2, 200);
@@ -651,7 +651,7 @@ void ai_balrog_splash(Entity *e) {
 	switch(e->state) {
 		case 0: // Waiting above screen
 		{
-			if(++e->timer > TIME_8(50)) {
+			if(++e->timer > 50) {
 				e->timer = 0;
 				e->state++;
 				e->frame = ARMSUP;
@@ -660,7 +660,7 @@ void ai_balrog_splash(Entity *e) {
 		break;
 		case 1: // Falling
 		{
-			if(e->y_speed < SPEED_12(0x5C0)) e->y_speed += SPEED_8(0x40);
+			if(e->y_speed < 0x5C0) e->y_speed += 0x40;
 			e->y += e->y_speed;
 			if(e->y >= pixel_to_sub(SCREEN_HALF_H - 24)) {
 				e->y_speed = 0x320;
@@ -684,7 +684,7 @@ void ai_balrog_splash(Entity *e) {
 		break;
 		case 3: // Hit ground
 		{
-			if(++e->timer > TIME_8(25)) {
+			if(++e->timer > 25) {
 				e->timer = 0;
 				e->state++;
 				e->frame = STAND;
@@ -693,7 +693,7 @@ void ai_balrog_splash(Entity *e) {
 		break;
 		case 4: // Standing
 		{
-			if(++e->timer > TIME_8(50)) {
+			if(++e->timer > 50) {
 				e->state++;
 				e->frame = SMILE;
 			}
@@ -825,7 +825,7 @@ void onspawn_lightning(Entity *e) {
 
 void ai_lightning(Entity *e) {
 	e->animtime++;
-	if(e->animtime > TIME_8(5)) {
+	if(e->animtime > 5) {
 		if(e->flags & NPC_OPTION2) e->attack = 10;
 		SMOKE_AREA((e->x >> CSF) - 16, (e->y >> CSF), 32, 16, 2);
 		e->animtime = 0;
@@ -836,8 +836,8 @@ void ai_lightning(Entity *e) {
 
 void onspawn_lvlupdn(Entity *e) {
 	e->alwaysActive = TRUE;
-	e->timer = TIME_8(100);
-	e->y_speed = -SPEED_10(0x300);
+	e->timer = 100;
+	e->y_speed = -0x300;
 	e->display_box.left = 28;
 }
 
@@ -846,7 +846,7 @@ void ai_lvlupdn(Entity *e) {
 		e->state = STATE_DELETE;
 	} else {
 		if((e->timer & 3) == 0) e->frame ^= 1;
-		if(e->y_speed < 0) e->y_speed += SPEED_8(0x10);
+		if(e->y_speed < 0) e->y_speed += 0x10;
 		e->y += e->y_speed;
 	}
 }
@@ -859,20 +859,20 @@ void ai_intro_kings(Entity *e) {
 			e->state++;
 			if(!(e->flags & NPC_OPTION2)) {
 				e->frame = 1;
-				e->timer = TIME_8(25);
+				e->timer = 25;
 				e->y -= 0x640;
 			}
 		} /* fallthrough */
 		case 1:
 		{
-			if(++e->timer >= TIME_8(50)) {
+			if(++e->timer >= 50) {
 				e->timer = 0;
 				e->timer2 ^= 1;
 			}
 			if(e->timer2) {
-				e->y += SPEED_8(0x40);
+				e->y += 0x40;
 			} else {
-				e->y -= SPEED_8(0x40);
+				e->y -= 0x40;
 			}
 		}
 		break;
@@ -941,7 +941,7 @@ void ai_intro_doctor(Entity *e) {
 		case 21:
 		{
 			ANIMATE(e, 10, 2,0,3,0);
-			e->x += SPEED_8(0xFF);
+			e->x += 0xFF;
 		}
 		break;
 		

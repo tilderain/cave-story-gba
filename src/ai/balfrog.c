@@ -88,7 +88,7 @@ void onspawn_balfrog(Entity *e) {
 }
 
 void ai_balfrog(Entity *e) {
-	if(!e->grounded && e->y_speed < SPEED_12(0x5C0)) e->y_speed += SPEED_8(0x40);
+	if(!e->grounded && e->y_speed < 0x5C0) e->y_speed += 0x40;
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
 	switch(e->state) {
@@ -151,7 +151,7 @@ void ai_balfrog(Entity *e) {
 			sound_play(SND_FUNNY_EXPLODE, 8);
 			e->frame = 4;
 			set_jump_sprite(e, TRUE);
-			e->y_speed = -SPEED(0x400);
+			e->y_speed = -0x400;
 			e->grounded = FALSE;
 			e->timer = 0;
 			e->state++;
@@ -165,7 +165,7 @@ void ai_balfrog(Entity *e) {
 			} else if(!e->dir && collide_stage_leftwall(e)) {
 				e->dir = !e->dir;
 			}
-			e->x_speed = e->dir ? SPEED(0x200) : -SPEED(0x200);
+			e->x_speed = e->dir ? 0x200 : -0x200;
 			// landed?
 			if(++e->timer > 3 && collide_stage_floor(e)) {
 				e->grounded = TRUE;
@@ -209,7 +209,7 @@ void ai_balfrog(Entity *e) {
 				e->state++;
 				e->frame = 4;
 				set_jump_sprite(e, TRUE);
-				e->y_speed = -SPEED(0xA00);
+				e->y_speed = -0xA00;
 				e->grounded = FALSE;
 			}
 		}
@@ -272,7 +272,7 @@ void ai_balfrog(Entity *e) {
 				FIRE_ANGLED_SHOT(OBJ_BALFROG_SHOT, e->x + (e->dir ? 0x1000 : -0x1000),
 						e->y + 0x1000, angle, 0x200);
 				sound_play(SND_EM_FIRE, 5);
-				if(e->timer > TIME_8(160) || bbox_damage > 90) {
+				if(e->timer > 160 || bbox_damage > 90) {
 					e->frame = 1;
 					e->state = STATE_CLOSE_MOUTH;
 					bbox_mode = BM_STAND;
@@ -284,7 +284,7 @@ void ai_balfrog(Entity *e) {
 		break;
 		case STATE_CLOSE_MOUTH:
 		{
-			if(++e->timer > TIME_8(10)) {
+			if(++e->timer > 10) {
 				e->timer = 0;
 				e->frame = 0;
 				// Big jump after 3 attacks
@@ -318,7 +318,7 @@ void ai_balfrog(Entity *e) {
 			// slowly between 2 X coordinates, but in fact, it
 			// alternates quickly between 3.
 			e->x += (e->timer & 2) ? 0x200 : -0x200;
-			if(e->timer > TIME_8(100)) {
+			if(e->timer > 100) {
 				e->timer = 0;
 				e->state++;
 			}
@@ -340,14 +340,14 @@ void ai_balfrog(Entity *e) {
 			if((e->timer & 15) == 0) {
 				SMOKE_AREA((e->x >> CSF) - 32, (e->y >> CSF) - 24, 64, 48, 1);
 			}
-			if(e->timer <= TIME_8(150)) {
+			if(e->timer <= 150) {
 				Entity *balrog = entity_find_by_type(OBJ_BALROG);
 				if(balrog) {
 					e->hidden = (e->timer & 2);
 					balrog->hidden = !e->hidden;
 				}
 			}
-			if(e->timer > TIME_8(156)) {
+			if(e->timer > 156) {
 				e->timer = 0;
 				e->state++;
 			}
@@ -363,13 +363,13 @@ void ai_balfrog(Entity *e) {
 			if(balrog) {
 				e->hidden = TRUE;
 				balrog->hidden = FALSE;
-				balrog->y_speed += SPEED_8(0x40);
+				balrog->y_speed += 0x40;
 				balrog->y_next = balrog->y + balrog->y_speed;
 				balrog->x_next = balrog->x;
 				if(collide_stage_floor(balrog)) {
 					balrog->y_speed = 0;
 					balrog->frame = 2;
-					if(++e->timer > TIME_8(30)) {
+					if(++e->timer > 30) {
 						balrog->frame = 0;
 						balrog->grounded = TRUE;
 						e->state++;
@@ -381,12 +381,12 @@ void ai_balfrog(Entity *e) {
 		break;
 		case STATE_DEATH+5:		// balrog flying away
 		{
-			if(++e->timer > TIME_8(30)) {
+			if(++e->timer > 30) {
 				Entity *balrog = entity_find_by_type(OBJ_BALROG);
 				// it's all over, destroy ourselves and clean up
 				if(balrog) {
 					balrog->frame = 3;
-					balrog->y_speed = -SPEED_12(0x5FF);
+					balrog->y_speed = -0x5FF;
 					balrog->y_next = balrog->y + balrog->y_speed;
 					balrog->y = balrog->y_next;
 					balrog->flags |= NPC_IGNORESOLID;

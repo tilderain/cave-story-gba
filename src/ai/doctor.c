@@ -39,13 +39,13 @@ void ai_boss_doctor(Entity *e) {
 			e->timer++;
 			//e->frame = (e->timer & 4) ? 0 : 3;
 			
-			if (e->timer > TIME(50)) e->state = 10;
+			if (e->timer > 50) e->state = 10;
 		}
 		break;
 		
 		case 10:	// base state/falling (script)
 		{
-			e->y_speed += SPEED(0x80);
+			e->y_speed += 0x80;
 			e->flags |= NPC_SHOOTABLE;
 			e->attack = 3;
 			
@@ -65,17 +65,17 @@ void ai_boss_doctor(Entity *e) {
 		{
 			e->timer++;
 			
-			if (e->timer < TIME(50)) {
+			if (e->timer < 50) {
 				if ((e->health - e->savedhp) > 20)
-					e->timer = TIME(50);
+					e->timer = 50;
 			}
 			
-			if (e->timer == TIME(50)) {	// arm across chest
+			if (e->timer == 50) {	// arm across chest
 				FACE_PLAYER(e);
 				e->frame = SHOOT1;
 			}
 			
-			if (e->timer == TIME(80)) {
+			if (e->timer == 80) {
 				e->frame = SHOOT2;	// arm cast out
 				
 				entity_create(e->x_next, e->y_next, OBJ_DOCTOR_SHOT, e->dir ? NPC_OPTION1 : 0);
@@ -84,16 +84,16 @@ void ai_boss_doctor(Entity *e) {
 				sound_play(SND_FUNNY_EXPLODE, 5);
 			}
 			
-			if (e->timer == TIME(120))
+			if (e->timer == 120)
 				e->frame = STAND1;	// arm down
 			
-			if (e->timer > TIME(130)) {
+			if (e->timer > 130) {
 				if ((e->health - e->savedhp) > 50) {
 					e->state = 100;
 					e->timer = 0;
 				}
 				
-				if (e->timer > TIME(160)) {
+				if (e->timer > 160) {
 					e->state = 100;
 					e->timer = 0;
 				}
@@ -115,7 +115,7 @@ void ai_boss_doctor(Entity *e) {
 			e->x_next = e->x_mark;
 			if (++e->timer & 2) e->x_next += (1 << CSF);
 			
-			if (e->timer > TIME(50)) {
+			if (e->timer > 50) {
 				e->state = 32;
 				e->timer = 0;
 				e->frame = BLAST2;
@@ -123,14 +123,14 @@ void ai_boss_doctor(Entity *e) {
 				sound_play(SND_LIGHTNING_STRIKE, 5);
 				
 				for(uint16_t angle = 8; angle < 256; angle += 16) {
-					FIRE_ANGLED_SHOT(OBJ_DOCTOR_BLAST, e->x, e->y, angle, SPEED(0x400));
+					FIRE_ANGLED_SHOT(OBJ_DOCTOR_BLAST, e->x, e->y, angle, 0x400);
 				}
 			}
 		}
 		break;
 		case 32:	// after blast
 		{
-			if (++e->timer > TIME(50)) e->state = 100;
+			if (++e->timer > 50) e->state = 100;
 		}
 		break;
 		
@@ -162,7 +162,7 @@ void ai_boss_doctor(Entity *e) {
 		
 		case 102:	// invisible: waiting to reappear
 		{
-			if (++e->timer > TIME(40)) {
+			if (++e->timer > 40) {
 				e->state = 103;
 				e->timer = 16;
 				e->frame = HOVER;
@@ -207,7 +207,7 @@ void ai_boss_doctor(Entity *e) {
 			e->frame = DEFEAT;
 			
 			// fall to earth
-			e->y_speed += SPEED(0x10);
+			e->y_speed += 0x10;
 			if (e->grounded && e->y_speed >= 0) {
 				e->state = 501;
 				e->timer = 0;
@@ -251,7 +251,7 @@ void ai_boss_doctor(Entity *e) {
 	e->x = e->x_next;
 	e->y = e->y_next;
 	
-	LIMIT_Y(SPEED(0x5ff));
+	LIMIT_Y(0x5ff);
 }
 
 // wave shot
@@ -301,10 +301,10 @@ void ai_doctor_blast(Entity *e) {
 			e->x_speed = -abs(e->x_speed);
 		
 		if (e->y_speed < 0 && blk(e->x, 0, e->y, -6) == 0x41)
-			e->y_speed = SPEED(0x200);
+			e->y_speed = 0x200;
 		
 		if (e->y_speed > 0 && blk(e->x, 0, e->y, 6) == 0x41)
-			e->y_speed = -SPEED(0x200);
+			e->y_speed = -0x200;
 	}
 	
 	e->x += e->x_speed;
@@ -312,7 +312,7 @@ void ai_doctor_blast(Entity *e) {
 	
 	if (e->timer & 2) e->frame ^= 1;
 	
-	if (e->timer > TIME(250)) {
+	if (e->timer > 250) {
 		e->state = STATE_DELETE;
 		effect_create_smoke(e->x >> CSF, e->y >> CSF);
 	}
@@ -339,10 +339,10 @@ void ai_red_crystal(Entity *e) {
 		
 		case 1:
 		{
-			e->x_speed += (e->x < crystal_xmark) ? SPEED(0x55) : -SPEED(0x55);
-			e->y_speed += (e->y < crystal_ymark) ? SPEED(0x55) : -SPEED(0x55);
-			LIMIT_X(SPEED(0x400));
-			LIMIT_Y(SPEED(0x400));
+			e->x_speed += (e->x < crystal_xmark) ? 0x55 : -0x55;
+			e->y_speed += (e->y < crystal_ymark) ? 0x55 : -0x55;
+			LIMIT_X(0x400);
+			LIMIT_Y(0x400);
 			
 			if ((!e->dir && e->x_speed > 0) || (e->dir && e->x_speed < 0)) {
 				if(crystal_state == CRYSTAL_INBACK) crystal_state = CRYSTAL_TOFRONT;

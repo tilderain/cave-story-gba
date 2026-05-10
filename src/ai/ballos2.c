@@ -91,7 +91,7 @@ static void run_flight(Entity *e) {
 		{
 			e->frame = 8;
 			
-			if (++e->timer > TIME_8(30)) {
+			if (++e->timer > 30) {
 				if (e->timer2 <= 3)
 					e->state = BP_PREPARE_FLY_LR;
 				else
@@ -144,7 +144,7 @@ static void run_flight(Entity *e) {
 		{
 			e->frame = 10;
 			
-			if (++e->timer > TIME_8(30)) {
+			if (++e->timer > 30) {
 				if (e->timer2 <= 3)
 					e->state = BP_PREPARE_FLY_LR;
 				else
@@ -194,9 +194,9 @@ static void run_flight(Entity *e) {
 		{
 			e->frame = 3;
 			
-			if (++e->timer > TIME_8(30)) {
+			if (++e->timer > 30) {
 				e->state = BP_FIGHTING_STANCE;
-				e->timer = TIME_8(120);
+				e->timer = 120;
 			}
 		}
 		break;
@@ -214,8 +214,8 @@ static void run_flight(Entity *e) {
 		{
 			ANIMATE(e, 4, 1,2);
 			
-			e->y_speed += SPEED_8(0x40);
-			LIMIT_Y(SPEED_12(0x5ff));
+			e->y_speed += 0x40;
+			LIMIT_Y(0x5ff);
 			
 			if (e->y_speed >= 0 && collide_stage_floor(e)) {
 				e->state++;
@@ -232,7 +232,7 @@ static void run_flight(Entity *e) {
 			e->x_speed *= 3;
 			e->x_speed /= 4;
 			
-			if (++e->timer > TIME_8(10)) {
+			if (++e->timer > 10) {
 				e->state = BP_FIGHTING_STANCE;
 				e->timer = 140;
 			}
@@ -248,7 +248,7 @@ static void run_lightning(Entity *e) {
 		case BP_LIGHTNING_STRIKE:
 		{
 			e->x_mark = player.x;
-			e->y_speed = -SPEED_12(0x600);
+			e->y_speed = -0x600;
 			
 			e->timer = 0;
 			e->timer2 = 0;
@@ -262,10 +262,10 @@ static void run_lightning(Entity *e) {
 		case BP_LIGHTNING_STRIKE+1:
 		{
 			ANIMATE(e, 4, 4,5);
-			e->x_speed += (e->x < e->x_mark) ? SPEED_8(0x40) : -SPEED_8(0x40);
-			e->y_speed += (e->y < FLOAT_Y) ? SPEED_8(0x40) : -SPEED_8(0x40);
-			LIMIT_X(SPEED_10(0x3FF));
-			LIMIT_Y(SPEED_10(0x3FF));
+			e->x_speed += (e->x < e->x_mark) ? 0x40 : -0x40;
+			e->y_speed += (e->y < FLOAT_Y) ? 0x40 : -0x40;
+			LIMIT_X(0x3FF);
+			LIMIT_Y(0x3FF);
 			
 			// run firing
 			e->timer++;
@@ -309,11 +309,11 @@ static void run_lightning(Entity *e) {
 			ANIMATE(e, 4, 6,7);
 			e->timer++;
 			
-			if (e->timer == TIME_8(40)) {
+			if (e->timer == 40) {
 				SCREEN_FLASH(3);
 			}
 			
-			if (e->timer > TIME_8(50)) {
+			if (e->timer > 50) {
 				if ((e->timer & 15) == 1) {
 					entity_create(block_to_sub(e->timer2), LIGHTNING_Y, OBJ_BALLOS_TARGET, 0);
 					e->timer2 += 4;
@@ -362,7 +362,7 @@ static void run_intro(Entity *e) {
 			e->timer++;
 			
 			// animate smile/open eyes
-			if (e->timer > TIME_8(50)) {
+			if (e->timer > 50) {
 				Entity *smile = e->linkedEntity;
 				if (smile) {
 					if (++smile->animtime > 4) {
@@ -374,9 +374,9 @@ static void run_intro(Entity *e) {
 					}
 				}
 				
-				if (e->timer > TIME_8(100)) {
+				if (e->timer > 100) {
 					e->state = BP_FIGHTING_STANCE;
-					e->timer = TIME_8(150);
+					e->timer = 150;
 					
 					e->flags |= NPC_SHOOTABLE;
 					e->flags &= ~NPC_INVINCIBLE;
@@ -409,15 +409,15 @@ static void run_defeated(Entity *e) {
 		} /* fallthrough */
 		case BP_DEFEATED+1:		// fall to ground, shaking
 		{
-			e->y_speed += SPEED_8(0x20);
-			LIMIT_Y(SPEED_12(0x5ff));
+			e->y_speed += 0x20;
+			LIMIT_Y(0x5ff);
 			
 			e->x = e->x_mark;
 			if (++e->timer & 2) e->x += pixel_to_sub(1);
 						   else e->x -= pixel_to_sub(1);
 			
 			if (e->y_speed >= 0 && collide_stage_floor(e)) {
-				if (++e->timer > TIME_8(150)) {
+				if (++e->timer > 150) {
 					e->state++;
 					e->timer = 0;
 					e->frame = 3;
@@ -429,8 +429,8 @@ static void run_defeated(Entity *e) {
 		
 		case BP_DEFEATED+2:		// prepare to jump
 		{
-			if (++e->timer > TIME_8(30)) {
-				e->y_speed = -SPEED_12(0xA00);
+			if (++e->timer > 30) {
+				e->y_speed = -0xA00;
 				
 				e->state++;
 				e->frame = 10;
@@ -520,7 +520,7 @@ void ai_ballos_priest(Entity *e) {
 			e->x_speed *= 8; e->x_speed /= 9;
 			e->y_speed *= 8; e->y_speed /= 9;
 			
-			if (++e->timer > TIME_8(20)) {
+			if (++e->timer > 20) {
 				sound_play(SND_FUNNY_EXPLODE, 5);
 				
 				if (e->state == BP_PREPARE_FLY_LR+1) {
@@ -569,9 +569,9 @@ void ai_ballos_target(Entity *e) {
 		case 1:
 		{
 			e->hidden = (++e->timer & 2);
-			if (e->timer == TIME_8(20)) {	// lightning attack
+			if (e->timer == 20) {	// lightning attack
 				if(!e->dir) entity_create(e->x_mark, e->y_mark - 0x2000, OBJ_LIGHTNING, NPC_OPTION2);
-			} else if(e->timer >= TIME_8(30)) {
+			} else if(e->timer >= 30) {
 				e->state = STATE_DELETE;
 			}
 		}
@@ -591,18 +591,18 @@ void ai_ballos_bone_spawner(Entity *e) {
 		{
 			sound_play(SND_MISSILE_HIT, 5);
 			e->state++;
-			MOVE_X(SPEED_10(0x3FF));
+			MOVE_X(0x3FF);
 		} /* fallthrough */
 		case 1:
 		{
 			e->timer++;
 			if((e->timer & 15) == 1 && entity_on_screen(e)) {
-				int16_t xi = SPEED_10(random() & 0x3FF);
+				int16_t xi = random() & 0x3FF);
 				if (!e->dir) xi = -xi;
 				
 				Entity *bone = entity_create(e->x, e->y, OBJ_BALLOS_BONE, 0);
 				bone->x_speed = xi;
-				bone->y_speed = -SPEED_10(0x3FF);
+				bone->y_speed = -0x3FF;
 				sound_play(SND_BLOCK_DESTROY, 5);
 			}
 			
@@ -629,7 +629,7 @@ void ai_ballos_bone(Entity *e) {
 	
 	if (e->y_speed >= 0 && blk(e->x, 0, e->y, 6) == 0x41) {
 		if (e->state == 0) {
-			e->y_speed = -SPEED_10(0x200);
+			e->y_speed = -0x200;
 			e->state = 1;
 		} else {
 			//effect(e->x, e->y, EFFECT_FISHY);
@@ -637,7 +637,7 @@ void ai_ballos_bone(Entity *e) {
 		}
 	}
 	
-	if(e->y_speed < SPEED_12(0x5C0)) e->y_speed += SPEED_8(0x40);
+	if(e->y_speed < 0x5C0) e->y_speed += 0x40;
 }
 
 void ai_ballos_skull(Entity *e) {
@@ -658,8 +658,8 @@ void ai_ballos_skull(Entity *e) {
 		} /* fallthrough */
 		case 100:
 		{
-			e->y_speed += SPEED_8(0x40);
-			LIMIT_Y(SPEED_12(0x700));
+			e->y_speed += 0x40;
+			LIMIT_Y(0x700);
 			
 			e->timer++;
 			//if (e->timer & 2) {
@@ -668,7 +668,7 @@ void ai_ballos_skull(Entity *e) {
 			
 			if (e->y > 0x10000) {
 				if (blk(e->x, 0, e->y, 7) == 0x41) {
-					e->y_speed = -SPEED_10(0x200);
+					e->y_speed = -0x200;
 					e->state = 110;
 					
 					//quake(10, SND_BLOCK_DESTROY);
@@ -687,7 +687,7 @@ void ai_ballos_skull(Entity *e) {
 		
 		case 110:
 		{
-			e->y_speed += SPEED_8(0x40);
+			e->y_speed += 0x40;
 			
 			if (e->y >= block_to_sub(stageHeight)) {
 				e->state = STATE_DELETE;
@@ -744,13 +744,13 @@ void ai_green_devil_spawner(Entity *e) {
 	if(e->timer == 0) {
 		Entity *dv = entity_create(e->x, e->y - 0x1000, OBJ_GREEN_DEVIL, 0);
 		dv->dir = e->dir;
-		dv->x_speed = SPEED_10(0x3FF) + (random() & 0x3FF);
+		dv->x_speed = 0x3FF + (random() & 0x3FF);
 		dv->y_speed = (random() & 0x7FF) - 0x3FF;
 		if(!dv->dir) dv->x_speed = -dv->x_speed;
 		dv->y_mark = dv->y;
 		dv->attack = 3;
 		
-		e->timer = TIME_8(50) + (random() & 0x3F);
+		e->timer = 50 + (random() & 0x3F);
 	} else {
 		e->timer--;
 	}
@@ -763,7 +763,7 @@ void ai_green_devil(Entity *e) {
 	e->y += e->y_speed;
 	
 	if((++e->animtime & 3) == 0) e->frame ^= 1;
-	e->y_speed += (e->y < e->y_mark) ? SPEED_8(0x80) : -SPEED_8(0x80);
+	e->y_speed += (e->y < e->y_mark) ? 0x80 : -0x80;
 	if(!e->dir) {
 		if(e->x < 0) e->state = STATE_DELETE;
 	} else {
@@ -773,7 +773,7 @@ void ai_green_devil(Entity *e) {
 
 void onspawn_bute_sword_red(Entity *e) {
 	e->alwaysActive = TRUE;
-	e->y_speed = -SPEED_12(0x600);
+	e->y_speed = -0x600;
 	e->hit_box = (bounding_box) { 6,6,6,6 };
 	e->display_box = (bounding_box) { 8,8,8,8 };
 }
@@ -784,7 +784,7 @@ void ai_bute_sword_red(Entity *e) {
 	e->y += e->y_speed;
 	if((++e->animtime & 3) == 0) e->frame ^= 1;
 	if(!e->state) {
-		if(++e->timer >= TIME_8(16)) {
+		if(++e->timer >= 16) {
 			e->state++;
 			e->frame = 2;
 			e->flags |= NPC_SHOOTABLE;
@@ -795,11 +795,11 @@ void ai_bute_sword_red(Entity *e) {
 		FACE_PLAYER(e);
 		// when player is below them, they come towards him,
 		// when player is above, they sweep away.
-		if(player.y > e->y) ACCEL_X(SPEED_8(0x20));
-		else ACCEL_X(-SPEED_8(0x20));
-		e->y_speed += (e->y <= player.y) ? SPEED_8(0x20) : -SPEED_8(0x20);
-		LIMIT_X(SPEED_10(0x3FF));
-		LIMIT_Y(SPEED_10(0x3FF));
+		if(player.y > e->y) ACCEL_X(0x20);
+		else ACCEL_X(-0x20);
+		e->y_speed += (e->y <= player.y) ? 0x20 : -0x20;
+		LIMIT_X(0x3FF);
+		LIMIT_Y(0x3FF);
 		
 		if ((e->x_speed < 0 && blk(e->x, -7, e->y, 0) == 0x41) || 
 			(e->x_speed > 0 && blk(e->x,  7, e->y, 0) == 0x41)) {
@@ -837,7 +837,7 @@ void ai_bute_archer_red(Entity *e) {
 			if((++e->animtime & 3) == 0) e->frame ^= 1;
 			if((!e->dir && e->x < e->x_mark) || (e->dir && e->x > e->x_mark)) {
 				e->state++;
-				e->timer = TIME_8(random() & 0x7F);
+				e->timer = random() & 0x7F);
 				e->frame = 2;
 			}
 		}
@@ -845,7 +845,7 @@ void ai_bute_archer_red(Entity *e) {
 		case 1: // aiming
 		{
 			if((++e->animtime & 3) == 0) e->frame ^= 1;
-			if(++e->timer > TIME_10(300) || (PLAYER_DIST_X(e, pixel_to_sub(112)) && PLAYER_DIST_Y(e, pixel_to_sub(16)))) {
+			if(++e->timer > 300 || (PLAYER_DIST_X(e, pixel_to_sub(112)) && PLAYER_DIST_Y(e, pixel_to_sub(16)))) {
 				e->state++;
 				e->timer = 0;
 				e->frame = 3;
@@ -855,20 +855,20 @@ void ai_bute_archer_red(Entity *e) {
 		case 2: // flashing
 		{
 			if((++e->animtime & 3) == 0 && ++e->frame > 4) e->frame = 3;
-			if(++e->timer > TIME_8(30)) {
+			if(++e->timer > 30) {
 				e->state++;
 				e->timer = 0;
 				e->frame = 5;
 				Entity *arrow = entity_create(e->x, e->y, OBJ_BUTE_ARROW, 0);
 				arrow->dir = e->dir;
-				arrow->x_speed = e->dir ? SPEED_12(0x800) : -SPEED_12(0x800);
+				arrow->x_speed = e->dir ? 0x800 : -0x800;
 			}
 		}
 		break;
 		case 3: // fired
 		{
 			//if((++e->animtime & 3) == 0 && ++e->frame > 6) e->frame = 5;
-			if (++e->timer > TIME_8(40)) {
+			if (++e->timer > 40) {
 				e->state++;
 				e->timer = 0;
 				e->frame = 0;
@@ -881,24 +881,24 @@ void ai_bute_archer_red(Entity *e) {
 		case 4:	// retreat offscreen
 		{
 			if((++e->animtime & 3) == 0) e->frame ^= 1;
-			ACCEL_X(-SPEED_8(0x20));
+			ACCEL_X(-0x20);
 			if(e->x < 0 || e->x > block_to_sub(stageWidth)) e->state = STATE_DELETE;
 		}
 		break;
 	}
 	// sinusoidal hover around set point
 	if (e->state < 4) {
-		if(e->x < e->x_mark && e->x_speed <  SPEED_10(0x3E0)) e->x_speed += SPEED_8(0x2A);
-		if(e->x > e->x_mark && e->x_speed > -SPEED_10(0x3E0)) e->x_speed -= SPEED_8(0x2A);
-		if(e->y < e->y_mark && e->y_speed <  SPEED_10(0x3E0)) e->y_speed += SPEED_8(0x2A);
-		if(e->y > e->y_mark && e->y_speed > -SPEED_10(0x3E0)) e->y_speed -= SPEED_8(0x2A);
+		if(e->x < e->x_mark && e->x_speed <  0x3E0) e->x_speed += 0x2A;
+		if(e->x > e->x_mark && e->x_speed > -0x3E0) e->x_speed -= 0x2A;
+		if(e->y < e->y_mark && e->y_speed <  0x3E0) e->y_speed += 0x2A;
+		if(e->y > e->y_mark && e->y_speed > -0x3E0) e->y_speed -= 0x2A;
 	}
 	
 }
 
 // This object is responsible for collapsing the walls in the final best-ending sequence.
 void ai_wall_collapser(Entity *e) {
-	if(e->state == 10 && ++e->timer > TIME_8(102)) {
+	if(e->state == 10 && ++e->timer > 102) {
 		e->timer = 0;
 		uint16_t xa = sub_to_block(e->x);
 		uint16_t ya = sub_to_block(e->y);

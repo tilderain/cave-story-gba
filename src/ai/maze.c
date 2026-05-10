@@ -35,9 +35,9 @@ void ai_blockh(Entity *e) {
 		case 30:
 		{
 			uint16_t dir = e->flags & NPC_OPTION2;
-			e->x_speed += dir ? SPEED_8(0x20) : -SPEED_8(0x20);
-			if(e->x_speed > SPEED_10(0x200)) e->x_speed = SPEED_10(0x200);
-			if(e->x_speed < -SPEED_10(0x200)) e->x_speed = -SPEED_10(0x200);
+			e->x_speed += dir ? 0x20 : -0x20;
+			if(e->x_speed > 0x200) e->x_speed = 0x200;
+			if(e->x_speed < -0x200) e->x_speed = -0x200;
 			e->x_next = e->x + e->x_speed;
 			// hit edge
 			if((e->x_speed > 0 && stage_get_block_type(
@@ -82,9 +82,9 @@ void ai_blockv(Entity *e) {
 		case 30:
 		{
 			uint16_t dir = e->flags & NPC_OPTION2;
-			e->y_speed += dir ? SPEED_8(0x20) : -SPEED_8(0x20);
-			if(e->y_speed > SPEED_10(0x200)) e->y_speed = SPEED_10(0x200);
-			if(e->y_speed < -SPEED_10(0x200)) e->y_speed = -SPEED_10(0x200);
+			e->y_speed += dir ? 0x20 : -0x20;
+			if(e->y_speed > 0x200) e->y_speed = 0x200;
+			if(e->y_speed < -0x200) e->y_speed = -0x200;
 			e->y_next = e->y + e->y_speed;
 			// hit edge
 			if((e->y_speed > 0 && stage_get_block_type(
@@ -131,8 +131,8 @@ void ai_boulder(Entity *e) {
 		// thrown away by Balrog
 		case 20:
 		{
-			e->y_speed = -SPEED(0x400);
-			e->x_speed = SPEED(0x100);
+			e->y_speed = -0x400;
+			e->x_speed = 0x100;
 			sound_play(SND_FUNNY_EXPLODE, 5);
 			
 			e->state = 21;
@@ -141,7 +141,7 @@ void ai_boulder(Entity *e) {
 		/* fallthrough */
 		case 21:
 		{
-			e->y_speed += SPEED(0x10);
+			e->y_speed += 0x10;
 			
 			if (e->y_speed >= 0 && collide_stage_floor(e)) {
 				sound_play(SND_EXPLOSION1, 5);
@@ -174,8 +174,8 @@ void ai_gaudiDying(Entity *e) {
 			
 			e->frame = 4;
 			
-			e->y_speed = -SPEED(0x200);
-			MOVE_X(-SPEED(0x100));
+			e->y_speed = -0x200;
+			MOVE_X(-0x100);
 			sound_play(SND_ENEMY_HURT_SMALL, 5);
 			e->grounded = FALSE;
 			
@@ -198,7 +198,7 @@ void ai_gaudiDying(Entity *e) {
 			e->x_speed -= e->x_speed >> 4;
 			e->frame = (e->timer & 7) > 3 ? 6 : 5;
 			
-			if (++e->timer > TIME(50)) {
+			if (++e->timer > 50) {
 				// this deletes Entity while generating smoke effects and boom
 				e->state = STATE_DESTROY;
 			}
@@ -209,8 +209,8 @@ void ai_gaudiDying(Entity *e) {
 	e->x = e->x_next;
 	e->y = e->y_next;
 	
-	if(!e->grounded) e->y_speed += SPEED(0x20);
-	LIMIT_Y(SPEED(0x5ff));
+	if(!e->grounded) e->y_speed += 0x20;
+	LIMIT_Y(0x5ff);
 }
 
 void ai_gaudi(Entity *e) {
@@ -258,7 +258,7 @@ void ai_gaudi(Entity *e) {
 		case 10:		// walking
 		{
 			e->state = 11;
-			e->timer = TIME_8(random() & 63) + TIME_8(30);		// how long to walk for
+			e->timer = random() & 63) + 30;		// how long to walk for
 			moveMeToFront = TRUE;
 		}
 		/* fallthrough */
@@ -268,12 +268,12 @@ void ai_gaudi(Entity *e) {
 			// time to stop walking?
 			if (--e->timer <= 0) e->state = 0;
 				
-			MOVE_X(SPEED_10(0x200));
+			MOVE_X(0x200);
 			
 			// try to jump over any walls we come to
 			if ((e->x_speed < 0 && collide_stage_leftwall(e)) ||
 				(e->x_speed > 0 && collide_stage_rightwall(e))) {
-				e->y_speed = -SPEED_12(0x5ff);
+				e->y_speed = -0x5ff;
 				e->grounded = FALSE;
 				e->state = 20;
 				e->timer = 0;
@@ -301,7 +301,7 @@ void ai_gaudi(Entity *e) {
 			// go the other way.
 			if ((e->dir == 0 && collide_stage_leftwall(e)) ||
 				(e->dir == 1 && collide_stage_rightwall(e))) {
-				if (++e->timer > TIME_8(10)) {
+				if (++e->timer > 10) {
 					e->timer = 0;
 					TURN_AROUND(e);
 				}
@@ -309,12 +309,12 @@ void ai_gaudi(Entity *e) {
 				e->timer = 0;
 			}
 			
-			MOVE_X(SPEED_10(0x100));
+			MOVE_X(0x100);
 		}
 		break;
 		case 21:	// landed from jump
 		{
-			if (++e->timer > TIME_8(10)) e->state = 0;
+			if (++e->timer > 10) e->state = 0;
 		}
 		break;
 	}
@@ -328,8 +328,8 @@ void ai_gaudi(Entity *e) {
 	e->x = e->x_next;
 	e->y = e->y_next;
 	
-	if(!e->grounded) e->y_speed += SPEED_8(0x40);
-	LIMIT_Y(SPEED_12(0x5ff));
+	if(!e->grounded) e->y_speed += 0x40;
+	LIMIT_Y(0x5ff);
 }
 
 void ai_gaudiFlying(Entity *e) {
@@ -361,7 +361,7 @@ void ai_gaudiFlying(Entity *e) {
 		/* fallthrough */
 		case 1:
 		{
-			e->timer = TIME_8(80) + TIME_8(random() & 63);
+			e->timer = 80 + random() & 63);
 			e->state = 2;
 		}
 		/* fallthrough */
@@ -380,9 +380,9 @@ void ai_gaudiFlying(Entity *e) {
 			ANIMATE(e, 4, 9,8);
 			
 			e->timer++;
-			if (++e->timer > TIME_8(30)) {
+			if (++e->timer > 30) {
 				Entity *shot = entity_create(e->x, e->y, OBJ_GAUDI_FLYING_SHOT, 0);
-				THROW_AT_TARGET(shot, player.x, player.y, SPEED_12(0x400));
+				THROW_AT_TARGET(shot, player.x, player.y, 0x400);
 				sound_play(SND_EM_FIRE, 5);
 				
 				e->state = 1;
@@ -392,10 +392,10 @@ void ai_gaudiFlying(Entity *e) {
 	
 	FACE_PLAYER(e);
 	// sinusoidal circling pattern
-	e->x_speed += (e->x > e->x_mark) ? -SPEED_8(0x10) : SPEED_8(0x10);
-	e->y_speed += (e->y > e->y_mark) ? -SPEED_8(0x10) : SPEED_8(0x10);
-	LIMIT_X(SPEED_10(0x200));
-	LIMIT_Y(SPEED_12(0x5ff));
+	e->x_speed += (e->x > e->x_mark) ? -0x10 : 0x10;
+	e->y_speed += (e->y > e->y_mark) ? -0x10 : 0x10;
+	LIMIT_X(0x200);
+	LIMIT_Y(0x5ff);
 	e->x += e->x_speed;
 	e->y += e->y_speed;
 }
@@ -427,7 +427,7 @@ void ai_gaudiArmor(Entity *e) {
 		{
 			e->x_speed = 0;
 			
-			if (++e->timer >= TIME(5)) {
+			if (++e->timer >= 5) {
 				if (PLAYER_DIST_X(e, pixel_to_sub(192)) && PLAYER_DIST_Y(e, pixel_to_sub(160))) {	// begin hopping
 					e->state = 10;
 					e->timer = 0;
@@ -445,14 +445,14 @@ void ai_gaudiArmor(Entity *e) {
 				
 				if (++e->timer2 < 3) {	// hopping back and forth
 					e->state = 20;
-					e->y_speed = -SPEED(0x200);
+					e->y_speed = -0x200;
 					e->grounded = FALSE;
-					e->x_speed = (e->x < e->x_mark) ? SPEED(0x200) : -SPEED(0x200);
+					e->x_speed = (e->x < e->x_mark) ? 0x200 : -0x200;
 				} else {	// big jump and attack
 					e->state = 30;
-					e->y_speed = -SPEED(0x600);
+					e->y_speed = -0x600;
 					e->grounded = FALSE;
-					e->x_speed = (e->x < e->x_mark) ? SPEED(0x80) : -SPEED(0x80);
+					e->x_speed = (e->x < e->x_mark) ? 0x80 : -0x80;
 					
 					e->timer2 = 0;
 				}
@@ -479,9 +479,9 @@ void ai_gaudiArmor(Entity *e) {
 			e->timer++;
 			
 			// throw attacks at player
-			if (e->timer == TIME(30) || e->timer == TIME(40)) {
+			if (e->timer == 30 || e->timer == 40) {
 				Entity *shot = entity_create(e->x, e->y, OBJ_GAUDI_ARMORED_SHOT, 0);
-				THROW_AT_TARGET(shot, player.x, player.y, SPEED(0x500));
+				THROW_AT_TARGET(shot, player.x, player.y, 0x500);
 				sound_play(SND_EM_FIRE, 5);
 				
 				e->frame = 3;
@@ -489,7 +489,7 @@ void ai_gaudiArmor(Entity *e) {
 			}
 			
 			// stop throwing animation
-			if (e->timer == TIME(35) || e->timer == TIME(45)) e->frame = 2;
+			if (e->timer == 35 || e->timer == 45) e->frame = 2;
 			
 			if (e->y_speed > 0 && (e->grounded = collide_stage_floor(e))) {
 				sound_play(SND_THUD, 5);
@@ -516,8 +516,8 @@ void ai_gaudiArmor(Entity *e) {
 	e->x = e->x_next;
 	e->y = e->y_next;
 	
-	if(!e->grounded) e->y_speed += SPEED(0x33);
-	LIMIT_Y(SPEED(0x5ff));
+	if(!e->grounded) e->y_speed += 0x33;
+	LIMIT_Y(0x5ff);
 }
 
 void ai_gaudiArmorShot(Entity *e) {
@@ -529,19 +529,19 @@ void ai_gaudiArmorShot(Entity *e) {
 		{
 			uint8_t bounced = FALSE;
 			if (e->x_speed <= 0 && collide_stage_leftwall(e)) { 
-				e->x_speed = SPEED(0x200);
+				e->x_speed = 0x200;
 				bounced = TRUE; 
 			}
 			if (e->x_speed >= 0 && collide_stage_rightwall(e)) { 
-				e->x_speed = -SPEED(0x200);
+				e->x_speed = -0x200;
 				bounced = TRUE; 
 			}
 			if (e->y_speed >= 0 && collide_stage_floor(e)) { 
-				e->y_speed = -SPEED(0x200);
+				e->y_speed = -0x200;
 				bounced = TRUE; 
 			}
 			if (e->y_speed <= 0 && collide_stage_ceiling(e)) { 
-				e->y_speed = SPEED(0x200);
+				e->y_speed = 0x200;
 				bounced = TRUE; 
 			}
 			
@@ -554,8 +554,8 @@ void ai_gaudiArmorShot(Entity *e) {
 		
 		case 1:
 		{
-			e->y_speed += SPEED(0x40);
-			LIMIT_Y(SPEED(0x5ff));
+			e->y_speed += 0x40;
+			LIMIT_Y(0x5ff);
 			
 			if (e->y_speed >= 0 && collide_stage_floor(e)) {
 				e->state = STATE_DELETE;
@@ -588,7 +588,7 @@ void ai_pooh_black(Entity *e) {
 			e->frame = FRAME_FLYING;
 			FACE_PLAYER(e);
 			
-			e->y_speed = SPEED_12(0xA00);
+			e->y_speed = 0xA00;
 			e->flags |= NPC_IGNORESOLID;
 			
 			if (e->y >= block_to_sub(8)) {
@@ -600,7 +600,7 @@ void ai_pooh_black(Entity *e) {
 		case 1:
 		{
 			e->frame = FRAME_FLYING;
-			e->y_speed = SPEED_12(0xA00);
+			e->y_speed = 0xA00;
 			
 			if ((e->grounded = collide_stage_floor(e))) {
 				//SmokeSide(o, 8, DOWN);
@@ -618,7 +618,7 @@ void ai_pooh_black(Entity *e) {
 		{
 			e->frame = FRAME_LANDED;
 			e->attack = 0;
-			if (++e->timer > TIME_8(24)) {
+			if (++e->timer > 24) {
 				e->state = 3;
 				e->timer = 0;
 			}
@@ -637,16 +637,16 @@ void ai_pooh_black(Entity *e) {
                     bubble->alwaysActive = TRUE;
                     bubble->x = e->x - 0x2000 + (random() & 0x3FFF);
                     bubble->y = e->y - 0x2000 + (random() & 0x3FFF);
-                    bubble->x_speed = -SPEED_12(0x400) + SPEED_12(random() & 0x7FF);
-                    bubble->y_speed = -SPEED_12(0x400) + SPEED_12(random() & 0x7FF);
+                    bubble->x_speed = -0x400 + random() & 0x7FF);
+                    bubble->y_speed = -0x400 + random() & 0x7FF);
 			    }
 				// fly away after hit enough times
-				if (++e->timer > TIME_8(100)) {
+				if (++e->timer > 100) {
 					e->state = 4;
 					e->timer = 0;
 					
 					e->flags |= NPC_IGNORESOLID;
-					e->y_speed = -SPEED_12(0xC00);
+					e->y_speed = -0xC00;
 				}
 			}
 		}
@@ -658,20 +658,20 @@ void ai_pooh_black(Entity *e) {
 			
 			// bubbles shoot down past player just before
 			// he falls.
-			if (e->timer == TIME_8(50)) {
+			if (e->timer == 50) {
 				bubble_xmark = player.x;
 				bubble_ymark = pixel_to_sub(10000);
-			} else if (e->timer < TIME_8(50)) {
+			} else if (e->timer < 50) {
 				bubble_xmark = e->x;
 				bubble_ymark = e->y;
 			}
-			if (e->timer >= TIME_8(170)) {
+			if (e->timer >= 170) {
 				// Fall on player, but keep outside the walls
 				e->x_next = player.x;
 				if(e->x_next < pixel_to_sub(5 * 16)) e->x_next = pixel_to_sub(5 * 16);
 				if(e->x_next > pixel_to_sub(15 * 16)) e->x_next = pixel_to_sub(15 * 16);
 				e->y_next = 0;
-				e->y_speed = SPEED_12(0x5ff);
+				e->y_speed = 0x5ff;
 				
 				e->state = 0;
 				e->timer = 0;
@@ -691,10 +691,10 @@ void ai_poohblk_bubble(Entity *e) {
 	}
 	if (!(random() & 7)) e->frame = 0;
 	else e->frame = 1;
-	e->x_speed += (e->x > bubble_xmark) ? -SPEED_8(0x40) : SPEED_8(0x40);
-	e->y_speed += (e->y > bubble_ymark) ? -SPEED_8(0x40) : SPEED_8(0x40);
-	LIMIT_X(SPEED_12(0xAFF));
-	LIMIT_Y(SPEED_12(0xAFF));
+	e->x_speed += (e->x > bubble_xmark) ? -0x40 : 0x40;
+	e->y_speed += (e->y > bubble_ymark) ? -0x40 : 0x40;
+	LIMIT_X(0xAFF);
+	LIMIT_Y(0xAFF);
 	e->x += e->x_speed;
 	e->y += e->y_speed;
 }
@@ -733,7 +733,7 @@ void ai_poohblk_dying(Entity *e) {
 		case 2:
 		{
 			camera_shake(2);
-			if (++e->timer > TIME(150)) {
+			if (++e->timer > 150) {
 				e->state = 2;
 				e->timer2++;
 				if ((e->timer2 & 7) == 3) {
@@ -743,7 +743,7 @@ void ai_poohblk_dying(Entity *e) {
 				    if(e->frame < 11) e->frame++;
 					//e->hidden = TRUE;
 				}
-				if(e->timer2 > TIME(80)) {
+				if(e->timer2 > 80) {
 					//entities_clear_by_type(OBJ_POOH_BLACK_BUBBLE);
 					e->state = STATE_DELETE;
 					return;
@@ -784,16 +784,16 @@ void ai_firewhirr(Entity *e) {
 		{
 			if (!e->timer) {
 				e->state = 10;
-				e->timer = TIME_8(100);
-				e->y_speed = -SPEED_10(0x200);
+				e->timer = 100;
+				e->y_speed = -0x200;
 			}
 			else e->timer--;
 		}
 		/* fallthrough */
 		case 10:
 		{
-			e->y_speed += (e->y < e->y_mark) ? SPEED_8(0x10) : -SPEED_8(0x10);
-			LIMIT_Y(SPEED_10(0x200));
+			e->y_speed += (e->y < e->y_mark) ? 0x10 : -0x10;
+			LIMIT_Y(0x200);
 			
 			// inc time-to-fire while player near
 			if (PLAYER_DIST_Y(e, pixel_to_sub(80))) {
@@ -802,7 +802,7 @@ void ai_firewhirr(Entity *e) {
 			}
 			
 			// if time to fire, spawn a shot
-			if (e->timer2 > TIME(120)) {
+			if (e->timer2 > 120) {
 				Entity *shot = entity_create(e->x, e->y, OBJ_FIREWHIRR_SHOT, 0);
 				shot->dir = e->dir;
 				shot->alwaysActive = TRUE;
@@ -821,7 +821,7 @@ void ai_firewhirr(Entity *e) {
 
 void ai_firewhirr_shot(Entity *e) {
 	ANIMATE(e, 8, 0,1,2);
-	e->x_next = e->x + (!e->dir ? -SPEED_10(0x200) : SPEED_10(0x200));
+	e->x_next = e->x + (!e->dir ? -0x200 : 0x200);
 	e->y_next = e->y;
 	
 	if ((!e->dir && collide_stage_leftwall(e)) ||
@@ -899,7 +899,7 @@ void ai_fuzz_core(Entity *e) {
 		{
 			if (e->timer == 0) {
 				e->state = 2;
-				e->y_speed = SPEED_10(0x300);
+				e->y_speed = 0x300;
 				e->y_mark = e->y;
 			} else e->timer--;
 		}
@@ -908,9 +908,9 @@ void ai_fuzz_core(Entity *e) {
 		{
 			if(entity_on_screen(e)) {
 				FACE_PLAYER(e);
-				if (e->y > e->y_mark) e->y_speed -= SPEED_8(0x10);
-				if (e->y < e->y_mark) e->y_speed += SPEED_8(0x10);
-				LIMIT_Y(SPEED_10(0x355));
+				if (e->y > e->y_mark) e->y_speed -= 0x10;
+				if (e->y < e->y_mark) e->y_speed += 0x10;
+				LIMIT_Y(0x355);
 			} else {
 				e->alwaysActive = FALSE; // Next frame we will deactivate
 				e->state = 3; // This'll run the below case after reactivation
@@ -934,18 +934,18 @@ void ai_fuzz(Entity *e) {
 	
 	if (e->state) {
 		// base destroyed, simple sinusoidal player-seek
-		e->x_speed += (e->x > player.x) ? -SPEED_8(0x20) : SPEED_8(0x20);
-		e->y_speed += (e->y > player.y) ? -SPEED_8(0x20) : SPEED_8(0x20);
-		LIMIT_X(SPEED_12(0x800));
-		LIMIT_Y(SPEED_10(0x200));
+		e->x_speed += (e->x > player.x) ? -0x20 : 0x20;
+		e->y_speed += (e->y > player.y) ? -0x20 : 0x20;
+		LIMIT_X(0x800);
+		LIMIT_Y(0x200);
 		e->x += e->x_speed;
 		e->y += e->y_speed;
 		FACE_PLAYER(e);
 	} else {
 		if (e->linkedEntity->state == STATE_DESTROY) {
 			e->alwaysActive = TRUE;
-			e->x_speed = -SPEED_10(0x1FF) + SPEED_10((random() & 0x3FF));
-			e->y_speed = -SPEED_10(0x1FF) + SPEED_10((random() & 0x3FF));
+			e->x_speed = -0x1FF + (random() & 0x3FF));
+			e->y_speed = -0x1FF + (random() & 0x3FF));
 			e->state = 1;
 		} else if(!e->linkedEntity->alwaysActive) {
 			e->state = STATE_DELETE;
@@ -986,7 +986,7 @@ void ai_buyobuyo_base(Entity *e) {
 			} else {
 				e->y += 0x1000;
 			}
-			e->timer = TIME(10);
+			e->timer = 10;
 			e->state = 1;
 		}
 		/* fallthrough */
@@ -1006,7 +1006,7 @@ void ai_buyobuyo_base(Entity *e) {
 		break;
 		case 2:
 		{
-			if (++e->timer > TIME(10)) {
+			if (++e->timer > 10) {
 				Entity *buyo = entity_create(e->x, e->y, OBJ_BUYOBUYO, e->flags & NPC_OPTION2);
 				if(e->flags & NPC_OPTION2) {
 					// On ceiling, buyo are fine
@@ -1021,10 +1021,10 @@ void ai_buyobuyo_base(Entity *e) {
 				// cyclic: three firings then pause
 				e->state = 1;
 				if (++e->timer2 > 2) {
-					e->timer = TIME(100);
+					e->timer = 100;
 					e->timer2 = 0;
 				} else {
-					e->timer = TIME(20);
+					e->timer = 20;
 				}
 				e->frame = 0;
 			}
@@ -1043,7 +1043,7 @@ void ai_buyobuyo(Entity *e) {
 		case 0:
 		{
 			// shoot up down at player...
-			e->y_speed = (e->flags & NPC_OPTION2) ? SPEED(0x600) : -SPEED(0x600);
+			e->y_speed = (e->flags & NPC_OPTION2) ? 0x600 : -0x600;
 			e->state = 1;
 			e->timer = 0;
 		}
@@ -1065,8 +1065,8 @@ void ai_buyobuyo(Entity *e) {
 				e->x_mark = e->x;
 				e->y_mark = e->y;
 				
-				e->x_speed = (random() & 1) ? SPEED(0x200) : -SPEED(0x200);
-				e->y_speed = (random() & 1) ? SPEED(0x200) : -SPEED(0x200);
+				e->x_speed = (random() & 1) ? 0x200 : -0x200;
+				e->y_speed = (random() & 1) ? 0x200 : -0x200;
 				
 				e->state = 3;
 			}
@@ -1074,17 +1074,17 @@ void ai_buyobuyo(Entity *e) {
 		break;
 		case 3:
 		{
-			if (e->x > e->x_mark) e->x_speed -= SPEED_8(0x20);
-			if (e->x < e->x_mark) e->x_speed += SPEED_8(0x20);
-			if (e->y > e->y_mark) e->y_speed -= SPEED_8(0x20);
-			if (e->y < e->y_mark) e->y_speed += SPEED_8(0x20);
-			LIMIT_X(SPEED_10(0x3FF));
-			LIMIT_Y(SPEED_10(0x3FF));
+			if (e->x > e->x_mark) e->x_speed -= 0x20;
+			if (e->x < e->x_mark) e->x_speed += 0x20;
+			if (e->y > e->y_mark) e->y_speed -= 0x20;
+			if (e->y < e->y_mark) e->y_speed += 0x20;
+			LIMIT_X(0x3FF);
+			LIMIT_Y(0x3FF);
 			
 			// move the point we are bobbling around
-			e->x_mark += e->dir ? SPEED_10(0x200) : -SPEED_10(0x200);
+			e->x_mark += e->dir ? 0x200 : -0x200;
 			
-			if (++e->timer > TIME_10(300)) {
+			if (++e->timer > 300) {
 				e->state = STATE_DELETE;
 				return;
 			}

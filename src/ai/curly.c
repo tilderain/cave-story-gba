@@ -40,7 +40,7 @@ void ai_curly(Entity *e) {
 				break;
 			}
 			//if (!e->grounded) e->frame = 5;
-			MOVE_X(SPEED(0x200));
+			MOVE_X(0x200);
 		}
 		break;
 		// state 5: curly makes a "kaboom", then looks sad.
@@ -72,9 +72,9 @@ void ai_curly(Entity *e) {
 			e->state = 31;
 			e->frame = 10;
 			e->timer2 = 0;
-			e->y_speed = -SPEED(0x400);
+			e->y_speed = -0x400;
 			e->grounded = FALSE;
-			MOVE_X(-SPEED(0x200));
+			MOVE_X(-0x200);
 		}
 		/* fallthrough */
 		case 31:
@@ -103,14 +103,14 @@ void ai_curly(Entity *e) {
 		/* fallthrough */
 		case 71:
 		{
-			MOVE_X(-SPEED(0x100));
+			MOVE_X(-0x100);
 		}
 		break;
 	}
 	e->y = e->y_next;
 	e->x = e->x_next;
-	if(!e->grounded && e->state != 32) e->y_speed += SPEED(0x40);
-	LIMIT_Y(SPEED(0x5ff));
+	if(!e->grounded && e->state != 32) e->y_speed += 0x40;
+	LIMIT_Y(0x5ff);
 }
 
 // collapsed curly (on bed in camp)
@@ -162,8 +162,8 @@ void ai_curly_carried(Entity *e) {
 		// floating away after Ironhead battle
 		case 10:
 		{
-			e->x_speed = SPEED_8(0x40);
-			e->y_speed = -SPEED_8(0x20);
+			e->x_speed = 0x40;
+			e->y_speed = -0x20;
 			e->state = 11;
 		}
 		/* fallthrough */
@@ -171,7 +171,7 @@ void ai_curly_carried(Entity *e) {
 		{
 			if (e->y < block_to_sub(4))	{
 				// if in top part of screen, reverse before hitting wall
-				e->y_speed = SPEED_8(0x20);
+				e->y_speed = 0x20;
 			}
 		}
 		break;
@@ -211,7 +211,7 @@ static void curly_fire_nemesis(int32_t x, int32_t y, uint8_t dir) {
 	if(!b) return;
 	b->type = WEAPON_NEMESIS;
 	b->level = 1;
-	b->ttl = TIME_8(20);
+	b->ttl = 20;
 	b->state = 0;
 	b->damage = 12;
 	sound_play(SND_NEMESIS_FIRE, 5);
@@ -224,7 +224,7 @@ static void curly_fire_nemesis(int32_t x, int32_t y, uint8_t dir) {
 		b->sprite.attr = TILE_ATTR(PAL0,0,0,(b->dir&1),sheets[b->sheet].index);
 		b->x = x + ((b->dir&1) ? pixel_to_sub(12) : -pixel_to_sub(12));
 		b->y = y + pixel_to_sub(1);
-		b->x_speed = ((b->dir&1) ? SPEED_12(0xFFF) : -SPEED_12(0xFFF));
+		b->x_speed = ((b->dir&1) ? 0xFFF : -0xFFF);
 		b->y_speed = 0;
 		b->hit_box = (bounding_box) { 10, 6, 10, 6 };
 		break;
@@ -235,7 +235,7 @@ static void curly_fire_nemesis(int32_t x, int32_t y, uint8_t dir) {
 		b->x = x - (4<<CSF);
 		b->y = y + ((b->dir&1) ? pixel_to_sub(12) : -pixel_to_sub(12));
 		b->x_speed = 0;
-		b->y_speed = ((b->dir&1) ? SPEED_12(0xFFF) : -SPEED_12(0xFFF));
+		b->y_speed = ((b->dir&1) ? 0xFFF : -0xFFF);
 		b->hit_box = (bounding_box) { 6, 10, 6, 10 };
 		break;
 	}
@@ -372,7 +372,7 @@ void ai_curlyBoss(Entity *e) {
 		case CURLYB_WALKING_PLAYER:
 		{
 			ANIMATE(e, 8, 1,0,2,0);
-			ACCEL_X(SPEED(0x40));
+			ACCEL_X(0x40);
 			if (e->timer) {
 				e->timer--;
 			} else {
@@ -388,7 +388,7 @@ void ai_curlyBoss(Entity *e) {
 			FACE_PLAYER(e);
 			e->x_speed -= e->x_speed >> 3;
 			e->frame = 0;
-			if (++e->timer > TIME_8(50)) {
+			if (++e->timer > 50) {
 				e->state = CURLYB_FIRE_GUN;
 				e->x_speed = 0;
 				e->timer = 0;
@@ -398,7 +398,7 @@ void ai_curlyBoss(Entity *e) {
 		break;
 		case CURLYB_FIRE_GUN:
 		{
-			if(++e->timer > TIME_8(5)) {	// time to fire
+			if(++e->timer > 5) {	// time to fire
 				e->timer = 0;
 				e->timer2++;
 				// check if player is trying to jump over
@@ -417,7 +417,7 @@ void ai_curlyBoss(Entity *e) {
 		case CURLYB_SHIELD:
 		{
 			e->x_speed = 0;
-			if (++e->timer > TIME_8(30)) e->state = CURLYB_FIGHT_START;
+			if (++e->timer > 30) e->state = CURLYB_FIGHT_START;
 		}
 		break;
 	}
@@ -435,8 +435,8 @@ void ai_curlyBoss(Entity *e) {
 		}
 	}
 	
-	if (e->x_speed > SPEED(0x200)) e->x_speed = SPEED(0x200);
-	if (e->x_speed < -SPEED(0x200)) e->x_speed = -SPEED(0x200);
+	if (e->x_speed > 0x200) e->x_speed = 0x200;
+	if (e->x_speed < -0x200) e->x_speed = -0x200;
 
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y;

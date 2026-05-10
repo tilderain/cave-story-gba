@@ -35,7 +35,7 @@ void ai_igor(Entity *e) {
 		case STATE_STAND+1:
 		{
 			ANIMATE(e, 16, STAND1, STAND2);
-			if(++e->timer > TIME_8(50)) e->state = STATE_WALK;
+			if(++e->timer > 50) e->state = STATE_WALK;
 		}
 		break;
 		case STATE_WALK:
@@ -48,7 +48,7 @@ void ai_igor(Entity *e) {
 				fireatk = -1;
 				e->dir ^= 1;	// walk away from player
 			}
-			e->x_speed = e->dir ? SPEED_10(0x200) : -SPEED_10(0x200);
+			e->x_speed = e->dir ? 0x200 : -0x200;
 			e->state++;
 			moveMeToFront = TRUE;
 		} /* fallthrough */
@@ -56,10 +56,10 @@ void ai_igor(Entity *e) {
 		{
 			ANIMATE(e, 12, WALK1,STAND1,WALK2,STAND1);
 			if(fireatk == -1) {	// begin mouth-blast attack
-				if(++e->timer > TIME_8(20)) e->state = STATE_MOUTH_BLAST;
+				if(++e->timer > 20) e->state = STATE_MOUTH_BLAST;
 			} else {
 				// if we don't reach him after a while, do a jump
-				if(++e->timer > TIME_8(50)) {
+				if(++e->timer > 50) {
 					e->state = STATE_JUMPING;
 				} else if(e->dir) {
 					if(e->x >= player.x - pixel_to_sub(22)) e->state = STATE_PUNCH;
@@ -79,7 +79,7 @@ void ai_igor(Entity *e) {
 		} /* fallthrough */
 		case STATE_PUNCH+1:
 		{
-			if(++e->timer > TIME_8(16)) e->state++;
+			if(++e->timer > 16) e->state++;
 		}
 		break;
 		case STATE_PUNCH+2:
@@ -94,7 +94,7 @@ void ai_igor(Entity *e) {
 		} /* fallthrough */
 		case STATE_PUNCH+3:
 		{
-			if(++e->timer > TIME_8(14)) {
+			if(++e->timer > 14) {
 				// return to normal-size bounding box
 				e->hit_box.left -= 10;
 				e->state = STATE_STAND;
@@ -104,7 +104,7 @@ void ai_igor(Entity *e) {
 		case STATE_JUMPING:
 		{
 			e->frame = JUMP;
-			e->y_speed = -SPEED(2<<CSF);
+			e->y_speed = -2<<CSF;
 			e->grounded = FALSE;
 			e->attack = 2;
 			e->x_speed -= e->x_speed >> 2;
@@ -140,7 +140,7 @@ void ai_igor(Entity *e) {
 		} /* fallthrough */
 		case STATE_LANDED+1:
 		{
-			if(++e->timer > TIME_8(12)) e->state = STATE_STAND;
+			if(++e->timer > 12) e->state = STATE_STAND;
 		}
 		break;
 		case STATE_MOUTH_BLAST:
@@ -154,23 +154,23 @@ void ai_igor(Entity *e) {
 		} /* fallthrough */
 		case STATE_MOUTH_BLAST+1:
 		{
-			e->frame = (++e->timer > TIME_8(50) && (e->timer & 4)) ? MOUTH2 : MOUTH1;
+			e->frame = (++e->timer > 50 && (e->timer & 4)) ? MOUTH2 : MOUTH1;
 			// fire shots
-			if(e->timer > TIME_8(100)) {
+			if(e->timer > 100) {
 				if((e->timer & 7) == 1) {
 					sound_play(SND_BLOCK_DESTROY, 5);
 					Entity *shot = entity_create(e->x + (e->dir ? 0x800 : -0x800), 
 							e->y, OBJ_IGOR_SHOT, 0);
-                    shot->x_speed = e->dir ? SPEED_12(0x600) : -SPEED_12(0x600);
-                    shot->y_speed = -SPEED_12(0x280) + SPEED_12((random() & 0x3FF));
+                    shot->x_speed = e->dir ? 0x600 : -0x600;
+                    shot->y_speed = -0x280 + (random() & 0x3FF));
 				}
 				// fires 6 shots
-				if(e->timer > TIME_8(135)) e->state = STATE_STAND;
+				if(e->timer > 135) e->state = STATE_STAND;
 			}
 		}
 		break;
 	}
-	if(!e->grounded) e->y_speed += SPEED_8(0x20);
+	if(!e->grounded) e->y_speed += 0x20;
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
 	entity_update_collision(e);
@@ -211,7 +211,7 @@ void ai_igorscene(Entity *e) {
 		break;
 		case 2:
 		{
-			MOVE_X(SPEED(0x200));
+			MOVE_X(0x200);
 		} /* fallthrough */
 		case 3:
 		{
@@ -244,7 +244,7 @@ void ai_igorscene(Entity *e) {
 	}
 	e->x = e->x_next;
 	e->y = e->y_next;
-	if(!e->grounded) e->y_speed += SPEED(0x40);
+	if(!e->grounded) e->y_speed += 0x40;
 }
 
 void ai_igordead(Entity *e) {
@@ -270,7 +270,7 @@ void ai_igordead(Entity *e) {
 		} else if((e->timer & 3) == 3) {
 			e->display_box.left += 1;
 		}
-		if(e->timer > TIME_8(100)) {
+		if(e->timer > 100) {
 			e->timer = 0;
 			e->state = 2;
 		}
@@ -288,14 +288,14 @@ void ai_igordead(Entity *e) {
 		} else if((e->timer & 3) == 3) {
 			e->frame = DEFEAT1;
 		}
-		if(e->timer > TIME_8(160)) {
+		if(e->timer > 160) {
 			e->frame = DEFEAT2;
 			e->state = 3;
 			e->timer = 0;
 		}
 		break;
 		case 3:
-		if(++e->timer > TIME_8(60)) {
+		if(++e->timer > 60) {
 			e->frame++;
 			e->timer = 0;
 			if(e->frame > DEFEAT4) {

@@ -16,11 +16,11 @@ void ai_prox_press_vert(Entity *e) {
 		break;
 		case 1:
 		{
-			if(e->frame < 2 && ++e->animtime > TIME_8(4)) {
+			if(e->frame < 2 && ++e->animtime > 4) {
 				e->animtime = 0;
 				e->frame++;
 			}
-			if(e->y_speed <= SPEED_12(0x580)) e->y_speed += SPEED_8(0x80);
+			if(e->y_speed <= 0x580) e->y_speed += 0x80;
 			e->y += e->y_speed;
 			if(blk(e->x, 0, e->y, e->hit_box.bottom + 1) == 0x41) {
 				camera_shake(10);
@@ -89,8 +89,8 @@ void ai_lava_spawner(Entity *e) {
 
 void ai_lava_drip(Entity *e) {
 	e->frame = 0;
-	e->y_speed += SPEED(0x40);
-	LIMIT_Y(SPEED(0x5ff));
+	e->y_speed += 0x40;
+	LIMIT_Y(0x5ff);
 	e->y += e->y_speed;
 	
 	uint8_t blockd = blk(e->x, 0, e->y, 0);
@@ -114,7 +114,7 @@ void ai_red_bat_spawner(Entity *e) {
 			//if(PLAYER_DIST_Y(e, 64 << CSF)) {
 				if(e->flags & NPC_OPTION2) e->dir = 1;
 				e->state = 1;
-				e->timer = TIME_8(160) + TIME_8(random() & 0xFF);
+				e->timer = 160 + random() & 0xFF);
 			//}
 		}
 		break;
@@ -144,7 +144,7 @@ void ai_red_bat(Entity *e) {
 		{
 			if (e->timer == 0) {
 				e->state = 2;
-				e->y_speed = SPEED_10(0x3FF);
+				e->y_speed = 0x3FF;
 			} else {
 				e->timer--;
 				break;
@@ -152,9 +152,9 @@ void ai_red_bat(Entity *e) {
 		} /* fallthrough */
 		case 2:
 		{
-			e->y_speed += (e->y < e->y_mark) ? SPEED_8(0x10) : -SPEED_8(0x10);
-			LIMIT_Y(SPEED(0x300));
-			MOVE_X(SPEED(0x100));
+			e->y_speed += (e->y < e->y_mark) ? 0x10 : -0x10;
+			LIMIT_Y(0x300);
+			MOVE_X(0x100);
 		}
 		break;
 	}
@@ -236,13 +236,13 @@ void ai_red_demon(Entity *e) {
 		
 		case 20:	// pause before jump
 		{
-			if (++e->timer > TIME(20)) {
+			if (++e->timer > 20) {
 				e->state = 21;
 				e->timer = 0;
 				e->frame = 5;
 				e->grounded = FALSE;
-				e->y_speed = -SPEED(0x5ff);
-				e->x_speed = (e->x < player.x) ? SPEED(0x100) : -SPEED(0x100);
+				e->y_speed = -0x5ff;
+				e->x_speed = (e->x < player.x) ? 0x100 : -0x100;
 			}
 		}
 		break;
@@ -289,7 +289,7 @@ void ai_red_demon(Entity *e) {
 		{
 			e->x_speed /= 2;
 			
-			if (++e->timer > TIME(22)) {
+			if (++e->timer > 22) {
 				e->state = 10;
 			}
 		}
@@ -328,8 +328,8 @@ void ai_red_demon(Entity *e) {
 	e->y = e->y_next;
 	
 	if(!e->grounded) {
-		e->y_speed += SPEED(0x20);
-		LIMIT_Y(SPEED(0x5ff));
+		e->y_speed += 0x20;
+		LIMIT_Y(0x5ff);
 	}
 }
 

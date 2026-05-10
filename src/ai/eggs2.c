@@ -51,7 +51,7 @@ void ai_dragon_zombie(Entity *e) {
 			e->timer++;
 			e->frame = (e->timer & 4) ? 2 : 3;
 			
-			if (e->timer > TIME(30))
+			if (e->timer > 30)
 				e->state = 3;
 		}
 		break;
@@ -71,16 +71,16 @@ void ai_dragon_zombie(Entity *e) {
 		{
 			e->timer++;
 			
-			if (e->timer < TIME(40) && (e->timer & 7) == 1) {
+			if (e->timer < 40 && (e->timer & 7) == 1) {
 				Entity *fire = entity_create(e->x, e->y, OBJ_DRAGON_ZOMBIE_SHOT, 0);
-				THROW_AT_TARGET(fire, e->x_mark, e->y_mark, SPEED(0x500));
+				THROW_AT_TARGET(fire, e->x_mark, e->y_mark, 0x500);
 				sound_play(SND_SNAKE_FIRE, 3);
 			}
 			
-			if (e->timer > TIME(60)) {
+			if (e->timer > 60) {
 				e->state = 1;
 				e->frame = 0;
-				e->timer = (random() & 127) + TIME(90);	// random time till can fire again
+				e->timer = (random() & 127) + 90;	// random time till can fire again
 			}
 		}
 		break;
@@ -106,7 +106,7 @@ void ai_fallingspike_sm(Entity *e) {
 			e->x = e->x_mark;
 			if (e->animtime >= 6) e->x += (1 << CSF);
 			
-			if (++e->timer > TIME(30)) {
+			if (++e->timer > 30) {
 				e->state = 2;	// fall
 				e->frame = 1;	// slightly brighter frame at top
 			}
@@ -115,8 +115,8 @@ void ai_fallingspike_sm(Entity *e) {
 		
 		case 2:		// falling
 		{
-			e->y_speed += SPEED(0x20);
-			LIMIT_Y(SPEED(0xC00));
+			e->y_speed += 0x20;
+			LIMIT_Y(0xC00);
 			
 			e->x_next = e->x;
 			e->y_next = e->y + e->y_speed;
@@ -156,7 +156,7 @@ void ai_fallingspike_lg(Entity *e) {
 			if (e->animtime >= 6)	// scuttle:: big spikes shake in the other direction
 				e->x -= (1 << CSF);
 			
-			if (++e->timer > TIME(30)) {
+			if (++e->timer > 30) {
 				e->state = 2;	// fall
 				e->frame = 1;	// slightly brighter frame at top
 				
@@ -174,8 +174,8 @@ void ai_fallingspike_lg(Entity *e) {
 		
 		case 2:		// falling
 		{
-			e->y_speed += SPEED(0x20);
-			LIMIT_Y(SPEED(0xC00));
+			e->y_speed += 0x20;
+			LIMIT_Y(0xC00);
 			
 			if (e->y + pixel_to_sub(e->hit_box.bottom) < player.y + pixel_to_sub(player.hit_box.top)) {	
 				// could fall on player
@@ -242,7 +242,7 @@ void ai_counterbomb(Entity *e) {
 			if (e->timer == 0) {
 				e->timer = 0;
 				e->state = 2;
-				e->y_speed = SPEED(0x300);
+				e->y_speed = 0x300;
 			} else {
 				e->timer--;
 			}
@@ -266,7 +266,7 @@ void ai_counterbomb(Entity *e) {
 					Entity *number = entity_create(e->x + pixel_to_sub(8), e->y + pixel_to_sub(16),
 												  OBJ_COUNTER_BOMB_NUMBER, 0);
 					number->frame = e->timer2++;
-					e->timer = TIME_8(50);
+					e->timer = 50;
 				} else {
 					// expand bounding box to cover explosion area
 					e->hidden = TRUE;
@@ -329,7 +329,7 @@ void ai_counterbomb_num(Entity *e) {
 		
 		case 2:
 		{
-			if (++e->timer > TIME(30))
+			if (++e->timer > 30)
 				e->state = STATE_DELETE;
 		}
 		break;

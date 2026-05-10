@@ -41,7 +41,7 @@ void splash_main() {
 	
 	uint16_t timer = 0;
 	oldstate = 65535;
-	while(++timer <= TIME(250) && !joy_pressed(BUTTON_C) && !joy_pressed(BUTTON_START)) {
+	while(++timer <= 250 && !joy_pressed(BUTTON_C) && !joy_pressed(BUTTON_START)) {
 		entities_update(TRUE);
 		effects_update(); // Draw Smoke
 		ready = TRUE;

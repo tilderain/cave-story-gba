@@ -48,8 +48,8 @@ void intro_main() {
     vdp_puts(VDP_PLAN_A, "    Studio Pixel    ", 10, 8);
 	uint16_t timer = 0;
 	//oldstate = 0;
-	while(++timer <= TIME_10(400) && !joy_pressed(BUTTON_C) && !joy_pressed(BUTTON_START)) {
-		if(timer == TIME_8(150)) {
+	while(++timer <= 400 && !joy_pressed(BUTTON_C) && !joy_pressed(BUTTON_START)) {
+		if(timer == 150) {
             vdp_text_clear(VDP_PLAN_A, 10, 6, 20);
             vdp_text_clear(VDP_PLAN_A, 10, 8, 20);
 		}

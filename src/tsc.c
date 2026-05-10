@@ -726,7 +726,7 @@ uint8_t execute_command() {
 		{
 			args[0] = tsc_read_word();
 			tscState = TSC_WAITTIME;
-			waitTime = TIME(args[0]);
+			waitTime = args[0];
 			return 1;
 		}
 		break;
@@ -755,11 +755,11 @@ uint8_t execute_command() {
 		{
 			args[0] = tsc_read_word();
 			if(args[0] == 0) { // Right
-				player.x_speed = SPEED(0x200);
+				player.x_speed = 0x200;
 			} else if(args[0] == 2) { // Left
-				player.x_speed = -SPEED(0x200);
+				player.x_speed = -0x200;
 			}
-			player.y_speed = -SPEED(0x400);
+			player.y_speed = -0x400;
 		}
 		break;
 		case CMD_MYD: // Change direction to (1)
@@ -1288,10 +1288,10 @@ uint8_t execute_command() {
 
 			song_stop();
 			
-			uint16_t t = TIME_10(350);
+			uint16_t t = 350;
 			while(--t) {
-				if(t > TIME_8(150) || !args[0]) {
-					if((t % TIME_8(5)) == 0) {
+				if(t > 150 || !args[0]) {
+					if((t % 5) == 0) {
 						island[0].y++;
 						island[1].y++;
 					}

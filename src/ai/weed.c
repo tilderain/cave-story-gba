@@ -7,7 +7,7 @@ void onspawn_jelly(Entity *e) {
 	e->y_mark = e->y;
 	e->flags &= ~NPC_SHOOTABLE;
 	if(e->flags & NPC_OPTION2) e->dir = 1;
-	MOVE_X(SPEED_8(0xFF));
+	MOVE_X(0xFF);
 }
 
 void ai_jelly(Entity *e) {
@@ -27,7 +27,7 @@ void ai_jelly(Entity *e) {
 		break;
 		case 10:
 		{
-			if(++e->timer > TIME_8(10)) {
+			if(++e->timer > 10) {
 				e->timer = 0;
 				e->state = 11;
 			}
@@ -35,10 +35,10 @@ void ai_jelly(Entity *e) {
 		break;
 		case 11:
 		{
-			if(++e->timer == TIME_8(12)) {
-				MOVE_X(SPEED_8(0xFF));
-				e->y_speed -= SPEED_10(0x200);
-			} else if(e->timer > TIME_8(16)) {
+			if(++e->timer == 12) {
+				MOVE_X(0xFF);
+				e->y_speed -= 0x200;
+			} else if(e->timer > 16) {
 				e->state = 12;
 				e->timer = 0;
 			}
@@ -47,7 +47,7 @@ void ai_jelly(Entity *e) {
 		case 12:
 		{
 			e->timer++;
-			if(e->y > e->y_mark && e->timer > TIME_8(10)) {
+			if(e->y > e->y_mark && e->timer > 10) {
 				e->timer = 0;
 				e->state = 10;
 			}
@@ -55,7 +55,7 @@ void ai_jelly(Entity *e) {
 		break;
 	}
 	e->dir = e->x < e->x_mark;
-	if(e->y <= e->y_mark && e->y_speed < SPEED_10(0x1E0)) e->y_speed += SPEED_8(0x20);
+	if(e->y <= e->y_mark && e->y_speed < 0x1E0) e->y_speed += 0x20;
 	if(!e->attack) {
 		if(e->x_speed > 0) {
 			if((blk(e->x, -8, e->y, 0) & 0x41) == 0x41) e->x_speed = 0;
@@ -63,9 +63,9 @@ void ai_jelly(Entity *e) {
 			if((blk(e->x, 8, e->y, 0) & 0x41) == 0x41) e->x_speed = 0;
 		}
 		if(e->y_speed > 0) {
-			if((blk(e->x, 0, e->y, 8) & 0x41) == 0x41) e->y_speed = -SPEED_10(0x200);
+			if((blk(e->x, 0, e->y, 8) & 0x41) == 0x41) e->y_speed = -0x200;
 		} else if(e->y_speed < 0) {
-			if((blk(e->x, 0, e->y, -8) & 0x41) == 0x41) e->y_speed = SPEED_8(0xFF);
+			if((blk(e->x, 0, e->y, -8) & 0x41) == 0x41) e->y_speed = 0xFF;
 		}
 	}
 	e->x += e->x_speed;
@@ -93,7 +93,7 @@ void ai_kulala(Entity *e) {
 		case 10:	// falling
 		{
 			e->flags &= ~NPC_INVINCIBLE;
-			if(++e->timer > TIME_8(40)) {
+			if(++e->timer > 40) {
 				e->timer = 0;
 				e->state++;
 			}
@@ -101,7 +101,7 @@ void ai_kulala(Entity *e) {
 		break;
 		case 11:	// animate thrust
 		{
-			if(++e->timer > TIME_8(5)) {
+			if(++e->timer > 5) {
 				e->timer = 0;
 				if(++e->frame >= 3) e->state++;
 			}
@@ -109,8 +109,8 @@ void ai_kulala(Entity *e) {
 		break;
 		case 12:	// thrusting upwards
 		{
-			e->y_speed = -SPEED_10(0x155);
-			if(++e->timer > TIME_8(20)) {
+			e->y_speed = -0x155;
+			if(++e->timer > 20) {
 				e->state = 10;
 				e->frame = 0;
 				e->timer = 0;
@@ -121,11 +121,11 @@ void ai_kulala(Entity *e) {
 		{
 			e->frame = 4;
 			e->x_speed >>= 1;
-			e->y_speed += SPEED_8(0x20);
+			e->y_speed += 0x20;
 			if(!e->damage_time) {
 				e->state = 10;
 				e->frame = 0;
-				e->timer = TIME_8(30);
+				e->timer = 30;
 			}
 		}
 		break;
@@ -133,7 +133,7 @@ void ai_kulala(Entity *e) {
 	
 	if(e->damage_time) {
 		// x_mark unused so use it as a second timer
-		if(++e->x_mark > TIME(12)) {
+		if(++e->x_mark > 12) {
 			e->state = 20;
 			e->frame = 4;
 			e->flags |= NPC_INVINCIBLE;
@@ -145,10 +145,10 @@ void ai_kulala(Entity *e) {
 	if(e->state >= 10) {
 		e->x_next = e->x + e->x_speed;
 		e->y_next = e->y + e->y_speed;
-		e->y_speed += SPEED(0x10);
+		e->y_speed += 0x10;
 		// Have to make an extra check because we are wide
 		if(collide_stage_floor(e) || ((blk(e->x_next, 0, e->y_next, e->hit_box.bottom) & 0x41) == 0x41)) 
-			e->y_speed = -SPEED(0x300);
+			e->y_speed = -0x300;
 		else if(e->y_speed < 0) {
 			if(!collide_stage_ceiling(e)) {
 				if(((blk(e->x_next, 0, e->y_next, -e->hit_box.top) & 0x41) == 0x41)) e->y_speed = 0x100;
@@ -156,23 +156,23 @@ void ai_kulala(Entity *e) {
 		}
 		// Unused y_mark for third timer
 		if(collide_stage_leftwall(e)) {
-			e->y_mark = TIME(50);
+			e->y_mark = 50;
 			e->dir = 1;
 		}
 		if(collide_stage_rightwall(e)) {
-			e->y_mark = TIME(50);
+			e->y_mark = 50;
 			e->dir = 0;
 		}
 		
 		if(e->y_mark > 0) {
 			e->y_mark--;
-			ACCEL_X(SPEED(0x80));
+			ACCEL_X(0x80);
 		} else {
-			e->y_mark = TIME(50);
+			e->y_mark = 50;
 			FACE_PLAYER(e);
 		}
-		LIMIT_X(SPEED(0x100));
-		LIMIT_Y(SPEED(0x300));
+		LIMIT_X(0x100);
+		LIMIT_Y(0x300);
 		e->x = e->x_next;
 		e->y = e->y_next;
 	}
@@ -190,7 +190,7 @@ void ondeath_kulala(Entity *e) {
 void ai_mannan(Entity *e) {
 	if(e->health >= 90) { // Alive
 		if(e->state) { // Firing
-			if(++e->timer > TIME(25)) {
+			if(++e->timer > 25) {
 				e->state = 0;
 				e->timer = 0;
 				e->frame = 0;
@@ -220,11 +220,11 @@ void ai_mannan(Entity *e) {
 }
 
 void ai_mannanShot(Entity *e) {
-	ACCEL_X(SPEED(0x20));
+	ACCEL_X(0x20);
 	if((e->timer & 7) == 1) {
 		sound_play(SND_IRONH_SHOT_FLY, 2);
 	}
-	if(++e->timer > TIME(120)) e->state = STATE_DELETE;
+	if(++e->timer > 120) e->state = STATE_DELETE;
 	e->x += e->x_speed;
 }
 
@@ -247,12 +247,12 @@ void ai_malco(Entity *e) {
 			effect_create_smoke(e->x >> CSF, e->y >> CSF);
 			/* fallthrough */
 		case 11:	// beeping and eyes flickering
-			if (++e->timer < TIME(100)) {
+			if (++e->timer < 100) {
 				if (!(e->timer & 3)) {
 					sound_play(SND_COMPUTER_BEEP, 5);
 					e->frame ^= 1;
 				}
-			} else if (e->timer > TIME(150)) {
+			} else if (e->timer > 150) {
 				e->timer = 0;
 				e->state = 15;
 			}
@@ -265,7 +265,7 @@ void ai_malco(Entity *e) {
 			} else {
 				e->x -= (1<<CSF);
 			}
-			if (++e->timer > TIME(50)) e->state = 16;
+			if (++e->timer > 50) e->state = 16;
 		break;
 		
 		case 16:		// stand up
@@ -276,7 +276,7 @@ void ai_malco(Entity *e) {
 			effect_create_smoke(e->x >> CSF, e->y >> CSF);
 			/* fallthrough */
 		case 17:
-			if (++e->timer > TIME(150)) {
+			if (++e->timer > 150) {
 				e->state = 18;
 			}
 		break;
@@ -382,11 +382,11 @@ void ai_press(Entity *e) {
 		break;
 		case 10:		// fall
 			e->timer++;
-			if(e->timer == TIME_8(5)) {
+			if(e->timer == 5) {
 				e->frame = 2;
 			}
-			e->y_speed += SPEED_8(0x20);
-			if(e->y_speed > SPEED_12(0x5FF)) e->y_speed = SPEED_12(0x5FF);
+			e->y_speed += 0x20;
+			if(e->y_speed > 0x5FF) e->y_speed = 0x5FF;
 			e->y += e->y_speed;
 			if(e->y + (12 << CSF) < player.y) {
 				e->flags &= ~NPC_SOLID;
@@ -429,8 +429,8 @@ void onspawn_frog(Entity *e) {
 }
 
 void ai_frog(Entity *e) {
-	if(!e->grounded) e->y_speed += SPEED_8(0x80);
-	LIMIT_Y(SPEED_12(0x5FF));
+	if(!e->grounded) e->y_speed += 0x80;
+	LIMIT_Y(0x5FF);
 
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
@@ -455,7 +455,7 @@ void ai_frog(Entity *e) {
 		break;
 		case 3:		// falling out of ceiling during balfrog fight
 		{
-			if(++e->timer > TIME_8(40)) {
+			if(++e->timer > 40) {
 				e->flags &= ~NPC_IGNORESOLID;
 				if((e->grounded = collide_stage_floor(e))) {
 					e->state = 1;
@@ -485,7 +485,7 @@ void ai_frog(Entity *e) {
 		break;
 	}
 	// random jumping, and jump when shot
-	if (e->state < 3 && e->timer > TIME_8(15)) {
+	if (e->state < 3 && e->timer > 15) {
 		uint8_t dojump = FALSE;
 		if(e->damage_time) {
 			dojump = TRUE;
@@ -498,14 +498,14 @@ void ai_frog(Entity *e) {
 			FACE_PLAYER(e);
 			e->state = 10;
 			e->frame = 2;
-			e->y_speed = -SPEED_12(0x5ff);
+			e->y_speed = -0x5ff;
 			e->grounded = FALSE;
 
 			// no jumping sound in cutscenes at ending
 			if (!controlsLocked)
 				sound_play(SND_ENEMY_JUMP, 3);
 
-			MOVE_X(SPEED_10(0x200));
+			MOVE_X(0x200);
 		}
 	}
 
@@ -528,7 +528,7 @@ void ai_hey(Entity *e) {
 		break;
 		case 1:
 		{
-			e->hidden = ++e->timer > TIME_8(50);
+			e->hidden = ++e->timer > 50;
 		}
 		break;
 	}
@@ -557,7 +557,7 @@ void ai_motorbike(Entity *e) {
 		{
 			e->x = e->x_mark + 0x200 - (random() & 0x3FF);
 			e->y = e->y_mark + 0x200 - (random() & 0x3FF);
-			if(++e->timer > TIME_8(30)) {
+			if(++e->timer > 30) {
 				e->state = 30;
 			}
 		}
@@ -566,18 +566,18 @@ void ai_motorbike(Entity *e) {
 		{
 			e->state = 31;
 			e->timer = 1;
-			e->x_speed = -SPEED_12(0x800);
+			e->x_speed = -0x800;
 			e->y_mark = e->y;
 			sound_play(SND_MISSILE_HIT, 5);
 		}
 		/* fallthrough */
 		case 31:
 		{
-			e->x_speed += SPEED_8(0x20);
+			e->x_speed += 0x20;
 			e->timer++;
 			e->y = e->y_mark + 0x200 - (random() & 0x3FF);
-			if (e->timer > TIME_8(10))  e->dir = 1;
-			if (e->timer > TIME_8(200)) e->state = 40;
+			if (e->timer > 10)  e->dir = 1;
+			if (e->timer > 200) e->state = 40;
 		}
 		break;
 		
@@ -587,13 +587,13 @@ void ai_motorbike(Entity *e) {
 			e->timer = 2;
 			e->dir = 0;
 			e->y -= pixel_to_sub(48);		// move up...
-			e->x_speed = -SPEED_12(0xFFF);		// ...and fly fast
+			e->x_speed = -0xFFF;		// ...and fly fast
 		}
 		/* fallthrough */
 		case 41:
 		{
 			e->timer += 2;	// makes exhaust sound go faster
-			if(e->timer > TIME_10(1000)) {
+			if(e->timer > 1000) {
 				e->state = STATE_DELETE;
 			}
 		}
@@ -666,7 +666,7 @@ void ai_ravil(Entity *e) {
 			ANIMATE(e, 4, 1,2,3);
 			if (e->frame >= 3) {
 				FACE_PLAYER(e);
-				MOVE_X(SPEED(0x200));
+				MOVE_X(0x200);
 				
 				if (++e->timer2 >= 3) { // lunge/bite
 					e->timer2 = 0;
@@ -680,7 +680,7 @@ void ai_ravil(Entity *e) {
 				}
 				
 				e->state = 21;
-				e->y_speed = -SPEED(0x400);
+				e->y_speed = -0x400;
 				e->grounded = FALSE;
 			}
 		}
@@ -715,7 +715,7 @@ void ai_ravil(Entity *e) {
 			e->flags &= ~(NPC_SHOOTABLE | NPC_SOLID);
 			//e->eflags &= ~(NPC_SHOOTABLE | NPC_SOLID);
 			e->state = 51;
-			e->y_speed = -SPEED(0x200);
+			e->y_speed = -0x200;
 		} /* fallthrough */
 		case 51:
 		{
@@ -729,11 +729,11 @@ void ai_ravil(Entity *e) {
 	}
 	
 	if (e->state == 52)
-		e->y_speed += SPEED(0x20);
+		e->y_speed += 0x20;
 	else
-		e->y_speed += SPEED(0x40);
+		e->y_speed += 0x40;
 	
-	LIMIT_Y(SPEED(0x5ff));
+	LIMIT_Y(0x5ff);
 	e->x = e->x_next;
 	e->y = e->y_next;
 }

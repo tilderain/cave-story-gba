@@ -34,12 +34,12 @@ void ai_bute_dying(Entity *e) {
 			e->animtime = 0;
 			e->state = 1;
 			
-			e->y_speed = -SPEED_10(0x1FF);
+			e->y_speed = -0x1FF;
 		} /* fallthrough */
 		case 1:
 		{
-			e->y_speed += SPEED_8(0x20);
-			LIMIT_Y(SPEED_12(0x5ff));
+			e->y_speed += 0x20;
+			LIMIT_Y(0x5ff);
 			
 			if (blk(e->x, 0, e->y, 8) == 0x41 && e->y_speed >= 0) {
 				e->state = 2;
@@ -54,7 +54,7 @@ void ai_bute_dying(Entity *e) {
 		{
 			e->x_speed -= (e->x_speed >> 3) + 1;
 			
-			if (++e->timer > TIME_8(50)) {
+			if (++e->timer > 50) {
 				e->state = STATE_DESTROY;
 			} else {
 				if((e->timer & 15) == 1) e->frame = baseframe + 2;
@@ -76,7 +76,7 @@ static uint8_t run_bute_defeated(Entity *e, uint16_t hp) {
 			e->type = OBJ_BUTE_DYING;
 			
 			sound_play(SND_ENEMY_SQUEAK, 5);
-			MOVE_X(-SPEED_8(0xFF));
+			MOVE_X(-0xFF);
 
 			e->vramindex += 16*6;
 			e->frame = 0;
@@ -107,9 +107,9 @@ void ai_bute_flying(Entity *e) {
 	if(++e->animtime & 1) {
 		FACE_PLAYER(e);
 		if(e->dir) {
-			if(e->x_speed <  SPEED_10(0x3E0)) e->x_speed += SPEED_8(0x20);
+			if(e->x_speed <  0x3E0) e->x_speed += 0x20;
 		} else {
-			if(e->x_speed > -SPEED_10(0x3E0)) e->x_speed -= SPEED_8(0x20);
+			if(e->x_speed > -0x3E0) e->x_speed -= 0x20;
 		}
 		if ((e->x_speed < 0 && blk(e->x, -8, e->y, 0) == 0x41) || 
 			(e->x_speed > 0 && blk(e->x,  8, e->y, 0) == 0x41)) {
@@ -118,9 +118,9 @@ void ai_bute_flying(Entity *e) {
 	} else {
 		if((e->animtime & 2) && ++e->frame > BF_FLYING2) e->frame = BF_FLYING1;
 		if(e->y < player.y) {
-			if(e->y_speed <  SPEED_10(0x3E0)) e->y_speed += SPEED_8(0x20);
+			if(e->y_speed <  0x3E0) e->y_speed += 0x20;
 		} else {
-			if(e->y_speed > -SPEED_10(0x3E0)) e->y_speed -= SPEED_8(0x20);
+			if(e->y_speed > -0x3E0) e->y_speed -= 0x20;
 		}
 		if ((e->y_speed > 0 && blk(e->x, 0, e->y,  8) == 0x41) || 
 			(e->y_speed < 0 && blk(e->x, 0, e->y, -8) == 0x41)) {
@@ -172,7 +172,7 @@ void ai_bute_spawner(Entity *e) {
 		break;
 		case 12:
 		{
-			if(++e->timer >= TIME_8(50)) e->state = 11;
+			if(++e->timer >= 50) e->state = 11;
 		}
 		break;
 	}
@@ -181,9 +181,9 @@ void ai_bute_spawner(Entity *e) {
 void onspawn_bute_falling(Entity *e) {
 	e->frame = BF_FALLING1;
 	if(e->flags & NPC_OPTION1) {
-		e->y_speed = -SPEED_12(0x600);
+		e->y_speed = -0x600;
 	} else {
-		e->y_speed = SPEED_12(0x600);
+		e->y_speed = 0x600;
 	}
 }
 
@@ -192,7 +192,7 @@ void ai_bute_falling(Entity *e) {
 
 	e->timer++;
 	if((e->timer & 3) == 0 && ++e->frame > BF_FALLING2) e->frame = BF_FALLING1;
-	if(e->timer > TIME_8(20)) {
+	if(e->timer > 20) {
 		if((e->y_speed > 0 && e->y >= player.y - (32<<CSF)) ||
 				(e->y_speed < 0 && e->y >= player.y + (32<<CSF)) ||
 				blk(e->x, e->dir ? 6 : -6, e->y, e->y_speed > 0 ? 6 : -6) == 0x41) {
@@ -210,7 +210,7 @@ void ai_bute_sword(Entity *e) {
 	if (run_bute_defeated(e, BUTE_HP)) return;
 	
 	if(!e->grounded) {
-		if(e->y_speed < SPEED_12(0x5E0)) e->y_speed += SPEED_8(0x20);
+		if(e->y_speed < 0x5E0) e->y_speed += 0x20;
 		// Check if we hit the ground when falling
 		if(e->y_speed > 0) {
 			e->x_next = e->x;
@@ -265,7 +265,7 @@ void ai_bute_sword(Entity *e) {
 		} /* fallthrough */
 		case 11:
 		{
-			if(++e->timer > TIME_8(30)) {
+			if(++e->timer > 30) {
 				e->state = 20;
 				e->timer = 0;
 			}
@@ -283,17 +283,17 @@ void ai_bute_sword(Entity *e) {
 		case 21:
 		{
 			if((++e->animtime & 3) == 0 && ++e->frame > BF_SWORD2) e->frame = BF_SWORD1;
-			MOVE_X(SPEED_10(0x3FF));
+			MOVE_X(0x3FF);
 			
 			if(PLAYER_DIST_X(e, 40<<CSF)) {
 				e->x_speed >>= 1;
-				e->y_speed = -SPEED_10(0x2FF);
+				e->y_speed = -0x2FF;
 				e->grounded = FALSE;
 				
 				e->state = 30;
 				e->frame = BF_SWORD3;	// sword back, jumping
 				sound_play(SND_ENEMY_JUMP, 5);
-			} else if(++e->timer > TIME_8(50)) {	// timeout, p got away
+			} else if(++e->timer > 50) {	// timeout, p got away
 				e->state = 10;
 				e->x_speed = 0;
 			}
@@ -303,7 +303,7 @@ void ai_bute_sword(Entity *e) {
 		// jumping up
 		case 30:
 		{
-			if (e->y_speed > -SPEED_8(0x80)) {
+			if (e->y_speed > -0x80) {
 				e->frame = BF_SWORD4;	// sword swipe fwd
 				e->attack = 9;
 				
@@ -334,7 +334,7 @@ void ai_bute_sword(Entity *e) {
 		
 		case 32:
 		{
-			if (++e->timer > TIME_8(30)) {
+			if (++e->timer > 30) {
 				e->state = 10;
 				e->timer = 0;
 			}
@@ -372,7 +372,7 @@ void ai_bute_archer(Entity *e) {
 				e->timer2 = 0;
 			}
 			
-			if (++e->timer > TIME_8(10)) {
+			if (++e->timer > 10) {
 				e->state++;
 				e->timer = 0;
 			}
@@ -383,7 +383,7 @@ void ai_bute_archer(Entity *e) {
 		case 3:
 		{
 			e->frame = e->timer2 ? BF_ARCHER5 : BF_ARCHER2;
-			if(++e->timer > TIME_8(30)) {
+			if(++e->timer > 30) {
 				e->state++;
 			} else if(e->timer & 2) {
 				e->frame++;
@@ -398,18 +398,18 @@ void ai_bute_archer(Entity *e) {
 			e->timer = 0;
 			
 			Entity *arrow = entity_create(e->x, e->y, OBJ_BUTE_ARROW, 0);
-			arrow->x_speed = (e->dir) ? SPEED_12(0x5FF) : -SPEED_12(0x5FF);
+			arrow->x_speed = (e->dir) ? 0x5FF : -0x5FF;
 			
-			if(e->timer2) arrow->y_speed = -SPEED_12(0x5FF);
+			if(e->timer2) arrow->y_speed = -0x5FF;
 			// frame: arrow away
 			e->frame = e->timer2 ? BF_ARCHER7 : BF_ARCHER4;
 		} /* fallthrough */
 		case 5:
 		{
-			if (++e->timer > TIME_8(30)) {
+			if (++e->timer > 30) {
 				e->state++;
 				e->frame = BF_ARCHER1;
-				e->timer = TIME_8(50) + (random() & 127);
+				e->timer = 50 + (random() & 127);
 			}
 		}
 		break;
@@ -437,7 +437,7 @@ void ai_bute_arrow(Entity *e) {
 		} /* fallthrough */
 		case 1:
 		{
-			if(++e->timer > TIME_8(10)) {
+			if(++e->timer > 10) {
 				e->state = 10;
 				// slow down a bit (was going real fast from bow)
 				e->x_speed -= e->x_speed >> 2;
@@ -448,8 +448,8 @@ void ai_bute_arrow(Entity *e) {
 		
 		case 10:
 		{
-			if(e->y_speed < SPEED_12(0x5E0)) e->y_speed += SPEED_8(0x20);
-			if(e->frame < 4 && ++e->animtime > TIME_8(10)) {
+			if(e->y_speed < 0x5E0) e->y_speed += 0x20;
+			if(e->frame < 4 && ++e->animtime > 10) {
 				e->frame++;
 				e->animtime = 0;
 			}
@@ -466,7 +466,7 @@ void ai_bute_arrow(Entity *e) {
 		case 20:	// hit something
 		{
 			e->hidden = (++e->timer & 2);
-			if(e->timer > TIME_8(30)) e->state = STATE_DELETE;
+			if(e->timer > 30) e->state = STATE_DELETE;
 		}
 		break;
 	}
@@ -488,7 +488,7 @@ void ai_mesa(Entity *e) {
 		} /* fallthrough */
 		case 1:
 		{
-			if (++e->timer > TIME_8(50)) e->state++;
+			if (++e->timer > 50) e->state++;
 			else if((++e->animtime & 31) == 0 && ++e->frame > MS_STAND2) e->frame = MS_STAND1;
 		}
 		break;
@@ -507,7 +507,7 @@ void ai_mesa(Entity *e) {
 		} /* fallthrough */
 		case 3:
 		{
-			if (++e->timer > TIME_8(50)) {
+			if (++e->timer > 50) {
 				e->state++;
 				e->timer = 0;
 				e->frame = MS_THROW2;	// hand up, throwing
@@ -516,8 +516,8 @@ void ai_mesa(Entity *e) {
 					Entity *block = e->linkedEntity;
 					
 					block->y = e->y - 0x800;
-					block->x_speed = e->dir ? SPEED_10(0x3FF) : -SPEED_10(0x3FF);
-					block->y_speed = -SPEED_10(0x3FF);
+					block->x_speed = e->dir ? 0x3FF : -0x3FF;
+					block->y_speed = -0x3FF;
 					block->state = 1;
 					
 					sound_play(SND_EM_FIRE, 5);
@@ -529,7 +529,7 @@ void ai_mesa(Entity *e) {
 		break;
 		case 4:
 		{
-			if (++e->timer > TIME_8(20)) {	// throw again, if player still near
+			if (++e->timer > 20) {	// throw again, if player still near
 				e->state = 1;
 				e->timer = 0;
 				e->frame = MS_STAND1;
@@ -552,8 +552,8 @@ void ai_mesa_block(Entity *e) {
 		
 		case 1:		// launched
 		{
-			e->y_speed += SPEED_8(0x2A);
-			LIMIT_Y(SPEED_12(0x5ff));
+			e->y_speed += 0x2A;
+			LIMIT_Y(0x5ff);
 			
 			if (blk(e->x, 0, e->y, 8) == 0x41 && e->y_speed >= 0) {
 				sound_play(SND_BLOCK_DESTROY, 5);
@@ -619,12 +619,12 @@ void ai_deleet(Entity *e) {
 			int16_t counter = -1;
 			
 			if(e->timer == 0) counter = 0;
-			if(e->timer == TIME_8(50)) counter = 1;
-			if(e->timer == TIME_8(100)) counter = 2;
-			if(e->timer == TIME_8(150)) counter = 3;
-			if(e->timer == TIME_8(200)) counter = 4;
+			if(e->timer == 50) counter = 1;
+			if(e->timer == 100) counter = 2;
+			if(e->timer == 150) counter = 3;
+			if(e->timer == 200) counter = 4;
 			
-			if(e->timer >= TIME_8(250)) {
+			if(e->timer >= 250) {
 				e->state = 3;
 				e->hidden = TRUE;
 				
@@ -685,7 +685,7 @@ void ai_rolling(Entity *e) {
 		
 		case 1:
 		{
-			if(e->x_speed > -SPEED_10(0x3C0)) e->x_speed -= SPEED_8(0x40);
+			if(e->x_speed > -0x3C0) e->x_speed -= 0x40;
 			if(blk(e->x, -8, e->y, 0) == 0x41) {
 				e->x_speed = 0;
 				e->state++;
@@ -694,7 +694,7 @@ void ai_rolling(Entity *e) {
 		break;
 		case 2:
 		{
-			if(e->y_speed > -SPEED_10(0x3C0)) e->y_speed -= SPEED_8(0x40);
+			if(e->y_speed > -0x3C0) e->y_speed -= 0x40;
 			if(blk(e->x, 0, e->y, -8) == 0x41) {
 				e->y_speed = 0;
 				e->state++;
@@ -703,7 +703,7 @@ void ai_rolling(Entity *e) {
 		break;
 		case 3:
 		{
-			if(e->x_speed < SPEED_10(0x3C0)) e->x_speed += SPEED_8(0x40);
+			if(e->x_speed < 0x3C0) e->x_speed += 0x40;
 			if(blk(e->x, 8, e->y, 0) == 0x41) {
 				e->x_speed = 0;
 				e->state++;
@@ -712,7 +712,7 @@ void ai_rolling(Entity *e) {
 		break;
 		case 4:
 		{
-			if(e->y_speed < SPEED_10(0x3C0)) e->y_speed += SPEED_8(0x40);
+			if(e->y_speed < 0x3C0) e->y_speed += 0x40;
 			if(blk(e->x, 0, e->y, 8) == 0x41) {
 				e->y_speed = 0;
 				e->state = 1;
@@ -796,7 +796,7 @@ void ai_puppy_ghost(Entity *e) {
 		{
 			e->hidden = (e->timer & 2);
 			
-			if (e->timer > TIME_8(50)) e->state = STATE_DELETE;
+			if (e->timer > 50) e->state = STATE_DELETE;
 		}
 		break;
 	}

@@ -319,7 +319,7 @@ void ai_sunstone(Entity *e) {
 			// Disable solid to work around this
 			e->flags &= ~(NPC_SOLID|NPC_SPECIALSOLID);
 			// Always face left, don't flip the sprite while moving
-			MOVE_X(SPEED(0x80));
+			MOVE_X(0x80);
 			e->dir = 0;
 			e->timer = 0;
 			e->state++;
@@ -337,8 +337,8 @@ void ai_sunstone(Entity *e) {
 
 void ai_armadillo(Entity *e) {
 	ANIMATE(e, 16, 0,1);
-	if(!e->grounded) e->y_speed += SPEED(0x40);
-	LIMIT_Y(SPEED(0x5ff));
+	if(!e->grounded) e->y_speed += 0x40;
+	LIMIT_Y(0x5ff);
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
 	switch(e->state) {
@@ -353,7 +353,7 @@ void ai_armadillo(Entity *e) {
 				(e->dir && collide_stage_rightwall(e))) {
 				TURN_AROUND(e);
 			}
-			MOVE_X(SPEED(0x100));
+			MOVE_X(0x100);
 		}
 		break;
 	}
@@ -387,19 +387,19 @@ void ai_crow(Entity *e) {
 		case 1:
 		case 101:
 		{
-			if 		(e->x > e->x_mark) e->x_speed -= SPEED_8(16);
-			else if (e->x < e->x_mark) e->x_speed += SPEED_8(16);
-			if 		(e->y > e->y_mark) e->y_speed -= SPEED_8(16);
-			else if (e->y < e->y_mark) e->y_speed += SPEED_8(16);
+			if 		(e->x > e->x_mark) e->x_speed -= 16;
+			else if (e->x < e->x_mark) e->x_speed += 16;
+			if 		(e->y > e->y_mark) e->y_speed -= 16;
+			else if (e->y < e->y_mark) e->y_speed += 16;
 			
 			FACE_PLAYER(e);
-			LIMIT_X(SPEED_10(0x200));
-			LIMIT_Y(SPEED_10(0x200));
+			LIMIT_X(0x200);
+			LIMIT_Y(0x200);
 
 			if (e->damage_time) {
 				e->state++;		// state 2/102
 				//e->timer = 0;
-				if (!e->linkedEntity) MOVE_X(SPEED_10(0x200));
+				if (!e->linkedEntity) MOVE_X(0x200);
 				e->y_speed = 0;
 			}
 		}
@@ -410,16 +410,16 @@ void ai_crow(Entity *e) {
 			FACE_PLAYER(e);
 			if (e->damage_time) {
 				// fall while hurt
-				e->y_speed += SPEED(0x20);
+				e->y_speed += 0x20;
 				e->x_speed = 0;
 				//e->timer = 0;
 			} else {
 				if(!e->linkedEntity) {
 					// move towards player
-					if(e->x < player.x) e->x_speed += SPEED_8(0x10);
-					else e->x_speed -= SPEED_8(0x10);
-					if(e->y < player.y) e->y_speed += SPEED_8(0x10);
-					else e->y_speed -= SPEED_8(0x10);
+					if(e->x < player.x) e->x_speed += 0x10;
+					else e->x_speed -= 0x10;
+					if(e->y < player.y) e->y_speed += 0x10;
+					else e->y_speed -= 0x10;
 				} else {
 					// carrying a skull; don't chase him
 					e->state--; // state 1/101
@@ -427,13 +427,13 @@ void ai_crow(Entity *e) {
 				//if(!e->timer) e->timer++;
 			}
 			// bounce off walls
-			if (e->x_speed < 0 && collide_stage_leftwall(e)) e->x_speed = SPEED_10(0x200);
-			if (e->x_speed > 0 && collide_stage_rightwall(e)) e->x_speed = -SPEED_10(0x200);
-			if (e->y_speed < 0 && collide_stage_ceiling(e)) e->y_speed = SPEED_10(0x200);
-			if (e->y_speed > 0 && collide_stage_floor(e)) e->y_speed = -SPEED_10(0x200);
+			if (e->x_speed < 0 && collide_stage_leftwall(e)) e->x_speed = 0x200;
+			if (e->x_speed > 0 && collide_stage_rightwall(e)) e->x_speed = -0x200;
+			if (e->y_speed < 0 && collide_stage_ceiling(e)) e->y_speed = 0x200;
+			if (e->y_speed > 0 && collide_stage_floor(e)) e->y_speed = -0x200;
 			
-			LIMIT_X(SPEED_12(0x5ff));
-			LIMIT_Y(SPEED_12(0x5ff));
+			LIMIT_X(0x5ff);
+			LIMIT_Y(0x5ff);
 		}
 		break;
 	}
@@ -449,11 +449,11 @@ void ai_crow_with_skull(Entity *e) {
 	// create the skullhead we're carrying
 	Entity *skull = entity_create(e->x, e->y, OBJ_SKULLHEAD, 0);
 	skull->linkedEntity = e;
-	skull->timer = TIME_8(50);
+	skull->timer = 50;
 	e->linkedEntity = skull;
 	
 	// switch over to the main crow AI, but only move up & down
-	e->y_speed = -SPEED_10(0x100 + (random() & 0xFF));
+	e->y_speed = -0x100 + (random() & 0xFF));
 	e->x_mark = e->x;
 	e->y_mark = e->y - (32<<CSF) + (random() & 0x7FFF);
 	e->state = 101;
@@ -480,10 +480,10 @@ void ai_skullhead(Entity *e) {
 				if ((abs(player.x - e->x) < pixel_to_sub(130)) && (abs(player.y - e->y) < pixel_to_sub(100))) {
 					e->timer++;
 				} else {
-					e->timer = TIME_8(49);
+					e->timer = 49;
 				}
 				
-				if (e->timer >= TIME_8(50)) {
+				if (e->timer >= 50) {
 					FACE_PLAYER(e);
 					e->frame = 1;
 					e->state = 102;
@@ -494,11 +494,11 @@ void ai_skullhead(Entity *e) {
 			case 102:			// mouth opened
 			{
 				e->timer++;
-				if (e->timer == TIME_8(30)) {
+				if (e->timer == 30) {
 					Entity *shot = entity_create(e->x, e->y, OBJ_SKELETON_SHOT, 0);
-					THROW_AT_TARGET(shot, player.x, player.y, SPEED_10(0x300));
+					THROW_AT_TARGET(shot, player.x, player.y, 0x300);
 					sound_play(SND_EM_FIRE, 5);
-				} else if (e->timer > TIME_8(50)) {
+				} else if (e->timer > 50) {
 					e->frame = 0;
 					e->state = 101;
 					e->timer = 0;
@@ -547,7 +547,7 @@ void ai_skullhead(Entity *e) {
 			default: // Crow was killed
 			{
 				e->state = 2;
-				MOVE_X(SPEED_10(0x200));
+				MOVE_X(0x200);
 				ai_skullhead(e);
 				return;
 			}
@@ -726,9 +726,9 @@ void ai_curlys_mimigas(Entity *e) {
 		e->flags &= ~NPC_SHOOTABLE;
 	}
 	
-	if(!e->grounded) e->y_speed += SPEED(0x20);
-	LIMIT_Y(SPEED(0x5ff));
-	LIMIT_X(SPEED(0x1ff));
+	if(!e->grounded) e->y_speed += 0x20;
+	LIMIT_Y(0x5ff);
+	LIMIT_X(0x1ff);
 	collide_stage_leftwall(e);
 	collide_stage_rightwall(e);
 	if(e->grounded) e->grounded = collide_stage_floor_grounded(e);
@@ -764,14 +764,14 @@ void ai_skeleton_shot(Entity *e) {
 	e->x_next = e->x;
 	e->y_next = e->y;
 	if (collide_stage_floor(e)) {
-		e->y_speed = -SPEED(0x180);
+		e->y_speed = -0x180;
 		e->state = 1;	// begin falling
 		e->timer += 4;
 	}
 	
 	if (e->state == 1) {
-		e->y_speed += SPEED(0x10);
-		LIMIT_Y(SPEED(0x5ff));
+		e->y_speed += 0x10;
+		LIMIT_Y(0x5ff);
 	}
 	
 	e->x += e->x_speed;
@@ -824,14 +824,14 @@ void ai_skeleton(Entity *e) {
 			e->state = 21;
 			e->frame = 1;
 			e->timer2 = 0;
-			e->y_speed = -(SPEED_10(0x200) + SPEED_10(random() & 0x3FF));
+			e->y_speed = -(0x200 + random() & 0x3FF));
 			e->grounded = FALSE;
 			
 			// jump towards player, unless we've been hurt; in that case jump away
 			if (!e->damage_time) {
-				e->x_speed += (e->x_next > player.x) ? -SPEED(0x100):SPEED(0x100);
+				e->x_speed += (e->x_next > player.x) ? -0x100:0x100;
 			} else {
-				e->x_speed += (e->x_next > player.x) ? SPEED(0x100):-SPEED(0x100);
+				e->x_speed += (e->x_next > player.x) ? 0x100:-0x100;
 			}
 		} /* fallthrough */
 		case 21:
@@ -856,9 +856,9 @@ void ai_skeleton(Entity *e) {
 	}
 	
 	if (e->state >= 10) FACE_PLAYER(e);
-	if(!e->grounded) e->y_speed += SPEED(0x33);
-	LIMIT_X(SPEED(0x5ff));
-	LIMIT_Y(SPEED(0x5ff));
+	if(!e->grounded) e->y_speed += 0x33;
+	LIMIT_X(0x5ff);
+	LIMIT_Y(0x5ff);
 	
 	e->x = e->x_next;
 	e->y = e->y_next;
@@ -1012,12 +1012,12 @@ void ai_puppy_run(Entity *e) {
 			// "bounce" off walls
 			if (e->dir) {
 				if (collide_stage_rightwall(e)) {
-					e->x_speed = -SPEED(0x400);
+					e->x_speed = -0x400;
 					e->dir = 0;
 				}
 			} else {
 				if (collide_stage_leftwall(e)) {
-					e->x_speed = SPEED(0x400);
+					e->x_speed = 0x400;
 					e->dir = 1;
 				}
 			}
@@ -1025,11 +1025,11 @@ void ai_puppy_run(Entity *e) {
 			e->x = e->x_next;
 			e->y = e->y_next;
 			
-			e->x_speed += e->dir ? SPEED(0x40) : -SPEED(0x40);
-			if(!e->grounded) e->y_speed += SPEED(0x40);
+			e->x_speed += e->dir ? 0x40 : -0x40;
+			if(!e->grounded) e->y_speed += 0x40;
 			
-			LIMIT_X(SPEED(0x400));
-			LIMIT_Y(SPEED(0x5FF));
+			LIMIT_X(0x400);
+			LIMIT_Y(0x5FF);
 		}
 		break;
 	}

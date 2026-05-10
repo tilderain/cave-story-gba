@@ -22,8 +22,8 @@ int32_t curly_target_y = 0;
 static void CaiJUMP(Entity *e) {
 	if (e->grounded) {
 		moveMeToFront = TRUE;
-		e->y_speed = -SPEED(0x300) - (random() & 0x2FF);
-		e->y_next -= SPEED(0x300);
+		e->y_speed = -0x300 - (random() & 0x2FF);
+		e->y_next -= 0x300;
 		e->grounded = FALSE;
 		e->frame = WALK2;
 		sound_play(SND_PLAYER_JUMP, 5);
@@ -51,7 +51,7 @@ void ai_curly_ai(Entity *e) {
 		{
 			e->alwaysActive = TRUE;
 			e->x_speed = 0;
-			e->y_speed += SPEED(0x1F);
+			e->y_speed += 0x1F;
 		}
 		break;
 		case CAI_INIT:			// set to this by an ANP in Maze M
@@ -89,9 +89,9 @@ void ai_curly_ai(Entity *e) {
 		/* fallthrough */
 		case CAI_KNOCKEDOUT+1:
 		{
-			if (++e->timer > TIME(1000)) {	// start fighting
+			if (++e->timer > 1000) {	// start fighting
 				e->state = CAI_START;
-			} else if (e->timer > TIME(750)) {	// stand up
+			} else if (e->timer > 750) {	// stand up
 				e->flags &= ~NPC_INTERACTIVE;
 				e->frame = 0;
 			}
@@ -204,8 +204,8 @@ void ai_curly_ai(Entity *e) {
 	
 	if (!reached_p)	{	// if not at rest walk towards target
 		// walk towards target
-		if (e->x_next > e->x_mark) e->x_speed -= SPEED(0x20);
-		if (e->x_next < e->x_mark) e->x_speed += SPEED(0x20);
+		if (e->x_next > e->x_mark) e->x_speed -= 0x20;
+		if (e->x_next < e->x_mark) e->x_speed += 0x20;
 		
 		// jump if we hit a wall, jump higher if off camera
 		if (e->grounded && (blockr || blockl)) {
@@ -225,12 +225,12 @@ void ai_curly_ai(Entity *e) {
 	// the improbable jump - when AI gets confused, just cheat!
 	// jump REALLY high by reducing gravity until we clear the wall
 	if (curly_impjump > 0) {
-		e->y_speed += SPEED(0x10);
+		e->y_speed += 0x10;
 		// deactivate Improbable Jump once we clear the wall or hit the ground
 		if (e->grounded || (!blockl && !blockr)) curly_impjump = 0;
 		else curly_impjump = abs(e->x - camera.x) > pixel_to_sub(168);
 	}
-	else e->y_speed += SPEED(0x33);
+	else e->y_speed += 0x33;
 	
 	// look up/down at target
 	curly_look = 0;
@@ -269,8 +269,8 @@ void ai_curly_ai(Entity *e) {
 	e->x = e->x_next;
 	e->y = e->y_next;
 	
-	LIMIT_X(SPEED(0x300));
-	LIMIT_Y(SPEED(0x5ff));
+	LIMIT_X(0x300);
+	LIMIT_Y(0x5ff);
 }
 
 static void fire_mgun(int32_t x, int32_t y, uint8_t dir) {

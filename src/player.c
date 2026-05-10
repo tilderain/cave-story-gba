@@ -186,25 +186,25 @@ void player_update() {
 		if(tile & 0x80) {
 			// This stops us fron getting stuck in ledges
 			if((blk(player.x, 0, player.y, 6) & 0x83) == 0x81) {
-				player.y_speed -= SPEED_8(0x80);
+				player.y_speed -= 0x80;
 			} else {
 				switch(tile & 0x03) {
-					case 0: player.x_speed -= SPEED_8(0x88); break;
-					case 1: player.y_speed -= SPEED_8(0x80); break;
-					case 2: player.x_speed += SPEED_8(0x88); break;
-					case 3: player.y_speed += SPEED_8(0x50); break;
+					case 0: player.x_speed -= 0x88; break;
+					case 1: player.y_speed -= 0x80; break;
+					case 2: player.x_speed += 0x88; break;
+					case 3: player.y_speed += 0x50; break;
 				}
 			}
 			if(player.underwater) {
-				if(player.x_speed >  SPEED_12(0x4E0)) player.x_speed =  SPEED_12(0x4E0);
-				if(player.x_speed < -SPEED_12(0x4E0)) player.x_speed = -SPEED_12(0x4E0);
-				if(player.y_speed >  SPEED_12(0x420)) player.y_speed =  SPEED_12(0x420);
-				if(player.y_speed < -SPEED_12(0x4FF)) player.y_speed = -SPEED_12(0x4FF);
+				if(player.x_speed >  0x4E0) player.x_speed =  0x4E0;
+				if(player.x_speed < -0x4E0) player.x_speed = -0x4E0;
+				if(player.y_speed >  0x420) player.y_speed =  0x420;
+				if(player.y_speed < -0x4FF) player.y_speed = -0x4FF;
 			} else {
-				if(player.x_speed >  SPEED_12(0x5FF)) player.x_speed =  SPEED_12(0x5FF);
-				if(player.x_speed < -SPEED_12(0x5FF)) player.x_speed = -SPEED_12(0x5FF);
-				if(player.y_speed >  SPEED_12(0x5FF)) player.y_speed =  SPEED_12(0x5FF);
-				if(player.y_speed < -SPEED_12(0x5FF)) player.y_speed = -SPEED_12(0x5FF);
+				if(player.x_speed >  0x5FF) player.x_speed =  0x5FF;
+				if(player.x_speed < -0x5FF) player.x_speed = -0x5FF;
+				if(player.y_speed >  0x5FF) player.y_speed =  0x5FF;
+				if(player.y_speed < -0x5FF) player.y_speed = -0x5FF;
 			}
 		}
 		player_update_movement();
@@ -352,7 +352,7 @@ void player_update() {
 	if(!tscState) {
 		if(player.underwater && !(playerEquipment & EQUIP_AIRTANK)) {
 			if(airTick == 0) {
-				airTick = TIME_8(9);
+				airTick = 9;
 				airPercent--;
 				if(airPercent == 0) {
 					// Spoilers
@@ -429,7 +429,7 @@ void player_update() {
 		w->maxammo = 100;
 		uint8_t chargespeed;
 		if(w->level == 1) {
-			chargespeed = TIME_8(25); // Twice per second
+			chargespeed = 25; // Twice per second
 			if(joy_pressed(btn[cfg_btn_shoot])) weapon_fire(*w);
 		} else {
 			chargespeed = 3; // Around 12-15 per second
@@ -731,26 +731,26 @@ void player_start_booster() {
 		
 		switch(playerBoostState) {
 			case BOOST_UP:
-				player.y_speed = -SPEED_12(0x600);
+				player.y_speed = -0x600;
 			break;
 			case BOOST_DOWN:
-				player.y_speed = SPEED_12(0x600);
+				player.y_speed = 0x600;
 			break;
 			case BOOST_HOZ:
 				player.y_speed = 0;
 				if (joy_down(BUTTON_LEFT)) {
-					player.x_speed = -SPEED_12(0x600);
+					player.x_speed = -0x600;
                     // Little hack to prevent clipping against left wall
                     player.x += 0x100;
 				} else {
-					player.x_speed = SPEED_12(0x600);
+					player.x_speed = 0x600;
                 }
 			break;
 		}
 	} else {
 		playerBoostState = BOOST_08;
 		// help it overcome gravity
-		if (player.y_speed > SPEED_8(0xFF))
+		if (player.y_speed > 0xFF)
 			player.y_speed >>= 1;
 	}
 	sound_play(SND_BOOSTER, 3);
@@ -791,50 +791,50 @@ static void player_update_booster() {
 		{
             if(!player.dir) { // Left
                 if(nblockl) {
-                    player.y_speed = -SPEED_8(0xFF);
+                    player.y_speed = -0xFF;
                     player.x += 0x100;
                 }
             } else { // Right
                 if(nblockr) {
-                    player.y_speed = -SPEED_8(0xFF);
+                    player.y_speed = -0xFF;
                     player.x -= 0x100;
                 }
             }
 			// I believe the player should not constantly fly upward after
 			// getting hit but need to verify what the original CS does
 			//if(playerIFrames) {
-			//	if(player.y_speed > 0) player.y_speed -= SPEED(0x20);
-			//	if(player.y_speed < 0) player.y_speed += SPEED(0x20);
+			//	if(player.y_speed > 0) player.y_speed -= 0x20;
+			//	if(player.y_speed < 0) player.y_speed += 0x20;
 			//}
-			//if (joy_down(BUTTON_DOWN)) player.y_speed += SPEED(0x20);
-			//if (joy_down(BUTTON_UP)) player.y_speed -= SPEED(0x20);
+			//if (joy_down(BUTTON_DOWN)) player.y_speed += 0x20;
+			//if (joy_down(BUTTON_UP)) player.y_speed -= 0x20;
 		}
 		break;
 		case BOOST_UP:
 		{
-			player.y_speed -= SPEED_8(0x20);
-			if(player.y_speed < -SPEED_12(0x600)) player.y_speed = -SPEED_12(0x600);
+			player.y_speed -= 0x20;
+			if(player.y_speed < -0x600) player.y_speed = -0x600;
 		}
 		break;
 		case BOOST_DOWN:
 		{
-			player.y_speed += SPEED_8(0x20);
+			player.y_speed += 0x20;
 		}
 		break;
 		case BOOST_08:
 		{
 			// top speed and sputtering
-			if (player.y_speed < -SPEED_10(0x3FF)) {
-				player.y_speed += SPEED_8(0x20);
+			if (player.y_speed < -0x3FF) {
+				player.y_speed += 0x20;
 				sputtering = TRUE;	// no sound/smoke this frame
 			} else {
-				player.y_speed -= SPEED_8(0x20);
+				player.y_speed -= 0x20;
 			}
 		}
 		break;
 	}
 	// smoke and sound effects
-	if((++player.timer2 >= TIME_8(5)) && !sputtering) {
+	if((++player.timer2 >= 5) && !sputtering) {
 		player.timer2 = 0;
 		sound_play(SND_BOOSTER, 3);
 		switch(playerBoostState) {
@@ -1030,7 +1030,7 @@ static void draw_air_percent() {
 static void player_update_air_display() {
 	// Blink for a second after getting out of the water
 	if(airPercent == 100) {
-		if(airDisplayTime == TIME_8(50)) {
+		if(airDisplayTime == 50) {
 			draw_air_percent();
 		} else if(airDisplayTime & 4) {
 			vdp_sprites_add(airSprite, 2);
@@ -1044,7 +1044,7 @@ static void player_update_air_display() {
 			vdp_tiles_load_from_rom(SPR_TILES(spr, 0, 0), TILE_AIRINDEX, 1);
 		}
 		// Calculate air percent and display the value
-		if(airTick == TIME_8(9)) draw_air_percent();
+		if(airTick == 9) draw_air_percent();
 		vdp_sprites_add(airSprite, 2);
 	}
 }
@@ -1071,7 +1071,7 @@ void player_draw() {
 				lookingDown = FALSE;
 				if(joystate&(BUTTON_LEFT|BUTTON_RIGHT)) {
 					static const uint8_t f[] = { UPWALK1, LOOKUP, UPWALK2, LOOKUP };
-					if(++player.timer2 > TIME_8(5)) {
+					if(++player.timer2 > 5) {
 						player.timer2 = 0;
 						if(++player.animtime > 3) player.animtime = 0;
 					}
@@ -1083,7 +1083,7 @@ void player_draw() {
 			} else if(joystate&(BUTTON_LEFT|BUTTON_RIGHT) && !controlsLocked) {
 				lookingDown = FALSE;
 				static const uint8_t f[] = { WALK1, STAND, WALK2, STAND };
-				if(++player.timer2 > TIME_8(5)) {
+				if(++player.timer2 > 5) {
 					player.timer2 = 0;
 					if(++player.animtime > 3) player.animtime = 0;
 				}
@@ -1238,7 +1238,7 @@ uint8_t player_inflict_damage(uint16_t damage) {
 	}
 	if(!iSuckAtThisGameSHIT) player.health -= damage;
 	sound_play(SND_PLAYER_HURT, 5);
-	playerIFrames = TIME_8(100);
+	playerIFrames = 100;
 	// Halve damage applied to weapon energy if we have the arms barrier
 	if(playerEquipment & EQUIP_ARMSBARRIER) damage = (damage + 1) >> 1;
 	// Decrease weapon exp
@@ -1264,7 +1264,7 @@ uint8_t player_inflict_damage(uint16_t damage) {
 		}
 	}
 	// Don't knock back in <UNI:0001 mode
-	if(!playerMoveMode) player.y_speed = -SPEED_10(0x3FF);
+	if(!playerMoveMode) player.y_speed = -0x3FF;
 	player.grounded = FALSE;
 	return FALSE;
 }

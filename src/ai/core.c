@@ -154,7 +154,7 @@ void ai_core(Entity *e) {
 		case CORE_CLOSED+1:
 		{
 			// open mouth after 400 ticks
-			if (e->timer > TIME_10(400)) {
+			if (e->timer > 400) {
 				if (++e->timer2 > 3) {
 					// every 3rd time do gusting left and big core blasts
 					e->timer2 = 0;
@@ -195,7 +195,7 @@ void ai_core(Entity *e) {
 			}
 			
 			// spawn ghosties
-			if(e->timer < TIME_8(200)) {
+			if(e->timer < 200) {
 				if((e->timer & 31) == 0) {
 					entity_create(e->x + pixel_to_sub(-48 + (random() & 63)),
 						     	  e->y + pixel_to_sub(-64 + (random() & 127)),
@@ -204,7 +204,7 @@ void ai_core(Entity *e) {
 			}
 			
 			// close mouth when 400 ticks have passed or we've taken more than 200 damage
-			if(e->timer > TIME_10(400) || (e->savedhp - e->health) >= 200) {
+			if(e->timer > 400 || (e->savedhp - e->health) >= 200) {
 				e->state = CORE_CLOSED;
 				CLOSE_MOUTH;
 				do_thrust = TRUE;
@@ -223,19 +223,19 @@ void ai_core(Entity *e) {
 		{
 			// Instead of spawning a bunch of laggy 1 pixel objects push the water to the left
 			backScrollTimer++;
-			player.x_speed -= SPEED_8(0x24);
+			player.x_speed -= 0x24;
 			
 			OPEN_MOUTH;
 			
 			//e->timer++;
 			// spawn the big white blasts
-			if(e->timer==TIME_10(300) || e->timer==TIME_10(350) || e->timer==TIME_10(400)) {
+			if(e->timer==300 || e->timer==350 || e->timer==400) {
 				Entity *shot = entity_create(pieces[CFRONT]->x, pieces[CFRONT]->y, OBJ_CORE_BLAST, 0);
-				THROW_AT_TARGET(shot, player.x, player.y, SPEED_12(0x600));
+				THROW_AT_TARGET(shot, player.x, player.y, 0x600);
 				sound_play(SND_LIGHTNING_STRIKE, 5);
 			}
 			
-			if(e->timer > TIME_10(400)) {
+			if(e->timer > 400) {
 				e->state = CORE_CLOSED;
 				CLOSE_MOUTH;
 				do_thrust = TRUE;
@@ -278,8 +278,8 @@ void ai_core(Entity *e) {
 			
 			#define CORE_DEATH_TARGET_X		0x72000
 			#define CORE_DEATH_TARGET_Y		0x16000
-			e->x_speed += (e->x > CORE_DEATH_TARGET_X) ? -SPEED(0x80) : SPEED(0x80);
-			e->y_speed += (e->y > CORE_DEATH_TARGET_Y) ? -SPEED(0x80) : SPEED(0x80);
+			e->x_speed += (e->x > CORE_DEATH_TARGET_X) ? -0x80 : 0x80;
+			e->y_speed += (e->y > CORE_DEATH_TARGET_Y) ? -0x80 : 0x80;
 		}
 		break;
 		case 600:			// teleported away by Misery
@@ -323,11 +323,11 @@ void ai_core(Entity *e) {
 		e->timer++;
 		
 		// fire off each minicore sequentially...
-		if(e->timer == TIME(80+  0)) pieces[0]->state = MC_CHARGE_FIRE;
-		if(e->timer == TIME(80+ 30)) pieces[1]->state = MC_CHARGE_FIRE;
-		if(e->timer == TIME(80+ 60)) pieces[2]->state = MC_CHARGE_FIRE;
-		if(e->timer == TIME(80+ 90)) pieces[3]->state = MC_CHARGE_FIRE;
-		if(e->timer == TIME(80+120)) pieces[4]->state = MC_CHARGE_FIRE;
+		if(e->timer == 80+  0) pieces[0]->state = MC_CHARGE_FIRE;
+		if(e->timer == 80+ 30) pieces[1]->state = MC_CHARGE_FIRE;
+		if(e->timer == 80+ 60) pieces[2]->state = MC_CHARGE_FIRE;
+		if(e->timer == 80+ 90) pieces[3]->state = MC_CHARGE_FIRE;
+		if(e->timer == 80+120) pieces[4]->state = MC_CHARGE_FIRE;
 		
 		// move main core towards a spot in front of target
 		e->x_speed += (e->x > (e->x_mark + (48<<CSF))) ? -4 : 4;
@@ -344,8 +344,8 @@ void ai_core(Entity *e) {
 		pieces[CFRONT]->flags |= NPC_INVINCIBLE | NPC_SHOOTABLE;
 	}
 	
-	LIMIT_X(SPEED_8(0x80));
-	LIMIT_Y(SPEED_8(0x80));
+	LIMIT_X(0x80);
+	LIMIT_Y(0x80);
 	
 	e->x += e->x_speed;
 	e->y += e->y_speed;
@@ -404,7 +404,7 @@ void ai_minicore(Entity *e) {
 		/* fallthrough */
 		case MC_THRUST+1:
 		{
-			if (++e->timer > TIME_8(50)) e->mouth_open = TRUE;
+			if (++e->timer > 50) e->mouth_open = TRUE;
 		}
 		break;
 		case MC_CHARGE_FIRE:			// charging for fire
@@ -415,7 +415,7 @@ void ai_minicore(Entity *e) {
 		/* fallthrough */
 		case MC_CHARGE_FIRE+1:			// flash blue
 		{
-			if(++e->timer > TIME_8(20)) e->state = MC_FIRE;
+			if(++e->timer > 20) e->state = MC_FIRE;
 		}
 		break;
 		case MC_FIRE:			// firing
@@ -431,13 +431,13 @@ void ai_minicore(Entity *e) {
 		/* fallthrough */
 		case MC_FIRE+1:
 		{
-			if (++e->timer > TIME(50)) {
+			if (++e->timer > 50) {
 				e->state = MC_FIRED;
 				e->mouth_open = TRUE;
 			} else if (e->timer==1 || e->timer==3) {
 				// fire at player at speed (2<<CSF) with 2 degrees of variance
 				Entity *shot = entity_create(e->x - 0x1000, e->y, OBJ_MINICORE_SHOT, 0);
-				THROW_AT_TARGET(shot, player.x, player.y, SPEED(0x400));
+				THROW_AT_TARGET(shot, player.x, player.y, 0x400);
 				sound_play(SND_EM_FIRE, 5);
 			}
 		}
@@ -451,7 +451,7 @@ void ai_minicore(Entity *e) {
 		/* fallthrough */
 		case MC_RETREAT+1:		// retreat back into the abyss
 		{
-			e->x_speed += SPEED(0x20);
+			e->x_speed += 0x20;
 			if (e->x > block_to_sub(stageWidth) + 0x4000) {
 				e->state = STATE_DELETE;
 			}
@@ -515,7 +515,7 @@ void ai_minicore_shot(Entity *e) {
 }
 
 void ai_core_ghostie(Entity *e) {
-	if(e->x_speed > -SPEED_10(0x3E0)) e->x_speed -= SPEED_8(0x20);
+	if(e->x_speed > -0x3E0) e->x_speed -= 0x20;
 	e->x += e->x_speed;
 	if((++e->animtime & 3) == 0 && ++e->frame > 2) e->frame = 0;
 	if(blk(e->x, 0, e->y, 0) == 0x41) {
@@ -527,5 +527,5 @@ void ai_core_ghostie(Entity *e) {
 void ai_core_blast(Entity *e) {
 	e->x += e->x_speed;
 	e->y += e->y_speed;
-	if(++e->timer > TIME_8(200)) e->state = STATE_DELETE;
+	if(++e->timer > 200) e->state = STATE_DELETE;
 }

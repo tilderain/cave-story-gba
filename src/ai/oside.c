@@ -36,7 +36,7 @@ void ai_night_spirit(Entity *e) {
 		{
 			ANIMATE(e, 4, 0,1,2);
 			
-			if (++e->timer > TIME_8(200)) {
+			if (++e->timer > 200) {
 				e->state = NS_PREPARE_FIRE;
 				e->timer = 0;
 				e->frame += 3;
@@ -47,7 +47,7 @@ void ai_night_spirit(Entity *e) {
 		case NS_PREPARE_FIRE:
 		{
 			ANIMATE(e, 4, 3,4,5);
-			if (++e->timer > TIME_8(50)) {
+			if (++e->timer > 50) {
 				e->state = NS_FIRING;
 				e->timer = 0;
 				e->frame += 3;
@@ -61,13 +61,13 @@ void ai_night_spirit(Entity *e) {
 			
 			if (!(e->timer & 7)) {
 				Entity *shot = entity_create(e->x, e->y, OBJ_NIGHT_SPIRIT_SHOT, 0);
-				shot->x_speed = SPEED_10(0x180) + SPEED_10(random() & 0x3FF);
-				shot->y_speed = -SPEED_10(0x200) + SPEED_10(random() & 0x3FF);
+				shot->x_speed = 0x180 + random() & 0x3FF);
+				shot->y_speed = -0x200 + random() & 0x3FF);
 				
 				sound_play(SND_BUBBLE, 3);
 			}
 			
-			if (++e->timer > TIME(50)) {
+			if (++e->timer > 50) {
 				e->state = NS_SEEK_PLAYER;
 				e->timer = 0;
 				e->frame -= 6;
@@ -80,8 +80,8 @@ void ai_night_spirit(Entity *e) {
 			ANIMATE(e, 4, 3,4,5);
 			
 			// lie in wait at original set point
-			e->y_speed += (e->y > e->y_mark) ? -SPEED(0x40) : SPEED(0x40);
-			LIMIT_Y(SPEED(0x400));
+			e->y_speed += (e->y > e->y_mark) ? -0x40 : 0x40;
+			LIMIT_Y(0x400);
 			
 			if (abs(e->y - e->y_mark) < pixel_to_sub(SCREEN_HALF_H)) {
 				e->state = NS_GUARD_SET_POINT;
@@ -94,8 +94,8 @@ void ai_night_spirit(Entity *e) {
 			ANIMATE(e, 4, 3,4,5);
 			
 			// lie in wait at original set point
-			e->y_speed += (e->y > e->y_mark) ? -SPEED(0x40) : SPEED(0x40);
-			LIMIT_Y(SPEED(0x400));
+			e->y_speed += (e->y > e->y_mark) ? -0x40 : 0x40;
+			LIMIT_Y(0x400);
 			
 			// and if player appears again...
 			if (PLAYER_DIST_Y(e, pixel_to_sub(SCREEN_HEIGHT))) {	
@@ -109,13 +109,13 @@ void ai_night_spirit(Entity *e) {
 	
 	if (e->state >= NS_SEEK_PLAYER && e->state < NS_GUARD_SET_POINT) {
 		// sinusoidal player seek
-		e->y_speed += (e->y < player.y) ? SPEED(0x19) : -SPEED(0x19);
+		e->y_speed += (e->y < player.y) ? 0x19 : -0x19;
 		
 		// rarely seen, but they do bounce off walls
 		e->x_next = e->x;
 		e->y_next = e->y + e->y_speed;
-		if (collide_stage_ceiling(e)) e->y_speed = SPEED(0x200);
-		if (collide_stage_floor(e)) e->y_speed = -SPEED(0x200);
+		if (collide_stage_ceiling(e)) e->y_speed = 0x200;
+		if (collide_stage_floor(e)) e->y_speed = -0x200;
 		e->y = e->y_next;
 		
 		// avoid leaving designated area
@@ -125,12 +125,12 @@ void ai_night_spirit(Entity *e) {
 			}
 		}
 	}
-	LIMIT_Y(SPEED(0x400));
+	LIMIT_Y(0x400);
 }
 
 void ai_night_spirit_sh(Entity *e) {
 	ANIMATE(e, 4, 0,1,2);
-	e->x_speed -= SPEED(0x19);
+	e->x_speed -= 0x19;
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
 	if (e->x_speed < 0 && collide_stage_leftwall(e)) {
@@ -176,7 +176,7 @@ void ai_hoppy(Entity *e) {
 				e->frame = 3;
 				
 				sound_play(SND_HOPPY_JUMP, 5);
-				e->x_speed = SPEED(0x700);
+				e->x_speed = 0x700;
 				e->grounded = FALSE;
 			}
 		}
@@ -184,8 +184,8 @@ void ai_hoppy(Entity *e) {
 		
 		case 3:	// in air...
 		{
-			if (e->y < player.y)	  e->y_speed = SPEED(0xAA);
-			else if (e->y > player.y) e->y_speed = -SPEED(0xAA);
+			if (e->y < player.y)	  e->y_speed = 0xAA;
+			else if (e->y > player.y) e->y_speed = -0xAA;
 			
 			// Top/bottom
 			if (e->x_speed > 0) {
@@ -223,8 +223,8 @@ void ai_hoppy(Entity *e) {
 	e->x = e->x_next;
 	e->y = e->y_next;
 	
-	if(!e->grounded) e->x_speed -= SPEED(0x2A);
-	LIMIT_X(SPEED(0x5ff));
+	if(!e->grounded) e->x_speed -= 0x2A;
+	LIMIT_X(0x5ff);
 }
 
 void onspawn_skydragon(Entity *e) {
@@ -281,7 +281,7 @@ void ai_sky_dragon(Entity *e) {
 			}
 			e->y_speed += (e->y < e->y_mark) ? 0x08 : -0x08;
 			e->x_speed += 0x20;
-			LIMIT_X(SPEED(0x600));
+			LIMIT_X(0x600);
 		}
 		break;
 		
@@ -354,7 +354,7 @@ void ai_little_family(Entity *e) {
 				e->dir ^= 1;
 			}
 			
-			MOVE_X(SPEED(0x100));
+			MOVE_X(0x100);
 			ANIMATE(e, 4, 0,1);
 			
 			if (e->timer == 0) e->state = 0;
@@ -368,8 +368,8 @@ void ai_little_family(Entity *e) {
 		case 220: e->frame += 4; break;		// little son
 	}
 	
-	if(!e->grounded) e->y_speed += SPEED(0x20);
-	LIMIT_Y(SPEED(0x5ff));
+	if(!e->grounded) e->y_speed += 0x20;
+	LIMIT_Y(0x5ff);
 	
 	e->x = e->x_next;
 	e->y = e->y_next;

@@ -64,8 +64,8 @@ void ai_ironhead(Entity *e) {
 			e->x_mark = e->x;
 			e->y_mark = e->y;
 			
-			e->y_speed = -SPEED_10(0x200) + SPEED_10(random() & 0x3FF);
-			e->x_speed = -SPEED_10(0x200) + SPEED_10(random() & 0x3FF);
+			e->y_speed = -0x200 + random() & 0x3FF);
+			e->x_speed = -0x200 + random() & 0x3FF);
 			
 			e->flags |= NPC_SHOOTABLE;
 		} /* fallthrough */
@@ -73,16 +73,16 @@ void ai_ironhead(Entity *e) {
 		{
 			ANIMATE(e, 8, 4,3,2,3,4,1,0,1);
 			if (e->dir2) {
-				e->x_mark += SPEED_12(0x400);
+				e->x_mark += 0x400;
 			} else {
-				e->x_mark -= SPEED_10(0x200);
-				e->y_mark += (e->y_mark < player.y) ? SPEED_10(0x200): -SPEED_10(0x200);
+				e->x_mark -= 0x200;
+				e->y_mark += (e->y_mark < player.y) ? 0x200: -0x200;
 			}
 			
 			e->x_speed += (e->x > e->x_mark) ? -8 : 8;
 			e->y_speed += (e->y > e->y_mark) ? -8 : 8;
 			
-			LIMIT_Y(SPEED_10(0x200));
+			LIMIT_Y(0x200);
 			
 			if (e->dir2) {
 				if (e->x > 0x5a000) {
@@ -157,8 +157,8 @@ void ai_ironh_fishy(Entity *e) {
 		{
 			e->state = 10;
 			e->animtime = 0;
-			e->y_speed = -SPEED_10(0x200) + SPEED_10(random() & 0x3FF);
-			e->x_speed = SPEED_12(0x800);
+			e->y_speed = -0x200 + random() & 0x3FF);
+			e->x_speed = 0x800;
 		} /* fallthrough */
 		case 10:			// harmless fishy
 		{
@@ -176,9 +176,9 @@ void ai_ironh_fishy(Entity *e) {
 		break;
 	}
 	
-	if (e->y_speed < 0 && collide_stage_ceiling(e)) e->y_speed = SPEED_10(0x200);
-	if (e->y_speed > 0 && collide_stage_floor(e)) e->y_speed = -SPEED_10(0x200);
-	e->x_speed -= SPEED_8(0x0c);
+	if (e->y_speed < 0 && collide_stage_ceiling(e)) e->y_speed = 0x200;
+	if (e->y_speed > 0 && collide_stage_floor(e)) e->y_speed = -0x200;
+	e->x_speed -= 0x0c;
 	e->x = e->x_next;
 	e->y = e->y_next;
 	
@@ -195,7 +195,7 @@ void ai_ironh_shot(Entity *e) {
 			e->timer2 = 0;
 		}
 	} else {
-		e->x_speed += SPEED(0x20);
+		e->x_speed += 0x20;
 	}
 	
 	ANIMATE(e, 8, 0,1,2);
@@ -214,7 +214,7 @@ void ai_ironh_shot(Entity *e) {
 void ai_brick_spawner(Entity *e) {
 	if (!e->state) {
 		e->state = 1;
-		e->timer = TIME_8(30) + TIME_8(random() & 127);
+		e->timer = 30 + random() & 127);
 	}
 	
 	if (!e->timer) {	// time to spawn a block
@@ -239,10 +239,10 @@ void ai_ironh_brick(Entity *e) {
 			e->hit_box = e->display_box = (bounding_box) { 16, 16, 16, 16 };
 		}
 		
-		e->x_speed = SPEED_8(0xFF) + SPEED_8(random() & 0xFF);
+		e->x_speed = 0xFF + random() & 0xFF);
 		e->x_speed *= e->dir ? 2 : -2;
 		
-		e->y_speed = -SPEED_10(0x200) + SPEED_10(random() & 0x3FF);
+		e->y_speed = -0x200 + random() & 0x3FF);
 		e->state = 1;
 	}
 	

@@ -83,7 +83,7 @@ static void spawn_fish(uint8_t index) {
 	fish->health = 1;
 	//FIRE_ANGLED_SHOT(OBJ_X_FISHY_MISSILE, 
 	//				 bossEntity->x + xoffs[index], bossEntity->y + yoffs[index], 
-	//				 0x80 + index * 0x100, SPEED(0x400));
+	//				 0x80 + index * 0x100, 0x400);
 	sound_play(SND_EM_FIRE, 3);
 }
 
@@ -181,7 +181,7 @@ void ai_monsterx(Entity *e) {
 		} /* fallthrough */
 		case STATE_X_FIGHT_BEGIN+1:
 		{
-			if (++e->timer > TIME_8(100)) {
+			if (++e->timer > 100) {
 				FACE_PLAYER(e);
 				e->timer = 0;
 				e->state = STATE_X_TRAVEL;
@@ -212,7 +212,7 @@ void ai_monsterx(Entity *e) {
 				}
 			}
 			
-			if (e->timer > TIME_8(120)) {
+			if (e->timer > 120) {
 				// time to attack? we attack every 3rd travel
 				// if so skid to a stop, that's the first step.
 				if (e->timer2 >= 3) {
@@ -252,7 +252,7 @@ void ai_monsterx(Entity *e) {
 				}
 			}
 			
-			if (e->timer > TIME_8(50)) {
+			if (e->timer > 50) {
 				e->state = STATE_X_OPEN_DOORS;
 				e->timer = 0;
 			}
@@ -284,7 +284,7 @@ void ai_monsterx(Entity *e) {
 				set_states(&pieces[TARGET1], 4, STATE_TARGET_FIRE);
 			}
 			
-			if (++e->timer > TIME_10(300) || all_targets_destroyed()) {
+			if (++e->timer > 300 || all_targets_destroyed()) {
 				e->state = STATE_X_CLOSE_DOORS;
 				e->timer = 0;
 			}
@@ -299,10 +299,10 @@ void ai_monsterx(Entity *e) {
 				e->linkedEntity->flags |= NPC_SHOOTABLE;
 			}
 			
-			if (++e->timer > TIME_10(300) || (saved_health - e->health) > 200) {
+			if (++e->timer > 300 || (saved_health - e->health) > 200) {
 				e->state = STATE_X_CLOSE_DOORS;
 				e->timer = 0;
-			} else if(++e->animtime > TIME_8(40)) {
+			} else if(++e->animtime > 40) {
 				e->animtime = 0;
 				// Recycling useless underwater var to cycle fish index
 				if(e->underwater > 3) e->underwater = 0;
@@ -331,7 +331,7 @@ void ai_monsterx(Entity *e) {
 				e->linkedEntity->flags &= ~NPC_SHOOTABLE;
 			}
 			
-			if (++e->timer > TIME_8(50)) {
+			if (++e->timer > 50) {
 				FACE_PLAYER(e);
 				e->state = STATE_X_TRAVEL;
 				e->timer = 0;
@@ -355,7 +355,7 @@ void ai_monsterx(Entity *e) {
 				sound_play(SND_ENEMY_HURT_BIG, 5);
 				SMOKE_AREA((e->x>>CSF) - 64, (e->y>>CSF) - 64, 128, 128, 4);
 			}
-			if (e->timer > TIME_8(100)) {
+			if (e->timer > 100) {
 				SCREEN_FLASH(3);
 				sound_play(SND_EXPLOSION1, 5);
 				e->timer = 0;
@@ -516,7 +516,7 @@ void ai_x_tread(Entity *e) {
 		e->attack = 0;
 	}
 	
-	LIMIT_X(SPEED(0x400));
+	LIMIT_X(0x400);
 	e->x += e->x_speed;
 	
 	// Sprite
@@ -635,7 +635,7 @@ void ai_x_target(Entity *e) {
 				if (e->timer == 0) {
 					e->timer = 40;
 					Entity *shot = entity_create(e->x, e->y, OBJ_GAUDI_FLYING_SHOT, 0);
-					THROW_AT_TARGET(shot, player.x, player.y, SPEED(0x500));
+					THROW_AT_TARGET(shot, player.x, player.y, 0x500);
 					//EmFireAngledShot(e, OBJ_GAUDI_FLYING_SHOT, 2, 0x500);
 					sound_play(SND_EM_FIRE, 3);
 				}
@@ -665,7 +665,7 @@ void ondeath_x_target(Entity *e) {
 
 void ai_x_fishy_missile(Entity *e) {
 	e->flags ^= NPC_SHOOTABLE;
-	if(++e->timer > TIME_10(600)) {
+	if(++e->timer > 600) {
 		effect_create_smoke(e->x >> CSF, e->y >> CSF);
 		e->state = STATE_DELETE;
 		return;
@@ -674,10 +674,10 @@ void ai_x_fishy_missile(Entity *e) {
 	// Find angle needed to reach player
 	// Don't do this every frame, arctan is expensive
 	e->timer2++;
-	if(e->timer2 == TIME_8(9)) {
+	if(e->timer2 == 9) {
 	    e->x_mark = e->x;
         e->y_mark = e->y;
-	} else if(e->timer2 > TIME_8(10)) {
+	} else if(e->timer2 > 10) {
 		e->timer2 = 0;
 		e->want_angle = get_angle(e->x, e->y, player.x, player.y);
         // smoke trails
@@ -721,9 +721,9 @@ void ai_x_defeated(Entity *e) {
 		} /* fallthrough */
 		case 1:
 		{
-			if (e->timer > TIME(50)) {
+			if (e->timer > 50) {
 				e->state = 2;
-				e->x_speed = -SPEED(0x100);
+				e->x_speed = -0x100;
 			}
 			
 			// three-position shake
@@ -733,7 +733,7 @@ void ai_x_defeated(Entity *e) {
 		
 		case 2:
 		{
-			e->y_speed += SPEED(0x40);
+			e->y_speed += 0x40;
 			if (e->y > block_to_sub(stageHeight)) e->state = STATE_DELETE;
 		}
 		break;

@@ -157,7 +157,7 @@ IWRAM_CODE void effects_update() {
 			break;
 			case EFF_ZZZ:
 			{
-				if(++effMisc[i].timer > TIME_8(25)) {
+				if(++effMisc[i].timer > 25) {
 					effMisc[i].timer = 0;
 					effMisc[i].sprite.attr++;
 				}
@@ -173,7 +173,7 @@ IWRAM_CODE void effects_update() {
 			} /* fallthrough */
 			case EFF_BOOST2:
 			{
-				if(++effMisc[i].timer >= TIME_8(5)) {
+				if(++effMisc[i].timer >= 5) {
 					effMisc[i].timer = 0;
 					effMisc[i].sprite.attr++;
 				}
@@ -185,7 +185,7 @@ IWRAM_CODE void effects_update() {
 			break;
 			case EFF_QMARK:
 			{
-				if(effMisc[i].ttl > TIME_8(20) && (effMisc[i].ttl & 1) == 0) {
+				if(effMisc[i].ttl > 20 && (effMisc[i].ttl & 1) == 0) {
 					effMisc[i].y -= 2;
 				}
 				sprite_pos(effMisc[i].sprite,
@@ -356,7 +356,7 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
 				uint8_t sheet = NOSHEET;
 				SHEET_FIND(sheet, SHEET_ZZZ);
 				if(sheet == NOSHEET) break;
-				effMisc[i].ttl = TIME_8(100);
+				effMisc[i].ttl = 100;
 				effMisc[i].sprite = (VDPSprite) {
 					.size = SPRITE_SIZE(1, 1),
 					.attr = TILE_ATTR(PAL0,1,0,0,sheets[sheet].index)
@@ -366,7 +366,7 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
 			case EFF_BOOST8: // Smoke that emits while using the booster
 			case EFF_BOOST2:
 			{
-				effMisc[i].ttl = TIME_8(20);
+				effMisc[i].ttl = 20;
 				effMisc[i].sprite = (VDPSprite) {
 					.size = SPRITE_SIZE(1, 1),
 					.attr = TILE_ATTR(PAL0,1,0,0,12)
@@ -375,7 +375,7 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
 			break;
 			case EFF_QMARK:
 			{
-				effMisc[i].ttl = TIME_8(30);
+				effMisc[i].ttl = 30;
 				effMisc[i].sprite = (VDPSprite) {
 					.size = SPRITE_SIZE(1, 1),
 					.attr = TILE_ATTR(PAL0,1,0,0,TILE_QMARKINDEX)
@@ -385,7 +385,7 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
 			case EFF_FANL:
 			{
 				effMisc[i].x_speed = -(random() & 3) - 1;
-				effMisc[i].ttl = TIME_8(20);
+				effMisc[i].ttl = 20;
 				effMisc[i].sprite = (VDPSprite) {
 					.size = SPRITE_SIZE(1, 1),
 					.attr = TILE_ATTR(PAL0,1,0,0,1)
@@ -395,7 +395,7 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
 			case EFF_FANU:
 			{
 				effMisc[i].y_speed = -(random() & 3) - 1;
-				effMisc[i].ttl = TIME_8(20);
+				effMisc[i].ttl = 20;
 				effMisc[i].sprite = (VDPSprite) {
 					.size = SPRITE_SIZE(1, 1),
 					.attr = TILE_ATTR(PAL0,1,0,0,1)
@@ -405,7 +405,7 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
 			case EFF_FANR:
 			{
 				effMisc[i].x_speed = (random() & 3) + 1;
-				effMisc[i].ttl = TIME_8(20);
+				effMisc[i].ttl = 20;
 				effMisc[i].sprite = (VDPSprite) {
 					.size = SPRITE_SIZE(1, 1),
 					.attr = TILE_ATTR(PAL0,1,0,0,1)
@@ -415,7 +415,7 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
 			case EFF_FAND:
 			{
 				effMisc[i].y_speed = (random() & 3) + 1;
-				effMisc[i].ttl = TIME_8(20);
+				effMisc[i].ttl = 20;
 				effMisc[i].sprite = (VDPSprite) {
 					.size = SPRITE_SIZE(1, 1),
 					.attr = TILE_ATTR(PAL0,1,0,0,1)

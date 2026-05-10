@@ -51,12 +51,12 @@ void ai_doorway(Entity *e) {
 	e->dir = 0;
 	// Opening animation
 	if(e->state) {
-		if(++e->animtime > TIME_8(10)) {
+		if(++e->animtime > 10) {
 			e->animtime = 0;
 			e->frame++;
 			if(e->frame == 11 || e->frame == 22) e->state = STATE_DELETE;
 		}
-	} else if(++e->timer > TIME_8(5)) {
+	} else if(++e->timer > 5) {
 		// This makes sure the 2 doors draw on top of the doorway
 		e->timer = 0;
 		moveMeToFront = TRUE;

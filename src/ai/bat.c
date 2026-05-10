@@ -13,17 +13,17 @@ void ai_batVertical(Entity *e) {
 		{
 			if (!e->timer) {
 				e->state = 2;
-				e->y_speed = SPEED_10(0x300);
+				e->y_speed = 0x300;
 			} else e->timer--;
 		}
 		break;
 		case 2:
 		{
 			if (e->y >= e->y_mark)
-				e->y_speed -= SPEED_8(0x10);
+				e->y_speed -= 0x10;
 			else
-				e->y_speed += SPEED_8(0x10);
-			LIMIT_Y(SPEED_10(0x300));
+				e->y_speed += 0x10;
+			LIMIT_Y(0x300);
 		}
 		break;
 	}
@@ -62,19 +62,19 @@ void ai_batHang(Entity *e) {
 			moveMeToFront = TRUE;
 		}
 	} else if(e->state == 3) { // Falling
-		e->y_speed += SPEED_8(0x20);
-		if(e->y_speed > SPEED_12(0x5FF)) e->y_speed = SPEED_12(0x5FF);
+		e->y_speed += 0x20;
+		if(e->y_speed > 0x5FF) e->y_speed = 0x5FF;
 		
 		e->timer++;
 		e->x_next = e->x; // x_next needs to be set for collision to work properly
 		e->y_next = e->y + e->y_speed;
 		uint8_t collided = collide_stage_floor(e);
-		if(collided || (e->timer > TIME_8(20) && player.y - 0x2000 < e->y)) {
+		if(collided || (e->timer > 20 && player.y - 0x2000 < e->y)) {
 			e->state = 4;
 			e->timer = 0;
 			e->y_mark = e->y;
 			e->frame = 0;
-			if(collided) e->y_speed = -SPEED_10(0x200);
+			if(collided) e->y_speed = -0x200;
 		} else {
 			e->y = e->y_next;
 		}
@@ -84,11 +84,11 @@ void ai_batHang(Entity *e) {
 			e->timer2 = 0;
 		}
 		FACE_PLAYER(e);
-		e->x_speed += (e->x > player.x) ? -SPEED_8(0x20) : SPEED_8(0x20);
-		e->y_speed += (e->y > e->y_mark) ? -SPEED_8(0x10) : SPEED_8(0x10);
+		e->x_speed += (e->x > player.x) ? -0x20 : 0x20;
+		e->y_speed += (e->y > e->y_mark) ? -0x10 : 0x10;
 		// Limit speed
-		LIMIT_X(SPEED_10(0x200));
-		LIMIT_Y(SPEED_10(0x200));
+		LIMIT_X(0x200);
+		LIMIT_Y(0x200);
 		e->x_next = e->x + e->x_speed;
 		e->y_next = e->y + e->y_speed;
 		// Bounce against floor and walls
@@ -98,7 +98,7 @@ void ai_batHang(Entity *e) {
 			collide_stage_rightwall(e);
 		}
 		if(collide_stage_floor(e)) {
-			e->y_speed = -SPEED_10(0x200);
+			e->y_speed = -0x200;
 		}
 		if(e->y_speed <= 0) {
 			collide_stage_ceiling(e);
@@ -124,8 +124,8 @@ void ai_batCircle(Entity *e) {
 			// circle around our target point
 			if((++e->animtime & 3) == 0) {
 				FACE_PLAYER(e);
-				LIMIT_X(SPEED_10(0x1E0));
-				LIMIT_Y(SPEED_10(0x1E0));
+				LIMIT_X(0x1E0);
+				LIMIT_Y(0x1E0);
 				if(++e->frame > 2) e->frame = 0;
 			}
 			e->x_speed += (e->x > e->x_mark) ? -0x10 : 0x10;
@@ -141,11 +141,11 @@ void ai_batCircle(Entity *e) {
 			} else e->timer--;
 		break;
 		case 2:	// dive attack
-			if(e->y_speed < SPEED_12(0x5C0)) e->y_speed += SPEED_8(0x40);
+			if(e->y_speed < 0x5C0) e->y_speed += 0x40;
 			if(blk(e->x, 0, e->y, 8) == 0x41) {
 				e->y_speed = 0;
 				e->x_speed <<= 1;
-				e->timer = TIME_8(100);		// delay before can dive again
+				e->timer = 100;		// delay before can dive again
 				e->state = 1;
 				e->frame = 0;
 			}

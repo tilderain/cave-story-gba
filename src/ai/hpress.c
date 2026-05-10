@@ -43,9 +43,9 @@ static void run_defeated(Entity *e) {
 									(e->y - 0x7FFF + (random() & 0xFFFF)) >> CSF);
 			}
 			// eye opens
-			if(e->timer == TIME_8(90)) e->frame = 1;
-			else if(e->timer == TIME_8(100)) e->frame = 2;
-			else if(e->timer >= TIME_8(105)) {
+			if(e->timer == 90) e->frame = 1;
+			else if(e->timer == 100) e->frame = 2;
+			else if(e->timer >= 105) {
 				e->state = 502;		// fall
 				e->attack = 127;
 				e->flags &= ~NPC_SPECIALSOLID;
@@ -60,7 +60,7 @@ static void run_defeated(Entity *e) {
 			// solid to NPC's so we can't use blockd.
 			if (e->y > HELL_FLOOR) {
 				e->state = 503;
-				e->y_speed = -SPEED_10(0x200);
+				e->y_speed = -0x200;
 				e->attack = 0;
 				// kill floor
 				uint16_t y = sub_to_block(HELL_FLOOR) + 4;
@@ -74,7 +74,7 @@ static void run_defeated(Entity *e) {
 		} /* fallthrough */
 		case 503:	// falling, and hit floor already
 		{
-			e->y_speed += SPEED_8(0x40);
+			e->y_speed += 0x40;
 			e->y += e->y_speed;
 		}
 		break;
@@ -116,7 +116,7 @@ static void run_passageway(Entity *e) {
 		} /* fallthrough */
 		case 31:
 		{
-			e->y += SPEED_12(0x800);
+			e->y += 0x800;
 			
 			if (e->y >= PWAY_BOTTOM) {
 				e->y = PWAY_BOTTOM;
@@ -180,14 +180,14 @@ void ai_heavypress(Entity *e) {
 			{
 				// spawn butes on alternating sides
 				e->timer++;
-				if(e->timer == TIME_8(100) || e->timer == TIME_10(260)) {
+				if(e->timer == 100 || e->timer == 260) {
 					entity_create(block_to_sub(17), block_to_sub(15), OBJ_BUTE_FALLING, NPC_OPTION1);
-				} else if(e->timer == TIME_8(180) || e->timer == TIME_10(340)) {
+				} else if(e->timer == 180 || e->timer == 340) {
 					entity_create(block_to_sub(3), block_to_sub(15), OBJ_BUTE_FALLING, NPC_OPTION1);
-				} else if(e->timer >= TIME_10(400)) {
+				} else if(e->timer >= 400) {
 					// fire lightning next frame
 					e->state = 101;
-					e->timer = TIME_8(90);
+					e->timer = 90;
 				}
 				
 				// uncover as it's damaged
@@ -230,7 +230,7 @@ void onspawn_hp_lightning(Entity *e) {
 void ai_hp_lightning(Entity *e) {
 	if((++e->timer & 3) == 0 && ++e->frame > 2) e->frame = 0;
 	
-	if(e->timer > TIME_8(50)) {
+	if(e->timer > 50) {
 		sound_play(SND_LIGHTNING_STRIKE, 5);
 		entity_create(e->x + pixel_to_sub(32), e->y + pixel_to_sub(72), OBJ_LIGHTNING, 0);
 		e->state = STATE_DELETE;

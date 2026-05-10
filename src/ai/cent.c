@@ -22,7 +22,7 @@ void ai_stumpy(Entity *e) {
 		} /* fallthrough */
 		case 1:
 		{
-			if (++e->timer > TIME(50)) e->state++;
+			if (++e->timer > 50) e->state++;
 		}
 		break;
 		case 2:
@@ -36,7 +36,7 @@ void ai_stumpy(Entity *e) {
 		{
 			if(blockl || blockr) e->x_speed = -e->x_mark;
 			if(blocku || blockd) e->y_speed = -e->y_mark;
-			if (++e->timer > TIME(50)) {
+			if (++e->timer > 50) {
 				e->state = 0;
 				e->x_speed = 0;
 				e->y_speed = 0;
@@ -74,7 +74,7 @@ void ai_midorin(Entity *e) {
 		
 		case 2:		// blinking
 		{
-			if (++e->timer > TIME_8(8)) {
+			if (++e->timer > 8) {
 				e->state = 1;
 				e->timer = 0;
 				e->frame = 0;
@@ -101,15 +101,15 @@ void ai_midorin(Entity *e) {
 				e->dir ^= 1;
 			}
 			
-			MOVE_X(SPEED(0x400));
+			MOVE_X(0x400);
 			
 			if (--e->timer <= 0) e->state = 0;
 		}
 		break;
 	}
 	
-	if(!e->grounded) e->y_speed += SPEED(0x20);
-	LIMIT_Y(SPEED(0x5ff));
+	if(!e->grounded) e->y_speed += 0x20;
+	LIMIT_Y(0x5ff);
 	e->x = e->x_next;
 	e->y = e->y_next;
 }
@@ -124,7 +124,7 @@ void ai_orangebell(Entity *e) {
 		{
 			e->state = 1;
 			e->y_mark = e->y;
-			e->y_speed = SPEED(0x200);
+			e->y_speed = 0x200;
 			
 			// create baby bats
 			for(uint8_t i=0;i<8;i++) {
@@ -143,10 +143,10 @@ void ai_orangebell(Entity *e) {
 				e->dir ^= 1;
 			}
 			
-			MOVE_X(SPEED(0x100));
+			MOVE_X(0x100);
 			
 			e->y_speed += (e->y < e->y_mark) ? 0x08 : -0x08;
-			LIMIT_Y(SPEED(0x200));
+			LIMIT_Y(0x200);
 		}
 		break;
 	}
@@ -180,8 +180,8 @@ void ai_orangebell_baby(Entity *e) {
 			
 			e->x_speed += (e->x < e->x_mark) ? 0x08 : -0x08;
 			e->y_speed += (e->y < e->y_mark) ? 0x20 : -0x20;
-			LIMIT_X(SPEED(0x400));
-			LIMIT_Y(SPEED(0x400));
+			LIMIT_X(0x400);
+			LIMIT_Y(0x400);
 			
 			// dive-bomb
 			if (e->timer) e->timer--;
@@ -198,13 +198,13 @@ void ai_orangebell_baby(Entity *e) {
 		case 2:		// dive-bombing
 		{
 			e->frame = 3;
-			e->y_speed += SPEED(0x40);
-			LIMIT_Y(SPEED(0x5ff));
+			e->y_speed += 0x40;
+			LIMIT_Y(0x5ff);
 			// Quick floor check
 			if (blk(e->x, 0, e->y, 8) == 0x41) {
 				e->x_speed *= 2;
 				e->y_speed = 0;
-				e->timer = TIME(120);
+				e->timer = 120;
 				
 				e->state = 1;
 			}
@@ -228,7 +228,7 @@ void ai_gunfish(Entity *e) {
 		case 1:		// desync
 		{
 			if (e->timer == 0) {
-				e->y_speed = SPEED_8(0x200);
+				e->y_speed = 0x200;
 				e->state = 2;
 				e->timer = 0;
 			} else e->timer--;
@@ -241,7 +241,7 @@ void ai_gunfish(Entity *e) {
 			FACE_PLAYER(e);
 			
 			if (PLAYER_DIST_X(e, pixel_to_sub(128)) && PLAYER_DIST_Y2(e, pixel_to_sub(160), 20<<CSF)) {
-				if (++e->timer > TIME_8(80)) {
+				if (++e->timer > 80) {
 					e->state = 10;
 					e->timer = 0;
 					e->frame += 2;
@@ -254,7 +254,7 @@ void ai_gunfish(Entity *e) {
 		{
 			ANIMATE(e, 4, 2,3);
 			
-			if (++e->timer > TIME_8(20)) {
+			if (++e->timer > 20) {
 				e->state = 20;
 				e->timer = 0;
 				e->timer2 = 0;
@@ -267,13 +267,13 @@ void ai_gunfish(Entity *e) {
 		{
 			ANIMATE(e, 4, 4,5);
 			
-			if(++e->timer > TIME_8(10)) {
+			if(++e->timer > 10) {
 				e->timer = 0;
 				e->timer2++;
 				Entity *shot = entity_create(e->x, e->y, OBJ_GUNFISH_SHOT, 0);
 				
-				shot->x_speed = e->dir ? SPEED(0x400) : -SPEED(0x400);
-				shot->y_speed = -SPEED(0x400);
+				shot->x_speed = e->dir ? 0x400 : -0x400;
+				shot->y_speed = -0x400;
 				
 				sound_play(SND_EM_FIRE, 3);
 			}
@@ -288,7 +288,7 @@ void ai_gunfish(Entity *e) {
 	}
 	
 	e->y_speed += (e->y < e->y_mark) ? 0x10 : -0x10;
-	LIMIT_Y(SPEED(0x100));
+	LIMIT_Y(0x100);
 	e->x += e->x_speed;
 	e->y += e->y_speed;
 }
@@ -311,8 +311,8 @@ void ai_gunfish_shot(Entity *e) {
 		e->state = STATE_DELETE;
 	}
 	
-	e->y_speed += SPEED(0x20);
-	LIMIT_Y(SPEED(0x5ff));
+	e->y_speed += 0x20;
+	LIMIT_Y(0x5ff);
 	e->x = e->x_next;
 	e->y = e->y_next;
 }
@@ -350,8 +350,8 @@ void ai_droll(Entity *e) {
 				e->frame = 6;
 				e->timer2 = 0;		// have not fired yet
 				
-				e->x_speed = (e->x >= e->x_mark) ? -SPEED(0x200) : SPEED(0x200);
-				e->y_speed = -SPEED(0x600);
+				e->x_speed = (e->x >= e->x_mark) ? -0x200 : 0x200;
+				e->y_speed = -0x600;
 			}
 		}
 		break;
@@ -367,7 +367,7 @@ void ai_droll(Entity *e) {
 					Entity *shot = entity_create(e->x, e->y, OBJ_DROLL_SHOT, 0);
 					THROW_AT_TARGET(shot, player.x, player.y, 0x600);
 					sound_play(SND_EM_FIRE, 5);
-				} else if (e->y_speed > SPEED(0x200)) {	// after-fire frame
+				} else if (e->y_speed > 0x200) {	// after-fire frame
 					e->frame = 3;
 				}
 				
@@ -395,8 +395,8 @@ void ai_droll(Entity *e) {
 		break;
 	}
 	
-	if(!e->grounded) e->y_speed += SPEED(0x55);
-	LIMIT_Y(SPEED(0x5ff));
+	if(!e->grounded) e->y_speed += 0x55;
+	LIMIT_Y(0x5ff);
 	e->x = e->x_next;
 	e->y = e->y_next;
 }
@@ -542,7 +542,7 @@ void ai_mimiga_farmer(Entity *e) {
 			//	e->dir ^= 1;
 			//}
 			
-			MOVE_X(SPEED(0x200));
+			MOVE_X(0x200);
 			ANIMATE(e, 8, 2,0,3,0);
 			
 			if (!--e->timer)
@@ -552,7 +552,7 @@ void ai_mimiga_farmer(Entity *e) {
 	}
 	
 	if(!e->grounded) e->y_speed += 0x20;
-	LIMIT_Y(SPEED(0x5ff));
+	LIMIT_Y(0x5ff);
 	e->x = e->x_next;
 	e->y = e->y_next;
 }
@@ -595,8 +595,8 @@ void ai_npc_itoh(Entity *e) {
 		{
 			e->state = 21;
 			e->frame = LEAP;
-			e->x_speed = SPEED(0x200);
-			e->y_speed = -SPEED(0x400);
+			e->x_speed = 0x200;
+			e->y_speed = -0x400;
 			e->grounded = FALSE;
 		} /* fallthrough */
 		case 21:		// cower after leap
@@ -626,7 +626,7 @@ void ai_npc_itoh(Entity *e) {
 		case 40:	// small vertical hop (from when he jumps out of helicopter at end)
 		{
 			e->state = 41;
-			e->y_speed = -SPEED(0x200);
+			e->y_speed = -0x200;
 			e->frame = LEAP;
 			e->grounded = FALSE;
 		} /* fallthrough */
@@ -658,9 +658,9 @@ void ai_npc_itoh(Entity *e) {
 		case 51:
 		{
 			ANIMATE(e, 4, WALK1,STAND,WALK2,STAND);
-			MOVE_X(SPEED(0x200));
+			MOVE_X(0x200);
 			
-			if (++e->timer > TIME(32)) {
+			if (++e->timer > 32) {
 				e->frame = STAND;
 				e->x_speed = 0;
 				e->state = 52;
@@ -669,8 +669,8 @@ void ai_npc_itoh(Entity *e) {
 		break;
 	}
 	
-	if(!e->grounded) e->y_speed += SPEED(0x40);
-	LIMIT_Y(SPEED(0x5ff));
+	if(!e->grounded) e->y_speed += 0x40;
+	LIMIT_Y(0x5ff);
 	e->x = e->x_next;
 	e->y = e->y_next;
 }
@@ -698,7 +698,7 @@ void ai_kanpachi_stand(Entity *e) {
 		case 4:
 		{
 			ANIMATE(e, 8, 3,4);
-			MOVE_X(SPEED(0x200));
+			MOVE_X(0x200);
 		}
 		break;
 		case 5:		// face away
@@ -837,7 +837,7 @@ void ai_rocket(Entity *e) {
 		case 11:
 		{
 			e->timer++;
-			e->y_speed += SPEED(8);
+			e->y_speed += 8;
 			
 			if (collide_stage_floor(e)) {
 				if (e->timer < 10) {
@@ -861,7 +861,7 @@ void ai_rocket(Entity *e) {
 		} /* fallthrough */
 		case 13:
 		{
-			e->y_speed -= SPEED(0x08);
+			e->y_speed -= 0x08;
 			e->timer++;
 			//SpawnRocketTrail(o, (e->timer & 1) ? RIGHT : LEFT);
 			
@@ -896,7 +896,7 @@ void ai_rocket(Entity *e) {
 		}
 		break;
 	}
-	LIMIT_Y(SPEED(0x5ff));
+	LIMIT_Y(0x5ff);
 	if(e->state) {
 		e->x = e->x_next;
 		e->y = e->y_next;

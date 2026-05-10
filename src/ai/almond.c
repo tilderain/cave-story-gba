@@ -7,7 +7,7 @@ void onspawn_waterlevel(Entity *e) {
 	e->y += pixel_to_sub(4);
 	if(stageID == STAGE_CORE) e->y += pixel_to_sub(8);
 	e->y_mark = e->y;
-	e->y_speed = SPEED_8(0xFF);
+	e->y_speed = 0xFF;
 }
 
 void ai_waterlevel(Entity *e) {
@@ -15,7 +15,7 @@ void ai_waterlevel(Entity *e) {
 		case WL_CALM:	// calm waves around set point
 		{
 			e->y_speed += (e->y < e->y_mark) ? 4 : -4;
-			LIMIT_Y(SPEED_8(0xFF));
+			LIMIT_Y(0xFF);
 		}
 		break;
 		case WL_CYCLE:	// wait 1000 ticks, then rise all the way to top come down and repeat
@@ -27,8 +27,8 @@ void ai_waterlevel(Entity *e) {
 		case WL_DOWN:
 		{
 			e->y_speed += (e->y < e->y_mark) ? 4 : -4;
-			LIMIT_Y(SPEED_10(0x200));
-			if (++e->timer > TIME_10(1000)) {
+			LIMIT_Y(0x200);
+			if (++e->timer > 1000) {
 				e->state = WL_UP;
 			}
 		}
@@ -36,7 +36,7 @@ void ai_waterlevel(Entity *e) {
 		case WL_UP:			// rise all the way to top then come back down
 		{
 			e->y_speed += (e->y > 0) ? -4 : 4;
-			LIMIT_Y(SPEED_10(0x200));
+			LIMIT_Y(0x200);
 			// when we reach the top return to normal level
 			if (e->y < (64<<9)) {
 				e->state = WL_CYCLE;
@@ -46,7 +46,7 @@ void ai_waterlevel(Entity *e) {
 		case WL_STAY_UP:	// rise quickly all the way to top and stay there
 		{
 			e->y_speed += (e->y > 0) ? -4 : 4;
-			LIMIT_Y(SPEED_10(0x200));
+			LIMIT_Y(0x200);
 		}
 		break;
 	}
@@ -80,16 +80,16 @@ void ai_shutter(Entity *e) {
 			e->x_next = e->x;
 			e->y_next = e->y;
 			switch(e->timer2) {
-				case 0: e->x_next = e->x - SPEED(0x80); break;
-				case 1: e->x_next = e->x + SPEED(0x80); break;
-				case 2: e->y_next = e->y - SPEED(0x80); break;
-				case 3: e->y_next = e->y + SPEED(0x80); break;
+				case 0: e->x_next = e->x - 0x80; break;
+				case 1: e->x_next = e->x + 0x80; break;
+				case 2: e->y_next = e->y - 0x80; break;
+				case 3: e->y_next = e->y + 0x80; break;
 			}
 			if (e->type==OBJ_SHUTTER_BIG) {
 				if (!e->timer) {
 					camera_shake(20);
 					sound_play(SND_QUAKE, 5);
-					e->timer = TIME(6);
+					e->timer = 6;
 				} else e->timer--;
 			}
 			e->x = e->x_next;

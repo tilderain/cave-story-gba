@@ -5,9 +5,9 @@ void ai_pignon(Entity *e) {
 	if(e->state < 3 && e->damage_time == 29) {
 		e->state = 3;
 		e->timer = 0;
-		e->y_speed = -SPEED(0x120);
+		e->y_speed = -0x120;
 		if(e->type == OBJ_GIANT_MUSHROOM_ENEMY)
-			e->x_speed = e->x > player.x ? -SPEED(0x120) : SPEED(0x120);
+			e->x_speed = e->x > player.x ? -0x120 : 0x120;
 		else
 			e->x_speed = 0;
 		e->frame = 4;
@@ -15,7 +15,7 @@ void ai_pignon(Entity *e) {
 	switch(e->state) {
 		case 0: // Standing
 		{
-			if(e->timer > TIME(100) && (e->timer & 31) == 0) { 
+			if(e->timer > 100 && (e->timer & 31) == 0) { 
 				// Either blink or walk in a random direction
 				uint8_t rnd = random() & 7;
 				if(rnd == 0) {
@@ -26,7 +26,7 @@ void ai_pignon(Entity *e) {
 					e->state = 2;
 					e->timer = 0;
 					e->dir = random() & 1;
-					e->x_speed = e->dir ? SPEED(0x120) : -SPEED(0x120);
+					e->x_speed = e->dir ? 0x120 : -0x120;
 					e->frame = 1;
 				}
 			}
@@ -44,7 +44,7 @@ void ai_pignon(Entity *e) {
 		case 2: // Walking
 		{
 			ANIMATE(e, 8, 1,0,2,0);
-			if(e->timer >= TIME(25) && (random() & 31) == 0) {
+			if(e->timer >= 25 && (random() & 31) == 0) {
 				e->state = 0;
 				e->timer = 0;
 				e->x_speed = 0;
@@ -55,7 +55,7 @@ void ai_pignon(Entity *e) {
 		case 3: // Hurt
 		{
 			e->x_speed -= e->x_speed > 0 ? 4 : -4; // Decellerate
-			if(e->timer >= TIME(30)) {
+			if(e->timer >= 30) {
 				e->state = 0;
 				e->timer = 0;
 				e->x_speed = 0;
@@ -64,7 +64,7 @@ void ai_pignon(Entity *e) {
 		}
 		break;
 	}
-	if(!e->grounded) e->y_speed += SPEED(0x20);
+	if(!e->grounded) e->y_speed += 0x20;
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
 	// Don't test ceiling, only test sticking to ground while moving
@@ -157,7 +157,7 @@ void ai_gkeeper(Entity *e) {
 		}
 		break;
 	}
-	if(!e->grounded) e->y_speed += SPEED(0x20);
+	if(!e->grounded) e->y_speed += 0x20;
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
 	// Don't test ceiling, only test sticking to ground while moving
@@ -261,12 +261,12 @@ void ai_ma_pignon(Entity *e) {
 		case MP_Jump:		// pause a moment and jump
 		{
 			e->frame = DUCK;
-			if (++e->timer > TIME_8(5)) {
+			if (++e->timer > 5) {
 				e->state = MP_In_Air;
 				e->frame = HOP;
 				
-				e->x_speed = -SPEED_12(0x400) + SPEED_12(random() & 0x7FF);
-				e->y_speed = -SPEED_12(0x800);
+				e->x_speed = -0x400 + random() & 0x7FF);
+				e->y_speed = -0x800;
 				e->grounded = FALSE;
 				
 				sound_play(SND_ENEMY_JUMP, 5);
@@ -277,7 +277,7 @@ void ai_ma_pignon(Entity *e) {
 		
 		case MP_In_Air:		// jumping or falling after clone attack
 		{
-			e->y_speed += SPEED_8(0x80);
+			e->y_speed += 0x80;
 			
 			// for when falling back onscreen after clone attack
 			//if (e->y > pixel_to_sub(8 * TILE_H))
@@ -291,9 +291,9 @@ void ai_ma_pignon(Entity *e) {
 			FACE_PLAYER(e);
 			
 			// select frame
-			if (e->y_speed < -SPEED_10(0x200)) {
+			if (e->y_speed < -0x200) {
 				e->frame = HOP;
-			} else if (e->y_speed > SPEED_10(0x200)) {
+			} else if (e->y_speed > 0x200) {
 				e->frame = LAND;
 			} else {
 				e->frame = STAND;
@@ -329,11 +329,11 @@ void ai_ma_pignon(Entity *e) {
 		case MP_ChargeAttack:		// charge attack
 		{
 			e->frame = SMILE;
-			if (++e->timer > TIME_8(10)) {
+			if (++e->timer > 10) {
 				e->state = MP_ChargeAttack+1;
 				e->frame = CHARGE1;
 				
-				MOVE_X(SPEED_12(0x5ff));
+				MOVE_X(0x5ff);
 				sound_play(SND_FUNNY_EXPLODE, 5);
 				
 				e->flags |= NPC_INVINCIBLE;
@@ -365,7 +365,7 @@ void ai_ma_pignon(Entity *e) {
 				entity_create(x, pixel_to_sub(16), OBJ_MA_PIGNON_ROCK, 0);
 			}
 			
-			if (e->timer > TIME_8(30)) {
+			if (e->timer > 30) {
 				e->timer2 = 0;
 				e->state = MP_In_Air;
 				
@@ -387,7 +387,7 @@ void ai_ma_pignon(Entity *e) {
 		{
 			ANIMATE(e, 4, WALK1,WALK2);
 			
-			MOVE_X(SPEED_12(0x400));
+			MOVE_X(0x400);
 			if (PLAYER_DIST_X(e, pixel_to_sub(3))) {
 				e->state = MP_Fly_Up;
 				e->timer = 0;
@@ -403,7 +403,7 @@ void ai_ma_pignon(Entity *e) {
 			if (++e->timer > 4) {
 				e->state++;
 				e->frame = HOP;
-				e->y_speed = -SPEED(0x800);
+				e->y_speed = -0x800;
 				e->grounded = FALSE;
 				sound_play(SND_FUNNY_EXPLODE, 5);
 				
@@ -439,7 +439,7 @@ void ai_ma_pignon(Entity *e) {
 				entity_create(x, pixel_to_sub(16), OBJ_MA_PIGNON_CLONE, 0);
 			}
 			
-			if (e->timer > TIME(30)) {
+			if (e->timer > 30) {
 				e->timer2 = 0;
 				e->state = MP_In_Air;	// fall back down to ground
 				
@@ -459,7 +459,7 @@ void ai_ma_pignon(Entity *e) {
 		} /* fallthrough */
 		case MP_Defeated+1:
 		{
-			e->y_speed += SPEED(0x20);
+			e->y_speed += 0x20;
 			if (e->grounded) {
 				e->x_speed *= 7;
 				e->x_speed /= 8;
@@ -514,7 +514,7 @@ void ai_ma_pignon(Entity *e) {
 	e->y = e->y_next;
 	
 	// don't use LIMIT_Y, it limits upwards too and breaks his jumps
-	if (e->y_speed > SPEED(0x5ff)) e->y_speed = SPEED(0x5ff);
+	if (e->y_speed > 0x5ff) e->y_speed = 0x5ff;
 }
 
 void ai_ma_pignon_rock(Entity *e) {
@@ -536,11 +536,11 @@ void ai_ma_pignon_rock(Entity *e) {
 		} /* fallthrough */
 		case 1:
 		{
-			e->y_speed += SPEED(0x40);
-			LIMIT_Y(SPEED(0x600));
+			e->y_speed += 0x40;
+			LIMIT_Y(0x600);
 			
 			if (e->grounded) {
-				e->y_speed = -SPEED(0x200);
+				e->y_speed = -0x200;
 				e->grounded = FALSE;
 				e->state = 2;
 				
@@ -560,7 +560,7 @@ void ai_ma_pignon_rock(Entity *e) {
 		
 		case 2:
 		{
-			e->y_speed += SPEED(0x40);
+			e->y_speed += 0x40;
 			if (e->y > block_to_sub(stageHeight)) e->state = STATE_DELETE;
 		}
 		break;
@@ -576,8 +576,8 @@ void ai_ma_pignon_clone(Entity *e) {
 		{
 			e->flags |= NPC_SHOOTABLE;
 			e->frame = 3;
-			e->y_speed += SPEED(0x80);
-			LIMIT_Y(SPEED(0x5ff));
+			e->y_speed += 0x80;
+			LIMIT_Y(0x5ff);
 			e->y += e->y_speed;
 			
 			if (e->y > block_to_sub(8)) {

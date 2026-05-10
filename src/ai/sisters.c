@@ -80,7 +80,7 @@ void onspawn_sisters(Entity *e) {
 	mainangle = 0;
 	e->x_mark = 192; // Start outside of the room, changes to 112 when they appear
 	e->y_mark = 60;
-	e->timer2 = TIME_10(random() & 511) + TIME_10(700);
+	e->timer2 = random() & 511) + 700;
 	e->health = 500;
 	e->event = 1000;
 	e->flags |= NPC_EVENTONDEATH;
@@ -125,7 +125,7 @@ void ai_sisters(Entity *e) {
 	switch(e->state) {
 		case 20:	// fight begin (script-triggered)
 		{
-			if (++e->timer > TIME_8(68)) {
+			if (++e->timer > 68) {
 				e->x_mark = 112;		// bodies zoom onto screen via force of their interpolation
 				e->timer = 0;
 				
@@ -140,15 +140,15 @@ void ai_sisters(Entity *e) {
 		{
 			e->timer++;
 			
-			if (e->timer < TIME_8(100))					mainangle += 1;
-			else if (e->timer < TIME_8(120))			mainangle += 2;
+			if (e->timer < 100)					mainangle += 1;
+			else if (e->timer < 120)			mainangle += 2;
 			else if (e->timer < e->timer2)				mainangle += 4;
-			else if (e->timer < e->timer2 + TIME_8(40))	mainangle += 2;
-			else if (e->timer < e->timer2 + TIME_8(60))	mainangle += 1;
+			else if (e->timer < e->timer2 + 40)	mainangle += 2;
+			else if (e->timer < e->timer2 + 60)	mainangle += 1;
 			else {
 				e->timer = 0;
 				e->state = STATE_CIRCLE_0;
-				e->timer2 = TIME_8(random() & 0xFF) + TIME_10(420);
+				e->timer2 = random() & 0xFF) + 420;
 			}
 		}
 		break;
@@ -157,11 +157,11 @@ void ai_sisters(Entity *e) {
 		{
 			e->timer++;
 			
-			if (e->timer < TIME_8(20))					mainangle -= 1;
-			else if (e->timer < TIME_8(60))				mainangle -= 2;
+			if (e->timer < 20)					mainangle -= 1;
+			else if (e->timer < 60)				mainangle -= 2;
 			else if (e->timer < e->timer2)				mainangle -= 4;
-			else if (e->timer < e->timer2 + TIME_8(40))	mainangle -= 2;
-			else if (e->timer < e->timer2 + TIME_8(60))	mainangle -= 1;
+			else if (e->timer < e->timer2 + 40)	mainangle -= 2;
+			else if (e->timer < e->timer2 + 60)	mainangle -= 1;
 			else {
 				if (e->health < SISTERS_ATTACK2_HP) {
 					e->state = STATE_MEGAFIRING;
@@ -169,7 +169,7 @@ void ai_sisters(Entity *e) {
 					e->timer = 0;
 				} else {
 					e->state = STATE_CIRCLE_1;
-					e->timer2 = TIME_8(random() & 0xFF) + TIME_10(420);
+					e->timer2 = random() & 0xFF) + 420;
 					e->timer = 0;
 				}
 			}
@@ -180,7 +180,7 @@ void ai_sisters(Entity *e) {
 		// first they stop completely, then spin around and around clockwise for a while.
 		case STATE_MEGAFIRING:
 		{
-			if (++e->timer > TIME_8(100)) {
+			if (++e->timer > 100) {
 				e->state++;
 				e->timer = 0;
 			}
@@ -190,11 +190,11 @@ void ai_sisters(Entity *e) {
 		{
 			e->timer++;
 			
-			if (e->timer < TIME_8(100))	       mainangle += 1;
-			else if (e->timer < TIME_8(120))   mainangle += 2;
-			else if (e->timer < TIME_10(500))  mainangle += 4;
-			else if (e->timer < TIME_10(540))  mainangle += 2;
-			else if (e->timer < TIME_10(560))  mainangle += 1;
+			if (e->timer < 100)	       mainangle += 1;
+			else if (e->timer < 120)   mainangle += 2;
+			else if (e->timer < 500)  mainangle += 4;
+			else if (e->timer < 540)  mainangle += 2;
+			else if (e->timer < 560)  mainangle += 1;
 			else
 			{
 				e->state = STATE_CIRCLE_0;
@@ -223,7 +223,7 @@ void ai_sisters(Entity *e) {
 		} /* fallthrough */
 		case STATE_DEFEATED+1:
 		{
-			if (++e->timer > TIME(100)) {
+			if (++e->timer > 100) {
 				e->state = STATE_DEFEATED_CRASH;
 				e->timer = 0;
 			}
@@ -271,7 +271,7 @@ void ai_sisters(Entity *e) {
 		// big starflash after dragons hit each other
 		case STATE_STARFLASH:
 		{
-			if (++e->timer > TIME(30)) {
+			if (++e->timer > 30) {
 				e->state = STATE_DELETE;
 				bossEntity = NULL;
 				
@@ -352,7 +352,7 @@ void ai_sisters_head(Entity *e) {
 		case STATE_HEAD_CLOSED:
 		{
 			e->frame = 0;
-			e->timer = TIME_8(random() & 127) + TIME_8(80);
+			e->timer = random() & 127) + 80;
 			e->state++;
 		} /* fallthrough */
 		case STATE_HEAD_CLOSED+1:
@@ -378,14 +378,14 @@ void ai_sisters_head(Entity *e) {
 			if (e->timer == 3) e->frame = 1;	// mouth partially open--about to fire!!
 			if (e->timer == 6) e->frame = 2;	// mouth fully open
 			
-			if (e->timer > TIME(150)) {	// begin firing if they haven't hit us by now
+			if (e->timer > 150) {	// begin firing if they haven't hit us by now
 				e->state = STATE_HEAD_FIRE;
 				e->timer = 0;
 			}
 			
 			// Close mouth after 3 hits, minimum of 1 second open
 			// This might be wrong but it works better than before at least
-			if (e->timer2 > 2 && e->timer > TIME(50)) {
+			if (e->timer2 > 2 && e->timer > 50) {
 				sound_play(SND_ENEMY_HURT, 5);
 				effect_create_smoke(e->x >> CSF, e->y >> CSF);
 				
@@ -404,11 +404,11 @@ void ai_sisters_head(Entity *e) {
 				//		e->dir ? A_RIGHT : A_LEFT, 0x200);
 				// Need to aim at the player
 				Entity *fire = entity_create(e->x, e->y, OBJ_DRAGON_ZOMBIE_SHOT, 0);
-				THROW_AT_TARGET(fire, player.x, player.y, SPEED(0x200));
+				THROW_AT_TARGET(fire, player.x, player.y, 0x200);
 				sound_play(SND_SNAKE_FIRE, 3);
 			}
 			
-			if (e->timer > TIME(50))
+			if (e->timer > 50)
 				e->state = STATE_HEAD_CLOSED;
 		}
 		break;
@@ -426,12 +426,12 @@ void ai_sisters_head(Entity *e) {
 			if (e->timer == 3) e->frame = 1;
 			if (e->timer == 6) e->frame = 2;
 			
-			if (e->timer > TIME(20)) {
+			if (e->timer > 20) {
 				if ((e->timer & 31) == 1) {
 					//FIRE_ANGLED_SHOT(OBJ_DRAGON_ZOMBIE_SHOT, e->x, e->y, 
 					//		e->dir ? A_RIGHT : A_LEFT, 0x200);
 					Entity *fire = entity_create(e->x, e->y, OBJ_DRAGON_ZOMBIE_SHOT, 0);
-					THROW_AT_TARGET(fire, player.x, player.y, SPEED(0x200));
+					THROW_AT_TARGET(fire, player.x, player.y, 0x200);
 					sound_play(SND_SNAKE_FIRE, 3);
 				}
 			}
@@ -441,7 +441,7 @@ void ai_sisters_head(Entity *e) {
 		// mouth closed bit tongue after got shot
 		case STATE_HEAD_BIT_TONGUE:
 		{
-			if (++e->timer > TIME(100)) {
+			if (++e->timer > 100) {
 				e->state = STATE_HEAD_CLOSED;
 				e->timer = 0;
 			}

@@ -86,7 +86,7 @@ void ai_muscle_doctor(Entity *e) {
 		} /* fallthrough */
 		case 8:
 		{
-			if (++e->timer > TIME(40)) e->state = STATE_BASE;
+			if (++e->timer > 40) e->state = STATE_BASE;
 		}
 		break;
 		
@@ -109,7 +109,7 @@ void ai_muscle_doctor(Entity *e) {
 		} /* fallthrough */
 		case STATE_BASE+1:
 		{
-			e->y_speed += SPEED(0x80);
+			e->y_speed += 0x80;
 			FACE_PLAYER(e);
 			
 			// select frame
@@ -128,7 +128,7 @@ void ai_muscle_doctor(Entity *e) {
 			}
 			
 			// after a moment select next attack in the loop
-			if (++e->timer > TIME(30) || (e->savedhp - e->health) > 20) {
+			if (++e->timer > 30 || (e->savedhp - e->health) > 20) {
 				e->state = attack_pattern[e->timer2];
 				e->timer = 0;
 				
@@ -146,15 +146,15 @@ void ai_muscle_doctor(Entity *e) {
 			e->frame = 3;
 			FACE_PLAYER(e);
 			
-			if (++e->timer > TIME(20)) {
+			if (++e->timer > 20) {
 				e->grounded = FALSE;
 				e->state = STATE_IN_AIR;
 				e->timer = 0;
 				e->frame = 4;
 				e->animtime = 0;
 				
-				e->y_speed = -SPEED(0x600);
-				MOVE_X(SPEED(0x400));
+				e->y_speed = -0x600;
+				MOVE_X(0x400);
 			}
 		}
 		break;
@@ -169,8 +169,8 @@ void ai_muscle_doctor(Entity *e) {
 			e->frame = 4;
 			e->animtime = 0;
 			
-			e->y_speed = -SPEED(0x800);
-			MOVE_X(SPEED(0x400));
+			e->y_speed = -0x800;
+			MOVE_X(0x400);
 		}
 		break;
 		
@@ -178,13 +178,13 @@ void ai_muscle_doctor(Entity *e) {
 		case STATE_IN_AIR_WITH_GP:	// in air; can "ground pound" if we pass over player
 		{
 			ANIMATE(e, 8, 4,5);
-			e->y_speed += SPEED(0x40);
+			e->y_speed += 0x40;
 			e->timer++; // Not used by state, but for spawning red drips
 			
 			if (e->state == STATE_IN_AIR_WITH_GP) {
 				if (PLAYER_DIST_X(e, 8<<CSF) && player.y >= e->y_next) {
 					e->x_speed = 0;
-					e->y_speed = SPEED(0x5ff);
+					e->y_speed = 0x5ff;
 					e->state = STATE_IN_AIR;
 				}
 			} else {
@@ -209,7 +209,7 @@ void ai_muscle_doctor(Entity *e) {
 			e->x_speed += (e->x_speed << 2) + (e->x_speed << 1);
 			e->x_speed >>= 3;
 			
-			if (++e->timer > TIME(10)) e->state = STATE_BASE;
+			if (++e->timer > 10) e->state = STATE_BASE;
 		}
 		break;
 		
@@ -225,13 +225,13 @@ void ai_muscle_doctor(Entity *e) {
 		} /* fallthrough */
 		case STATE_RED_DASH+1:
 		{
-			if (++e->timer > TIME(20)) {
+			if (++e->timer > 20) {
 				e->frame = 7;		// elbow-out dash frame
 				e->timer = 0;
 				e->state++;
 				
 				sound_play(SND_FUNNY_EXPLODE, 5);
-				MOVE_X(SPEED(0x5ff));
+				MOVE_X(0x5ff);
 				
 				e->attack = DAMAGE_RED_DASH;
 				e->flags |= NPC_FRONTATKONLY;
@@ -248,8 +248,8 @@ void ai_muscle_doctor(Entity *e) {
 			e->frame = (e->timer & 2) ? 7 : 8;
 			
 			// time to stop?
-			if (blockl || blockr || e->timer > TIME(30)) {
-				if (e->timer > TIME(30)) {		// stopped because timeout
+			if (blockl || blockr || e->timer > 30) {
+				if (e->timer > 30) {		// stopped because timeout
 					e->state++;
 					e->grounded = FALSE;
 					e->frame = 3;
@@ -268,7 +268,7 @@ void ai_muscle_doctor(Entity *e) {
 			e->x_speed += (e->x_speed << 2) + (e->x_speed << 1);
 			e->x_speed >>= 3;
 			
-			if (++e->timer > TIME(10)) e->state = STATE_BASE;
+			if (++e->timer > 10) e->state = STATE_BASE;
 		}
 		break;
 		
@@ -284,7 +284,7 @@ void ai_muscle_doctor(Entity *e) {
 		{
 			e->timer++;
 			
-			if (e->timer > TIME_8(15) && (e->timer & 7) == 1) {
+			if (e->timer > 15 && (e->timer & 7) == 1) {
 				Entity *bat = entity_create(e->x + (8<<CSF),
 										   e->y - (4<<CSF), OBJ_DOCTOR_BAT, 0);
 				
@@ -301,7 +301,7 @@ void ai_muscle_doctor(Entity *e) {
 				sound_play(SND_EM_FIRE, 3);
 			}
 			
-			if (e->timer > TIME_8(100)) e->state = STATE_BASE;
+			if (e->timer > 100) e->state = STATE_BASE;
 		}
 		break;
 		
@@ -320,7 +320,7 @@ void ai_muscle_doctor(Entity *e) {
 		{
 			//if (dr_tp_out(o))
 			e->hidden = (++e->timer & 2);
-			if(e->timer > TIME(30)) {
+			if(e->timer > 30) {
 				e->state++;
 				e->timer = 0;
 				e->hidden = TRUE;
@@ -342,7 +342,7 @@ void ai_muscle_doctor(Entity *e) {
 		// invisible...waiting to reappear
 		case STATE_TELEPORT+2:
 		{
-			if (++e->timer > TIME_8(40)) {
+			if (++e->timer > 40) {
 				e->x_next = e->x_mark;
 				e->y_next = e->y_mark;
 				e->frame = 4;
@@ -364,13 +364,13 @@ void ai_muscle_doctor(Entity *e) {
 		{
 			//if (dr_tp_in(o))
 			e->hidden = (++e->timer & 2);
-			if(e->timer > TIME(30)) {
+			if(e->timer > 30) {
 				e->flags |= NPC_SHOOTABLE;
 				e->attack = DAMAGE_NORMAL;
 				e->hidden = FALSE;
 				e->grounded = FALSE;
 				e->x_speed = 0;
-				e->y_speed = -SPEED(0x200);
+				e->y_speed = -0x200;
 				e->state = STATE_IN_AIR;
 			}
 		}
@@ -451,7 +451,7 @@ void ai_muscle_doctor(Entity *e) {
 			
 			// he doesn't take up the entire height of the sprite,
 			// so we stop a little bit early.
-			if (e->timer >= TIME(300)) {
+			if (e->timer >= 300) {
 				//e->hidden = TRUE;
 				e->frame = 0;
                 e->linkedEntity->state = STATE_DELETE;
@@ -488,8 +488,8 @@ void ai_muscle_doctor(Entity *e) {
 		crystal_state = CRYSTAL_INBACK;
 	}
 	
-	if (!e->grounded) e->y_speed += SPEED(0x80);
-	if (e->y_speed > SPEED(0x5ff)) e->y_speed = SPEED(0x5ff);
+	if (!e->grounded) e->y_speed += 0x80;
+	if (e->y_speed > 0x5ff) e->y_speed = 0x5ff;
 	
 	e->x = e->x_next;
 	e->y = e->y_next;
@@ -501,7 +501,7 @@ void ai_doctorm_die(Entity *e) {
     if (!(e->timer & 2)) {
         e->x += (1 << CSF);
     }
-    if(e->timer >= TIME_8(15)) {
+    if(e->timer >= 15) {
         e->timer = 0;
         e->frame++;
         if(e->frame >= 20) e->state = STATE_DELETE;
@@ -516,8 +516,8 @@ static void do_redsplode(Entity *e) {
 	e->frame = 6;
 	FACE_PLAYER(e);
 	
-	player.y_speed = -SPEED(0x400);
-	player.x_speed = (e->x_next > player.x) ? -SPEED(0x5ff) : SPEED(0x5ff);
+	player.y_speed = -0x400;
+	player.x_speed = (e->x_next > player.x) ? -0x5ff : 0x5ff;
 	
 	player_inflict_damage(5);
 	camera_shake(10);
