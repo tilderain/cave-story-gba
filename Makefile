@@ -182,7 +182,7 @@ clean:
 	rm -f $(TSBS) $(TL_TSBS)
 	rm -f res/patches/*.patch
 	rm -f src/xgm/z80_xgm.s src/xgm/z80_xgm.o80 src/xgm/z80_xgm.h out.lst
-	rm -f res/resources.h res/resources.s inc/ai_gen.h
+	rm -f res/resources.h res/resources.s src/ai_gen.h
 	rm -f bin/rescomp bin/mmutil
 
 #---------------------------------------------------------------------------------
@@ -198,13 +198,13 @@ $(OUTPUT).elf : prereq $(OFILES)
 
 $(OFILES_SOURCES) : $(HFILES)
 
-$(OFILES_SOURCES) : resources.h ../inc/ai_gen.h soundbank.h soundbank_bin.h
+$(OFILES_SOURCES) : resources.h ../src/ai_gen.h soundbank.h soundbank_bin.h
 
 soundbank_bin.h: soundbank.bin
 
 main.o: soundbank.h
 
-prereq: $(RESCOMP) resources.s resources.h ../inc/ai_gen.h grit-gen.stamp $(BINTOS) $(TSCOMP) $(WAVTORAW) soundbank.h
+prereq: $(RESCOMP) resources.s resources.h ../src/ai_gen.h grit-gen.stamp $(BINTOS) $(TSCOMP) $(WAVTORAW) soundbank.h
 prereq: $(SLZ)
 prereq: $(CPXMS) $(XGCS) $(PCMS) $(CTSETS) $(ZOBJ) $(TSBS)
 
@@ -213,7 +213,7 @@ $(SLZ):
 	@mkdir -p $(dir $@)
 	cc $(TOOLSMD)/slz/tool/*.c -o $@
 
-../inc/ai_gen.h: ../aigen.py
+../src/ai_gen.h: ../aigen.py
 	python ../aigen.py
 		
 grit-gen.stamp: ../gritgen.py
