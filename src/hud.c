@@ -36,6 +36,12 @@ uint8_t hudMaxBlink;
 // Used for bar animation
 uint8_t hudEnergyPixel, hudEnergyTimer, hudEnergyDest;
 
+// Weapon swap scroll animation
+// Matches CSE2 gArmsEnergyX sliding: forward (next) scrolls in from right (+16px),
+// backward (prev) scrolls in from left (-16px). Slides at 2px/frame over 8 frames.
+static int8_t hudScrollOffset;   // current pixel offset: -16 to 16, 0 = normal
+static int8_t hudScrollDir;      // 0 = none, 1 = next (from right), -1 = prev (from left)
+
 uint8_t showing = FALSE;
 
 static const uint8_t EnergyPixel[4][42] = {
@@ -59,6 +65,8 @@ void hud_create() {
 	hudMaxHealth = hudHealth = hudWeapon = hudLevel = hudMaxAmmo = hudAmmo = 255;
     hudEnergy = hudMaxEnergy = 10;
 	hudEnergyPixel = hudEnergyTimer = hudEnergyDest = 0;
+	hudScrollOffset = 0;
+	hudScrollDir = 0;
 	// Create the sprites
 	sprHUD[0] = (VDPSprite) {
 		.x = 16 + 128,
@@ -112,13 +120,36 @@ void hud_update() {
 	uint8_t weaponChange = FALSE;
 	//if(paused) return;
 	if(!showing || fadeSweepTimer > 0) return;
-	
+
+	// Handle weapon swap scroll animation (matches CSE2 gArmsEnergyX sliding)
+	if(hudScrollDir != 0) {
+		// Apply scroll offset to HUD sprite positions
+		sprHUD[0].x = (16 + 128) + hudScrollOffset;
+		sprHUD[1].x = (16 + 32 + 128) + hudScrollOffset;
+
+		// Move offset toward 0 (2 px/frame, matching CSE2's rate)
+		if(hudScrollOffset > 0) {
+			hudScrollOffset -= 2;
+			if(hudScrollOffset < 0) hudScrollOffset = 0;
+		} else {
+			hudScrollOffset += 2;
+			if(hudScrollOffset > 0) hudScrollOffset = 0;
+		}
+
+		// Scroll complete
+		if(hudScrollOffset == 0) {
+			hudScrollDir = 0;
+			sprHUD[0].x = 16 + 128;
+			sprHUD[1].x = 16 + 32 + 128;
+		}
+	}
+
 	vdp_sprites_add(sprHUD, 2);
 	// Only refresh one part of the HUD in a single frame, at most 8 tiles will be sent
 	if(hudMaxHealth != playerMaxHealth || hudHealth != player.health) {
 		hud_refresh_health();
 	}
-    if(hudWeapon != playerWeapon[currentWeapon].type) {
+    if(hudScrollDir == 0 && hudWeapon != playerWeapon[currentWeapon].type) {
 		hud_refresh_weapon();
 		weaponChange = TRUE;
 	}
@@ -260,8 +291,33 @@ void hud_refresh_energy(uint8_t hard) {
 	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[XP_BAR+4], (TILE_HUDINDEX+12)*TILE_SIZE, 32, 2);
 }
 
+static uint8_t hudLastWeaponIdx = 0xFF; // last known currentWeapon index, for scroll direction. 0xFF = uninitialized
+
 void hud_refresh_weapon() {
-	// Weapon switched
+	// Determine scroll direction from weapon index change
+	// CSE2: RotationArms (next) sets gArmsEnergyX=32 (scroll from right)
+	//       RotationArmsRev (prev) sets gArmsEnergyX=0  (scroll from left)
+	//       GBA offset: normal=0, from right=+16, from left=-16
+	// Handle wrap-around with MAX_WEAPONS=5
+	uint8_t newIdx = currentWeapon;
+	int8_t diff = newIdx - hudLastWeaponIdx;
+	if(diff > 2) diff -= MAX_WEAPONS;      // wrap backward: 0→4 → diff=-1
+	else if(diff < -2) diff += MAX_WEAPONS; // wrap forward:  4→0 → diff=1
+
+	if(hudLastWeaponIdx == 0xFF) {
+		// First load — no scroll animation
+		hudScrollDir = 0;
+		hudScrollOffset = 0;
+	} else if(diff > 0) {
+		hudScrollDir = 1;      // forward → scroll in from right
+		hudScrollOffset = 16;
+	} else {
+		hudScrollDir = -1;     // backward → scroll in from left
+		hudScrollOffset = -16;
+	}
+	hudLastWeaponIdx = newIdx;
+
+	// Weapon switched — update tiles immediately (scroll anim handles positioning)
 	hudWeapon = playerWeapon[currentWeapon].type;
 	memcpy(tileData[WPN+0], SPR_TILES(&SPR_ArmsImage, 0, hudWeapon), TILE_SIZE*2);
 	memcpy(tileData[WPN+2], &SPR_TILES(&SPR_ArmsImage, 0, hudWeapon)[TSIZE*2], TILE_SIZE*2);
