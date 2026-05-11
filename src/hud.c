@@ -23,7 +23,7 @@
 #define WPN     16
 #define AMMO    20
 
-VDPSprite sprHUD[2];
+VDPSprite sprHUD[4];
 uint32_t tileData[28][8];
 
 // Values used to draw parts of the HUD
@@ -80,9 +80,31 @@ void hud_create() {
 		.size = SPRITE_SIZE(4, 4),
 		.attr = TILE_ATTR(PAL0,1,0,0,(TILE_HUDINDEX*2)+16)
 	};
+	// Health bar sprites (packed at DMA 96-107, right after scrolling HUD)
+	// Heart icon + digit at (32, Y+8), 16x16
+	sprHUD[2] = (VDPSprite) {
+		.x = (16 + 16) + 128 - 16,
+		.y = (16) + 8 + 128 + 16,
+		.size = SPRITE_SIZE(4, 2),
+		.attr = TILE_ATTR(PAL0,1,0,0,(TILE_HUDINDEX + 32)*2)
+	};
+	// HP bar at (16, Y+16), 32x16
+	sprHUD[3] = (VDPSprite) {
+		.x = 16 + 128 + 32,
+		.y = (16) + 16 + 128 + 8,
+		.size = SPRITE_SIZE(4, 2),
+		.attr = TILE_ATTR(PAL0,1,0,0,(TILE_HUDINDEX + 42)*2)
+	};
 	// Draw blank tiles next to weapon
 	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+1)*TILE_SIZE, 16, 2);
 	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+3)*TILE_SIZE, 16, 2);
+	// Fill health sprites' blank tile slots: heart sprite bottom (+34,+35)
+	// and 32x16 sprite non-HP positions (+36..+41)
+	for(int i = 34; i < 42; i++)
+		DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+i)*TILE_SIZE, 16, 2);
+	// Blank old health bar tile positions in the scrolling sprite area
+	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+6)*TILE_SIZE, 32, 2);
+	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+14)*TILE_SIZE, 32, 2);
 }
 
 
@@ -96,6 +118,9 @@ void hud_force_redraw(void) {
     // Draw blank tiles next to weapon
 	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+1)*TILE_SIZE, 16, 2);
 	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+3)*TILE_SIZE, 16, 2);
+	// Blank old health bar tile positions in the scrolling sprite area
+	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+6)*TILE_SIZE, 32, 2);
+	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+14)*TILE_SIZE, 32, 2);
 
     disable_ints;
     z80_request();
@@ -123,7 +148,7 @@ void hud_update() {
 
 	// Handle weapon swap scroll animation (matches CSE2 gArmsEnergyX sliding)
 	if(hudScrollDir != 0) {
-		// Apply scroll offset to HUD sprite positions
+		// Apply scroll offset to both weapon panel sprites
 		sprHUD[0].x = (16 + 128) + hudScrollOffset;
 		sprHUD[1].x = (16 + 32 + 128) + hudScrollOffset;
 
@@ -144,7 +169,7 @@ void hud_update() {
 		}
 	}
 
-	vdp_sprites_add(sprHUD, 2);
+	vdp_sprites_add(sprHUD, 4);
 	// Only refresh one part of the HUD in a single frame, at most 8 tiles will be sent
 	if(hudMaxHealth != playerMaxHealth || hudHealth != player.health) {
 		hud_refresh_health();
@@ -194,10 +219,10 @@ void hud_refresh_health() {
 	}
 	memcpy(tileData[2], &TS_Numbers.tiles[mod10[hudHealth]*TSIZE], TILE_SIZE);
 	// Queue DMA transfer for health display
-	//for(uint8_t i = 0; i < 8; i++)
-	//DMA_queueDma(DMA_VRAM, (uint32_t)tileData[i], (TILE_HUDINDEX+6+i*4)*TILE_SIZE, 16, 2);
-	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[0], (TILE_HUDINDEX+6)*TILE_SIZE, 32, 2);
-	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[3], (TILE_HUDINDEX+14)*TILE_SIZE, 32, 2);
+	// Heart+digit at TILE_HUDINDEX+32 (sprite tile 160, DMA 96-97)
+	// HP bar at TILE_HUDINDEX+42 (sprite tile 164, DMA 106-107, internal pos 2,1)
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[0], (TILE_HUDINDEX+32)*TILE_SIZE, 32, 2);
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[3], (TILE_HUDINDEX+42)*TILE_SIZE, 32, 2);
 }
 
 void hud_refresh_energy(uint8_t hard) {

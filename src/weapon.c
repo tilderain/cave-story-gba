@@ -165,6 +165,7 @@ void wstar_update(void) {
 
 static void bullet_destroy_block(uint16_t x, uint16_t y);
 static void create_blade_slash(Bullet *b, uint8_t burst);
+static void create_blade_slash_dir(Bullet *b, uint8_t dir);
 
 static inline void set_extent_box(Bullet *b) {
 	b->extent = (extent_box) {
@@ -578,6 +579,7 @@ void weapon_fire_blade(Weapon *w) {
 	b->level = w->level;
 	b->sheet = w->sheet;
 	b->hits = 0;
+	b->state = 0;
 	sound_play(SND_FIREBALL, 5);
 	switch(b->level) {
 		case 1: // Small 16x16 Blade
@@ -1089,29 +1091,63 @@ void bullet_update_bubbler(Bullet *b) {
 void bullet_update_blade(Bullet *b) {
 	b->ttl--;
 	if(b->level == 3) {
-		if(b->x_speed | b->y_speed) {
-			uint8_t block = stage_get_block_type(sub_to_block(b->x), sub_to_block(b->y));
-			if(b->hits) { // Hit something, stop moving
-				b->ttl = 50;
+		// King's Ghost — CSE2 ActBullet_Sword3
+		switch(b->state) {
+			case 0: // State 0: one frame pause (CSE2 act_no 0)
 				b->x_speed = 0;
 				b->y_speed = 0;
-				
-				TILES_QUEUE(SPR_TILES(&SPR_BladeB3k, 0, 3), sheets[b->sheet].index, 9);
-				
-			} else if(block == 0x43) { // Breakable block
-				b->ttl = 0;
-				bullet_destroy_block(sub_to_block(b->x), sub_to_block(b->y));
-				effect_create_smoke(sub_to_pixel(b->x), sub_to_pixel(b->y));
-				sound_play(SND_BLOCK_DESTROY, 5);
-				return;
-			} else if(block == 0x41) {
-				b->ttl = 0;
-				return;
-			} else {
-				create_blade_slash(b, FALSE);
-			}
-		} else {
-			create_blade_slash(b, TRUE);
+				b->state = 1;
+				b->hits = 0;
+				// Fall through — set direction speed on first state 1 entry
+			case 1: // State 1: moving, spawning slashes
+				if(b->x_speed == 0 && b->y_speed == 0) {
+					switch(b->dir) {
+						case LEFT:  b->x_speed = -0x800; break;
+						case UP:    b->y_speed = -0x800; break;
+						case RIGHT: b->x_speed =  0x800; break;
+						case DOWN:  b->y_speed =  0x800; break;
+					}
+				}
+				if(b->hits) { // Hit entity — transition to AOE burst
+					b->state = 2;
+					b->ttl = 50;
+					b->x_speed = 0;
+					b->y_speed = 0;
+					TILES_QUEUE(SPR_TILES(&SPR_BladeB3k, 0, 3), sheets[b->sheet].index, 9);
+					break;
+				}
+				// Spawn slash every 4 frames (ttl starts at 30: 30, 26, 22, ...)
+				if((b->ttl & 3) == 2) {
+					sound_play(SND_SLASH, 5);
+					create_blade_slash_dir(b, ((b->ttl >> 2) & 1) ? RIGHT : LEFT);
+				}
+				// Wall collision — check block at position
+				{
+					uint8_t block = stage_get_block_type(sub_to_block(b->x), sub_to_block(b->y));
+					if(block == 0x43) { // Breakable block
+						b->ttl = 0;
+						bullet_destroy_block(sub_to_block(b->x), sub_to_block(b->y));
+						effect_create_smoke(sub_to_pixel(b->x), sub_to_pixel(b->y));
+						sound_play(SND_BLOCK_DESTROY, 5);
+						return;
+					} else if(block == 0x41) { // Wall — transition to AOE burst
+						b->state = 2;
+						b->ttl = 50;
+						b->x_speed = 0;
+						b->y_speed = 0;
+					}
+				}
+				break;
+			case 2: // State 2: AOE burst (CSE2 act_no 2)
+				b->x_speed = 0;
+				b->y_speed = 0;
+				// 1/3 chance per frame to spawn slash at random offset
+				if((random() % 3) == 0) {
+					sound_play(SND_SLASH, 5);
+					create_blade_slash(b, TRUE);
+				}
+				if(b->ttl <= 1) return;
+				break;
 		}
 	} else {
 		// Level 1 and 2 hit walls, spin
@@ -1421,6 +1457,41 @@ static void create_blade_slash(Bullet *b, uint8_t burst) {
         //slash->x = b->x;
         //slash->y = b->y;// + ((slash->dir & 2) ? 0x2000 : -0x2000);
     }
+	slash->type = WEAPON_BLADE_SLASH;
+	slash->ttl = 20;
+	slash->hit_box = (bounding_box) { 6, 6, 6, 6 };
+	slash->sprite.size = SPRITE_SIZE(2, 2);
+}
+
+static void create_blade_slash_dir(Bullet *b, uint8_t dir) {
+	// CSE2: spawn one directed slash (used by level 3 moving phase)
+	Bullet *slash = &playerBullet[1];
+	slash->x = b->x;
+	slash->y = b->y;
+	slash->dir = dir;
+	switch(slash->dir) {
+		case LEFT:
+			slash->x_speed = -0x3FF;
+			slash->y_speed = 0x3FF;
+			slash->sprite.attr = TILE_ATTR(PAL0,0,0,0,TILE_SLASHINDEX);
+			break;
+		case UP:
+			slash->x_speed = -0x3FF;
+			slash->y_speed = -0x3FF;
+			slash->sprite.attr = TILE_ATTR(PAL0,0,1,0,TILE_SLASHINDEX);
+			break;
+		case RIGHT:
+			slash->x_speed = 0x3FF;
+			slash->y_speed = -0x3FF;
+			slash->sprite.attr = TILE_ATTR(PAL0,0,1,1,TILE_SLASHINDEX);
+			break;
+		case DOWN:
+			slash->x_speed = 0x3FF;
+			slash->y_speed = 0x3FF;
+			slash->sprite.attr = TILE_ATTR(PAL0,0,0,1,TILE_SLASHINDEX);
+			break;
+	}
+	slash->damage = 1;
 	slash->type = WEAPON_BLADE_SLASH;
 	slash->ttl = 20;
 	slash->hit_box = (bounding_box) { 6, 6, 6, 6 };
