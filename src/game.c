@@ -71,7 +71,8 @@ IWRAM_CODE void game_main(uint8_t load) {
 		if(paused) {
             PF_BGCOLOR(0x080);
 			paused = update_pause();
-		} else {
+		}
+		if(!paused) {
 			// Pressing start opens the item menu (unless a script is running)
 
 			if(joy_pressed(btn[cfg_btn_lswap]))
@@ -124,6 +125,7 @@ IWRAM_CODE void game_main(uint8_t load) {
 				vdp_sprites_update();
 				vdp_set_window(0, 0);
 				vdp_set_display(TRUE);
+                aftervsync();
 			} else {
 				// HUD on top
                 PF_BGCOLOR(0x008);

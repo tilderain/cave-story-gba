@@ -89,6 +89,9 @@
 #define TILE_DISSIPSIZE     16
 #define TILE_BOOMINDEX      (TILE_DISSIPINDEX + TILE_DISSIPSIZE)
 #define TILE_BOOMSIZE       32
+// 16 tiles for weapon swap display (4 weapons x 4 tiles each)
+#define TILE_EXWEPINDEX     (TILE_BOOMINDEX + TILE_BOOMSIZE)
+#define TILE_EXWEPSIZE      16
 // 12 tiles at the end for nemesis vertical frames
 #define TILE_NEMINDEX (0xFE80 >> 5)
 // 8 tiles after window plane for blade L3

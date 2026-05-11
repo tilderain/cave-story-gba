@@ -1281,6 +1281,7 @@ static void player_prev_weapon() {
 			TILES_QUEUE(SPR_TILES(weapon_info[playerWeapon[i].type].sprite,0,0),
 					TILE_WEAPONINDEX,6);
 			}
+			hud_swap_weapon(0); // LEFT
 			sound_play(SND_SWITCH_WEAPON, 5);
 			break;
 		}
@@ -1296,6 +1297,7 @@ static void player_next_weapon() {
 			TILES_QUEUE(SPR_TILES(weapon_info[playerWeapon[i].type].sprite,0,0),
 					TILE_WEAPONINDEX,6);
 			}
+			hud_swap_weapon(1); // RIGHT
 			sound_play(SND_SWITCH_WEAPON, 5);
 			break;
 		}

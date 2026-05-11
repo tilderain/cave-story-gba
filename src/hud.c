@@ -24,6 +24,7 @@
 #define AMMO    20
 
 VDPSprite sprHUD[4];
+VDPSprite sprSwap[2];
 uint32_t tileData[28][8];
 
 // Values used to draw parts of the HUD
@@ -41,6 +42,10 @@ uint8_t hudEnergyPixel, hudEnergyTimer, hudEnergyDest;
 // backward (prev) scrolls in from left (-16px). Slides at 2px/frame over 8 frames.
 static int8_t hudScrollOffset;   // current pixel offset: -16 to 16, 0 = normal
 static int8_t hudScrollDir;      // 0 = none, 1 = next (from right), -1 = prev (from left)
+
+// Used for weapon switch display (all weapons shown during swap)
+#define SWAP_BEGIN    9
+static uint8_t swapTimer, swapDir, swapWepNum;
 
 uint8_t showing = FALSE;
 
@@ -67,6 +72,7 @@ void hud_create() {
 	hudEnergyPixel = hudEnergyTimer = hudEnergyDest = 0;
 	hudScrollOffset = 0;
 	hudScrollDir = 0;
+	swapTimer = swapDir = swapWepNum = 0;
 	// Create the sprites
 	sprHUD[0] = (VDPSprite) {
 		.x = 16 + 128,
@@ -95,6 +101,20 @@ void hud_create() {
 		.size = SPRITE_SIZE(4, 2),
 		.attr = TILE_ATTR(PAL0,1,0,0,(TILE_HUDINDEX + 42)*2)
 	};
+	// Weapon swap display sprites (offscreen until swap begins)
+	sprSwap[0] = (VDPSprite) {
+		.x = 16 + 64 + 128,
+		.y = (pal_mode ? 24 : 16) + 128,
+		.size = SPRITE_SIZE(4, 2),
+		.attr = TILE_ATTR(PAL0,1,0,0,TILE_EXWEPINDEX*2)
+	};
+	sprSwap[1] = (VDPSprite) {
+		.x = 16 + 96 + 128,
+		.y = (pal_mode ? 24 : 16) + 128,
+		.size = SPRITE_SIZE(4, 2),
+		.attr = TILE_ATTR(PAL0,1,0,0,(TILE_EXWEPINDEX+8)*2)
+	};
+	hud_refresh_swap(TRUE);
 	// Draw blank tiles next to weapon
 	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+1)*TILE_SIZE, 16, 2);
 	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+3)*TILE_SIZE, 16, 2);
@@ -112,6 +132,7 @@ void hud_force_redraw(void) {
 	if(fadeSweepTimer > 0) return;
 	hud_refresh_health();
     hud_refresh_weapon();
+    hud_refresh_swap(TRUE);
     hud_refresh_energy(TRUE);
 	hud_refresh_maxammo();
 	hud_refresh_ammo();
@@ -170,6 +191,12 @@ void hud_update() {
 	}
 
 	vdp_sprites_add(sprHUD, 4);
+	// Handle weapon swap display animation
+	if(swapTimer) {
+		hud_refresh_swap(FALSE);
+	}
+	// Add swap display sprites if any weapons to show
+	if(swapWepNum > 0) vdp_sprites_add(sprSwap, swapWepNum > 2 ? 2 : 1);
 	// Only refresh one part of the HUD in a single frame, at most 8 tiles will be sent
 	if(hudMaxHealth != playerMaxHealth || hudHealth != player.health) {
 		hud_refresh_health();
@@ -349,6 +376,58 @@ void hud_refresh_weapon() {
 	// Queue DMA transfer for icon
 	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[WPN+0], (TILE_HUDINDEX)*TILE_SIZE, 16, 2);
 	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[WPN+2], (TILE_HUDINDEX+2)*TILE_SIZE, 16, 2);
+}
+
+void hud_swap_weapon(uint8_t dir) {
+	swapTimer = SWAP_BEGIN;
+	swapDir = dir;
+	sprSwap[0].x += swapDir ? 18 : -18;
+	sprSwap[1].x += swapDir ? 18 : -18;
+}
+
+void hud_refresh_swap(uint8_t force) {
+	if(force) swapTimer = 0;
+	if(force || swapTimer == SWAP_BEGIN) {
+		swapWepNum = 0;
+		for(uint8_t wep = currentWeapon + 1; ; wep++) {
+			if(wep >= MAX_WEAPONS) wep = 0;
+			if(wep == currentWeapon) break;
+
+			uint8_t type = playerWeapon[wep].type;
+			if(type == WEAPON_NONE) continue;
+
+			// 32x16 sprite holds 2 weapons side-by-side (16x16 each)
+			// Sprite 0: cols 0-1 (weapon 0), cols 2-3 (weapon 1)
+			// Sprite 1: cols 0-1 (weapon 2), cols 2-3 (weapon 3)
+			// In 1D OBJ mapping with sprite width 4:
+			//   TL@+0, TR@+1, BL@+4, BR@+5  (weapon at cols 0-1)
+			//   TL@+2, TR@+3, BL@+6, BR@+7  (weapon at cols 2-3)
+			uint16_t baseTile = TILE_EXWEPINDEX * 2 + (swapWepNum >> 1) * 16;
+			uint16_t colOff = (swapWepNum & 1) * 2; // 0 for cols 0-1, 2 for cols 2-3
+
+			const uint32_t *src = SPR_TILES(&SPR_ArmsImage, 0, type);
+			// Top-left tile
+			DMA_queueDma(DMA_VRAM, (uint32_t)src,       (baseTile + colOff + 0) * 16, 16, 2);
+			// Top-right tile
+			DMA_queueDma(DMA_VRAM, (uint32_t)(src + 8), (baseTile + colOff + 1) * 16, 16, 2);
+			// Bottom-left tile
+			DMA_queueDma(DMA_VRAM, (uint32_t)(src + 16), (baseTile + colOff + 4) * 16, 16, 2);
+			// Bottom-right tile
+			DMA_queueDma(DMA_VRAM, (uint32_t)(src + 24), (baseTile + colOff + 5) * 16, 16, 2);
+
+			swapWepNum++;
+		}
+	}
+	if(swapTimer) { // Animation in progress
+		sprSwap[0].x += swapDir ? -2 : 2;
+		sprSwap[1].x += swapDir ? -2 : 2;
+		swapTimer--;
+	} else { // End of animation, reset positions
+		sprSwap[0].x = 16 + 64 + 128;
+		sprSwap[1].x = 16 + 96 + 128;
+		sprSwap[0].size = SPRITE_SIZE(swapWepNum > 1 ? 4 : 2, 2);
+		sprSwap[1].size = SPRITE_SIZE(swapWepNum > 3 ? 4 : 2, 2);
+	}
 }
 
 void hud_refresh_ammo() {

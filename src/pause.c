@@ -251,11 +251,15 @@ uint8_t update_pause() {
         player_draw();
         entities_draw();
 
+        // Commit sprites to OAM before turning display on
+        vdp_sprites_update();
+        vdp_set_display(TRUE);
+
         controlsLocked = FALSE;
         gameFrozen = FALSE;
+        paused = FALSE;
         vdp_set_window(0, 0);
         window_close();
-        vdp_set_display(TRUE);
         return FALSE;
     } else {
         // Every cursor move and item selection runs a script
