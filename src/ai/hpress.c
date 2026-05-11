@@ -123,8 +123,7 @@ static void run_passageway(Entity *e) {
 				sound_play(SND_MISSILE_HIT, 5);
 				
 				e->frame = 0;
-				//for(int i=0;i<5;i++)
-				//	SmokePuff(random(e->Left(), e->Right()), e->Bottom());
+				effect_smoke_burst(e->x>>CSF, (e->y>>CSF) + e->hit_box.bottom, 8, 5);
 				
 				e->state = 20;	// continue smoking
 			}
@@ -239,7 +238,7 @@ void ai_hp_lightning(Entity *e) {
 		effect_create_smoke(e->x >> CSF, (e->y >> CSF) + e->hit_box.bottom);
 		e->state = STATE_DELETE;
 		// smoke on floor where it struck
-		//SmokeXY(e->x, e->Bottom() - (7<<CSF), 3, 0, 0);
+		effect_smoke_burst(e->x>>CSF, (e->y>>CSF) + e->hit_box.bottom - 7, 4, 3);
 	}
 }
 

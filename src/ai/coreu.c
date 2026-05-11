@@ -360,14 +360,14 @@ static uint8_t RunDefeated(Entity *e) {
 			//SetRotatorStates(RT_Spin_Slow_Closed);
 			
 			camera_shake(20);
-			//SmokeXY(e->x, e->y, 100, 128, 64);
+			effect_smoke_burst(e->x>>CSF, e->y>>CSF, 8, 8);
 			
 			entities_clear_by_type(OBJ_UDMINI_PLATFORM);
 			//set_bbox_shootable(FALSE);
 		} /* fallthrough */
 		case CR_Defeated+1:
 		{
-			//SmokeXY(e->x, e->y, 1, 64, 32);
+			effect_smoke_burst(e->x>>CSF, e->y>>CSF, 8, 1);
 			
 			e->x_speed = 0x40;
 			e->y_speed = 0x80;
@@ -390,10 +390,8 @@ static uint8_t RunDefeated(Entity *e) {
 			if ((e->timer & 7) == 0)
 				sound_play(SND_MISSILE_HIT, 5);
 			
-			//int x = e->x + random(-72<<CSF, 72<<CSF);
-			//int y = e->y + random(-64<<CSF, 64<<CSF);
-			//SmokePuff(x, y);
-			//effect(x, y, EFFECT_BOOMFLASH);
+			effect_smoke_burst(e->x>>CSF, e->y>>CSF, 144, 1);
+			effect_create_misc(EFF_BOOMFLASH, e->x >> CSF, e->y >> CSF, FALSE);
 			
 			if (e->timer > 100) {
 				sound_play(SND_EXPLOSION1, 5);
@@ -823,11 +821,11 @@ void ai_ud_spinner(Entity *e)
 {
 	if (e->x < 0 || e->x > MAPX(map.xsize))
 	{
-		effect(e->CenterX(), e->CenterY(), EFFECT_BOOMFLASH);
+		effect_create_misc(EFF_BOOMFLASH, e->x >> CSF, e->y >> CSF, FALSE);
 		e->Delete();
 		return;
 	}
-	
+
 	switch(e->state)
 	{
 		case 0:
@@ -864,8 +862,7 @@ void ai_ud_blast(Entity *e) {
 	e->x += -0xFFF;
 	//e->frame ^= 1;
 
-	//SmokePuff(e->CenterX() + (random(0, 16) << CSF),
-	//		  e->CenterY() + (random(-16, 16) << CSF));
+	effect_smoke_burst(e->x>>CSF, e->y>>CSF, 16, 1);
 	
 	if (e->x < -pixel_to_sub(8)) e->state = STATE_DELETE;
 }

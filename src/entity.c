@@ -149,6 +149,7 @@ Entity *entity_destroy(Entity *e) {
 	entity_drop_powerup(e);
 	effect_create_smoke(e->x >> CSF, e->y >> CSF);
 	effect_create_smoke(e->x >> CSF, e->y >> CSF);
+	effect_create_misc(EFF_BOOMFLASH, e->x >> CSF, e->y >> CSF, FALSE);
 	if(e->flags & NPC_EVENTONDEATH) tsc_call_event(e->event);
 	if(e->flags & NPC_DISABLEONFLAG) system_set_flag(e->id, TRUE);
 	return entity_delete(e);

@@ -717,7 +717,7 @@ void ai_booster_falling(Entity *e) {
 		{
 			e->hidden = (++e->timer & 2);
 			if (e->timer > 100) {
-				//SmokeClouds(o, 4, 16, 16);
+				SMOKE_AREA((e->x>>CSF)-8, (e->y>>CSF)-8, 16, 16, 4);
 				e->state = STATE_DELETE;
 			}
 		}

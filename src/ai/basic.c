@@ -561,7 +561,7 @@ void ai_fireplace(Entity *e) {
 		
 		case 10:	// extinguished by Jellyfish Juice
 			e->state = 11;
-			//effect(e->CenterX(), e->CenterY(), EFFECT_BOOMFLASH);
+			effect_create_misc(EFF_BOOMFLASH, e->x >> CSF, e->y >> CSF, FALSE);
 			SMOKE_AREA((e->x>>CSF) - 8, (e->y>>CSF) - 8, 16, 16, 2);
 			/* fallthrough */
 		case 11:

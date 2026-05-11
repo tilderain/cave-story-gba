@@ -604,7 +604,7 @@ void ai_pooh_black(Entity *e) {
 			e->y_speed = 0xA00;
 			
 			if ((e->grounded = collide_stage_floor(e))) {
-				//SmokeSide(o, 8, DOWN);
+				effect_smoke_burst(e->x>>CSF, e->y>>CSF, 8, 8);
 				sound_play(SND_BIG_CRASH, 5);
 				camera_shake(30);
 				
@@ -721,7 +721,7 @@ void ai_poohblk_dying(Entity *e) {
 			FACE_PLAYER(e);
 			
 			sound_play(SND_BIG_CRASH, 5);
-			//SmokeClouds(o, 10, 12, 12);
+			SMOKE_AREA((e->x>>CSF)-6, (e->y>>CSF)-6, 12, 12, 10);
 			entities_clear_by_type(OBJ_POOH_BLACK_BUBBLE);
 			
 			e->state = 1;
@@ -968,7 +968,7 @@ void ai_fuzz(Entity *e) {
 
 void ai_buyobuyo_base(Entity *e) {
 	if (e->state < 3 && e->health < (1000 - BUYOBUYO_BASE_HP)) {
-		//SmokeClouds(o, objprop[e->type].death_smoke_amt, 8, 8);
+		SMOKE_AREA((e->x>>CSF)-4, (e->y>>CSF)-4, 8, 8, 4);
 		e->attack = 0;
 		//e->eflags &= ~NPC_SHOOTABLE;
 		e->flags &= ~NPC_SHOOTABLE;

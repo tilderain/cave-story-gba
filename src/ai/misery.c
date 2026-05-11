@@ -496,7 +496,7 @@ void ai_boss_misery(Entity *e) {
 		{
 			e->flags &= ~NPC_SHOOTABLE;
 			entities_clear_by_type(OBJ_MISERY_RING);
-			//SmokeClouds(o, 3, 2, 2);
+			SMOKE_AREA((e->x>>CSF)-1, (e->y>>CSF)-1, 2, 2, 3);
 			
 			e->x_speed = 0;
 			e->y_speed = 0;
@@ -655,7 +655,7 @@ void ai_misery_ball(Entity *e) {
 void ai_black_lightning(Entity *e) {
 	ANIMATE(e, 2, 0,1);
 	if (blk(e->x, 0, e->y, 15) == 0x41) {
-		//effect(e->CenterX(), e->Bottom(), EFFECT_BOOMFLASH);
+		effect_create_misc(EFF_BOOMFLASH, e->x >> CSF, e->y >> CSF, FALSE);
 		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		effect_create_smoke(e->x >> CSF, e->y >> CSF);
 		e->state = STATE_DELETE;

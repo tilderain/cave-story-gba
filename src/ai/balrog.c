@@ -124,7 +124,7 @@ void ai_balrog(Entity *e) {
 			e->frame = PAINED;
 			e->x_speed = 0;
 			e->timer = e->timer2 = 0;
-			//SmokeClouds(e, 4, 8, 8);
+			SMOKE_AREA((e->x>>CSF)-4, (e->y>>CSF)-4, 8, 8, 4);
 			sound_play(SND_BIG_CRASH, 5);
 			e->balrog_smoking = 1;
 		}
@@ -294,7 +294,7 @@ void ai_balrog(Entity *e) {
 
 	if (e->balrog_smoking) {
 		if (++e->balrog_smoketimer > 20 || !(random() & 15)) {
-			//SmokeClouds(e, 1, 4, 4);
+			SMOKE_AREA((e->x>>CSF)-2, (e->y>>CSF)-2, 4, 4, 1);
 			e->balrog_smoketimer = 0;
 		}
 	}
@@ -817,7 +817,7 @@ void ai_balrog_missile(Entity *e) {
 	if ((e->dir && blk(e->x, 6, e->y, 0) == 0x41) ||
 		(!e->dir && blk(e->x, -6, e->y, 0) == 0x41)) {
 		SMOKE_AREA((e->x >> CSF) - 16, (e->y >> CSF) - 16, 32, 32, 3);
-		//effect(e->CenterX(), e->CenterY(), EFFECT_BOOMFLASH);
+		effect_create_misc(EFF_BOOMFLASH, e->x >> CSF, e->y >> CSF, FALSE);
 		sound_play(SND_MISSILE_HIT, 5);
 		
 		e->state = STATE_DELETE;

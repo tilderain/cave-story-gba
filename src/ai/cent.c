@@ -411,7 +411,7 @@ void ai_droll_shot(Entity *e) {
 	if (blk(e->x, 0, e->y, 0) & 0x41) {
 		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		effect_create_smoke(e->x >> CSF, e->y >> CSF);
-		//effect(e->CenterX(), e->CenterY(), EFFECT_BOOMFLASH);
+		effect_create_misc(EFF_BOOMFLASH, e->x >> CSF, e->y >> CSF, FALSE);
 		e->state = STATE_DELETE;
 	}
 }
@@ -779,12 +779,11 @@ void ai_prox_press_hoz(Entity *e) {
 
 			//if (++e->timer == 10) {
 			//	sound_play(SND_BLOCK_DESTROY, 5);
-				//SmokeSide(o, 4, e->dir);
 			//}
 
 			if (++e->timer > 8) {
 				int16_t xx = (e->x >> CSF) + e->dir ? 12 : -12, yy = e->y >> CSF;
-				effect_create_smoke(xx, yy);
+				effect_smoke_burst(xx, yy, 8, 4);
 				sound_play(SND_BLOCK_DESTROY, 5);
 				e->attack = 0;
 				e->x_speed = 0;
@@ -859,7 +858,7 @@ void ai_rocket(Entity *e) {
 			e->timer = 0;
 			e->frame = 1;
 			
-			//SmokeClouds(o, 10, 16, 8);
+			SMOKE_AREA((e->x>>CSF)-8, (e->y>>CSF)-4, 16, 8, 10);
 			sound_play(SND_BLOCK_DESTROY, 5);
 		} /* fallthrough */
 		case 13:
@@ -871,7 +870,7 @@ void ai_rocket(Entity *e) {
 			if ((e->timer & 3) == 1) sound_play(SND_FIREBALL, 3);
 			
 			if (collide_stage_ceiling(e)) {
-				//SmokeClouds(o, 6, 16, 8);
+				SMOKE_AREA((e->x>>CSF)-8, (e->y>>CSF)-4, 16, 8, 6);
 				sound_play(SND_BLOCK_DESTROY, 5);
 				
 				e->y_speed = 0;

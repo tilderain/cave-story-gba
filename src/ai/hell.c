@@ -544,6 +544,7 @@ void ai_mesa_block(Entity *e) {
 		case 0:		// being held
 		{
 			if (!e->linkedEntity || e->linkedEntity->type == OBJ_MESA_DYING) {
+				effect_create_misc(EFF_BOOMFLASH, e->x >> CSF, e->y >> CSF, FALSE);
 				effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 				effect_create_smoke(e->x>>CSF, e->y>>CSF);
 				e->state = STATE_DELETE;

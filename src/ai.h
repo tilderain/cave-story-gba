@@ -83,10 +83,7 @@ static inline uint8_t PLAYER_DIST_Y2(Entity *e, int32_t dist1, int32_t dist2) {
 }
 
 #define SMOKE_AREA(x, y, w, h, count) {                                                        \
-	for(uint8_t i = 0; i < (count); i++) {                                                     \
-		effect_create_smoke((x) + (random() % (w)),                                            \
-							(y) + (random() % (h)));                                           \
-	}                                                                                          \
+	effect_smoke_burst((x) + ((w) / 2), (y) + ((h) / 2), ((w) + (h)) / 2, (count));           \
 }
 
 #define ANIMATE(e, spd, ...) {                                                                 \

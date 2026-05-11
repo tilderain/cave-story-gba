@@ -261,7 +261,7 @@ void ai_igordead(Entity *e) {
 		case 0:
 		FACE_PLAYER(e);
 		sound_play(SND_BIG_CRASH, 5);
-		//SmokeBoomUp(e);
+		effect_smoke_burst(e->x>>CSF, (e->y>>CSF) - 8, 8, 3);
 		e->x_speed = 0;
 		e->timer = 0;
 		e->frame = DEFEAT1;

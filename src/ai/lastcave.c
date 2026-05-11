@@ -163,7 +163,7 @@ void ai_red_bat(Entity *e) {
 	e->y += e->y_speed;
 	
 	if (e->x < 0 || e->x > block_to_sub(stageWidth)) {
-		//effect(e->CenterX(), e->CenterY(), EFFECT_BOOMFLASH);
+		effect_create_misc(EFF_BOOMFLASH, e->x >> CSF, e->y >> CSF, FALSE);
 		e->state = STATE_DELETE;
 	}
 }

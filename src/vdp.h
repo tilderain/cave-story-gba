@@ -87,6 +87,8 @@
 #define TILE_GIBSIZE        4
 #define TILE_DISSIPINDEX    (TILE_GIBINDEX + TILE_GIBSIZE)
 #define TILE_DISSIPSIZE     16
+#define TILE_BOOMINDEX      (TILE_DISSIPINDEX + TILE_DISSIPSIZE)
+#define TILE_BOOMSIZE       32
 // 12 tiles at the end for nemesis vertical frames
 #define TILE_NEMINDEX (0xFE80 >> 5)
 // 8 tiles after window plane for blade L3

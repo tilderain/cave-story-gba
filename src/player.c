@@ -135,7 +135,7 @@ void player_init() {
 	player.damage_time = 0;
 	player.damage_value = 0;
 	player.dir = 1;
-	player.hit_box = (bounding_box){ 6, 6, 5, 8 };
+	player.hit_box = (bounding_box){ 5, 8, 5, 8 };
 	player.frame = 255;
 	ledge_time = 0;
 	lookingDown = FALSE;
@@ -520,7 +520,7 @@ static void player_update_walk() {
 	int16_t fric;
 	int16_t max_speed;
 	if(pal_mode || cfg_60fps) {
-		max_speed = 810;
+		max_speed = 812; // 0x32C
 		if(player.grounded) {
 			acc = 85;
 			fric = 51;
@@ -529,7 +529,7 @@ static void player_update_walk() {
 			fric = 0;
 		}
 	} else {
-		max_speed = 675;
+		max_speed = 677;
 		if(player.grounded) {
 			acc = 71;
 			fric = 42;
@@ -577,9 +577,9 @@ static void player_update_jump() {
 	int16_t maxFallSpeed;
 	if(pal_mode || cfg_60fps) {
 		// See issue #270 for the reason these values are off
-		jumpSpeed = 	0x4E0; // 0x500
+		jumpSpeed = 	0x500;
 		gravity = 		0x50;
-		gravityJump = 	0x21; // 0x20
+		gravityJump = 	0x20;
 		maxFallSpeed =	0x5FF;
 	} else {
 		jumpSpeed = 	0x42A;
@@ -608,13 +608,16 @@ static void player_update_jump() {
 			// Maybe possibly fix jump height?
 			player.jump_time = (pal_mode || cfg_60fps) ? 0 : 3;
 			player.jump_time += player.underwater ? 2 : 0;
-			
+
 			sound_play(SND_PLAYER_JUMP, 3);
 		}
 	} else if((playerEquipment & (EQUIP_BOOSTER08 | EQUIP_BOOSTER20)) &&
 			joy_pressed(btn[cfg_btn_jump])) {
 		player_start_booster();
-	} else if(playerBoostState == BOOST_OFF) {
+	}
+	// Gravity must apply every frame including the jump frame
+	// (CSE2 applies gravity independently of grounded state)
+	if(playerBoostState == BOOST_OFF && !player.grounded) {
 		if(joy_down(btn[cfg_btn_jump]) && (player.y_speed < 0 || player.underwater)) {
 			player.y_speed += gravityJump;
 		} else {
@@ -731,19 +734,19 @@ void player_start_booster() {
 		
 		switch(playerBoostState) {
 			case BOOST_UP:
-				player.y_speed = -0x600;
+				player.y_speed = -0x5FF;
 			break;
 			case BOOST_DOWN:
-				player.y_speed = 0x600;
+				player.y_speed = 0x5FF;
 			break;
 			case BOOST_HOZ:
 				player.y_speed = 0;
 				if (joy_down(BUTTON_LEFT)) {
-					player.x_speed = -0x600;
+					player.x_speed = -0x5FF;
                     // Little hack to prevent clipping against left wall
                     player.x += 0x100;
 				} else {
-					player.x_speed = 0x600;
+					player.x_speed = 0x5FF;
                 }
 			break;
 		}
@@ -791,12 +794,12 @@ static void player_update_booster() {
 		{
             if(!player.dir) { // Left
                 if(nblockl) {
-                    player.y_speed = -0xFF;
+                    player.y_speed = -0x100;
                     player.x += 0x100;
                 }
             } else { // Right
                 if(nblockr) {
-                    player.y_speed = -0xFF;
+                    player.y_speed = -0x100;
                     player.x -= 0x100;
                 }
             }
@@ -813,7 +816,7 @@ static void player_update_booster() {
 		case BOOST_UP:
 		{
 			player.y_speed -= 0x20;
-			if(player.y_speed < -0x600) player.y_speed = -0x600;
+			if(player.y_speed < -0x5FF) player.y_speed = -0x5FF;
 		}
 		break;
 		case BOOST_DOWN:

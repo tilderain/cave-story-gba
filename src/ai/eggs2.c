@@ -124,8 +124,8 @@ void ai_fallingspike_sm(Entity *e) {
 				if (!controlsLocked)	// no sound in ending cutscene
 					sound_play(SND_BLOCK_DESTROY, 5);
 				
-				//SmokeClouds(o, 4, 2, 2);
-				//effect(e->CenterX(), e->CenterY(), EFFECT_BOOMFLASH);
+				SMOKE_AREA((e->x>>CSF)-1, (e->y>>CSF)-1, 2, 2, 4);
+				effect_create_misc(EFF_BOOMFLASH, e->x >> CSF, e->y >> CSF, FALSE);
 				effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 				effect_create_smoke(sub_to_pixel(e->x), sub_to_pixel(e->y));
 				e->state = STATE_DELETE;
@@ -209,8 +209,8 @@ void ai_fallingspike_lg(Entity *e) {
 				effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 				effect_create_smoke(e->x >> CSF, e->y >> CSF);
 				effect_create_smoke(e->x >> CSF, e->y >> CSF);
-				//SmokeClouds(o, 4, 2, 2);
-				
+				SMOKE_AREA((e->x>>CSF)-1, (e->y>>CSF)-1, 2, 2, 4);
+
 				//effect(e->CenterX(), e->y + (sprites[e->sprite].block_d[0].y << CSF),
 				//	EFFECT_STARSOLID);
 			}

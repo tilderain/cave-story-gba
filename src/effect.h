@@ -11,6 +11,7 @@ enum {
 	EFF_FANL, EFF_FANU, EFF_FANR, EFF_FAND, EFF_SPLASH,
 	EFF_PSTAR_HIT, EFF_MGUN_HIT, EFF_BUBB_POP, EFF_FIRETRAIL, EFF_SNAKETRAIL,
 	EFF_DISSIPATE, EFF_GIB,
+	EFF_BOOMFLASH,
 };
 
 // Only send tiles for 1 damage string per frame
@@ -31,6 +32,8 @@ void effects_update();
 void effect_create_damage(int16_t num, Entity *follow, int16_t xoff, int16_t yoff);
 // Creates a single puff of smoke
 void effect_create_smoke(int16_t x, int16_t y);
+// Creates count smoke puffs scattered within a w×w area (CSE2 SetDestroyNpChar equivalent)
+void effect_smoke_burst(int16_t x, int16_t y, uint16_t w, uint8_t count);
 
 
 void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one);

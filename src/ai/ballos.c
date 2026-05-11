@@ -303,7 +303,7 @@ void ai_ballos_f1(Entity *e) {
 				e->y_speed = 0;
 				e->state++;
 				camera_shake(30);
-				//SmokeXY(e->x, e->y + 0x5000, 16, 40, 0);
+				SMOKE_AREA((e->x>>CSF)-20, ((e->y+0x5000)>>CSF)-20, 40, 40, 16);
 				if (player.grounded) player.y_speed = -0x200;
 				// ... and wait for script to trigger form 2
 			}
@@ -529,7 +529,7 @@ void ai_ballos_f3(Entity *e) {
 			SetEyeStates(EYE_INVISIBLE);
 			SetRotatorStates(30);			// slow spin CW, alternate open/closed
 			
-			//SmokeClouds(o, 256, 60, 60);	// ka boom!
+			SMOKE_AREA((e->x>>CSF)-30, (e->y>>CSF)-30, 60, 60, 16);
 			sound_play(SND_EXPLOSION1, 5);
 			camera_shake(30);
 			
@@ -629,10 +629,8 @@ void ai_ballos_f3(Entity *e) {
 		} /* fallthrough */
 		case 1001:
 		{
-			//int x = e->x + random(-60<<CSF, 60<<CSF);
-			//int y = e->y + random(-60<<CSF, 60<<CSF);
-			//SmokePuff(x, y);
-			//effect(x, y, EFFECT_BOOMFLASH);
+			effect_smoke_burst(e->x>>CSF, e->y>>CSF, 120, 3);
+			effect_create_misc(EFF_BOOMFLASH, e->x >> CSF, e->y >> CSF, FALSE);
 			
 			e->timer++;
 			
@@ -761,9 +759,9 @@ void ai_ballos_eye(Entity *e) {
 			e->state++;
 			
 			//if (e->dir == LEFT)
-			//	SmokeXY(e->x - (4<<CSF), e->y, 10, 4, 4);
+			effect_smoke_burst((e->x>>CSF)-4, e->y>>CSF, 4, 10);
 			//else
-			//	SmokeXY(e->x + (4<<CSF), e->y, 10, 4, 4);
+			effect_smoke_burst((e->x>>CSF)+4, e->y>>CSF, 4, 10);
 		}
 		break;
 	}
@@ -819,7 +817,7 @@ void ai_ballos_rotator(Entity *e) {
 					e->flags &= ~NPC_SHOOTABLE;
 					e->frame = 1;	// close eye
 					
-					//SmokeClouds(o, 32, 16, 16);
+					SMOKE_AREA((e->x>>CSF)-8, (e->y>>CSF)-8, 16, 16, 32);
 					sound_play(SND_LITTLE_CRASH, 5);
 					
 					rotators_left--;
@@ -874,7 +872,7 @@ void ai_ballos_rotator(Entity *e) {
 					e->y_speed = 0;
 					
 					e->flags &= ~NPC_SHOOTABLE;
-					//SmokeClouds(o, 32, 16, 16);
+					SMOKE_AREA((e->x>>CSF)-8, (e->y>>CSF)-8, 16, 16, 32);
 					sound_play(SND_LITTLE_CRASH, 5);
 					
 					e->frame = 1;
@@ -926,9 +924,9 @@ void ai_ballos_rotator(Entity *e) {
 		{
 			// explode one by one going clockwise
 			if (e->timer2 <= 0) {
-				//SmokeClouds(o, 32, 16, 16);
+				SMOKE_AREA((e->x>>CSF)-8, (e->y>>CSF)-8, 16, 16, 32);
 				sound_play(SND_LITTLE_CRASH, 5);
-				//effect(e->x, e->y, EFFECT_BOOMFLASH);
+				effect_create_misc(EFF_BOOMFLASH, e->x >> CSF, e->y >> CSF, FALSE);
 				e->state = STATE_DELETE;
 			} else {
 				e->timer2--;

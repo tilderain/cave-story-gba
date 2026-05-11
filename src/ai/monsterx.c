@@ -656,7 +656,7 @@ void ondeath_monsterx(Entity *e) {
 }
 
 void ondeath_x_target(Entity *e) {
-	//SmokeClouds(o, 8, 8, 8);
+	SMOKE_AREA((e->x>>CSF)-4, (e->y>>CSF)-4, 8, 8, 8);
 	sound_play(SND_LITTLE_CRASH, 5);
 	
 	e->flags &= ~NPC_SHOOTABLE;
@@ -666,6 +666,7 @@ void ondeath_x_target(Entity *e) {
 void ai_x_fishy_missile(Entity *e) {
 	e->flags ^= NPC_SHOOTABLE;
 	if(++e->timer > 600) {
+		effect_create_misc(EFF_BOOMFLASH, e->x >> CSF, e->y >> CSF, FALSE);
 		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		effect_create_smoke(e->x >> CSF, e->y >> CSF);
 		e->state = STATE_DELETE;
@@ -711,13 +712,13 @@ void ai_x_fishy_missile(Entity *e) {
 void ai_x_defeated(Entity *e) {
 	e->timer++;
 	if ((e->timer & 3) == 0) {
-		//SmokeClouds(o, 1, 16, 16);
+		SMOKE_AREA((e->x>>CSF)-8, (e->y>>CSF)-8, 16, 16, 1);
 	}
 	
 	switch(e->state) {
 		case 0:
 		{
-			//SmokeClouds(o, 8, 16, 16);
+			SMOKE_AREA((e->x>>CSF)-8, (e->y>>CSF)-8, 16, 16, 8);
 			e->state = 1;
 		} /* fallthrough */
 		case 1:

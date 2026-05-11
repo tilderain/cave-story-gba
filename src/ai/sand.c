@@ -31,6 +31,7 @@ void ai_polish(Entity *e) {
 		for(uint8_t i = 0; i < 10; i++) {
 			entity_create(e->x, e->y, OBJ_POLISHBABY, 0);
 		}
+		effect_create_misc(EFF_BOOMFLASH, e->x >> CSF, e->y >> CSF, FALSE);
 		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		SMOKE_AREA((e->x >> CSF) - 16, (e->y >> CSF) - 16, 32, 32, 8);
 		sound_play(SND_FUNNY_EXPLODE, 5);

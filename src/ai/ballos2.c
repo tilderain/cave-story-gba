@@ -127,7 +127,7 @@ static void run_flight(Entity *e) {
 				e->attack = DMG_NORMAL;
 				e->timer = 0;
 				
-				//SmokeXY(e->x, e->Top(), 8);
+				effect_smoke_burst(e->x>>CSF, (e->y>>CSF) - e->hit_box.top, 4, 8);
 				camera_shake(10);
 				
 				spawn_bones(e, UP);
@@ -178,7 +178,7 @@ static void run_flight(Entity *e) {
 				e->attack = DMG_NORMAL;
 				e->timer = 0;
 				
-				//SmokeXY(e->x, e->Bottom(), 8);
+				effect_smoke_burst(e->x>>CSF, (e->y>>CSF) + e->hit_box.bottom, 4, 8);
 				camera_shake(10);
 				
 				spawn_bones(e, DOWN);
@@ -401,8 +401,8 @@ static void run_defeated(Entity *e) {
 			e->frame = 12;
 			
 			e->flags &= ~NPC_SHOOTABLE;
-			//effect(e->x, e->y, EFFECT_BOOMFLASH);
-			//SmokeClouds(o, 16, 16, 16);
+			effect_create_misc(EFF_BOOMFLASH, e->x >> CSF, e->y >> CSF, FALSE);
+			SMOKE_AREA((e->x>>CSF)-8, (e->y>>CSF)-8, 16, 16, 16);
 			sound_play(SND_BIG_CRASH, 5);
 			
 			e->x_mark = e->x;

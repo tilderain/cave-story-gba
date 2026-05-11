@@ -67,6 +67,7 @@ void effects_init() {
 	// Load dissipation and gib effect tiles
 	vdp_tiles_load_from_rom(SPR_TILES(&SPR_Dissipate, 0, 0), TILE_DISSIPINDEX, TILE_DISSIPSIZE);
 	vdp_tiles_load_from_rom(SPR_TILES(&SPR_Gib, 0, 0), TILE_GIBINDEX, TILE_GIBSIZE);
+	vdp_tiles_load_from_rom(SPR_TILES(&SPR_Boomflash, 0, 0), TILE_BOOMINDEX, TILE_BOOMSIZE);
 }
 
 void effects_clear() {
@@ -85,6 +86,9 @@ IWRAM_CODE void effects_update() {
     	effDamage[i].ttl--;
     	if(effDamage[i].ttl < 8) {
     	    uint8_t start = 3 - effDamage[i].digit_count;
+    	    uint8_t tcount = effDamage[i].digit_count + 1;
+    	    // GBA has no 24×8 sprite mode — data was shifted left and padded to 4
+    	    if (tcount == 3) { start = 0; tcount = 4; }
     	    for(uint8_t x = start; x < 4; x++) {
     	        for(uint8_t y = 0; y < 7; y++) {
     	            dtiles[i][x][y] = dtiles[i][x][y + 1];
@@ -92,9 +96,9 @@ IWRAM_CODE void effects_update() {
     	        dtiles[i][x][7] = 0;
     	    }
     			DMA_doDma(DMA_VRAM,
-    			          (uint32_t) dtiles[i][3 - effDamage[i].digit_count],
+    			          (uint32_t) dtiles[i][start],
     			          (TILE_NUMBERINDEX + (i << 2)) * 16,
-    			          (effDamage[i].digit_count + 1) * 8,
+    			          tcount * 8,
     			          2);
     	} else {
     	        if(damageFollow[i].e) {
@@ -116,11 +120,16 @@ IWRAM_CODE void effects_update() {
 	for(uint8_t i = 0; i < MAX_SMOKE; i++) {
 		if(!effSmoke[i].ttl) continue;
 		effSmoke[i].ttl--;
+		// CSE2 ActNpc004 drag: xm = xm * 20 / 21
+		effSmoke[i].x_speed = (effSmoke[i].x_speed * 20) / 21;
+		effSmoke[i].y_speed = (effSmoke[i].y_speed * 20) / 21;
 		effSmoke[i].x += effSmoke[i].x_speed;
 		effSmoke[i].y += effSmoke[i].y_speed;
-		// Half assed animation
-		sprite_index(effSmoke[i].sprite,
-			TILE_SMOKEINDEX + 24 - ((effSmoke[i].ttl >> 2) << 2));
+		// CSE2 ActNpc004 animation: ++ani_wait > 4 → advance frame
+		if(++effSmoke[i].timer > 4) {
+			effSmoke[i].timer = 0;
+			effSmoke[i].sprite.attr += 4;  // next 16x16 tile
+		}
 		sprite_pos(effSmoke[i].sprite,
 			effSmoke[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 8,
 			effSmoke[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 8);
@@ -270,6 +279,15 @@ IWRAM_CODE void effects_update() {
                 vdp_sprite_add(&effMisc[i].sprite);
             }
             break;
+            case EFF_BOOMFLASH:
+            {
+                if(effMisc[i].ttl == 3) effMisc[i].sprite.attr += 16;
+                sprite_pos(effMisc[i].sprite,
+                           effMisc[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 16,
+                           effMisc[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 16);
+                vdp_sprite_add(&effMisc[i].sprite);
+            }
+            break;
 		}
 	}
 }
@@ -292,6 +310,17 @@ void effect_create_damage(int16_t num, Entity *follow, int16_t xoff, int16_t yof
 		tileIndex = ((negative ? 11 : 0) + 10) * 8;
 		memcpy(dtiles[i][3 - digitCount], &TS_Numbers.tiles[tileIndex], 32); // - or +
 
+		uint8_t num_tiles = digitCount + 1;
+		uint8_t tile_start = 3 - digitCount;
+		// GBA has no 24×8 sprite mode (3 tiles wide). Pad to 4 and shift data left.
+		if (num_tiles == 3) {
+			for (uint8_t j = 0; j < 3; j++)
+				memcpy(dtiles[i][j], dtiles[i][j + 1], 32);
+			memset(dtiles[i][3], 0, 32);
+			num_tiles = 4;
+			tile_start = 0;
+		}
+
 		if(follow) {
 			damageFollow[i].e = follow;
 			damageFollow[i].xoff = xoff;
@@ -305,10 +334,10 @@ void effect_create_damage(int16_t num, Entity *follow, int16_t xoff, int16_t yof
 		}
 		effDamage[i].ttl = 60; // 1 second
 		effDamage[i].sprite = (VDPSprite) {
-			.size = SPRITE_SIZE(digitCount+1, 1),
+			.size = SPRITE_SIZE(num_tiles, 1),
 			.attr = TILE_ATTR(PAL0, 1, 0, 0, TILE_NUMBERINDEX + (i<<2))
 		};
-		TILES_QUEUE(dtiles[i][3-digitCount], TILE_NUMBERINDEX + (i<<2), digitCount+1);
+		TILES_QUEUE(dtiles[i][tile_start], TILE_NUMBERINDEX + (i<<2), num_tiles);
 		dqueued = TRUE;
 
 		effDamage[i].digit_count = digitCount;
@@ -321,22 +350,41 @@ void effect_create_smoke(int16_t x, int16_t y) {
 		if(effSmoke[i].ttl) continue;
 		effSmoke[i].x = x;
 		effSmoke[i].y = y;
-		switch(random() & 7) {
-			case 0: effSmoke[i].x_speed = 0; break;
-			case 1:	effSmoke[i].y_speed = 0; break;
-			case 2: effSmoke[i].x_speed = 1; break;
-			case 3: effSmoke[i].y_speed = 1; break;
-			case 4: effSmoke[i].x_speed = -1; break;
-			case 5:	effSmoke[i].y_speed = -1; break;
-			case 6: effSmoke[i].x_speed ^= 1; break;
-			case 7: effSmoke[i].y_speed ^= 1; break;
+		// CSE2 ActNpc004: random angle direction, speed 1-3 pixels/frame
+		{
+			int8_t spd = 1 + (random() % 3);
+			switch(random() & 7) {
+				case 0: effSmoke[i].x_speed = spd;  effSmoke[i].y_speed = 0;    break;
+				case 1: effSmoke[i].x_speed = spd;  effSmoke[i].y_speed = -spd; break;
+				case 2: effSmoke[i].x_speed = 0;    effSmoke[i].y_speed = -spd; break;
+				case 3: effSmoke[i].x_speed = -spd; effSmoke[i].y_speed = -spd; break;
+				case 4: effSmoke[i].x_speed = -spd; effSmoke[i].y_speed = 0;    break;
+				case 5: effSmoke[i].x_speed = -spd; effSmoke[i].y_speed = spd;  break;
+				case 6: effSmoke[i].x_speed = 0;    effSmoke[i].y_speed = spd;  break;
+				case 7: effSmoke[i].x_speed = spd;  effSmoke[i].y_speed = spd;  break;
+			}
 		}
-		effSmoke[i].ttl = 24;
+		// CSE2 ActNpc004: 8 frames × ~5 ticks = 40 frames total
+		effSmoke[i].ttl = 40;
+		effSmoke[i].timer = 0;  // animation timer
+		// Animation frame cycles every 5 ticks (40/8=5), matching CSE2 ani_wait > 4
 		effSmoke[i].sprite = (VDPSprite) {
 			.size = SPRITE_SIZE(2, 2),
 			.attr = TILE_ATTR(PAL1, 1, 0, 0, TILE_SMOKEINDEX)
 		};
 		break;
+	}
+}
+
+// CSE2 SetDestroyNpChar / SetDestroyNpCharUp equivalent
+// Scatters 'count' smoke particles within a w×w pixel area centered at (x, y)
+void effect_smoke_burst(int16_t x, int16_t y, uint16_t w, uint8_t count) {
+	int16_t half = (int16_t)w / 2;
+	if (half < 1) half = 0;
+	for(uint8_t i = 0; i < count; i++) {
+		int16_t ox = half ? (int16_t)(random() % (half * 2)) - half : 0;
+		int16_t oy = half ? (int16_t)(random() % (half * 2)) - half : 0;
+		effect_create_smoke(x + ox, y + oy);
 	}
 }
 
@@ -522,6 +570,15 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
                 effMisc[i].sprite = (VDPSprite) {
                     .size = SPRITE_SIZE(2, 2),
                     .attr = TILE_ATTR(PAL1,1,0,0,TILE_GIBINDEX)
+                };
+            }
+            break;
+            case EFF_BOOMFLASH:
+            {
+                effMisc[i].ttl = 6;
+                effMisc[i].sprite = (VDPSprite) {
+                    .size = SPRITE_SIZE(4, 4),
+                    .attr = TILE_ATTR(PAL0,1,0,0,TILE_BOOMINDEX)
                 };
             }
             break;

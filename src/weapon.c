@@ -222,7 +222,7 @@ void weapon_fire_snake(Weapon *w) {
 	if(b->level > 1) {
 		// start moving off at an angle to our direction.
 		// whether we start off going up or down alternates with each shot.
-		int16_t wavespeed = (wave_dir & 1) ? -0x3FF : 0x3FF;
+		int16_t wavespeed = (wave_dir & 1) ? -0x400 : 0x400;
 		wave_dir ^= 1;
 		if(b->dir == LEFT || b->dir == RIGHT) {
 			b->y_speed = wavespeed;
@@ -231,6 +231,11 @@ void weapon_fire_snake(Weapon *w) {
 		}
 		b->state = 2;
 	}
+	// Muzzle flash (CSE2 CARET_SHOOT)
+	if(b->dir < 2)
+		effect_create_misc(EFF_PSTAR_HIT, (player.x>>CSF) + (b->dir ? 12 : -12), (player.y>>CSF) + 2, FALSE);
+	else
+		effect_create_misc(EFF_PSTAR_HIT, player.x>>CSF, (player.y>>CSF) + (b->dir == DOWN ? 10 : -10), FALSE);
 	set_extent_box(b);
 }
 
@@ -266,23 +271,28 @@ void weapon_fire_polarstar(Weapon *w) {
 		b->x = player.x;
 		b->y = player.y - pixel_to_sub(8);
 		b->x_speed = 0;
-		b->y_speed = -0xFFF;
+		b->y_speed = -0x1000;
 		b->hit_box = (bounding_box) { 1 + b->level, 6, 1 + b->level, 6 };
 	} else if(b->dir == DOWN) {
 		b->sprite.attr = TILE_ATTR(PAL0,0,0,0,sheets[b->sheet].index+4);
 		b->x = player.x;
 		b->y = player.y + pixel_to_sub(8);
 		b->x_speed = 0;
-		b->y_speed = 0xFFF;
+		b->y_speed = 0x1000;
 		b->hit_box = (bounding_box) { 1 + b->level, 6, 1 + b->level, 6 };
 	} else {
 		b->sprite.attr = TILE_ATTR(PAL0,0,0,0,sheets[b->sheet].index);
 		b->x = player.x + (b->dir ? pixel_to_sub(8) : -pixel_to_sub(8));
 		b->y = player.y + pixel_to_sub(3);
-		b->x_speed = (b->dir ? 0xFFF : -0xFFF);
+		b->x_speed = (b->dir ? 0x1000 : -0x1000);
 		b->y_speed = 0;
 		b->hit_box = (bounding_box) { 6, 1 + b->level, 6, 1 + b->level };
 	}
+	// Muzzle flash (CSE2 CARET_SHOOT)
+	if(b->dir < 2)
+		effect_create_misc(EFF_PSTAR_HIT, (player.x>>CSF) + (b->dir ? 12 : -12), (player.y>>CSF) + 3, FALSE);
+	else
+		effect_create_misc(EFF_PSTAR_HIT, player.x>>CSF, (player.y>>CSF) + (b->dir == DOWN ? 8 : -8), FALSE);
 	set_extent_box(b);
 }
 
@@ -329,6 +339,11 @@ void weapon_fire_fireball(Weapon *w) {
 		b->x_speed = b->dir ? 0x400 : -0x400;
 		b->y_speed = 0;
 	}
+	// Muzzle flash (CSE2 CARET_SHOOT)
+	if(b->dir < 2)
+		effect_create_misc(EFF_PSTAR_HIT, (player.x>>CSF) + (b->dir ? 12 : -12), (player.y>>CSF) + 4, FALSE);
+	else
+		effect_create_misc(EFF_PSTAR_HIT, player.x>>CSF, (player.y>>CSF) + (b->dir == DOWN ? 12 : -12), FALSE);
 	set_extent_box(b);
 }
 
@@ -360,8 +375,8 @@ void weapon_fire_machinegun(Weapon *w) {
 		}
 		b->x = player.x;
 		b->y = player.y - pixel_to_sub(12);
-		b->x_speed = -0x7F + (random() & 0xFF);
-		b->y_speed = -0xFFF;
+		b->x_speed = (int16_t)(random() % 0x155) - 0xAA;
+		b->y_speed = -0x1000;
 	} else if(b->dir == DOWN) {
 		b->sprite.attr = TILE_ATTR(PAL0,0,1,0,sheets[w->sheet].index+8);
 		if(w->level == 3) {
@@ -374,16 +389,21 @@ void weapon_fire_machinegun(Weapon *w) {
 		}
 		b->x = player.x;
 		b->y = player.y + pixel_to_sub(12);
-		b->x_speed = -0x7F + (random() & 0xFF);
-		b->y_speed = 0xFFF;
+		b->x_speed = (int16_t)(random() % 0x155) - 0xAA;
+		b->y_speed = 0x1000;
 	} else {
 		//b->level++; // Wonky use of this var, so the trail knows whether to be H/V
 		b->sprite.attr = TILE_ATTR(PAL0,0,0,b->dir,sheets[w->sheet].index);
 		b->x = player.x + (b->dir ? pixel_to_sub(10) : -pixel_to_sub(10));
 		b->y = player.y + pixel_to_sub(3);
-		b->x_speed = (b->dir ? 0xFFF : -0xFFF);
-		b->y_speed = -0x7F + (random() & 0xFF);
+		b->x_speed = (b->dir ? 0x1000 : -0x1000);
+		b->y_speed = (int16_t)(random() % 0x155) - 0xAA;
 	}
+	// Muzzle flash (CSE2 CARET_SHOOT)
+	if(b->dir < 2)
+		effect_create_misc(EFF_MGUN_HIT, (player.x>>CSF) + (b->dir ? 12 : -12), (player.y>>CSF) + 3, FALSE);
+	else
+		effect_create_misc(EFF_MGUN_HIT, player.x>>CSF, (player.y>>CSF) + (b->dir == DOWN ? 12 : -12), FALSE);
 	set_extent_box(b);
 }
 
@@ -412,6 +432,7 @@ void weapon_fire_missile(Weapon *w) {
 			}
 		}
 		missileEmptyFlag = FALSE;
+		sound_play(SND_POLAR_STAR_L1_2, 5);
 
 		b->type = w->type;
 		b->level = w->level;
@@ -453,6 +474,14 @@ void weapon_fire_missile(Weapon *w) {
 		}
 		set_extent_box(b);
 	}
+	// Muzzle flash (CSE2 CARET_SHOOT) - once per shot, not per bullet
+	{
+		uint8_t dir = FIREDIR;
+		if(dir < 2)
+			effect_create_misc(EFF_PSTAR_HIT, (player.x>>CSF) + (dir ? 12 : -12), (player.y>>CSF) + 2, FALSE);
+		else
+			effect_create_misc(EFF_PSTAR_HIT, player.x>>CSF, (player.y>>CSF) + (dir == DOWN ? 12 : -12), FALSE);
+	}
 }
 
 void weapon_fire_bubbler(Weapon *w) {
@@ -491,7 +520,7 @@ void weapon_fire_bubbler(Weapon *w) {
 		case 1:
 			b->damage = 1;
 			b->ttl = 40;
-			fwdspeed = 0x3FF; 
+			fwdspeed = 0x600;
 			break;
 		case 2: 
 			b->damage = 2;
@@ -533,6 +562,11 @@ void weapon_fire_bubbler(Weapon *w) {
 			b->y_speed = fwdspeed;
 			break;
 	}
+	// Muzzle flash (CSE2 CARET_SHOOT)
+	if(b->dir < 2)
+		effect_create_misc(EFF_BUBB_POP, (player.x>>CSF) + (b->dir ? 12 : -12), (player.y>>CSF) + 3, FALSE);
+	else
+		effect_create_misc(EFF_BUBB_POP, player.x>>CSF, (player.y>>CSF) + (b->dir == DOWN ? 10 : -10), FALSE);
 	set_extent_box(b);
 }
 
@@ -615,13 +649,13 @@ void weapon_fire_nemesis(Weapon *w) {
 	uint16_t speed = 0;
 	switch(b->level) {
 		case 1:
-		b->damage = 12;
-		speed = 0xFFF;
+		b->damage = 4;
+		speed = 0x1000;
 		sound_play(SND_NEMESIS_FIRE, 5);
 		break;
 		case 2:
-		b->damage = 6;
-		speed = 0xFFF;
+		b->damage = 4;
+		speed = 0x1000;
 		sound_play(SND_POLAR_STAR_L3, 5);
 		break;
 		case 3:
@@ -654,6 +688,11 @@ void weapon_fire_nemesis(Weapon *w) {
 	}
 	b->last_hit[0] = NULL;
     b->last_hit[1] = NULL;
+	// Muzzle flash (CSE2 CARET_SHOOT)
+	if(b->dir < 2)
+		effect_create_misc(EFF_PSTAR_HIT, (player.x>>CSF) + ((b->dir&1) ? 16 : -16), (player.y>>CSF) + 1, FALSE);
+	else
+		effect_create_misc(EFF_PSTAR_HIT, (player.x>>CSF) - 4, (player.y>>CSF) + ((b->dir&1) ? 12 : -12), FALSE);
 	set_extent_box(b);
 }
 
@@ -700,25 +739,30 @@ void weapon_fire_spur(Weapon *w) {
 		b->x = player.x;
 		b->y = player.y - pixel_to_sub(8);
 		b->x_speed = 0;
-		b->y_speed = -0xFFF;
+		b->y_speed = -0x1000;
 		b->hit_box = (bounding_box) { 2 + b->level, 6, 2 + b->level, 6 };
 	} else if(b->dir == DOWN) {
 		b->sprite.attr = TILE_ATTR(PAL0,0,0,0,sheets[b->sheet].index+8);
 		b->x = player.x;
 		b->y = player.y + pixel_to_sub(8);
 		b->x_speed = 0;
-		b->y_speed = 0xFFF;
+		b->y_speed = 0x1000;
 		b->hit_box = (bounding_box) { 2 + b->level, 6, 2 + b->level, 6 };
 	} else {
 		b->sprite.attr = TILE_ATTR(PAL0,0,0,0,sheets[b->sheet].index);
 		b->x = player.x + (b->dir ? pixel_to_sub(8) : -pixel_to_sub(8));
 		b->y = player.y + pixel_to_sub(2);
-		b->x_speed = (b->dir ? 0xFFF : -0xFFF);
+		b->x_speed = (b->dir ? 0x1000 : -0x1000);
 		b->y_speed = 0;
 		b->hit_box = (bounding_box) { 6, 2 + b->level, 6, 2 + b->level };
 	}
 	spur_xmark = b->x >> CSF;
 	spur_ymark = b->y >> CSF;
+	// Muzzle flash (CSE2 CARET_SHOOT)
+	if(b->dir < 2)
+		effect_create_misc(EFF_PSTAR_HIT, (player.x>>CSF) + (b->dir ? 12 : -12), (player.y>>CSF) + 2, FALSE);
+	else
+		effect_create_misc(EFF_PSTAR_HIT, player.x>>CSF, (player.y>>CSF) + (b->dir == DOWN ? 8 : -8), FALSE);
 	set_extent_box(b);
 }
 
@@ -736,9 +780,8 @@ void bullet_update_snake(Bullet *b) {
 			case DOWN:  b->y_speed += 0x80; break;
 		}
 		// periodically abruptly change the wave's direction
-		// use "state" as a timer
-		if((++b->state > 5)) {
-			b->state = 0;
+		// based on lifetime count to match CSE2's count1%5==2
+		if(((snake_ttl[b->level] - b->ttl) % 5) == 2) {
 			if(b->dir == LEFT || b->dir == RIGHT) {
 				b->y_speed = -b->y_speed;
 			} else {
@@ -808,8 +851,7 @@ void bullet_update_fireball(Bullet *b) {
 	uint8_t block_above = b->y_speed < 0 ? blk(b->x, 0, b->y, -6) : 0;
 	if(block_below == 0x41 || block_below == 0x43) {
 		//b->y -= sub_to_pixel(b->y + 0x800) & 15;
-		b->y_speed = -b->y_speed >> 1;
-		if(b->y_speed > -0x3FF) b->y_speed = -0x3FF;
+		b->y_speed = -0x400;
 	} else if(block_below & BLOCK_SLOPE) {
 		uint8_t index = block_below & 0xF;
 		if(index >= 4) {
@@ -824,16 +866,30 @@ void bullet_update_fireball(Bullet *b) {
 			}
 		}
 	} else if(block_above == 0x41 || block_above == 0x43) {
-		b->y_speed = -b->y_speed >> 1;
-		if(b->y_speed < 0xFF) b->y_speed = 0xFF;
+		b->y_speed = 0x400;
 	} else {
 		if(b->y_speed < 0x3C0) b->y_speed += 0x55;
 	}
 	// Check in front
 	uint8_t block_front = blk(b->x, b->x_speed > 0 ? 6 : -6, b->y, -1);
-	if(block_front == 0x41 || block_front == 0x43) { // Bullet hit a wall
-		b->x_speed = -b->x_speed;
+	uint8_t hit_wall = (block_front == 0x41 || block_front == 0x43);
+	if(hit_wall) { // Bullet hit a wall
+		if(b->x_speed < 0) b->x_speed = 0x400;
+		else b->x_speed = -0x400;
 	}
+	// Check if embedded in solid (hitting both left+right walls or both ceiling+floor)
+	uint8_t block_left = blk(b->x, -6, b->y, -1);
+	uint8_t block_right = blk(b->x, 6, b->y, -1);
+	uint8_t hit_ground = (block_below == 0x41 || block_below == 0x43);
+	uint8_t hit_ceil = (block_above == 0x41 || block_above == 0x43);
+	if((hit_ground && hit_ceil) || ((block_left == 0x41 || block_left == 0x43) && (block_right == 0x41 || block_right == 0x43))) {
+		b->ttl = 0;
+		sound_play(SND_SHOT_HIT, 3);
+		effect_create_misc(EFF_PSTAR_HIT, b->x >> CSF, b->y >> CSF, FALSE);
+		return;
+	}
+	// Play sound on wall bounce
+	if(hit_wall || hit_ground) sound_play(SND_FIREBALL, 3);
 	b->x += b->x_speed;
 	b->y += b->y_speed;
 	sprite_pos(b->sprite, 
@@ -860,7 +916,7 @@ void bullet_update_machinegun(Bullet *b) {
 	} else if(block == 0x41) { // Bullet hit a wall
 		b->ttl = 0;
 		sound_play(SND_SHOT_HIT, 3);
-        //effect_create_misc(EFF_MGUN_HIT, (b->x >> CSF) - 4, (b->y >> CSF) - 4, FALSE);
+        effect_create_misc(EFF_MGUN_HIT, sub_to_pixel(b->x), sub_to_pixel(b->y), FALSE);
 	} else {
 		sprite_pos(b->sprite,
 			sub_to_pixel(b->x - camera.x) + SCREEN_HALF_W - 8,
@@ -937,8 +993,7 @@ void bullet_update_missile(Bullet *b) {
 
 void bullet_update_bubbler(Bullet *b) {
 	if(b->level < 3) { // Level 1 and 2 just move forward a bit
-		uint8_t decel = 0x10;
-		if(b->level == 1) decel += 0x0A;
+		int16_t decel = (b->level == 1) ? 0x2A : 0x10;
 		switch(b->dir) {
 			case LEFT: b->x_speed += decel; break;
 			case RIGHT: b->x_speed -= decel; break;
@@ -1113,6 +1168,7 @@ void bullet_update_nemesis(Bullet *b) {
 	uint8_t block = blk(b->x, 0, b->y, 0);
 	if(block == 0x41) {
 		b->ttl = 0;
+        effect_create_misc(EFF_PSTAR_HIT, b->x >> CSF, b->y >> CSF, FALSE);
 	} else if(block == 0x43) {
 		bullet_destroy_block(sub_to_block(b->x), sub_to_block(b->y));
 		effect_create_smoke(sub_to_pixel(b->x), sub_to_pixel(b->y));
@@ -1136,6 +1192,7 @@ void bullet_update_spur(Bullet *b) {
 	if(block == 0x41) {
 		sound_play(SND_SHOT_HIT, 2);
 		b->ttl = 0;
+		effect_create_misc(EFF_PSTAR_HIT, b->x >> CSF, b->y >> CSF, FALSE);
 	} else if(block == 0x43) {
 		bullet_destroy_block(sub_to_block(b->x), sub_to_block(b->y));
 		effect_create_smoke(sub_to_pixel(b->x), sub_to_pixel(b->y));
@@ -1213,6 +1270,7 @@ void bullet_update_spur_tail(Bullet *b) {
     if(block == 0x41) {
         sound_play(SND_SHOT_HIT, 2);
         b->ttl = 0;
+        effect_create_misc(EFF_PSTAR_HIT, b->x >> CSF, b->y >> CSF, FALSE);
     } else if(block == 0x43) {
         bullet_destroy_block(sub_to_block(b->x), sub_to_block(b->y));
         effect_create_smoke(sub_to_pixel(b->x), sub_to_pixel(b->y));
