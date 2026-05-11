@@ -29,10 +29,15 @@ void ai_door(Entity *e) {
 void ai_theDoor(Entity *e) {
 	if(e->damage_time) {
 		e->frame = 3;
-	} else if(PLAYER_DIST_X(e, pixel_to_sub(80)) && PLAYER_DIST_Y(e, pixel_to_sub(80))) {
-		e->frame = ++e->timer > 8 ? 2 : 1;
-	} else {
-		e->timer = e->frame = 0;
+		e->timer = 0;
+	} else if(PLAYER_DIST_X(e, pixel_to_sub(64)) && PLAYER_DIST_Y(e, pixel_to_sub(64))) {
+		e->frame = ++e->timer > 6 ? 2 : 1;
+	} else if(e->frame) {
+		// Closing animation (CSE2 ActNpc059 state 4: 2 frame-per-step decrement)
+		if(++e->timer > 2) {
+			e->timer = 0;
+			if(e->frame > 0 && e->frame < 3) e->frame--;
+		}
 	}
 }
 
@@ -54,6 +59,7 @@ void ai_doorway(Entity *e) {
 		if(++e->animtime > 10) {
 			e->animtime = 0;
 			e->frame++;
+			sound_play(SND_QUAKE, 5);
 			if(e->frame == 11 || e->frame == 22) e->state = STATE_DELETE;
 		}
 	} else if(++e->timer > 5) {

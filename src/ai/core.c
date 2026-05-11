@@ -106,10 +106,10 @@ void onspawn_core(Entity *e) {
 	pieces[2]->y = (e->y + 0x8000);
 	
 	pieces[3]->x = (e->x - 0x6000);
-	pieces[3]->y = (e->y + 0x4000);
-	
+	pieces[3]->y = (e->y - 0x4000);
+
 	pieces[4]->x = (e->x - 0x6000);
-	pieces[4]->y = (e->y - 0x4000);
+	pieces[4]->y = (e->y + 0x4000);
 
 	for(uint8_t i = 0; i < 5; i++) {
 		pieces[i]->flags = (NPC_SHOOTABLE | NPC_INVINCIBLE | NPC_IGNORESOLID);
@@ -187,17 +187,16 @@ void ai_core(Entity *e) {
 			
 			// must call constantly for red-flashing when hit
 			OPEN_MOUTH;
-			
-			//e->timer++;
+
 			// hint curly to target us
-			if ((e->timer & 63) == 1) {
+			if ((e->timer % 100) == 1) {
 				CURLY_TARGET_HERE(e);
 			}
 			
 			// spawn ghosties
 			if(e->timer < 200) {
-				if((e->timer & 31) == 0) {
-					entity_create(e->x + pixel_to_sub(-48 + (random() & 63)),
+				if((e->timer % 20) == 1) {
+					entity_create(e->x + pixel_to_sub(-48 + (random() % 33)),
 						     	  e->y + pixel_to_sub(-64 + (random() & 127)),
 							 	  OBJ_CORE_GHOSTIE, 0);
 				}
@@ -226,8 +225,6 @@ void ai_core(Entity *e) {
 			player.x_speed -= 0x24;
 			
 			OPEN_MOUTH;
-			
-			//e->timer++;
 			// spawn the big white blasts
 			if(e->timer==300 || e->timer==350 || e->timer==400) {
 				Entity *shot = entity_create(pieces[CFRONT]->x, pieces[CFRONT]->y, OBJ_CORE_BLAST, 0);
@@ -266,7 +263,7 @@ void ai_core(Entity *e) {
 		case 501:
 		{
 			e->timer++;
-			if ((e->timer & 15) == 1) {
+			if (e->timer % 16) {
 				effect_create_smoke((e->x >> CSF) - 32 + (random() & 127), 
 									(e->y >> CSF) - 64 + (random() & 127));
 			}
@@ -324,13 +321,13 @@ void ai_core(Entity *e) {
 		
 		// fire off each minicore sequentially...
 		if(e->timer == 80+  0) pieces[0]->state = MC_CHARGE_FIRE;
-		if(e->timer == 80+ 30) pieces[1]->state = MC_CHARGE_FIRE;
-		if(e->timer == 80+ 60) pieces[2]->state = MC_CHARGE_FIRE;
-		if(e->timer == 80+ 90) pieces[3]->state = MC_CHARGE_FIRE;
-		if(e->timer == 80+120) pieces[4]->state = MC_CHARGE_FIRE;
+		if(e->timer == 80+ 50) pieces[1]->state = MC_CHARGE_FIRE;
+		if(e->timer == 80+100) pieces[2]->state = MC_CHARGE_FIRE;
+		if(e->timer == 80+150) pieces[3]->state = MC_CHARGE_FIRE;
+		if(e->timer == 80+200) pieces[4]->state = MC_CHARGE_FIRE;
 		
 		// move main core towards a spot in front of target
-		e->x_speed += (e->x > (e->x_mark + (48<<CSF))) ? -4 : 4;
+		e->x_speed += (e->x > (e->x_mark + (160<<CSF))) ? -4 : 4;
 		e->y_speed += (e->y > e->y_mark) ? -4 : 4;
 	}
 	
@@ -396,8 +393,8 @@ void ai_minicore(Entity *e) {
 			e->state = MC_THRUST+1;
 			e->mouth_open = FALSE;
 			e->timer = 0;
-			uint16_t xx = px - 96 + (random() & 127);
-			uint16_t yy = py - 64 + (random() & 127);
+			uint16_t xx = (bossEntity->x >> CSF) - 128 + (random() % 161);
+			uint16_t yy = (bossEntity->y >> CSF) - 64 + (random() % 129);
 			e->x_mark = pixel_to_sub(xx);
 			e->y_mark = pixel_to_sub(yy);
 		}
@@ -411,11 +408,19 @@ void ai_minicore(Entity *e) {
 		{
 			e->state = MC_CHARGE_FIRE+1;
 			e->timer = 0;
+			e->animtime = 0;
 		}
 		/* fallthrough */
 		case MC_CHARGE_FIRE+1:			// flash blue
 		{
-			if(++e->timer > 20) e->state = MC_FIRE;
+			if (++e->animtime > 2) {
+				e->animtime = 0;
+				e->mouth_open = !e->mouth_open;
+			}
+			if(++e->timer > 20) {
+				e->state = MC_FIRE;
+				e->mouth_open = TRUE;
+			}
 		}
 		break;
 		case MC_FIRE:			// firing
@@ -509,6 +514,7 @@ void ai_minicore_shot(Entity *e) {
 	e->y += e->y_speed;
 	if((++e->animtime & 3) == 0 && ++e->frame > 2) e->frame = 0;
 	if (blk(e->x, 0, e->y, 0) == 0x41) {
+		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		effect_create_smoke(e->x >> CSF, e->y >> CSF);
 		e->state = STATE_DELETE;
 	}
@@ -519,6 +525,7 @@ void ai_core_ghostie(Entity *e) {
 	e->x += e->x_speed;
 	if((++e->animtime & 3) == 0 && ++e->frame > 2) e->frame = 0;
 	if(blk(e->x, 0, e->y, 0) == 0x41) {
+		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		effect_create_smoke(e->x >> CSF, e->y >> CSF);
 		e->state = STATE_DELETE;
 	}

@@ -22,7 +22,7 @@ int32_t curly_target_y = 0;
 static void CaiJUMP(Entity *e) {
 	if (e->grounded) {
 		moveMeToFront = TRUE;
-		e->y_speed = -0x300 - (random() & 0x2FF);
+		e->y_speed = -0x600;
 		e->y_next -= 0x300;
 		e->grounded = FALSE;
 		e->frame = WALK2;

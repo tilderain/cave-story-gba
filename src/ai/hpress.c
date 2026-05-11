@@ -139,8 +139,8 @@ void onspawn_heavypress(Entity *e) {
 	e->y = HELL_Y;
 	shield_left = NULL;
 	shield_right = NULL;
-	uncover_y = 11;
-	
+	uncover_y = 9;
+
 	e->hurtSound = SND_ENEMY_HURT_COOL;
 	
 	e->flags = (NPC_SHOWDAMAGE | NPC_EVENTONDEATH | NPC_SPECIALSOLID | NPC_IGNORESOLID);
@@ -164,37 +164,39 @@ void ai_heavypress(Entity *e) {
 				// create shielding objects for invincibility on either side
 				shield_left = entity_create(e->x, e->y, OBJ_HEAVY_PRESS_SHIELD, 0);
 				shield_right = entity_create(e->x, e->y, OBJ_HEAVY_PRESS_SHIELD, NPC_OPTION2);
-				
+
 				e->flags |= NPC_SHOOTABLE;
 				e->flags &= ~NPC_INVINCIBLE;
-				
+
 				e->state = 101;
-				e->timer = 0;	// pause a moment before Butes come
+				e->timer = 0;
 			} /* fallthrough */
 			case 101:
-			{	// fire lightning
-				entity_create(e->x, e->y + 0x7800, OBJ_HP_LIGHTNING, 0);
-				e->state = 102;
-			} /* fallthrough */
-			case 102:
-			{
-				// spawn butes on alternating sides
-				e->timer++;
-				if(e->timer == 100 || e->timer == 260) {
-					entity_create(block_to_sub(17), block_to_sub(15), OBJ_BUTE_FALLING, NPC_OPTION1);
-				} else if(e->timer == 180 || e->timer == 340) {
-					entity_create(block_to_sub(3), block_to_sub(15), OBJ_BUTE_FALLING, NPC_OPTION1);
-				} else if(e->timer >= 400) {
-					// fire lightning next frame
-					e->state = 101;
-					e->timer = 90;
+			{	// prep phase - 100 frame delay before first lightning (CSE2: act_wait=-100)
+				if (++e->timer >= 100) {
+					e->state = 102;
+					e->timer = 0;
+					entity_create(e->x, e->y + 0x7800, OBJ_HP_LIGHTNING, 0);
 				}
-				
+			}
+			break;
+			case 102:
+			{	// main fight loop - 300 frame cycle (CSE2: act_wait 0..300)
+				e->timer++;
+				if(e->timer == 1 || e->timer == 161) {
+					entity_create(block_to_sub(17), block_to_sub(15), OBJ_BUTE_FALLING, NPC_OPTION1);
+				} else if(e->timer == 81 || e->timer == 241) {
+					entity_create(block_to_sub(3), block_to_sub(15), OBJ_BUTE_FALLING, NPC_OPTION1);
+				} else if(e->timer >= 300) {
+					e->timer = 0;
+					entity_create(e->x, e->y + 0x7800, OBJ_HP_LIGHTNING, 0);
+				}
+
 				// uncover as it's damaged
 				if (e->health < (uncover_y * 70) && uncover_y > 1) {
 					uncover_y--;
 					sound_play(SND_BLOCK_DESTROY, 5);
-					
+
 					for(uint16_t x=uncover_left;x<=uncover_right;x++)
 						stage_replace_block(x, uncover_y, 0);
 				}
@@ -228,11 +230,13 @@ void onspawn_hp_lightning(Entity *e) {
 }
 
 void ai_hp_lightning(Entity *e) {
-	if((++e->timer & 3) == 0 && ++e->frame > 2) e->frame = 0;
+	if(++e->frame > 2) e->frame = 0;	// advance every frame (CSE2: ani_wait > 0)
 	
 	if(e->timer > 50) {
 		sound_play(SND_LIGHTNING_STRIKE, 5);
 		entity_create(e->x + pixel_to_sub(32), e->y + pixel_to_sub(72), OBJ_LIGHTNING, 0);
+		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
+		effect_create_smoke(e->x >> CSF, (e->y >> CSF) + e->hit_box.bottom);
 		e->state = STATE_DELETE;
 		// smoke on floor where it struck
 		//SmokeXY(e->x, e->Bottom() - (7<<CSF), 3, 0, 0);
@@ -242,11 +246,11 @@ void ai_hp_lightning(Entity *e) {
 void onspawn_hpress_shield(Entity *e) {
 	e->alwaysActive = TRUE;
 	if(e->flags & NPC_OPTION2) {
-		e->x = bossEntity->x + pixel_to_sub(28);
+		e->x = bossEntity->x + pixel_to_sub(24);
 	} else {
-		e->x = bossEntity->x - pixel_to_sub(28);
+		e->x = bossEntity->x - pixel_to_sub(24);
 	}
-	e->y = bossEntity->y + pixel_to_sub(40);
+	e->y = bossEntity->y + pixel_to_sub(52);
 	e->hit_box = (bounding_box) { 16, 16, 16, 16 };
 	e->flags |= NPC_SHOOTABLE | NPC_INVINCIBLE;
 	e->health = 1000;

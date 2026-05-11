@@ -89,7 +89,7 @@ void ai_midorin(Entity *e) {
 			e->frame = 0;	// this will be toggled into frame 2 just below
 			e->animtime = 0;
 			
-			e->timer = 40 + (random() & 15);		// how long to run
+			e->timer = 17 + (random() % 17);		// how long to run
 			e->dir = random() & 1;
 		} /* fallthrough */
 		case 4:
@@ -136,7 +136,7 @@ void ai_orangebell(Entity *e) {
 		} /* fallthrough */
 		case 1:
 		{
-			ANIMATE(e, 5, 0,1,2);
+			ANIMATE(e, 6, 0,1,2);
 			
 			if ((!e->dir && collide_stage_leftwall(e)) ||
 				(e->dir && collide_stage_rightwall(e))) {
@@ -162,7 +162,7 @@ void ai_orangebell_baby(Entity *e) {
 			e->x_speed = cos[angle];//pixel_to_sub();
 			e->y_speed = sin[angle];//pixel_to_sub();
 			
-			e->timer = 0;	// time until can dive-bomb
+			e->timer = 120;	// time until can dive-bomb
 			// unique target point on main bat
 			e->y_next = -pixel_to_sub(random() & 31);
 			
@@ -170,7 +170,7 @@ void ai_orangebell_baby(Entity *e) {
 		} /* fallthrough */
 		case 1:
 		{
-			ANIMATE(e, 4, 0,1,2);
+			ANIMATE(e, 2, 0,1,2);
 			
 			if (e->linkedEntity) {
 				e->x_mark = e->linkedEntity->x;
@@ -223,7 +223,7 @@ void ai_gunfish(Entity *e) {
 			e->y_mark = e->y;
 			
 			e->state = 1;
-			e->timer = random() & 63;
+			e->timer = random() % 51;
 		} /* fallthrough */
 		case 1:		// desync
 		{
@@ -237,10 +237,10 @@ void ai_gunfish(Entity *e) {
 		
 		case 2:
 		{
-			ANIMATE(e, 4, 0,1);
+			ANIMATE(e, 2, 0,1);
 			FACE_PLAYER(e);
 			
-			if (PLAYER_DIST_X(e, pixel_to_sub(128)) && PLAYER_DIST_Y2(e, pixel_to_sub(160), 20<<CSF)) {
+			if (PLAYER_DIST_X(e, pixel_to_sub(128)) && PLAYER_DIST_Y2(e, pixel_to_sub(160), pixel_to_sub(32))) {
 				if (++e->timer > 80) {
 					e->state = 10;
 					e->timer = 0;
@@ -252,7 +252,7 @@ void ai_gunfish(Entity *e) {
 		
 		case 10:
 		{
-			ANIMATE(e, 4, 2,3);
+			ANIMATE(e, 2, 2,3);
 			
 			if (++e->timer > 20) {
 				e->state = 20;
@@ -265,7 +265,7 @@ void ai_gunfish(Entity *e) {
 		
 		case 20:
 		{
-			ANIMATE(e, 4, 4,5);
+			ANIMATE(e, 2, 4,5);
 			
 			if(++e->timer > 10) {
 				e->timer = 0;
@@ -364,7 +364,7 @@ void ai_droll(Entity *e) {
 					e->timer2 = 1;
 					e->frame = 7;
 					//FIRE_ANGLED_SHOT(OBJ_DROLL_SHOT, e->x, e->y, e->dir ? A_RIGHT : A_LEFT, 0x600);
-					Entity *shot = entity_create(e->x, e->y, OBJ_DROLL_SHOT, 0);
+					Entity *shot = entity_create(e->x, e->y - pixel_to_sub(10), OBJ_DROLL_SHOT, 0);
 					THROW_AT_TARGET(shot, player.x, player.y, 0x600);
 					sound_play(SND_EM_FIRE, 5);
 				} else if (e->y_speed > 0x200) {	// after-fire frame
@@ -409,6 +409,7 @@ void ai_droll_shot(Entity *e) {
 	if ((++e->timer & 7) == 0) sound_play(SND_DROLL_SHOT_FLY, 3);
 	
 	if (blk(e->x, 0, e->y, 0) & 0x41) {
+		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		effect_create_smoke(e->x >> CSF, e->y >> CSF);
 		//effect(e->CenterX(), e->CenterY(), EFFECT_BOOMFLASH);
 		e->state = STATE_DELETE;
@@ -429,7 +430,7 @@ void ai_droll_guard(Entity *e) {
 		} /* fallthrough */
 		case 1:
 		{
-			ANIMATE(e, 30, 0,1);
+			ANIMATE(e, 50, 0,1);
 			FACE_PLAYER(e);
 		}
 		break;
@@ -580,7 +581,7 @@ void ai_npc_itoh(Entity *e) {
 		{
 			e->x_speed = 0;
 			e->frame = STAND;
-			RANDBLINK(e, BLINK, 200);
+			RANDBLINK(e, BLINK, 121);
 		}
 		break;
 		
@@ -687,7 +688,7 @@ void ai_kanpachi_stand(Entity *e) {
 			e->frame = 1;
 			e->x_speed = 0;
 			e->y_speed = 0;
-			RANDBLINK(e, 2, 200);
+			RANDBLINK(e, 2, 61);
 		}
 		break;
 		case 3:		// walking
@@ -697,7 +698,7 @@ void ai_kanpachi_stand(Entity *e) {
 		} /* fallthrough */
 		case 4:
 		{
-			ANIMATE(e, 8, 3,4);
+			ANIMATE(e, 5, 3,4);
 			MOVE_X(0x200);
 		}
 		break;
@@ -720,6 +721,8 @@ void ai_kanpachi_stand(Entity *e) {
 		}
 		break;
 	}
+	if(!e->grounded) e->y_speed += 0x20;
+	LIMIT_Y(0x5ff);
 	e->x = e->x_next;
 	e->y = e->y_next;
 	e->dir = 0;
@@ -730,7 +733,7 @@ void ai_npc_momorin(Entity *e) {
 	switch(e->state) {
 		case 0:
 			e->frame = 0;
-			RANDBLINK(e, 1, 200);
+			RANDBLINK(e, 1, 161);
 			FACE_PLAYER(e);
 		break;
 		
@@ -772,14 +775,14 @@ void ai_prox_press_hoz(Entity *e) {
 		case 2:		// activated
 		{
 			e->attack = 127;
-			MOVE_X(0x900);
-			
+			MOVE_X(0xC00);
+
 			//if (++e->timer == 10) {
 			//	sound_play(SND_BLOCK_DESTROY, 5);
 				//SmokeSide(o, 4, e->dir);
 			//}
-			
-			if (++e->timer > 11) {
+
+			if (++e->timer > 8) {
 				int16_t xx = (e->x >> CSF) + e->dir ? 12 : -12, yy = e->y >> CSF;
 				effect_create_smoke(xx, yy);
 				sound_play(SND_BLOCK_DESTROY, 5);
@@ -793,7 +796,7 @@ void ai_prox_press_hoz(Entity *e) {
 		
 		case 3:		// hit other press
 		{
-			if (++e->timer > 60) {
+			if (++e->timer > 50) {
 				e->state = 4;	// return
 				e->frame = 1;
 				e->timer = 0;
@@ -803,12 +806,12 @@ void ai_prox_press_hoz(Entity *e) {
 		
 		case 4:		// return to start pos
 		{
-			MOVE_X(-0x5A0);
-			
+			MOVE_X(-0x800);
+
 			//if(!e->dir) collide_stage_rightwall(e);
 			//else collide_stage_leftwall(e);
-			
-			if (++e->timer > 15) {
+
+			if (++e->timer > 12) {
 				e->frame = 0;
 				e->x_speed = 0;
 				e->x = e->x_mark;

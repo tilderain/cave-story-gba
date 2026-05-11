@@ -37,8 +37,8 @@ void ai_boss_doctor(Entity *e) {
 		case 2:		// transforming (script)
 		{
 			e->timer++;
-			//e->frame = (e->timer & 4) ? 0 : 3;
-			
+			e->frame = (e->timer & 2) ? 0 : 3;
+
 			if (e->timer > 50) e->state = 10;
 		}
 		break;
@@ -77,10 +77,12 @@ void ai_boss_doctor(Entity *e) {
 			
 			if (e->timer == 80) {
 				e->frame = SHOOT2;	// arm cast out
-				
-				entity_create(e->x_next, e->y_next, OBJ_DOCTOR_SHOT, e->dir ? NPC_OPTION1 : 0);
-				entity_create(e->x_next, e->y_next, OBJ_DOCTOR_SHOT, (e->dir ? NPC_OPTION1 : 0) | NPC_OPTION2);
-				
+
+				// Spawn 16 pixels in front of doctor (matching CSE2)
+				int32_t spawn_ofs = e->dir ? (16 << CSF) : -(16 << CSF);
+				entity_create(e->x_next + spawn_ofs, e->y_next, OBJ_DOCTOR_SHOT, e->dir ? NPC_OPTION1 : 0);
+				entity_create(e->x_next + spawn_ofs, e->y_next, OBJ_DOCTOR_SHOT, (e->dir ? NPC_OPTION1 : 0) | NPC_OPTION2);
+
 				sound_play(SND_FUNNY_EXPLODE, 5);
 			}
 			
@@ -140,7 +142,8 @@ void ai_boss_doctor(Entity *e) {
 			e->state = 101;
 			e->flags &= ~NPC_SHOOTABLE;
 			e->attack = 0;
-			
+			sound_play(SND_TELEPORT, 5);
+
 			//dr_tp_out_init(o);
 		} /* fallthrough */
 		case 101:
@@ -257,6 +260,7 @@ void ai_boss_doctor(Entity *e) {
 // wave shot
 void ai_doctor_shot(Entity *e) {
 	if (e->x < 0 || e->x > (int32_t)stageWidth << 13) {
+		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		e->state = STATE_DELETE;
 		return;
 	}
@@ -313,6 +317,7 @@ void ai_doctor_blast(Entity *e) {
 	if (e->timer & 2) e->frame ^= 1;
 	
 	if (e->timer > 250) {
+		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		e->state = STATE_DELETE;
 		effect_create_smoke(e->x >> CSF, e->y >> CSF);
 	}

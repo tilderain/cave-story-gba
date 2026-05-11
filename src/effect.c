@@ -64,6 +64,9 @@ void effects_init() {
 	}
 	// Transfer to VRAM
 	vdp_tiles_load_from_rom(stiles[0], TILE_SMOKEINDEX, TILE_SMOKESIZE);
+	// Load dissipation and gib effect tiles
+	vdp_tiles_load_from_rom(SPR_TILES(&SPR_Dissipate, 0, 0), TILE_DISSIPINDEX, TILE_DISSIPSIZE);
+	vdp_tiles_load_from_rom(SPR_TILES(&SPR_Gib, 0, 0), TILE_GIBINDEX, TILE_GIBSIZE);
 }
 
 void effects_clear() {
@@ -128,31 +131,17 @@ IWRAM_CODE void effects_update() {
 		effMisc[i].ttl--;
 		switch(effMisc[i].type) {
 			case EFF_BONKL:
-			{
-				if(effMisc[i].ttl&1) {
-					if(effMisc[i].ttl > 15) {
-						effMisc[i].x--;
-						effMisc[i].y--;
-					}
-					sprite_pos(effMisc[i].sprite,
-						effMisc[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 4,
-						effMisc[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 4);
-					vdp_sprite_add(&effMisc[i].sprite);
-				}
-			}
-			break;
 			case EFF_BONKR:
 			{
-				if(!(effMisc[i].ttl&1)) {
-					if(effMisc[i].ttl > 15) {
-						effMisc[i].x++;
-						effMisc[i].y--;
-					}
-					sprite_pos(effMisc[i].sprite,
-						effMisc[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 4,
-						effMisc[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 4);
-					vdp_sprite_add(&effMisc[i].sprite);
-				}
+				// CSE2 CARET_TINY_PARTICLES: friction (xm *= 4/5), render every frame
+				effMisc[i].x_speed = (effMisc[i].x_speed * 4) / 5;
+				effMisc[i].y_speed = (effMisc[i].y_speed * 4) / 5;
+				effMisc[i].x += effMisc[i].x_speed;
+				effMisc[i].y += effMisc[i].y_speed;
+				sprite_pos(effMisc[i].sprite,
+					effMisc[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 4,
+					effMisc[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 4);
+				vdp_sprite_add(&effMisc[i].sprite);
 			}
 			break;
 			case EFF_ZZZ:
@@ -261,6 +250,26 @@ IWRAM_CODE void effects_update() {
                 vdp_sprite_add(&effMisc[i].sprite);
             }
             break;
+            case EFF_DISSIPATE:
+            {
+                if((effMisc[i].ttl & 3) == 0) effMisc[i].sprite.attr++;
+                sprite_pos(effMisc[i].sprite,
+                           effMisc[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 8,
+                           effMisc[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 8);
+                vdp_sprite_add(&effMisc[i].sprite);
+            }
+            break;
+            case EFF_GIB:
+            {
+                effMisc[i].x += effMisc[i].x_speed;
+                effMisc[i].y += effMisc[i].y_speed;
+                if((effMisc[i].ttl & 3) == 0) effMisc[i].sprite.attr++;
+                sprite_pos(effMisc[i].sprite,
+                           effMisc[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 4,
+                           effMisc[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 4);
+                vdp_sprite_add(&effMisc[i].sprite);
+            }
+            break;
 		}
 	}
 }
@@ -344,7 +353,10 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
 			case EFF_BONKL: // Dots that appear when player bonks their head on the ceiling
 			case EFF_BONKR:
 			{
-				effMisc[i].ttl = 30;
+				// CSE2 CARET_TINY_PARTICLES: xm=Random(-0x600,0x600), ym=Random(-0x200,0x200), friction *=4/5
+				effMisc[i].ttl = 21;
+				effMisc[i].x_speed = (int16_t)((random() % 7) - 3);
+				effMisc[i].y_speed = (int16_t)((random() % 3) - 1);
 				effMisc[i].sprite = (VDPSprite) {
 					.size = SPRITE_SIZE(1, 1),
 					.attr = TILE_ATTR(PAL0,1,0,0,1)
@@ -490,6 +502,26 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
                 effMisc[i].sprite = (VDPSprite) {
                     .size = SPRITE_SIZE(1, 1),
                     .attr = TILE_ATTR(PAL1,1,0,0,sheets[loc].index+12)
+                };
+            }
+            break;
+            case EFF_DISSIPATE:
+            {
+                effMisc[i].ttl = 15;
+                effMisc[i].sprite = (VDPSprite) {
+                    .size = SPRITE_SIZE(2, 2),
+                    .attr = TILE_ATTR(PAL0,1,0,0,TILE_DISSIPINDEX)
+                };
+            }
+            break;
+            case EFF_GIB:
+            {
+                effMisc[i].x_speed = (random() & 3) - 1;
+                effMisc[i].y_speed = (random() & 3) - 1;
+                effMisc[i].ttl = 15;
+                effMisc[i].sprite = (VDPSprite) {
+                    .size = SPRITE_SIZE(2, 2),
+                    .attr = TILE_ATTR(PAL1,1,0,0,TILE_GIBINDEX)
                 };
             }
             break;

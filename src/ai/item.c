@@ -15,7 +15,9 @@ void onspawn_energy(Entity *e) {
 		e->display_box = (bounding_box) { 8,8,8,8 };
 	}
 	e->left_gravity = (stageID == STAGE_WATERWAY_BOSS || stageID == STAGE_OUTER_WALL);
+	// CSE2 ActNpc001: xm = Random(-0x200, 0x200), ym = Random(-0x400, 0)
 	e->x_speed = 0x1FF - (random() & 0x3FF);
+	e->y_speed = -(random() & 0x3FF); // Random(-0x400, 0) - initial upward bounce
 	e->alwaysActive = TRUE;
 }
 
@@ -29,7 +31,7 @@ static uint8_t collide_player(Entity *e) {
 }
 
 void ai_energy(Entity *e) {
-	if(++e->animtime >= 4) {
+	if(++e->animtime >= 3) {
 		e->animtime = 0;
 		if(++e->frame > 5) e->frame = 0;
 	}
@@ -59,10 +61,10 @@ void ai_energy(Entity *e) {
 		}
 		e->state = STATE_DELETE;
 	} else {
-		if(e->timer > 500) {
+		if(e->timer > 550) {
 			e->state = STATE_DELETE;
 			return;
-		} else if(e->timer > 350) {
+		} else if(e->timer > 500) {
 			e->hidden = (e->timer & 3) > 1;
 		}
 
@@ -72,15 +74,17 @@ void ai_energy(Entity *e) {
 			e->x_speed -= 6;
 			if(blk(e->x, -4, e->y, 0) == 0x41) e->x_speed = 0xFF;
 		} else {
-			if(e->y_speed < 0x3E0) e->y_speed += 0x40;
+			// CSE2 ActNpc001: ym += 0x2A, capped at 0x5FF
+			if(e->y_speed < 0x5FF) e->y_speed += 0x2A;
 			if(e->x_speed > 0) e->x_speed--;
 			if(e->x_speed < 0) e->x_speed++;
 			// Check below / above first
 			uint8_t block_below = blk(e->x, 0, e->y, e->display_box.top);
 			uint8_t block_above = blk(e->x, 0, e->y, -e->display_box.top);
 			if(block_below == 0x41 || block_below == 0x43) {
-				e->y_speed = -e->y_speed >> 1;
-				if(e->y_speed > -0x3FF) e->y_speed = -0x3FF;
+				// CSE2: ym = -0x280, xm = 2*xm/3
+				e->y_speed = -0x280;
+				e->x_speed = 2 * e->x_speed / 3;
 				sound_play(SND_XP_BOUNCE, 0);
 			} else if(block_below & BLOCK_SLOPE) {
 				uint8_t index = block_below & 0xF;
@@ -96,8 +100,8 @@ void ai_energy(Entity *e) {
 					}
 				}
 			} else if(block_above == 0x41 || block_above == 0x43) {
-				e->y_speed = -e->y_speed >> 1;
-				if(e->y_speed < 0x300) e->y_speed = 0x300;
+				// CSE2: ym *= -1 (full velocity reversal on ceiling)
+				e->y_speed = -e->y_speed;
 			}
 			// Check in front
 			uint8_t block_front = blk(e->x, e->x_speed > 0 ? 4 : -4, e->y, -1);
@@ -121,15 +125,18 @@ void onspawn_powerup(Entity *e) {
 
 void ai_missile(Entity *e) {
 	if(e->flags & NPC_OPTION1) {
-		if((++e->animtime & 3) == 0) e->frame ^= 1;
+		if(++e->animtime > 2) {
+			e->animtime = 0;
+			e->frame ^= 1;
+		}
 		if(stageID == STAGE_WATERWAY_BOSS || stageID == STAGE_OUTER_WALL) {
 			e->x_speed -= 6;
 			e->x += e->x_speed;
 		}
-		if(e->timer > 500) {
+		if(e->timer > 550) {
 			e->state = STATE_DELETE;
 			return;
-		} else if(e->timer > 350) {
+		} else if(e->timer > 500) {
 			e->hidden = (e->timer & 2);
 		}
 	} else if(!e->state) {
@@ -158,15 +165,18 @@ void ai_missile(Entity *e) {
 
 void ai_heart(Entity *e) {
 	if(e->flags & NPC_OPTION1) {
-		if((++e->animtime & 3) == 0) e->frame ^= 1;
+		if(++e->animtime > 2) {
+			e->animtime = 0;
+			e->frame ^= 1;
+		}
 		if(stageID == STAGE_WATERWAY_BOSS || stageID == STAGE_OUTER_WALL) {
 			e->x_speed -= 6;
 			e->x += e->x_speed;
 		}
-		if(e->timer > 500) {
+		if(e->timer > 550) {
 			e->state = STATE_DELETE;
 			return;
-		} else if(e->timer > 350) {
+		} else if(e->timer > 500) {
 			e->hidden = (e->timer & 2);
 		}
 	} else if(!e->state) {

@@ -59,7 +59,7 @@ void ai_night_spirit(Entity *e) {
 		{
 			ANIMATE(e, 4, 6,7,8);
 			
-			if (!(e->timer & 7)) {
+			if ((e->timer % 5) == 1) {
 				Entity *shot = entity_create(e->x, e->y, OBJ_NIGHT_SPIRIT_SHOT, 0);
 				shot->x_speed = 0x180 + (random() & 0x3FF);
 				shot->y_speed = -0x200 + (random() & 0x3FF);
@@ -134,6 +134,7 @@ void ai_night_spirit_sh(Entity *e) {
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
 	if (e->x_speed < 0 && collide_stage_leftwall(e)) {
+		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		effect_create_smoke(e->x >> CSF, e->y >> CSF);
 		sound_play(SND_SHOT_HIT, 3);
 		e->state = STATE_DELETE;
@@ -264,22 +265,22 @@ void ai_sky_dragon(Entity *e) {
 		case 11:
 		{
 			moveMeToFront = TRUE; // For normal ending, stay above clouds
-			if(++e->animtime > 8) {
+			if(++e->animtime > 5) {
 				e->frame ^= 1; // swap between 2-3 or 4-5 for mimiga mask
 				e->animtime = 0;
 			}
 			e->x_speed += (e->x < e->x_mark) ? 0x08 : -0x08;
-			e->y_speed += (e->y < e->y_mark) ? 0x08 : -0x08;
+			e->y_speed += (e->y < e->y_mark) ? 0x10 : -0x10;
 		}
 		break;
 		
 		case 20:	// fly away
 		{
-			if(++e->animtime > 8) {
+			if(++e->animtime > 2) {
 				e->frame ^= 1;
 				e->animtime = 0;
 			}
-			e->y_speed += (e->y < e->y_mark) ? 0x08 : -0x08;
+			e->y_speed += (e->y < e->y_mark) ? 0x10 : -0x10;
 			e->x_speed += 0x20;
 			LIMIT_X(0x600);
 		}

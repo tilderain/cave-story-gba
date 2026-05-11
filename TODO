@@ -15,12 +15,9 @@ Accuracy pass - mychar
 -bullet
 -npc
 	smoke speed
-	xp bar flash time
 	splashing/ water drop anim
 	add randomness to bonk particles
-	fix sandzone ball count
 
-	fix valueview
 
 Sort OBJ Vram
 ==GFX==

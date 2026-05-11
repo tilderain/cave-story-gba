@@ -6,6 +6,7 @@ void ai_misery_float(Entity *e) {
 	switch(e->state) {
 		case 0:
 		{
+			sound_play(SND_TELEPORT, 5);	// CSE2 ActNpc067 teleport-in sound
 			e->state = 1;
 			e->x_next += (1 << CSF);	// check Undead Core intro to prove this is correct
 			e->x_mark = e->x_next;
@@ -29,7 +30,7 @@ void ai_misery_float(Entity *e) {
 		case 11:
 		{
 			e->frame = 0;
-			RANDBLINK(e, 1, 200);
+			RANDBLINK(e, 1, 121);
 			if (e->y_next > e->y_mark) e->y_speed -= 16;
 			if (e->y_next < e->y_mark) e->y_speed += 16;
 			if (e->y_speed > 0xFF) e->y_speed = 0xFF;
@@ -125,7 +126,7 @@ void ai_misery_stand(Entity *e) {
 		case 1:
 		{
 			e->frame = 2;
-			RANDBLINK(e, 3, 200);
+			RANDBLINK(e, 3, 121);
 		}
 		break;
 		case 20:	// she flys away
@@ -229,28 +230,23 @@ void ai_misery_bubble(Entity *e) {
 	switch(e->state) {
 		case 0:
 		{
-			// Wait a bit
-			if(++e->timer > 20) e->state = 1;
-		}
-		break;
-		case 1:
-		{
-			// Calculate the speed it will take to reach the target in 1 second
-			e->x_speed = (target->x - e->x) / 50;
-			e->y_speed = (target->y - e->y) / 50;
-			if(e->x > target->x) e->x_speed = -e->x_speed;
-			if(e->y > target->y) e->y_speed = -e->y_speed;
-			e->state = 2;
+			// Calculate angle-based velocity toward Toroko using proven THROW_AT_TARGET macro
+			THROW_AT_TARGET(e, target->x, target->y, 0x400);
+			e->state = 1;
 			e->timer = 0;
-		} /* fallthrough */
-		case 2:
+		}
+		/* fallthrough */
+		case 1:
 		{
 			e->x += e->x_speed;
 			e->y += e->y_speed;
-			// Did we reach the target?
-			if(++e->timer == 50) {
+			// Check proximity to target (CSE2: within 3*0x200 pixels)
+			// Also timeout after 120 frames as fallback
+			if(++e->timer > 120 ||
+			   (e->x - (3 << CSF) < target->x && e->x + (3 << CSF) > target->x &&
+			    e->y - (3 << CSF) < target->y && e->y + (3 << CSF) > target->y)) {
 				sound_play(SND_BUBBLE, 5);
-				e->state = 3;
+				e->state = 2;
 				e->x = target->x;
 				e->y = target->y;
 				e->x_speed = 0;
@@ -259,9 +255,13 @@ void ai_misery_bubble(Entity *e) {
 			}
 		}
 		break;
-		case 3: // Carry Toroko away
+		case 2: // Carry Toroko away (CSE2: both axes accelerate upward by -0x20)
 		{
-			e->y_speed -= 0x1C;
+			e->x_speed -= 0x20;
+			e->y_speed -= 0x20;
+			if(e->x_speed < -0x5FF) e->x_speed = -0x5FF;
+			if(e->y_speed < -0x5FF) e->y_speed = -0x5FF;
+			e->x += e->x_speed;
 			e->y += e->y_speed;
 			target->x = e->x + 0x200;
 			target->y = e->y - 0x200;
@@ -304,7 +304,7 @@ void ai_boss_misery(Entity *e) {
 		case 1:
 		{
 			e->frame = 0;
-			RANDBLINK(e, 1, 200);
+			RANDBLINK(e, 1, 121);
 		}
 		break;
 		
@@ -322,7 +322,7 @@ void ai_boss_misery(Entity *e) {
 		case 21:		// standing/talking after fall from throne
 		{
 			e->frame = 2;
-			RANDBLINK(e, 3, 200);
+			RANDBLINK(e, 3, 121);
 		}
 		break;
 
@@ -383,7 +383,7 @@ void ai_boss_misery(Entity *e) {
 		// fire black shots at player
 		case STATE_FIRE_SHOTS:
 		{
-			if ((++e->timer & 7) == 0) {
+			if (++e->timer % 6 == 0) {
 				uint8_t angle = get_angle(e->x, e->y, player.x, player.y);
 				Entity *shot = entity_create(e->x, e->y, OBJ_MISERY_SHOT, 0);
 				angle -= 3;
@@ -393,7 +393,7 @@ void ai_boss_misery(Entity *e) {
 				sound_play(SND_FIREBALL, 3);
 			}
 			
-			if (e->timer > 40) {
+			if (e->timer > 30) {
 				e->timer = 0;
 				e->state = STATE_TP_AWAY;
 			}
@@ -656,6 +656,7 @@ void ai_black_lightning(Entity *e) {
 	ANIMATE(e, 2, 0,1);
 	if (blk(e->x, 0, e->y, 15) == 0x41) {
 		//effect(e->CenterX(), e->Bottom(), EFFECT_BOOMFLASH);
+		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		effect_create_smoke(e->x >> CSF, e->y >> CSF);
 		e->state = STATE_DELETE;
 	}

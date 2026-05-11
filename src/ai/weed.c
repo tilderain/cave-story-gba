@@ -147,8 +147,8 @@ void ai_kulala(Entity *e) {
 		e->y_next = e->y + e->y_speed;
 		e->y_speed += 0x10;
 		// Have to make an extra check because we are wide
-		if(collide_stage_floor(e) || ((blk(e->x_next, 0, e->y_next, e->hit_box.bottom) & 0x41) == 0x41)) 
-			e->y_speed = -0x300;
+		if(collide_stage_floor(e) || ((blk(e->x_next, 0, e->y_next, e->hit_box.bottom) & 0x41) == 0x41))
+			e->y_speed = -0x400;	// CSE2 ym = -0x400
 		else if(e->y_speed < 0) {
 			if(!collide_stage_ceiling(e)) {
 				if(((blk(e->x_next, 0, e->y_next, -e->hit_box.top) & 0x41) == 0x41)) e->y_speed = 0x100;
@@ -188,43 +188,66 @@ void ondeath_kulala(Entity *e) {
 }
 
 void ai_mannan(Entity *e) {
-	if(e->health >= 90) { // Alive
-		if(e->state) { // Firing
-			if(++e->timer > 25) {
-				e->state = 0;
-				e->timer = 0;
-				e->frame = 0;
-			}
-		} else { // Waiting
-			if(e->damage_time) {
-				// Got hit, start firing
-				e->state = 1;
-				e->timer = 0;
-				e->frame = 1;
-				Entity *shot = entity_create(e->x, e->y + 0x400, OBJ_MANNAN_SHOT, 0);
-				shot->dir = e->dir;
-				shot->alwaysActive = TRUE;
-			}
-		}
-	} else if(e->state < 3) { // Just got killed
+	// CSE2: death when act_no < 3 && life < 90
+	if (e->state < 3 && e->health < 90) {
 		sound_play(e->deathSound, 5);
+		// CSE2: SetDestroyNpChar particles + SetExpObjects XP drop
 		effect_create_smoke(sub_to_pixel(e->x), sub_to_pixel(e->y));
 		entity_drop_powerup(e);
-		// Face sprite remains after defeated
-		//e->eflags &= ~NPC_SHOOTABLE;
 		e->flags &= ~NPC_SHOOTABLE;
-		e->frame = 2;
 		e->attack = 0;
+		e->frame = 2;
 		e->state = 3;
+		e->timer = 0;
+	}
+
+	switch (e->state) {
+		case 0:
+		case 1:		// CSE2 case 0/1: waiting, fires when hit
+			if (e->damage_time) {	// CSE2: npc->shock
+				Entity *shot = entity_create(e->x + (e->dir ? 0x1000 : -0x1000), e->y + 0x1000,
+							      OBJ_MANNAN_SHOT, 0);
+				shot->dir = e->dir;
+				shot->alwaysActive = TRUE;
+				e->frame = 1;	// CSE2: ani_no = 1
+				e->state = 2;
+				e->timer = 0;
+			}
+			break;
+
+		case 2:		// CSE2 case 2: firing cooldown
+			if (++e->timer > 20) {	// CSE2: act_wait > 20
+				e->state = 1;
+				e->frame = 0;	// CSE2: ani_no = 0
+			}
+			break;
+
+		case 3:		// CSE2 case 3: death animation
+			// CSE2 eye-flicker at 50/53/60/63 using ani_no 3
+			// (GBA sprite lacks frame 3, can't match perfectly)
+			if (++e->timer > 100)	// CSE2: > 100 → permanent dead
+				e->state = 4;
+			break;
+
+		case 4:		// CSE2 case 4: permanent dead (no-op)
+			break;
 	}
 }
 
 void ai_mannanShot(Entity *e) {
-	ACCEL_X(0x20);
-	if((e->timer & 7) == 1) {
+	// CSE2 ActNpc103: accelerate in facing direction
+	if (e->dir == 0)
+		e->x_speed -= 0x20;
+	else
+		e->x_speed += 0x20;
+
+	// CSE2: sound every 4 frames (count1 % 4 == 1)
+	if ((++e->timer % 4) == 1)
 		sound_play(SND_IRONH_SHOT_FLY, 2);
-	}
-	if(++e->timer > 120) e->state = STATE_DELETE;
+
+	// CSE2: delete after 100 frames (count1 > 100)
+	if (e->timer > 100) e->state = STATE_DELETE;
+
 	e->x += e->x_speed;
 }
 
@@ -400,7 +423,9 @@ void ai_press(Entity *e) {
 				while((blk(e->x, 0, e->y, 12) & 0x41) == 0x41) {
 					e->y -= 0x200;
 				}
-				//SmokeSide(o, 4, DOWN);
+				// CSE2: 4 smoke particles and sound 26 on landing
+				SMOKE_AREA((e->x >> CSF) - 12, (e->y >> CSF) - 8, 24, 8, 4);
+				sound_play(SND_QUAKE, 5);
 				camera_shake(10);
 				e->y_speed = 0;
 				e->state = 0;
@@ -485,12 +510,12 @@ void ai_frog(Entity *e) {
 		break;
 	}
 	// random jumping, and jump when shot
-	if (e->state < 3 && e->timer > 15) {
+	if (e->state < 3 && e->timer > 10) {	// CSE2 act_wait > 10
 		uint8_t dojump = FALSE;
 		if(e->damage_time) {
 			dojump = TRUE;
 		} else if(PLAYER_DIST_X(e, 0x14000) && PLAYER_DIST_Y(e, 0x8000)) {
-			if((random() & 31) == 0) {
+			if((random() % 51) == 2) {	// CSE2 Random(0,50)==2
 				dojump = TRUE;
 			}
 		}

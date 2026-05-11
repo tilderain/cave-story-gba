@@ -176,7 +176,7 @@ void ai_omega(Entity *e) {
 		{
 			e->firecounter++;
 			if (e->firecounter > 20 && e->firecounter < 80) {
-				if (!(e->firecounter & 7) && entity_active_count < 30) {
+				if ((e->firecounter % 3) == 0 && entity_active_count < 30) {
 					sound_play(SND_EM_FIRE, 5);
 					Entity *shot = entity_create(e->x, e->y, OBJ_OMEGA_SHOT, 0);
 					if(e->form == 2) {
@@ -228,9 +228,9 @@ void ai_omega(Entity *e) {
 						//collide_stage_floor(pieces[RIGHTLEG]);
 						sound_play(SND_FUNNY_EXPLODE, 5);
 						if(px < player.x >> CSF) {
-							e->x_speed = 0xC0;
+							e->x_speed = 0x100;
 						} else {
-							e->x_speed = -0xC0;
+							e->x_speed = -0x100;
 						}
 						e->state = OMG_JUMP;
 						e->y_speed = -0x5FF;
@@ -272,7 +272,8 @@ void ai_omega(Entity *e) {
 		} /* fallthrough */
 		case OMG_JUMP+1:	// jumping
 		{
-			if(e->y_speed < 0x5E0) e->y_speed += 0x24;
+			e->y_speed += 0x24;
+			if(e->y_speed > 0x5FF) e->y_speed = 0x5FF;
 			//pieces[LEFTLEG]->x_next = pieces[LEFTLEG]->x;
 			//pieces[LEFTLEG]->y_next = pieces[LEFTLEG]->y;
 			//pieces[RIGHTLEG]->x_next = pieces[RIGHTLEG]->x;
@@ -391,6 +392,7 @@ void ai_omega_shot(Entity *e) {
 		//if(e->y_speed > 0 && py > block_to_pixel(13) + 8) {
 			// Delete brown shots when they hit the ground, red ones bounce
 			if(e->frame > 1) {
+				effect_create_misc(EFF_DISSIPATE, px, py, FALSE);
 				effect_create_smoke(px, py);
 				e->state = STATE_DELETE;
 				return;
@@ -409,6 +411,7 @@ void ai_omega_shot(Entity *e) {
 		}
 		e->frame ^= 1;
 	} else if(e->timer > 0x240) {
+		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		effect_create_smoke(e->x >> CSF, e->y >> CSF);
 		e->state = STATE_DELETE;
 	}

@@ -5,7 +5,7 @@ void onspawn_block(Entity *e) {
 	e->y += pixel_to_sub(8);
 	e->hit_box = (bounding_box) { 16, 16, 16, 16 };
 	e->display_box = (bounding_box) { 16, 16, 16, 16 };
-	e->flags |= NPC_SPECIALSOLID | NPC_IGNORE44;
+	e->flags |= NPC_SPECIALSOLID | NPC_SHOOTABLE | NPC_INVINCIBLE | NPC_IGNORE44;
 	e->flags &= ~NPC_SOLID;
 	e->enableSlopes = FALSE;
 	e->attack = 0;
@@ -50,7 +50,7 @@ void ai_blockh(Entity *e) {
 				e->state = dir ? 10 : 20;
 			} else {
 				e->x = e->x_next;
-				if((++e->timer & 15) == 6) {
+				if((++e->timer % 10) == 6) {
 					sound_play(SND_BLOCK_MOVE, 2);
 				}
 			}
@@ -97,7 +97,7 @@ void ai_blockv(Entity *e) {
 				e->state = dir ? 10 : 20;
 			} else {
 				e->y = e->y_next;
-				if((++e->timer & 15) == 6) {
+				if((++e->timer % 10) == 6) {
 					sound_play(SND_BLOCK_MOVE, 2);
 				}
 			}
@@ -121,7 +121,7 @@ void ai_boulder(Entity *e) {
 		/* fallthrough */
 		case 11:
 		{
-			if ((++e->timer & 2) != 0)
+			if (((++e->timer / 3) & 1) != 0)
 				e->x = e->x_mark + (1 << 9);
 			else
 				e->x = e->x_mark;
@@ -195,9 +195,9 @@ void ai_gaudiDying(Entity *e) {
 		
 		case 2:		// landed, shake
 		{
-			e->x_speed -= e->x_speed >> 4;
+			e->x_speed = (e->x_speed * 8) / 9;
 			e->frame = (e->timer & 7) > 3 ? 6 : 5;
-			
+
 			if (++e->timer > 50) {
 				// this deletes Entity while generating smoke effects and boom
 				e->state = STATE_DESTROY;
@@ -481,7 +481,7 @@ void ai_gaudiArmor(Entity *e) {
 			// throw attacks at player
 			if (e->timer == 30 || e->timer == 40) {
 				Entity *shot = entity_create(e->x, e->y, OBJ_GAUDI_ARMORED_SHOT, 0);
-				THROW_AT_TARGET(shot, player.x, player.y, 0x500);
+				THROW_AT_TARGET(shot, player.x, player.y, 0x600);
 				sound_play(SND_EM_FIRE, 5);
 				
 				e->frame = 3;
@@ -501,12 +501,12 @@ void ai_gaudiArmor(Entity *e) {
 		break;
 		case 40:		// landed
 		{
-			e->x_speed -= e->x_speed >> 4;
-			
-			if (++e->timer >= 2) {
+			e->x_speed = (e->x_speed * 7) / 8;
+
+			if (++e->timer > 3) {
 				e->frame = 0;
 				e->x_speed = 0;
-				
+
 				e->state = 1;
 				e->timer = 0;
 			}
@@ -558,6 +558,7 @@ void ai_gaudiArmorShot(Entity *e) {
 			LIMIT_Y(0x5ff);
 			
 			if (e->y_speed >= 0 && collide_stage_floor(e)) {
+				effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 				e->state = STATE_DELETE;
 				return;
 			}
@@ -770,13 +771,13 @@ void ai_poohblk_dying(Entity *e) {
 
 void ai_firewhirr(Entity *e) {
 	FACE_PLAYER(e);
-	
+
 	switch(e->state) {
 		case 0:
 		{
-			e->display_box = (bounding_box) {{ 12,16,12,16 }};
+			e->display_box = (bounding_box) { 12,16,12,16 };
 			e->state = 1;
-			e->timer = random() & 63;
+			e->timer = random() % 51; // CSE2: Random(0, 50)
 			e->y_mark = e->y;
 		}
 		/* fallthrough */
@@ -784,7 +785,6 @@ void ai_firewhirr(Entity *e) {
 		{
 			if (!e->timer) {
 				e->state = 10;
-				e->timer = 100;
 				e->y_speed = -0x200;
 			}
 			else e->timer--;
@@ -792,23 +792,24 @@ void ai_firewhirr(Entity *e) {
 		/* fallthrough */
 		case 10:
 		{
+			// CSE2: animation every frame (ani_wait > 0)
+			if(++e->animtime > 0) { e->animtime = 0; e->frame ^= 1; }
+
 			e->y_speed += (e->y < e->y_mark) ? 0x10 : -0x10;
 			LIMIT_Y(0x200);
-			
-			// inc time-to-fire while player near
+
+			// inc time-to-fire while player near (CSE2: count1 > 20)
 			if (PLAYER_DIST_Y(e, pixel_to_sub(80))) {
 				if (!e->dir && player.x < e->x && PLAYER_DIST_X(e, pixel_to_sub(160))) e->timer2++;
 				if (e->dir && player.x > e->x && PLAYER_DIST_X(e, pixel_to_sub(160))) e->timer2++;
 			}
-			
-			// if time to fire, spawn a shot
+
+			// if time to fire, spawn a shot (CSE2: count1 > 20 -> fire, reset to -100)
 			if (e->timer2 > 120) {
 				Entity *shot = entity_create(e->x, e->y, OBJ_FIREWHIRR_SHOT, 0);
 				shot->dir = e->dir;
 				shot->alwaysActive = TRUE;
-				shot->x = e->x;
-				shot->y = e->y;
-				e->timer2 = random() & 15;
+				e->timer2 = 0;
 				// tell Curly to acquire us as a target
 				CURLY_TARGET_HERE(e);
 			}
@@ -820,17 +821,20 @@ void ai_firewhirr(Entity *e) {
 }
 
 void ai_firewhirr_shot(Entity *e) {
-	ANIMATE(e, 8, 0,1,2);
+	ANIMATE(e, 4, 0,1,2);	// CSE2: ani_wait > 3
 	e->x_next = e->x + (!e->dir ? -0x200 : 0x200);
-	e->y_next = e->y;
-	
+	e->y_speed += 0x20;
+	LIMIT_Y(0x5FF);
+	e->y_next = e->y + e->y_speed;
+
 	if ((!e->dir && collide_stage_leftwall(e)) ||
 		(e->dir && collide_stage_rightwall(e))) {
-		//effect(e->x, e->CenterY(), EFFECT_FISHY);
+		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		e->state = STATE_DELETE;
 	}
 
 	e->x = e->x_next;
+	e->y = e->y_next;
 }
 
 void ai_gaudi_egg(Entity *e) {

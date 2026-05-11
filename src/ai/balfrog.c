@@ -182,7 +182,7 @@ void ai_balfrog(Entity *e) {
 				}
 				// shake a small frog loose from the ceiling on every landing
 				spawn_frogs(OBJ_MINIFROG, 1);
-				SMOKE_AREA((e->x >> CSF) - 32, (e->y >> CSF) + 16, 64, 8, 2);
+				SMOKE_AREA((e->x >> CSF) - 32, (e->y >> CSF) + 16, 64, 8, 4);
 			}
 		}
 		break;
@@ -220,9 +220,9 @@ void ai_balfrog(Entity *e) {
 				e->frame = 0;
 				set_jump_sprite(e, FALSE);
 				camera_shake(60);
-				spawn_frogs(OBJ_MINIFROG, 4);
+				spawn_frogs(OBJ_MINIFROG, 6);
 				spawn_frogs(OBJ_FROG, 2);
-				SMOKE_AREA((e->x >> CSF) - 32, (e->y >> CSF) + 16, 64, 8, 4);
+				SMOKE_AREA((e->x >> CSF) - 32, (e->y >> CSF) + 16, 64, 8, 8);
 				// player ran under us? turn around and fire!
 				if((e->dir && e->x >= player.x) ||
 					(!e->dir && e->x <= player.x)) {
@@ -252,6 +252,7 @@ void ai_balfrog(Entity *e) {
 			if(e->timer > 54) {
 				e->state = STATE_SHOOTING;
 				e->timer = 0;
+				e->animtime = 0;
 				e->frame = 2;
 				bbox_mode = BM_MOUTH_OPEN;
 			}
@@ -267,10 +268,13 @@ void ai_balfrog(Entity *e) {
 					e->frame = 3;
 				}
 			}
-			if((e->timer & 15) == 1) {
-				uint8_t angle = (e->dir ? A_RIGHT : A_LEFT) - 16 + (random() & 31);
-				FIRE_ANGLED_SHOT(OBJ_BALFROG_SHOT, e->x + (e->dir ? 0x1000 : -0x1000),
-						e->y + 0x1000, angle, 0x200);
+			if(++e->animtime > 16) {
+				e->animtime = 0;
+				int32_t spawn_x = e->x + (e->dir ? 0x4000 : -0x4000);
+				int32_t spawn_y = e->y - 0x1000;
+				uint8_t angle = get_angle(spawn_x, spawn_y, player.x, player.y);
+				angle += (random() & 31) - 16;
+				FIRE_ANGLED_SHOT(OBJ_BALFROG_SHOT, spawn_x, spawn_y, angle, 0x200);
 				sound_play(SND_EM_FIRE, 5);
 				if(e->timer > 160 || bbox_damage > 90) {
 					e->frame = 1;

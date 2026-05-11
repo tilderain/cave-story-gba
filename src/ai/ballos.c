@@ -12,7 +12,7 @@
 #define rotator(i)	pieces[2+(i)]
 
 #define FLOOR_Y			0x26000							// Y coord of floor
-#define CRASH_Y			(FLOOR_Y - pixel_to_sub(40))	// Y coord of main when body hits floor
+#define CRASH_Y			(FLOOR_Y - pixel_to_sub(48))	// Y coord of main when body hits floor
 
 enum EYE_STATES {
 	EYE_OPENING		= 10,
@@ -207,8 +207,9 @@ void ai_ballos_f1(Entity *e) {
 				if(!playerIFrames && PLAYER_DIST_X(e, pixel_to_sub(48)) && PLAYER_DIST_Y2(e, 0, pixel_to_sub(64))) {
 					player_inflict_damage(16);
 				}
+				sound_play(SND_MISSILE_HIT, 5);
 				camera_shake(30);
-				SMOKE_AREA((e->x >> CSF) - 40, (e->y >> CSF) + 40, 80, 16, 6);
+				SMOKE_AREA((e->x >> CSF) - 40, (e->y >> CSF) + 40, 80, 16, 16);
 				if(player.grounded) player.y_speed = -0x200;
 			}
 		}
@@ -216,7 +217,7 @@ void ai_ballos_f1(Entity *e) {
 		
 		case AS_COME_DOWN+3:
 		{
-			if (++e->timer > 31) {
+			if (++e->timer > 50) {
 				SetEyeStates(EYE_OPENING);
 				e->state++;
 			}
@@ -256,8 +257,10 @@ void ai_ballos_f1(Entity *e) {
 		
 		case AS_JUMPING:
 		{
-			if(e->y_speed < 0xBB0) e->y_speed += 0x55;
-			
+			e->y_speed += 0x55;
+
+			if(e->y_speed > 0xC00) e->y_speed = 0xC00;
+
 			if(e->x + e->x_speed < F1_LEFT) e->x_speed = 0x200;
 			if(e->x + e->x_speed > F1_RIGHT) e->x_speed = -0x200;
 			
@@ -269,10 +272,11 @@ void ai_ballos_f1(Entity *e) {
 				// player hopping from the vibration
 				if(player.grounded) player.y_speed = -0x200;
 				camera_shake(30);
-				
+				sound_play(SND_QUAKE, 5);
+
 				entity_create(e->x - pixel_to_sub(12), e->y + pixel_to_sub(52), OBJ_BALLOS_BONE_SPAWNER, 0)->dir = 0;
 				entity_create(e->x + pixel_to_sub(12), e->y + pixel_to_sub(52), OBJ_BALLOS_BONE_SPAWNER, 0)->dir = 1;
-				//SmokeXY(e->x, e->y + pixel_to_sub(40), 16, 40, 0);
+				SMOKE_AREA((e->x >> CSF) - 40, (e->y >> CSF) + 40, 80, 16, 16);
 				
 				e->y_speed = 0;
 				e->state = AS_PREPARE_JUMP;
@@ -291,8 +295,10 @@ void ai_ballos_f1(Entity *e) {
 		} /* fallthrough */
 		case AS_DEFEATED+1:
 		{
-			if(e->y_speed < 0xBC0) e->y_speed += 0x40;
-			
+			e->y_speed += 0x40;
+
+			if(e->y_speed > 0xC00) e->y_speed = 0xC00;
+
 			if(e->y + e->y_speed > CRASH_Y) {
 				e->y_speed = 0;
 				e->state++;
@@ -702,7 +708,7 @@ void ai_ballos_eye(Entity *e) {
 		} /* fallthrough */
 		case EYE_OPENING+1:
 		{
-			if (++e->animtime > 4) {
+			if (++e->animtime > 2) {
 				e->animtime = 0;
 				e->frame++;
 				if ((e->frame & 3) == 3) {
@@ -713,20 +719,20 @@ void ai_ballos_eye(Entity *e) {
 			}
 		}
 		break;
-		
+
 		// close eyes
 		case EYE_CLOSING:
 		{
 			e->frame = (e->flags & NPC_OPTION2) ? 6 : 2;
 			e->hidden = FALSE;
 			e->flags |= NPC_INVINCIBLE;
-			
+
 			e->animtime = 0;
 			e->state++;
 		} /* fallthrough */
 		case EYE_CLOSING+1:
 		{
-			if (++e->animtime > 4) {
+			if (++e->animtime > 2) {
 				e->animtime = 0;
 				e->frame--;
 				if ((e->frame & 3) == 0) {

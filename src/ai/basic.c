@@ -187,6 +187,7 @@ void ai_genericproj(Entity *e) {
 	e->flags ^= NPC_SHOOTABLE;
 	if((++e->animtime & 3) == 0) e->frame ^= 1;
 	if(++e->timer > 250 || blk(e->x, 0, e->y, 0) == 0x41) {
+		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		effect_create_smoke(e->x >> CSF, e->y >> CSF);
 		e->state = STATE_DELETE;
 	} else {
@@ -442,11 +443,11 @@ void ai_player(Entity *e) {
 }
 
 void ai_computer(Entity *e) {
-	if((++e->animtime & 3) == 0) if(++e->frame > 2) e->frame = 1;
+	if((++e->animtime & 3) == 0) if(++e->frame > 2) e->frame = 0;
 }
 
 void ai_savepoint(Entity *e) {
-	if((++e->animtime & 3) == 0) if(++e->frame > 7) e->frame = 0;
+	if(++e->animtime > 2) { e->animtime = 0; if(++e->frame > 7) e->frame = 0; }
 	ai_grav(e);
 }
 
@@ -460,7 +461,7 @@ void ai_refill(Entity *e) {
     }
     case 1: // flickery animation
     {
-      int x = random() % 30;
+      int x = random() % 31;
 
       if (x < 10)
         e->state = 2;
@@ -469,7 +470,7 @@ void ai_refill(Entity *e) {
       else
         e->state = 4;
 
-      e->timer     = min(16, random() % 64);
+      e->timer     = (random() % 49) + 16;
       e->animtime = 0;
     }
     break;
@@ -513,7 +514,8 @@ void ai_water_droplet(Entity *e) {
 	} else {
 		e->x_speed += 4;
 	}
-	if(e->y_speed < 0x5E0) e->y_speed += 0x20;
+	e->y_speed += 0x20;
+	if(e->y_speed > 0x5FF) e->y_speed = 0x5FF;
 	e->x += e->x_speed;
 	e->y += e->y_speed;
 	e->hidden ^= 1;
@@ -530,14 +532,17 @@ void ai_chinfish(Entity *e) {
 			e->state = 1;
 			e->x_mark = e->x;
 			e->y_mark = e->y;
-			e->y_speed = 0x88;
+			e->y_speed = 0x80;
 			/* fallthrough */
 		case 1:
 			e->y_speed += (e->y > e->y_mark) ? -8:8;
 			LIMIT_Y(0x100);
 			e->y += e->y_speed;
-			if (e->damage_time) e->frame = 1;
-			else e->frame = 0;
+			if(++e->animtime > 4) {
+				e->animtime = 0;
+				if(++e->frame > 1) e->frame = 0;
+			}
+			if(e->damage_time) e->frame = 2;
 		break;
 	}
 }
@@ -551,7 +556,7 @@ void ai_fireplace(Entity *e) {
 			e->hidden = 0;
 			/* fallthrough */
 		case 1:
-			ANIMATE(e, 8, 0,1,2);
+			ANIMATE(e, 4, 0,1,2);
 		break;
 		
 		case 10:	// extinguished by Jellyfish Juice
@@ -572,12 +577,12 @@ void ai_gunsmith(Entity *e) {
 		if(++e->timer > 100) e->timer = 0;
 	} else {
 		e->frame = 1;
-		RANDBLINK(e, 2, 200);
+		RANDBLINK(e, 2, 121);
 	}
 }
 
 void ai_lifeup(Entity *e) {
-	ANIMATE(e, 4, 0,1);
+	ANIMATE(e, 3, 0,1);
 }
 
 void ai_chest(Entity *e) {
@@ -586,11 +591,11 @@ void ai_chest(Entity *e) {
 }
 
 void ai_sparkle(Entity *e) {
-	ANIMATE(e, 8, 0,1,2);
+	ANIMATE(e, 4, 0,1,2);
 }
 
 void ai_forcefield(Entity *e) {
-	ANIMATE(e, 2, 0,1,2,3);
+	ANIMATE(e, 1, 0,1,2,3);
 }
 
 #ifdef SEGA_LOGO
@@ -809,7 +814,8 @@ void ai_xp_capsule(Entity *e) {
 		exp->experience = e->id;
 		effect_create_smoke(e->x, e->y);
 		sound_play(SND_FUNNY_EXPLODE, 5);
-		
+		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
+
 		e->state = STATE_DELETE;
 	}
 }

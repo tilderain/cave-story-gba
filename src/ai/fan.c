@@ -32,7 +32,7 @@ void ai_fan(Entity *e) {
 	switch(e->state) {
 		case 1: // Left
 		{
-			if((++e->animtime & 1) == 0 && ++e->frame > 5) {
+			if(++e->frame > 5) {
 				e->frame = 3;
 				effect_create_misc(EFF_FANL, ex - 8, ey + ((random() & 15) - 8), FALSE);
 			}
@@ -44,7 +44,7 @@ void ai_fan(Entity *e) {
 		break;
 		case 2: // Up
 		{
-			if((++e->animtime & 1) == 0 && ++e->frame > 2) {
+			if(++e->frame > 2) {
 				e->frame = 0;
 				effect_create_misc(EFF_FANU, ex + ((random() & 15) - 8), ey - 8, FALSE);
 			}
@@ -67,7 +67,7 @@ void ai_fan(Entity *e) {
 		break;
 		case 3: // Right
 		{
-			if((++e->animtime & 1) == 0 && ++e->frame > 5) {
+			if(++e->frame > 5) {
 				e->frame = 3;
 				effect_create_misc(EFF_FANR, ex + 8, ey + ((random() & 15) - 8), FALSE);
 			}
@@ -79,7 +79,7 @@ void ai_fan(Entity *e) {
 		break;
 		case 4: // Down
 		{
-			if((++e->animtime & 1) == 0 && ++e->frame > 2) {
+			if(++e->frame > 2) {
 				e->frame = 0;
 				effect_create_misc(EFF_FAND, ex + ((random() & 15) - 8), ey + 8, FALSE);
 			}

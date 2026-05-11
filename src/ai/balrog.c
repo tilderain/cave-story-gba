@@ -98,7 +98,7 @@ void ai_balrog(Entity *e) {
 		/* fallthrough */
 		case 11:
 		{
-			if (++e->timer <= 20) break;
+			if (++e->timer <= 30) break;
 			e->frame = ARMSUP;
 			e->state++;
 			e->y_speed = -0x800;
@@ -133,8 +133,10 @@ void ai_balrog(Entity *e) {
 		{
 			e->timer2++;
 			e->x += ((e->timer2 >> 1) & 1) ? (1<<9) : -(1<<9);
-			if (++e->timer > 120) {
-				e->state = 10;
+			if (e->grounded) {
+				if (++e->timer > 100) {
+					e->state = 10;
+				}
 			}
 			e->y_speed += 0x20;
 			LIMIT_Y(0x5FF);
@@ -197,15 +199,16 @@ void ai_balrog(Entity *e) {
 		case 70:
 		{
 			e->x_speed = 0;
-			e->timer = 0;
+			e->timer = 64;
 			e->frame = WORRY;
 			e->state++;
+			sound_play(SND_TELEPORT, 5);
 		}
 		/* fallthrough */
 		case 71:
 		{
 			fall = FALSE;
-			if(++e->timer > 120) {
+			if(--e->timer <= 0) {
 				e->state = STATE_DELETE;
 				return;
 			}
@@ -226,6 +229,8 @@ void ai_balrog(Entity *e) {
 			} else {
 				e->x -= (1 << 9);
 			}
+			if (!e->grounded) e->y_speed += 0x20;
+			LIMIT_Y(0x5FF);
 		}
 		break;
 		// fly up and lift Curly & PNPC
@@ -260,8 +265,9 @@ void ai_balrog(Entity *e) {
 		case 102:	// flying up during escape seq
 		{
 			fall = FALSE;
-			if(e->y <= 0) {
+			if(e->y <= pixel_to_sub(-32)) {
 				e->state = STATE_DELETE;
+				camera_shake(30);
 				return;
 			}
 			// bust through ceiling
@@ -334,7 +340,7 @@ void ai_balrog_drop_in(Entity *e) {
 		break;
 		case 3:	// landed
 		{
-			if (++e->timer > 20) {
+			if (++e->timer > 16) {
 				e->state = 4;
 				e->frame = STAND;
 			}
@@ -353,12 +359,13 @@ void ai_balrog_bust_in(Entity *e) {
 	switch(e->state) {
 		case 0:
 		{
-			e->y += pixel_to_sub(2);
+			e->y += pixel_to_sub(10);
 			e->y_speed = -0x100;
 			camera_shake(30);
 			e->state = 1;
 			e->frame = ARMSUP;
 			sound_play(SND_BLOCK_DESTROY, 5);
+			sound_play(SND_QUAKE, 5);
 		}
 		/* fallthrough */
 		case 1:		// falling the short distance to ground
@@ -446,6 +453,7 @@ void ai_balrogRunning(Entity *e) {
 		case STATE_CHARGE+1:
 		{
 			ACCEL_X(0x10);
+			if (e->animtime % 16 == 0) sound_play(SND_THUD, 5);
 			ANIMATE(e, 8, WALK1,STAND,WALK2,STAND);
 			if (++e->timer > 75 ||
 				(!e->dir && collide_stage_leftwall(e)) ||
@@ -604,8 +612,9 @@ void ai_balrogFlying(Entity *e) {
 				e->x_speed = 0;
 				e->attack = 0;
 				sound_play(SND_FUNNY_EXPLODE, 5);
+				sound_play(SND_QUAKE, 5);
 				camera_shake(30);
-				for(int i=0;i<4;i++) {
+				for(int i=0;i<8;i++) {
 					Entity *shot = entity_create(e->x, e->y, OBJ_BALROG_SHOT_BOUNCE, 0);
 					shot->x_speed = -0x400 + (random() & 0x7FF);
 					shot->y_speed = -0x400 + (random() & 0x3FF);
@@ -678,12 +687,18 @@ void ai_balrog_boss_msl(Entity *e) {
 	// try to catch player
 	switch(e->state) {
 		case STATE_CHARGE+1:
-		case STATE_JUMP_FIRE+1:
 		{
 			if (PLAYER_DIST_X(e, 12<<CSF) && PLAYER_DIST_Y2(e, 12<<CSF, 8<<CSF)) {
 				balrog_grab_player(e);
 				if(!playerIFrames) player_inflict_damage(5);
-				//e->state = STATE_CAUGHT_PLAYER;
+			}
+		}
+		break;
+		case STATE_JUMP_FIRE+1:
+		{
+			if (PLAYER_DIST_X(e, 12<<CSF) && PLAYER_DIST_Y2(e, 12<<CSF, 8<<CSF)) {
+				balrog_grab_player(e);
+				if(!playerIFrames) player_inflict_damage(10);
 			}
 		}
 		break;
@@ -756,7 +771,7 @@ void ai_balrog_boss_msl(Entity *e) {
 			FACE_PLAYER(e);
 			// fire missiles
 			if (++e->timer < 30) {
-				if ((e->timer & 7) == 1) {
+				if ((e->timer % 6) == 1) {
 					sound_play(SND_EM_FIRE, 5);
 					Entity *shot = entity_create(e->x, e->y, OBJ_BALROG_MISSILE, 0);
 					shot->dir = e->dir;

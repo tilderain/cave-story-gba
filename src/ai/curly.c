@@ -34,7 +34,7 @@ void ai_curly(Entity *e) {
 		case 4:
 		case 11:
 		{
-			ANIMATE(e, 8, 1,0,2,0);
+			ANIMATE(e, 5, 1,0,2,0);
 			if (e->state == 11 && PLAYER_DIST_X(e, 20<<CSF)) {
 				e->state = 0;
 				break;
@@ -99,11 +99,13 @@ void ai_curly(Entity *e) {
 			e->state = 71;
 			e->timer = 0;
 			e->frame = 1;
+			e->animtime = 0;
 		}
 		/* fallthrough */
 		case 71:
 		{
-			MOVE_X(-0x100);
+			ANIMATE(e, 9, 1,0,2,0);
+			MOVE_X(-0x100); // walk backward (opposite of facing)
 		}
 		break;
 	}
@@ -155,8 +157,8 @@ void ai_curly_carried(Entity *e) {
 		case 1:
 		{	// carried by player
 			e->dir = player.dir;
-			e->x = player.x + pixel_to_sub(e->dir ? -4 : 4);
-			e->y = player.y - pixel_to_sub(5);
+			e->x = player.x + pixel_to_sub(e->dir ? -3 : 3);
+			e->y = player.y - pixel_to_sub(4);
 		}
 		break;
 		// floating away after Ironhead battle
@@ -348,7 +350,7 @@ void ai_curlyBoss(Entity *e) {
 		case CURLYB_FIGHT_START:
 		{
 			e->state = CURLYB_WAIT;
-			e->timer = (random() & 31) + 60;
+			e->timer = (random() % 51) + 50;
 			e->frame = 0;
 			e->dir = (e->x <= player.x);
 			e->flags |= NPC_SHOOTABLE;
@@ -365,13 +367,13 @@ void ai_curlyBoss(Entity *e) {
 		{
 			e->state = CURLYB_WALKING_PLAYER;
 			e->frame = 1;
-			e->timer = (random() & 31) + 60;
+			e->timer = (random() % 51) + 50;
 			FACE_PLAYER(e);
 		}
 		/* fallthrough */
 		case CURLYB_WALKING_PLAYER:
 		{
-			ANIMATE(e, 8, 1,0,2,0);
+			ANIMATE(e, 3, 1,0,2,0);
 			ACCEL_X(0x40);
 			if (e->timer) {
 				e->timer--;
@@ -398,7 +400,7 @@ void ai_curlyBoss(Entity *e) {
 		break;
 		case CURLYB_FIRE_GUN:
 		{
-			if(++e->timer > 5) {	// time to fire
+			if(++e->timer > 3) {	// fire every 4 frames (matching CSE2 act_wait%4==1)
 				e->timer = 0;
 				e->timer2++;
 				// check if player is trying to jump over
@@ -411,7 +413,7 @@ void ai_curlyBoss(Entity *e) {
 					curlyboss_fire(e, e->dir);
 				}
 			}
-			if(e->timer2 > 8) e->state = CURLYB_FIGHT_START;
+			if(e->timer2 > 7) e->state = CURLYB_FIGHT_START;
 		}
 		break;
 		case CURLYB_SHIELD:
@@ -435,8 +437,8 @@ void ai_curlyBoss(Entity *e) {
 		}
 	}
 	
-	if (e->x_speed > 0x200) e->x_speed = 0x200;
-	if (e->x_speed < -0x200) e->x_speed = -0x200;
+	if (e->x_speed > 0x1FF) e->x_speed = 0x1FF;
+	if (e->x_speed < -0x1FF) e->x_speed = -0x1FF;
 
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y;
@@ -461,9 +463,12 @@ void ai_curlyBossShot(Entity *e) {
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
 	if(collide_stage_leftwall(e) || collide_stage_rightwall(e) || collide_stage_ceiling(e)) {
+		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		e->state = STATE_DELETE;
 	} else if(!player_invincible() && entity_overlapping(e, &player)) {
 		player_inflict_damage(e->attack);
+		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
+		effect_create_misc(EFF_MGUN_HIT, e->x >> CSF, e->y >> CSF, FALSE);
 		e->state = STATE_DELETE;
 	} else {
 		e->x = e->x_next;

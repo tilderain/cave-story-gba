@@ -5,7 +5,7 @@ void ai_pignon(Entity *e) {
 	if(e->state < 3 && e->damage_time == 29) {
 		e->state = 3;
 		e->timer = 0;
-		e->y_speed = -0x120;
+		e->y_speed = -0x200;
 		if(e->type == OBJ_GIANT_MUSHROOM_ENEMY)
 			e->x_speed = e->x > player.x ? -0x120 : 0x120;
 		else
@@ -26,7 +26,7 @@ void ai_pignon(Entity *e) {
 					e->state = 2;
 					e->timer = 0;
 					e->dir = random() & 1;
-					e->x_speed = e->dir ? 0x120 : -0x120;
+					e->x_speed = e->dir ? 0x100 : -0x100;
 					e->frame = 1;
 				}
 			}
@@ -34,7 +34,7 @@ void ai_pignon(Entity *e) {
 		break;
 		case 1: // Blink
 		{
-			if(e->timer >= 10) {
+			if(e->timer > 8) {
 				e->state = 0;
 				e->timer = 0;
 				e->frame = 0;
@@ -64,7 +64,8 @@ void ai_pignon(Entity *e) {
 		}
 		break;
 	}
-	if(!e->grounded) e->y_speed += 0x20;
+	if(!e->grounded) e->y_speed += 0x40;
+	LIMIT_Y(0x5FF);
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
 	// Don't test ceiling, only test sticking to ground while moving
@@ -546,14 +547,7 @@ void ai_ma_pignon_rock(Entity *e) {
 				
 				sound_play(SND_BLOCK_DESTROY, 5);
 				camera_shake(10);
-				
-				// these smoke clouds appear BEHIND the map tiles
-				//for(int i=0;i<2;i++) {
-				//	Entity *smoke = entity_create(e->CenterX() + random(-12<<CSF, 12<<CSF),
-				//								 e->Bottom()+(16<<CSF), OBJ_SMOKE_CLOUD);
-				//	smoke->x_speed = random(-0x155, 0x155);
-				//	smoke->y_speed = random(-0x600, 0);
-				//}
+				SMOKE_AREA((e->x >> CSF) - 12, (e->y >> CSF), 24, 8, 2);
 			}
 		}
 		break;
@@ -594,6 +588,7 @@ void ai_ma_pignon_clone(Entity *e) {
 	// Our engine has no substate, substitute id1
 	if (++e->id > 300) {
 		//effect(e->CenterX(), e->CenterY(), EFFECT_BOOMFLASH);
+		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		e->state = STATE_DELETE;
 	}
 }

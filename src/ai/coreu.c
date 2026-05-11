@@ -175,11 +175,15 @@ void ai_undead_core(Entity *e) {
 		{
 			e->timer++;
 			RunHurtFlash(e->timer);
-			
+
+			if ((e->timer % 100) == 1) {
+				CURLY_TARGET_HERE(e);
+			}
+
 			if (e->timer < 300) {
-				if ((e->timer & 127) == 0) {
+				if ((e->timer % 120) == 1) {
 					SpawnPellet(1);
-				} else if ((e->timer & 127) == 63) {
+				} else if ((e->timer % 120) == 61) {
 					SpawnPellet(0);
 				}
 			}
@@ -210,15 +214,12 @@ void ai_undead_core(Entity *e) {
 		{
 			e->timer++;
 			RunHurtFlash(e->timer);
-			
-			// fire rotators
-			if ((e->timer & 63) == 1) {
-				//uint8_t i = random() & 3;
-				//int32_t x = rotator[i]->x - (16<<CSF);
-				//int32_t y = rotator[i]->y;
-				
+
+			// fire pellets from face
+			if ((e->timer % 40) == 1) {
 				sound_play(SND_FUNNY_EXPLODE, 5);
-				//CreateSpinner(x, y);
+				SpawnPellet(1);
+				SpawnPellet(0);
 			}
 			
 			if (e->timer > 400 || (e->savedhp - e->health) > 150 || e->health < 200) {
@@ -252,10 +253,14 @@ void ai_undead_core(Entity *e) {
 		{
 			e->timer++;
 			RunHurtFlash(e->timer);
-			
-			if ((e->timer & 127) == 0) {
+
+			if ((e->timer % 100) == 1) {
+				CURLY_TARGET_HERE(e);
+			}
+
+			if ((e->timer % 120) == 1) {
 				SpawnPellet(1);
-			} else if ((e->timer & 127) == 63) {
+			} else if ((e->timer % 120) == 61) {
 				SpawnPellet(0);
 			}
 		}

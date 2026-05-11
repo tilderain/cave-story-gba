@@ -63,8 +63,8 @@ void ai_heli_blade(Entity *e) {
 		case 10:
 		{
 			static const uint8_t f[] = { 0, 1, 2, 1 };
-			if(++e->animtime >= 16) e->animtime = 0;
-			e->frame = f[e->animtime >> 2];
+			if(++e->animtime >= 4) e->animtime = 0;
+			e->frame = f[e->animtime];
 		}
 		break;
 	}
@@ -147,8 +147,9 @@ void ai_igor_balcony(Entity *e) {
 			MOVE_X(0x200);
 			if (e->grounded) {
 				camera_shake(20);
+				sound_play(SND_QUAKE, 5);
 				e->x_speed = 0;
-				
+
 				e->state = 22;
 				e->timer = 0;
 				e->frame = LAND;
@@ -305,12 +306,13 @@ void ai_falling_block(Entity *e) {
 		{
 			e->y_speed += 0x40;
 			LIMIT_Y(0x5FF);
-			
+
 			if (blk(e->x, 0, e->y, (NPC_OPTION2 ? 8 : 20)) == 0x41) {
 				e->y_speed = -0x280;
-				
+
 				e->state = 20;
-				SMOKE_AREA((e->x >> CSF) - 8, (e->y >> CSF) + (NPC_OPTION2 ? 8 : 16), 16, 1, 1);
+				sound_play(SND_QUAKE, 5);
+				SMOKE_AREA((e->x >> CSF) - 8, (e->y >> CSF) + (NPC_OPTION2 ? 8 : 16), 16, 1, 4);
 				camera_shake(10);
 			}
 		}
@@ -346,7 +348,7 @@ void ai_doctor_ghost(Entity *e) {
 		{
 			e->timer++;
 			if((e->timer & 7) == 0) {
-				Entity *r = entity_create(e->x, e->y/*+pixel_to_sub(128)*/, OBJ_RED_ENERGY, 0);
+				Entity *r = entity_create(e->x, e->y + pixel_to_sub(128), OBJ_RED_ENERGY, 0);
 				r->angle = A_RIGHT;
 				r->linkedEntity = e;
 				if((e->timer & 15) == 0) r->timer = 200;

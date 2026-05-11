@@ -107,9 +107,9 @@ void ai_bute_flying(Entity *e) {
 	if(++e->animtime & 1) {
 		FACE_PLAYER(e);
 		if(e->dir) {
-			if(e->x_speed <  0x3E0) e->x_speed += 0x20;
+			if(e->x_speed <  0x5FF) e->x_speed += 0x20;
 		} else {
-			if(e->x_speed > -0x3E0) e->x_speed -= 0x20;
+			if(e->x_speed > -0x5FF) e->x_speed -= 0x20;
 		}
 		if ((e->x_speed < 0 && blk(e->x, -8, e->y, 0) == 0x41) || 
 			(e->x_speed > 0 && blk(e->x,  8, e->y, 0) == 0x41)) {
@@ -118,9 +118,9 @@ void ai_bute_flying(Entity *e) {
 	} else {
 		if((e->animtime & 2) && ++e->frame > BF_FLYING2) e->frame = BF_FLYING1;
 		if(e->y < player.y) {
-			if(e->y_speed <  0x3E0) e->y_speed += 0x20;
+			if(e->y_speed <  0x5FF) e->y_speed += 0x20;
 		} else {
-			if(e->y_speed > -0x3E0) e->y_speed -= 0x20;
+			if(e->y_speed > -0x5FF) e->y_speed -= 0x20;
 		}
 		if ((e->y_speed > 0 && blk(e->x, 0, e->y,  8) == 0x41) || 
 			(e->y_speed < 0 && blk(e->x, 0, e->y, -8) == 0x41)) {
@@ -396,11 +396,11 @@ void ai_bute_archer(Entity *e) {
 		{
 			e->state++;
 			e->timer = 0;
-			
+
 			Entity *arrow = entity_create(e->x, e->y, OBJ_BUTE_ARROW, 0);
-			arrow->x_speed = (e->dir) ? 0x5FF : -0x5FF;
-			
-			if(e->timer2) arrow->y_speed = -0x5FF;
+			arrow->x_speed = (e->dir) ? 0x600 : -0x600;	// CSE2: ±0x600
+
+			if(e->timer2) arrow->y_speed = -0x600;		// CSE2: -0x600
 			// frame: arrow away
 			e->frame = e->timer2 ? BF_ARCHER7 : BF_ARCHER4;
 		} /* fallthrough */
@@ -409,7 +409,7 @@ void ai_bute_archer(Entity *e) {
 			if (++e->timer > 30) {
 				e->state++;
 				e->frame = BF_ARCHER1;
-				e->timer = 50 + (random() & 127);
+				e->timer = 150 + (random() & 127);	// CSE2: 150 + Random(0,100)
 			}
 		}
 		break;
@@ -514,12 +514,12 @@ void ai_mesa(Entity *e) {
 				
 				if (e->linkedEntity) {
 					Entity *block = e->linkedEntity;
-					
+
 					block->y = e->y - 0x800;
-					block->x_speed = e->dir ? 0x3FF : -0x3FF;
-					block->y_speed = -0x3FF;
+					block->x_speed = e->dir ? 0x400 : -0x400;	// CSE2: ±0x400
+					block->y_speed = -0x400;					// CSE2: -0x400
 					block->state = 1;
-					
+
 					sound_play(SND_EM_FIRE, 5);
 					block->linkedEntity = NULL;
 					e->linkedEntity = NULL;
@@ -544,8 +544,9 @@ void ai_mesa_block(Entity *e) {
 		case 0:		// being held
 		{
 			if (!e->linkedEntity || e->linkedEntity->type == OBJ_MESA_DYING) {
-				e->state = STATE_DELETE;
+				effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 				effect_create_smoke(e->x>>CSF, e->y>>CSF);
+				e->state = STATE_DELETE;
 			}
 		}
 		break;
@@ -557,6 +558,7 @@ void ai_mesa_block(Entity *e) {
 			
 			if (blk(e->x, 0, e->y, 8) == 0x41 && e->y_speed >= 0) {
 				sound_play(SND_BLOCK_DESTROY, 5);
+				effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 				effect_create_smoke(e->x>>CSF, e->y>>CSF);
 				e->state = STATE_DELETE;
 			}
@@ -627,13 +629,14 @@ void ai_deleet(Entity *e) {
 			if(e->timer >= 250) {
 				e->state = 3;
 				e->hidden = TRUE;
-				
+
 				e->hit_box.left = 48;
 				e->hit_box.right = 48;
 				e->hit_box.top = 48;
 				e->hit_box.bottom = 48;
 				e->attack = 12;
-				
+
+				sound_play(SND_QUAKE, 5);		// CSE2: PlaySoundObject(26)
 				camera_shake(10);
 				SMOKE_AREA((e->x>>CSF) - 48, (e->y>>CSF) - 48, 96, 96, 10);
 				
@@ -682,10 +685,10 @@ void ai_rolling(Entity *e) {
 			e->state = 1;
 		}
 		break;
-		
+
 		case 1:
 		{
-			if(e->x_speed > -0x3C0) e->x_speed -= 0x40;
+			if(e->x_speed > -0x400) e->x_speed -= 0x40;	// CSE2: ±0x400 cap
 			if(blk(e->x, -8, e->y, 0) == 0x41) {
 				e->x_speed = 0;
 				e->state++;
@@ -694,7 +697,7 @@ void ai_rolling(Entity *e) {
 		break;
 		case 2:
 		{
-			if(e->y_speed > -0x3C0) e->y_speed -= 0x40;
+			if(e->y_speed > -0x400) e->y_speed -= 0x40;	// CSE2: ±0x400 cap
 			if(blk(e->x, 0, e->y, -8) == 0x41) {
 				e->y_speed = 0;
 				e->state++;
@@ -703,7 +706,7 @@ void ai_rolling(Entity *e) {
 		break;
 		case 3:
 		{
-			if(e->x_speed < 0x3C0) e->x_speed += 0x40;
+			if(e->x_speed < 0x400) e->x_speed += 0x40;	// CSE2: ±0x400 cap
 			if(blk(e->x, 8, e->y, 0) == 0x41) {
 				e->x_speed = 0;
 				e->state++;
@@ -712,7 +715,7 @@ void ai_rolling(Entity *e) {
 		break;
 		case 4:
 		{
-			if(e->y_speed < 0x3C0) e->y_speed += 0x40;
+			if(e->y_speed < 0x400) e->y_speed += 0x40;	// CSE2: ±0x400 cap
 			if(blk(e->x, 0, e->y, 8) == 0x41) {
 				e->y_speed = 0;
 				e->state = 1;
@@ -720,9 +723,9 @@ void ai_rolling(Entity *e) {
 		}
 		break;
 	}
-	
-	if((++e->animtime & 3) == 0 && ++e->frame > 2) e->frame = 0;
-	
+
+	if((++e->animtime & 1) == 0 && ++e->frame > 2) e->frame = 0;	// CSE2: ani_wait > 1 (every 2 frames)
+
 	e->x += e->x_speed;
 	e->y += e->y_speed;
 }

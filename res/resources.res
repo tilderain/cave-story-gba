@@ -92,7 +92,8 @@ SPRITE SPR_SpurB1		"sprite/spurb1.png"			2 2 0 0 NONE
 SPRITE SPR_SpurB2		"sprite/spurb2.png"			2 2 0 0 NONE
 SPRITE SPR_SpurB3		"sprite/spurb3.png"			2 2 0 0 NONE
 SPRITE SPR_WStar        "sprite/wstar.png"          1 1 NONE
-
+SPRITE SPR_Dissipate    "sprite/dissipate.png"      2 2 NONE
+SPRITE SPR_Gib          "sprite/gib.png"            1 1 NONE
 
 SPRITE SPR_Fade         "sprite/fade.png"           4 4 NONE
 

@@ -241,7 +241,7 @@ IWRAM_CODE void entities_update(uint8_t draw) {
 					//k_str("wstar_hit");
 					if(e->health < 2) {
 						if(e->flags & NPC_SHOWDAMAGE) {
-							effect_create_damage(e->damage_value - 1, NULL, e->x >> CSF, e->y >> CSF);
+					effect_create_damage(e->damage_value - 1, NULL, e->x >> CSF, e->y >> CSF);
 							e->damage_time = e->damage_value = 0;
 						}
 						// Killed enemy
@@ -340,7 +340,7 @@ IWRAM_CODE void entities_update(uint8_t draw) {
 			}
 			if(!e->damage_time) {
 				if(e->flags & NPC_SHOWDAMAGE) {
-					effect_create_damage(e->damage_value, e, 0, 0);
+						effect_create_damage(e->damage_value, e, 0, 0);
 				}
 				e->damage_value = 0;
 				e->xoff = 0;
@@ -489,7 +489,16 @@ void entity_handle_bullet(Entity *e, Bullet *b) {
 				if(--b->damage == 0) b->ttl = 0;
 			}
 			return;
-		} else if((e->flags & NPC_SHOWDAMAGE) || e->shakeWhenHit) {
+		}
+		// CSE2: spawn 3 CARET_HURT_PARTICLES at midpoint between bullet and NPC
+		if(!e->damage_time) {
+			int16_t mx = ((b->x + e->x) >> 1) >> CSF;
+			int16_t my = ((b->y + e->y) >> 1) >> CSF;
+			effect_create_misc(EFF_GIB, mx, my, FALSE);
+			effect_create_misc(EFF_GIB, mx, my, FALSE);
+			effect_create_misc(EFF_GIB, mx, my, FALSE);
+		}
+		if((e->flags & NPC_SHOWDAMAGE) || e->shakeWhenHit) {
 			e->damage_value -= b->damage;
 			e->damage_time = 30;
 		}
@@ -727,8 +736,9 @@ uint8_t collide_stage_ceiling(Entity *e) {
 			e->jump_time = 0;
 			if(!playerNoBump && e->y_speed < -0x200) {
 				sound_play(SND_BONK_HEAD, 2);
-				effect_create_misc(EFF_BONKL, (e->x >> CSF) - 4, (e->y >> CSF) - 6, FALSE);
-				effect_create_misc(EFF_BONKR, (e->x >> CSF) + 4, (e->y >> CSF) - 6, FALSE);
+				// CSE2 PutlittleStar: 2 CARET_TINY_PARTICLES at player center X, player top Y
+				effect_create_misc(EFF_BONKL, e->x >> CSF, (e->y >> CSF) - e->hit_box.top, FALSE);
+				effect_create_misc(EFF_BONKR, e->x >> CSF, (e->y >> CSF) - e->hit_box.top, FALSE);
 				if(shoot_cooldown) {
 					playerNoBump = TRUE;
 				} else {
@@ -933,28 +943,30 @@ void entities_clear_by_type(uint16_t type) {
 
 void entity_drop_powerup(Entity *e) {
 	uint8_t chance = mod10[random() & 0x3FF] >> 1;
-	if(chance >= 2) { // Weapon Energy
-		if(e->experience > 0) {
-			Entity *exp = entity_create(e->x, e->y, OBJ_XP,
-					e->experience > 6 ? NPC_OPTION2 : 0);
-			exp->experience = e->experience;
+	// CSE2: Spawn individual XP items with random velocity (trajectory handled by onspawn_energy)
+	if(chance >= 2 && e->experience > 0) { // Weapon Energy
+		uint8_t count = e->experience;
+		if(count > 4) count = 4; // CSE2: most enemies drop 1-4 individual XP
+		for(uint8_t i = 0; i < count; i++) {
+			Entity *exp = entity_create(e->x, e->y, OBJ_XP, 0);
+			if(exp) exp->experience = 1;
 		}
-	} else if(chance == 1 && (player_has_weapon(WEAPON_MISSILE) || 
+	} else if(chance == 1 && (player_has_weapon(WEAPON_MISSILE) ||
 		player_has_weapon(WEAPON_SUPERMISSILE))) { // Missiles
 		if(e->experience > 6) {
             Entity *missile = entity_create(e->x, e->y, 86, NPC_OPTION1 | NPC_OPTION2);
-            missile->experience = 3;
+            if(missile) missile->experience = 3;
 		} else {
             Entity *missile = entity_create(e->x, e->y, 86, NPC_OPTION1);
-            missile->experience = 1;
+            if(missile) missile->experience = 1;
 		}
 	} else { // Heart
 		if(e->experience > 6) {
 			Entity *heart = entity_create(e->x, e->y, 87, NPC_OPTION1 | NPC_OPTION2);
-			heart->experience = 6;
+			if(heart) heart->experience = 6;
 		} else {
 			Entity *heart = entity_create(e->x, e->y, 87, NPC_OPTION1);
-			heart->experience = 2;
+			if(heart) heart->experience = 2;
 		}
 	}
 }

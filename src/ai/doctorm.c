@@ -283,8 +283,8 @@ void ai_muscle_doctor(Entity *e) {
 		case STATE_MEGA_BATS+1:
 		{
 			e->timer++;
-			
-			if (e->timer > 15 && (e->timer & 7) == 1) {
+
+			if (e->timer > 20 && e->timer % 3 == 1) {
 				Entity *bat = entity_create(e->x + (8<<CSF),
 										   e->y - (4<<CSF), OBJ_DOCTOR_BAT, 0);
 				
@@ -301,7 +301,7 @@ void ai_muscle_doctor(Entity *e) {
 				sound_play(SND_EM_FIRE, 3);
 			}
 			
-			if (e->timer > 100) e->state = STATE_BASE;
+			if (e->timer > 90) e->state = STATE_BASE;
 		}
 		break;
 		
@@ -311,7 +311,8 @@ void ai_muscle_doctor(Entity *e) {
 		{
 			e->flags &= ~NPC_SHOOTABLE;
 			e->attack = 0;
-			
+			sound_play(SND_TELEPORT, 5);
+
 			e->state++;
 			e->timer = 0;
 			//dr_tp_out_init(o);
@@ -488,7 +489,13 @@ void ai_muscle_doctor(Entity *e) {
 		crystal_state = CRYSTAL_INBACK;
 	}
 	
-	if (!e->grounded) e->y_speed += 0x80;
+	if (!e->grounded) {
+		// CSE2 uses lighter gravity during defeat fall (ym += 0x20 vs normal 0x80)
+		if (e->state >= STATE_DEFEATED)
+			e->y_speed += 0x20;
+		else
+			e->y_speed += 0x80;
+	}
 	if (e->y_speed > 0x5ff) e->y_speed = 0x5ff;
 	
 	e->x = e->x_next;

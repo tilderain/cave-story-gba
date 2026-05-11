@@ -18,6 +18,8 @@ void onspawn_ironhead(Entity *e) {
 	e->display_box = (bounding_box) { 28, 12, 28, 12 };
 	e->hurtSound = SND_ENEMY_HURT_COOL;
 	e->state = IRONH_SPAWN_FISHIES;
+	// Match CSE2: start by coming from left (CSE2 direct=2 -> dir2=1)
+	e->dir2 = 1;
 	// Keep track if player gets hurt
 	player_hit = FALSE;
 }
@@ -43,9 +45,9 @@ void ai_ironhead(Entity *e) {
 				e->timer = 0;
 				e->state = IRONH_SWIM;
 			}
-			if (!(e->timer & 7)) {
-				entity_create(pixel_to_sub((14 + (random() & 3)) << 4),
-						  	pixel_to_sub((1 + (random() & 15)) << 4),
+			if ((e->timer & 3) == 1) {	// CSE2: act_wait % 4 == 0, spawn every 4 frames
+				entity_create(pixel_to_sub((15 + (random() & 3)) << 4),	// CSE2: x=15-18 tiles
+						  	pixel_to_sub((2 + (random() & 11)) << 4),	// CSE2: y=2-13 tiles
 						  	OBJ_IRONH_FISHY, 0);
 			}
 		}
@@ -126,6 +128,10 @@ void ai_ironhead(Entity *e) {
 			e->timer = 0;
 			// I believe the screen should flash here since objects get deleted
 			SCREEN_FLASH(3);
+			// CSE2: spawn 32 smoke particles on defeat
+			for(uint8_t i=0;i<32;i++) {
+				effect_create_smoke((e->x>>CSF) - 32 + (random() & 63), (e->y>>CSF) - 16 + (random() & 31));
+			}
 			entities_clear_by_type(OBJ_IRONH_FISHY);
 			entities_clear_by_type(OBJ_IRONH_BRICK);
 			entities_clear_by_type(OBJ_BRICK_SPAWNER);
@@ -162,7 +168,7 @@ void ai_ironh_fishy(Entity *e) {
 		} /* fallthrough */
 		case 10:			// harmless fishy
 		{
-			ANIMATE(e, 8, 0,1);
+			ANIMATE(e, 3, 0,1);	// CSE2: ani_wait > 2 (every 3 frames)
 			if (e->x_speed < 0) {
 				e->attack = 3;
 				e->state = 20;
@@ -171,7 +177,7 @@ void ai_ironh_fishy(Entity *e) {
 		break;
 		case 20:			// puffer fish
 		{
-			ANIMATE(e, 8, 2,3);
+			ANIMATE(e, 1, 2,3);	// CSE2: ani_wait > 0 (every 1 frame)
 		}
 		break;
 	}
@@ -198,8 +204,8 @@ void ai_ironh_shot(Entity *e) {
 		e->x_speed += 0x20;
 	}
 	
-	ANIMATE(e, 8, 0,1,2);
-	
+	ANIMATE(e, 1, 0,1,2);	// CSE2: ani_wait > 0 (every 1 frame)
+
 	if (++e->timer2 > 100 && !entity_on_screen(e)) {
 		e->state = STATE_DELETE;
 	}

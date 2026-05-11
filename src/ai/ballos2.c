@@ -66,8 +66,8 @@ static void run_flight(Entity *e) {
 		} /* fallthrough */
 		case BP_FLY_LR+1:
 		{
-			ANIMATE(e, 4, 8,9);
-			
+			ANIMATE(e, 2, 8,9);
+
 			// smacked into wall?
 			if ((!e->dir && collide_stage_leftwall(e)) || 
 				(e->dir && collide_stage_rightwall(e))) {
@@ -117,8 +117,8 @@ static void run_flight(Entity *e) {
 		} /* fallthrough */
 		case BP_FLY_UP+1:
 		{
-			ANIMATE(e, 4, 10,11);
-			
+			ANIMATE(e, 2, 10,11);
+
 			// hit ceiling? (to make this happen, break his loop and jump ABOVE him
 			// while he is in the air, at the part where he would normally be
 			// coming back down at you).
@@ -170,8 +170,8 @@ static void run_flight(Entity *e) {
 		} /* fallthrough */
 		case BP_FLY_DOWN+1:
 		{
-			ANIMATE(e, 4, 13, 14);
-			
+			ANIMATE(e, 2, 13, 14);
+
 			if (collide_stage_floor(e))
 			{
 				e->state = BP_HIT_FLOOR;
@@ -213,8 +213,8 @@ static void run_flight(Entity *e) {
 		case BP_RETURN_TO_GROUND+1:
 		{
 			ANIMATE(e, 4, 1,2);
-			
-			e->y_speed += 0x40;
+
+			e->y_speed += 0x80;
 			LIMIT_Y(0x5ff);
 			
 			if (e->y_speed >= 0 && collide_stage_floor(e)) {
@@ -264,8 +264,8 @@ static void run_lightning(Entity *e) {
 			ANIMATE(e, 4, 4,5);
 			e->x_speed += (e->x < e->x_mark) ? 0x40 : -0x40;
 			e->y_speed += (e->y < FLOAT_Y) ? 0x40 : -0x40;
-			LIMIT_X(0x3FF);
-			LIMIT_Y(0x3FF);
+			LIMIT_X(0x400);
+			LIMIT_Y(0x400);
 			
 			// run firing
 			e->timer++;
@@ -397,6 +397,7 @@ static void run_defeated(Entity *e) {
 		{
 			e->state++;
 			e->timer = 0;
+			e->animtime = 0;
 			e->frame = 12;
 			
 			e->flags &= ~NPC_SHOOTABLE;
@@ -411,11 +412,11 @@ static void run_defeated(Entity *e) {
 		{
 			e->y_speed += 0x20;
 			LIMIT_Y(0x5ff);
-			
+
 			e->x = e->x_mark;
-			if (++e->timer & 2) e->x += pixel_to_sub(1);
+			if (++e->animtime & 2) e->x += pixel_to_sub(1);
 						   else e->x -= pixel_to_sub(1);
-			
+
 			if (e->y_speed >= 0 && collide_stage_floor(e)) {
 				if (++e->timer > 150) {
 					e->state++;
@@ -441,8 +442,8 @@ static void run_defeated(Entity *e) {
 		
 		case BP_DEFEATED+3:		// jumping
 		{
-			ANIMATE(e, 4, 10, 11);
-			
+			ANIMATE(e, 2, 10, 11);
+
 			if (e->y < 0) {
 				//flashscreen.Start();
 				SCREEN_FLASH(3);
@@ -602,6 +603,7 @@ void ai_ballos_bone_spawner(Entity *e) {
 				
 				Entity *bone = entity_create(e->x, e->y, OBJ_BALLOS_BONE, 0);
 				bone->x_speed = xi;
+				effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 				bone->y_speed = -0x3FF;
 				sound_play(SND_BLOCK_DESTROY, 5);
 			}
@@ -633,6 +635,7 @@ void ai_ballos_bone(Entity *e) {
 			e->state = 1;
 		} else {
 			//effect(e->x, e->y, EFFECT_FISHY);
+			effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 			e->state = STATE_DELETE;
 		}
 	}
@@ -690,6 +693,8 @@ void ai_ballos_skull(Entity *e) {
 			e->y_speed += 0x40;
 			
 			if (e->y >= block_to_sub(stageHeight)) {
+				SMOKE_AREA(e->x >> CSF, e->y >> CSF, 8, 8, 4);
+				effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 				e->state = STATE_DELETE;
 			}
 		}

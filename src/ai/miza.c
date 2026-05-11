@@ -248,18 +248,18 @@ static Entity *fm_spawn_missile(Entity *e, uint8_t angindex) {
 }
 */
 void ai_misery_critter(Entity *e) {
-	e->flags ^= NPC_SHOOTABLE;
-	
+	e->flags |= NPC_SHOOTABLE;
+
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
-	
+
 	if(e->state < 12) {
 		if(e->x_speed > 0) collide_stage_rightwall(e);
 		if(e->x_speed < 0) collide_stage_leftwall(e);
 		//if(e->y_speed < 0) collide_stage_ceiling(e);
 		if(!e->grounded) e->grounded = collide_stage_floor(e);
 	}
-	
+
 	switch(e->state) {
 		case 0:
 		{
@@ -324,7 +324,7 @@ void ai_misery_critter(Entity *e) {
 }
 
 void ai_misery_bat(Entity *e) {
-	e->flags ^= NPC_SHOOTABLE;
+	e->flags |= NPC_SHOOTABLE;
 	switch(e->state) {
 		case 0:
 		{
@@ -345,7 +345,7 @@ void ai_misery_bat(Entity *e) {
 		
 		case 1:
 		{
-			ANIMATE(e, 2, 0,1,2);
+			ANIMATE(e, 3, 0,1,2);
 			
 			e->y_speed += (e->y < e->y_mark) ? 0x40 : -0x40;
 			ACCEL_X(0x10);

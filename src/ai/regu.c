@@ -89,7 +89,7 @@ void ai_toroko(Entity *e) {
 		case 1:
 		{
 			e->frame = 0;
-			RANDBLINK(e, 7, 200);
+			RANDBLINK(e, 7, 121);
 		}
 		break;
 		case 3:		// run away!!
@@ -602,7 +602,7 @@ void ai_blue_robot(Entity *e) {
 	if(!e->grounded) e->grounded = collide_stage_floor(e);
 	else e->grounded = collide_stage_floor_grounded(e);
 	e->frame = 0;
-	RANDBLINK(e, 1, 200);
+	RANDBLINK(e, 1, 100);
 	e->y = e->y_next;
 	if(!e->grounded) e->y_speed += 0x40;
 	LIMIT_Y(0x5FF);
@@ -744,7 +744,7 @@ void ai_npc_at_computer(Entity *e) {
 		} /* fallthrough */
 		case TYPING:
 		{
-			ANIMATE(e, 4, 0,1);
+			ANIMATE(e, 3, 0,1);
 			if(!(random() & 63)) {
 				e->state = PAUSE_SLOUCH;
 				e->frame = 1;

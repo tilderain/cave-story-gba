@@ -80,8 +80,13 @@
 
 
 
-#define TILE_FADEINDEX      (TILE_QMARKINDEX + TILE_QMARKSIZE)
+// Effects (must be past breakable block range 0-508, see stage.c stage_load_tileset)
+#define TILE_FADEINDEX      (TILE_QMARKINDEX + TILE_QMARKSIZE)      
 #define TILE_FADESIZE       2
+#define TILE_GIBINDEX       (TILE_FADEINDEX + TILE_FADESIZE)
+#define TILE_GIBSIZE        4
+#define TILE_DISSIPINDEX    (TILE_GIBINDEX + TILE_GIBSIZE)
+#define TILE_DISSIPSIZE     16
 // 12 tiles at the end for nemesis vertical frames
 #define TILE_NEMINDEX (0xFE80 >> 5)
 // 8 tiles after window plane for blade L3

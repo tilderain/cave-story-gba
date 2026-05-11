@@ -4,9 +4,9 @@ void ai_behemoth(Entity *e) {
 	switch(e->state) {
 		case 0: // Walking
 		{
-			ANIMATE(e, 12, 0,1,0,2);
+			ANIMATE(e, 9, 0,1,0,2);
 			if(e->x_speed == 0) TURN_AROUND(e);
-			MOVE_X(0xFF);
+			MOVE_X(0x100);
 			if(e->damage_time) {
 				e->frame = 3;
 				e->state = 1;
@@ -18,7 +18,7 @@ void ai_behemoth(Entity *e) {
 		{
 			e->x_speed *= 7;
 			e->x_speed /= 8;
-			
+
 			if(++e->timer > 40) {
 				if(e->damage_time) {
 					e->state = 2;
@@ -26,21 +26,21 @@ void ai_behemoth(Entity *e) {
 					e->timer = 0;
 					e->animtime = 0;
 					e->attack = 5;
-					MOVE_X(0x300);
+					MOVE_X(0x400);
 				} else {
 					e->state = 0;
 					e->animtime = 0;
 					e->attack = 1;
-					MOVE_X(0xFF);
+					MOVE_X(0x100);
 				}
 			}
 		}
 		break;
 		case 2: // Charging
 		{
-			ANIMATE(e, 8, 4,5);
+			ANIMATE(e, 6, 4,5);
 			if(e->x_speed == 0) TURN_AROUND(e);
-			MOVE_X(0x300);
+			MOVE_X(0x400);
 			if(++e->timer > 200) {
 				e->state = 0;
 				e->attack = 1;
@@ -72,7 +72,7 @@ void ai_beetle(Entity *e) {
 		} /* fallthrough */
 		case 1: // wait for player on the wall
 		{
-			if(++e->timer > 50 && PLAYER_DIST_Y(e, 16 << CSF)) {
+			if(++e->timer > 60 && PLAYER_DIST_Y(e, 16 << CSF)) {
 				TURN_AROUND(e);
 				MOVE_X(0x200);
 				e->state = 2;
@@ -81,7 +81,7 @@ void ai_beetle(Entity *e) {
 		break;
 		case 2: // moving left or right
 		{
-			ANIMATE(e, 4, 1,0);
+			ANIMATE(e, 2, 1,0);
 			e->x += e->x_speed;
 			if(blk(e->x, e->dir ? 8 : -8, e->y, 0) == 0x41) {
 				e->state = 1;
@@ -102,13 +102,13 @@ void onspawn_beetleFollow(Entity *e) {
 void ai_beetleFollow(Entity *e) {
 	// Don't deactivate immediately when offscreen, but do if really far away
 	e->alwaysActive = TRUE;
-	ANIMATE(e, 4, 1,0);
+	ANIMATE(e, 2, 1,0);
 	FACE_PLAYER(e);
-	e->x_speed += e->dir ? 12 : -12;
-	if(abs(e->x_speed) > 0x360) 
-		e->x_speed = e->dir ? 0x360 : -0x360;
-	e->y_speed += (e->y > e->y_mark) ? -4 : 4;
-	LIMIT_Y(0x1FF);
+	e->x_speed += e->dir ? 0x10 : -0x10;
+	if(abs(e->x_speed) > 0x2FF)
+		e->x_speed = e->dir ? 0x2FF : -0x2FF;
+	e->y_speed += (e->y > e->y_mark) ? -8 : 8;
+	LIMIT_Y(0x100);
 	if(e->damage_time) {
 		e->x += e->x_speed >> 1;
 		e->y += e->y_speed >> 1;
@@ -125,13 +125,13 @@ void onspawn_basu(Entity *e) {
 }
 
 void ai_basu(Entity *e) {
-	ANIMATE(e, 8, 1,0);
+	ANIMATE(e, 2, 1,0);
 	e->timer++;
 	FACE_PLAYER(e);
-	e->x_speed += e->dir ? 5 : -5;
+	e->x_speed += e->dir ? 0x10 : -0x10;
 	LIMIT_X(0x2FF);
-	e->y_speed += (e->y > e->y_mark) ? -2 : 2;
-	LIMIT_Y(0x1FF);
+	e->y_speed += (e->y > e->y_mark) ? -8 : 8;
+	LIMIT_Y(0x100);
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
 	if(e->x_speed < 0 && collide_stage_leftwall(e)) e->x_speed = 0x200;
@@ -153,7 +153,7 @@ void onspawn_basil(Entity *e) {
 }
 
 void ai_basil(Entity *e) {
-	ANIMATE(e, 8, 0,1,2);
+	ANIMATE(e, 2, 0,1,2);
 	if(e->x_speed == 0) { // Hit a wall
 		e->dir ^= 1;
 	} else if(sub_to_pixel(e->x) < sub_to_pixel(camera.x) - SCREEN_HALF_W - 64) {

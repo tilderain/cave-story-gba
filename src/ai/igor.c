@@ -34,7 +34,7 @@ void ai_igor(Entity *e) {
 		} /* fallthrough */
 		case STATE_STAND+1:
 		{
-			ANIMATE(e, 16, STAND1, STAND2);
+			ANIMATE(e, 6, STAND1, STAND2);	// CSE2: ani_wait > 5
 			if(++e->timer > 50) e->state = STATE_WALK;
 		}
 		break;
@@ -54,7 +54,7 @@ void ai_igor(Entity *e) {
 		} /* fallthrough */
 		case STATE_WALK+1:
 		{
-			ANIMATE(e, 12, WALK1,STAND1,WALK2,STAND1);
+			ANIMATE(e, 4, WALK1,STAND1,WALK2,STAND1);	// CSE2: ani_wait > 3
 			if(fireatk == -1) {	// begin mouth-blast attack
 				if(++e->timer > 20) e->state = STATE_MOUTH_BLAST;
 			} else {
@@ -79,7 +79,7 @@ void ai_igor(Entity *e) {
 		} /* fallthrough */
 		case STATE_PUNCH+1:
 		{
-			if(++e->timer > 16) e->state++;
+			if(++e->timer > 12) e->state++;	// CSE2: act_wait > 12
 		}
 		break;
 		case STATE_PUNCH+2:
@@ -94,7 +94,7 @@ void ai_igor(Entity *e) {
 		} /* fallthrough */
 		case STATE_PUNCH+3:
 		{
-			if(++e->timer > 14) {
+			if(++e->timer > 10) {	// CSE2: act_wait > 10
 				// return to normal-size bounding box
 				e->hit_box.left -= 10;
 				e->state = STATE_STAND;
@@ -118,11 +118,12 @@ void ai_igor(Entity *e) {
 		case STATE_JUMPING+1:
 		{
 			if(e->grounded) {
-				sound_play(SND_ENEMY_JUMP, 5);
-				int16_t xx = e->x >> CSF, yy = (e->y >> CSF) + e->hit_box.bottom;
-				effect_create_smoke(xx - 12, yy);
+				sound_play(SND_QUAKE, 5);	// CSE2: PlaySoundObject(26)
+				int16_t xx = (e->x >> CSF) - 16, yy = (e->y >> CSF) + e->hit_box.bottom;
 				effect_create_smoke(xx, yy);
-				effect_create_smoke(xx + 12, yy);
+				effect_create_smoke(xx + 10, yy);
+				effect_create_smoke(xx + 21, yy);
+				effect_create_smoke(xx + 32, yy);
 				e->state = STATE_LANDED;
 			} else {
 				// Don't stop momentum if we hit the step on the left
@@ -140,7 +141,7 @@ void ai_igor(Entity *e) {
 		} /* fallthrough */
 		case STATE_LANDED+1:
 		{
-			if(++e->timer > 12) e->state = STATE_STAND;
+			if(++e->timer > 10) e->state = STATE_STAND;	// CSE2: act_wait > 10
 		}
 		break;
 		case STATE_MOUTH_BLAST:
@@ -154,23 +155,31 @@ void ai_igor(Entity *e) {
 		} /* fallthrough */
 		case STATE_MOUTH_BLAST+1:
 		{
-			e->frame = (++e->timer > 50 && (e->timer & 4)) ? MOUTH2 : MOUTH1;
-			// fire shots
-			if(e->timer > 100) {
-				if((e->timer & 7) == 1) {
+			++e->timer;
+			// flash mouth from 40-99 (CSE2: act_wait >= 40 && act_wait < 100)
+			e->frame = (e->timer >= 40 && (e->timer & 4)) ? MOUTH2 : MOUTH1;
+			// fire aimed shots (CSE2: act_wait >= 100, act_wait % 6 == 1)
+			if(e->timer >= 100) {
+				if((e->timer % 6) == 1) {
 					sound_play(SND_BLOCK_DESTROY, 5);
-					Entity *shot = entity_create(e->x + (e->dir ? 0x800 : -0x800), 
+					Entity *shot = entity_create(e->x + (e->dir ? 0x800 : -0x800),
 							e->y, OBJ_IGOR_SHOT, 0);
-                    shot->x_speed = e->dir ? 0x600 : -0x600;
-                    shot->y_speed = -0x280 + (random() & 0x3FF);
+					// Aim at player with random spread (CSE2: GetArktan + Random(-6,6))
+					uint8_t angle = get_angle(shot->x, shot->y, player.x, player.y);
+					angle += (random() & 0x1F) - 0x10;	// spread ±16/256
+					shot->x_speed = ((int32_t)cos[angle] * 0x600) >> CSF;
+					shot->y_speed = ((int32_t)sin[angle] * 0x600) >> CSF;
 				}
-				// fires 6 shots
-				if(e->timer > 135) e->state = STATE_STAND;
+				// fires 6 shots (CSE2: 100, 106, 112, 118, 124, 130; exit at 132)
+				if(e->timer >= 132) e->state = STATE_STAND;
 			}
 		}
 		break;
 	}
-	if(!e->grounded) e->y_speed += 0x20;
+	if(!e->grounded) {
+		e->y_speed += 0x40;	// CSE2: ym += 0x40
+		LIMIT_Y(0x5ff);		// CSE2: ym > 0x5FF check
+	}
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
 	entity_update_collision(e);

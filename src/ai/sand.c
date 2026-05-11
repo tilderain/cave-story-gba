@@ -26,13 +26,15 @@ void ai_polish(Entity *e) {
 	#define POLISH_CW_RIGHT		7
 	#define POLISH_CW_DOWN		8
 	
-	// Split after 20 damage
+	// Split after 20 damage (CSE2: spawns 10 PolishBabies)
 	if(e->health <= 100) {
-		entity_create(e->x - (8<<CSF), e->y, OBJ_POLISHBABY, 0)->dir = 0;
-		entity_create(e->x + (8<<CSF), e->y, OBJ_POLISHBABY, 0)->dir = 1;
+		for(uint8_t i = 0; i < 10; i++) {
+			entity_create(e->x, e->y, OBJ_POLISHBABY, 0);
+		}
+		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
+		SMOKE_AREA((e->x >> CSF) - 16, (e->y >> CSF) - 16, 32, 32, 8);
+		sound_play(SND_FUNNY_EXPLODE, 5);
 		e->state = STATE_DELETE;
-		effect_create_smoke(sub_to_pixel(e->x), sub_to_pixel(e->y));
-		sound_play(e->deathSound, 5);
 		return;
 	}
 	
@@ -173,33 +175,37 @@ void ai_polish(Entity *e) {
 void ai_baby(Entity *e) {
 	if(!e->state) {
 		e->state = 1;
-		if(random() & 1) {
-			e->x_speed = (random() & 0xFF) + 0x100;
-		} else {
-			e->x_speed = (random() & 0xFF) - 0x300;
-		}
-		if(random() & 1) {
-			e->y_speed = (random() & 0xFF) + 0x100;
-		} else {
-			e->y_speed = (random() & 0xFF) - 0x300;
-		}
+		// CSE2 ActNpc045: Random(±0x100, ±0x200)
+		if(random() & 1)
+			e->x_speed = 0x100 + (random() % 0x101);	// 0x100..0x200
+		else
+			e->x_speed = -0x200 + (random() % 0x101);	// -0x200..-0x100
+		if(random() & 1)
+			e->y_speed = 0x100 + (random() % 0x101);
+		else
+			e->y_speed = -0x200 + (random() % 0x101);
 	}
-	
+
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
-	
-	// Collide functions set speed to 0. Remember using mark vars
+
+	// Collision bounces invert velocity (CSE2: xm2 *= -1)
 	e->x_mark = e->x_speed;
 	e->y_mark = e->y_speed;
 	if (e->x_speed > 0 && collide_stage_rightwall(e)) e->x_speed = -e->x_mark;
 	if (e->x_speed < 0 && collide_stage_leftwall(e)) e->x_speed = -e->x_mark;
 	if (e->y_speed > 0 && collide_stage_floor(e)) e->y_speed = -e->y_mark;
 	if (e->y_speed < 0 && collide_stage_ceiling(e)) e->y_speed = -e->y_mark;
-	
+
+	// CSE2: speed cap at ±0x200
+	LIMIT_X(0x200);
+	LIMIT_Y(0x200);
+
 	e->x = e->x_next;
 	e->y = e->y_next;
-	
-	ANIMATE(e, 4, 0,1);
+
+	// CSE2: animation runs every frame (ani_no cycles 1-2)
+	if(++e->animtime > 1) { e->animtime = 0; if(++e->frame > 1) e->frame = 0; }
 }
 
 void ai_sandcroc(Entity *e) {
@@ -226,17 +232,32 @@ void ai_sandcroc(Entity *e) {
 			}
 			if(PLAYER_DIST_X(e, pixel_to_sub(19))) {
 				// check if bottoms of player and croc are near
-				if(player.y < e->y + 0x200 && sub_to_pixel(player.y) + 
+				if(player.y < e->y + 0x200 && sub_to_pixel(player.y) +
 					player.hit_box.bottom + 12 > sub_to_pixel(e->y) + e->hit_box.bottom) {
 					// attack!!
 					e->x_speed = 0;
-					e->state = 2;
-					e->timer = 0;
-					sound_play(SND_JAWS, 5);
+					if(e->type == OBJ_SANDCROC_OSIDE) {
+						e->state = 6;	// OSIDE: 10-frame delay before attack
+						e->timer = 0;
+					} else {
+						e->state = 2;
+						e->timer = 0;
+						sound_play(SND_JAWS, 5);
+					}
 					e->hidden = FALSE;
 				}
 			} else {
 				e->hidden = TRUE;
+			}
+		}
+		break;
+		case 6:		// OSIDE: 10-frame delay before attack (CSE2 ActNpc215 state 15)
+		{
+			e->hidden = FALSE;
+			if(++e->timer > 10) {
+				sound_play(SND_JAWS, 5);
+				e->state = 2;
+				e->timer = 0;
 			}
 		}
 		break;
@@ -271,10 +292,10 @@ void ai_sandcroc(Entity *e) {
 		break;
 		case 4:		// retreat
 		{
-			e->y += 0x280;
+			e->y += 0x200;
 			e->flags &= ~(NPC_SOLID);
-			
-			if (++e->timer == 30) {
+
+			if (++e->timer == 32) {
 				e->flags &= ~(NPC_SHOOTABLE);
 				e->hidden = TRUE;
 				e->state = 5;
@@ -630,7 +651,7 @@ void ai_curlys_mimigas(Entity *e) {
 		case 3:		// stand and blink
 		{
 			e->frame = 0;
-			RANDBLINK(e, 3, 200);
+			RANDBLINK(e, 3, 61);	// CSE2 Random(0,60)==1
 		}
 		break;
 		// sitting mimiga (when facing right)
@@ -652,7 +673,7 @@ void ai_curlys_mimigas(Entity *e) {
 			e->flags |= NPC_SHOOTABLE;
 			e->health = 1000;
 			e->state = 11;
-			e->timer = random() & 63;
+			e->timer = random() % 51;		// CSE2 Random(0, 50)
 			e->frame = 0;
 		} /* fallthrough */
 		case 11:
@@ -662,13 +683,13 @@ void ai_curlys_mimigas(Entity *e) {
 		case 13:
 		{
 			e->state = 14;
-			e->timer = random() & 63;
+			e->timer = random() % 51;		// CSE2 Random(0, 50)
 			FACE_PLAYER(e);
 			e->frame = 1;
 		} /* fallthrough */
 		case 14:
 		{
-			ANIMATE(e, 8, 1,0,2,0);
+			ANIMATE(e, 3, 1,0,2,0);		// CSE2 ani_wait > 2
 			if(e->dir) e->x_speed += 0x40;
 			else e->x_speed -= 0x40;
 			
@@ -699,7 +720,7 @@ void ai_curlys_mimigas(Entity *e) {
 				e->x_speed = 0;
 				e->state = 21;
 				if(e->frame < 7) e->frame += 2;
-				e->timer = 280 + (random() & 127);
+				e->timer = 300 + (random() % 101);	// CSE2 Random(300, 400)
 			}
 		}
 		break;
@@ -721,7 +742,7 @@ void ai_curlys_mimigas(Entity *e) {
 		// got shot by player
 		e->state = 20;
 		e->y_speed = -0x200;
-		e->frame = (random() & 1) + 5;
+		e->frame = (random() & 1) + 6;		// CSE2 Random(6, 7)
 		e->attack = 0;
 		e->flags &= ~NPC_SHOOTABLE;
 	}
@@ -779,6 +800,7 @@ void ai_skeleton_shot(Entity *e) {
 	
 	if (e->timer >= 10) {
 		//effect(e->CenterX(), e->CenterY(), EFFECT_FISHY);
+		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		e->state = STATE_DELETE;
 	}
 }
@@ -787,6 +809,12 @@ void ai_skeleton_shot(Entity *e) {
 #define SKNEAR_ABOVE	pixel_to_sub(64)
 
 void ai_skeleton(Entity *e) {
+	// CSE2: deactivate if player is more than 352 pixels away horizontally or 160/64 vertically
+	if(abs((int32_t)(player.x - e->x)) > pixel_to_sub(352) ||
+		player.y < e->y - pixel_to_sub(160) || player.y > e->y + pixel_to_sub(64)) {
+		e->state = 0;
+	}
+
 	uint8_t pnear = PLAYER_DIST_Y2(e, SKNEAR_ABOVE, SKNEAR_BELOW);
 	
 	e->x_next = e->x + e->x_speed;
@@ -824,7 +852,7 @@ void ai_skeleton(Entity *e) {
 			e->state = 21;
 			e->frame = 1;
 			e->timer2 = 0;
-			e->y_speed = -(0x200 + (random() & 0x3FF));
+			e->y_speed = -0x200 * (1 + (random() % 3));
 			e->grounded = FALSE;
 			
 			// jump towards player, unless we've been hurt; in that case jump away
@@ -840,8 +868,8 @@ void ai_skeleton(Entity *e) {
 				if (e->timer2 == 0) {
 					e->timer2++;
 					
-					FIRE_ANGLED_SHOT(OBJ_SKELETON_SHOT, e->x, e->y, 
-							e->dir ? A_RIGHT+1:A_LEFT-1, 0x300);
+					FIRE_ANGLED_SHOT(OBJ_SKELETON_SHOT, e->x, e->y,
+							e->dir ? A_RIGHT+1:A_LEFT-1, 0x400);
 					sound_play(SND_EM_FIRE, 3);
 				}
 				

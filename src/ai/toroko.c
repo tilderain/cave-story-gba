@@ -2,16 +2,29 @@
 
 void onspawn_torokoAtk(Entity *e) {
 	e->y -= 16 << CSF;
-	e->x_speed = 0x400; // 1.5px
-	e->state = 3; // Running back and forth
-	e->frame = 3;
+	e->y_speed = -0x400; // Bounce in
+	e->state = 0;
+	e->frame = 0;
 }
 
 void ai_torokoAtk(Entity *e) {
 	switch(e->state) {
-	case 0: // Stand still
-		e->frame = 0;
-		break;
+	case 0: // Jump-in bounce (CSE2 ActNpc063 states 0/1)
+	{
+		e->state = 1;
+		e->x_speed = e->dir ? 0x100 : -0x100;
+	}
+	/* fallthrough */
+	case 1:
+	{
+		ANIMATE(e, 3, 0,1,2,3);
+		if(e->grounded && e->timer++) {
+			e->state = 3;
+			e->x_speed = e->dir ? 0x3FF : -0x3FF;
+			e->frame = 3;
+		}
+	}
+	break;
 	case 3: // Run back and forth
 	case 4:
 		ANIMATE(e, 4, 3,4);
@@ -21,8 +34,8 @@ void ai_torokoAtk(Entity *e) {
 			e->attack = 0; // Don't hurt the player anymore
 			e->flags |= NPC_INTERACTIVE; // Enable interaction
 			e->state = 10; // Change animation to falling on ground
-			e->y_speed = -0x200;
-			e->x_speed >>= 1;
+			e->y_speed = -0x400;
+			e->x_speed = e->dir ? 0x100 : -0x100;
 			e->grounded = FALSE;
 			e->frame = 5;
 			b->ttl = 0;
@@ -48,7 +61,7 @@ void ai_torokoAtk(Entity *e) {
 		e->dir = 0;
 		e->frame = 0;
 	}
-	if(!e->grounded) e->y_speed += 0x20;
+	if(!e->grounded) e->y_speed += 0x40;
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
 	entity_update_collision(e);
@@ -75,7 +88,7 @@ void onspawn_torokoBoss(Entity *e) {
 		e->linkedEntity->x = e->x;                                                             \
 		e->linkedEntity->y = e->y - (16 << CSF);                                               \
 		e->linkedEntity->flags |= NPC_INVINCIBLE;                                             \
-		THROW_AT_TARGET(e->linkedEntity, player.x, player.y, 0x600);                 \
+		THROW_AT_TARGET(e->linkedEntity, player.x, player.y, 0x800);                 \
 		sound_play(SND_EM_FIRE, 5);                                                            \
 		e->linkedEntity->linkedEntity = NULL;                                                  \
 		e->linkedEntity = NULL;                                                                \
@@ -116,7 +129,7 @@ void ai_torokoBoss(Entity *e) {
 		case 3:		// rest a moment, then jump
 		{
 			ANIMATE(e, 8, 0,1);
-			if (++e->timer > 5) {
+			if (++e->timer > 50) {
 				e->state = 10;
 				e->flags |= NPC_SHOOTABLE;
 			}
@@ -125,7 +138,7 @@ void ai_torokoBoss(Entity *e) {
 		case 10:	// wait a moment then ATTACK!!
 		{
 			e->state = 11;
-			e->timer = (random() & 0x7F) + 20;
+			e->timer = (random() % 111) + 20;
 			e->x_speed = 0;
 		}
 		/* fallthrough */
@@ -181,7 +194,7 @@ void ai_torokoBoss(Entity *e) {
 		break;
 		case 24:	// threw block
 		{
-			if (++e->timer > 5) {
+			if (++e->timer > 3) {
 				e->state = 25;
 				e->frame = 3;
 			}
@@ -230,7 +243,7 @@ void ai_torokoBoss(Entity *e) {
 		break;
 		case 52:
 		{
-			if (++e->timer > 5) {
+			if (++e->timer > 3) {
 				e->state = 10;
 				e->frame = 0;
 			}
@@ -330,6 +343,7 @@ void ai_torokoBoss(Entity *e) {
 	}
 	
 	if(!e->grounded) e->y_speed += 0x20;
+	LIMIT_Y(0x5FF);
 }
 
 void ondeath_torokoBoss(Entity *e) {
@@ -342,8 +356,8 @@ void ondeath_torokoBoss(Entity *e) {
 // the blocks Frenzied Toroko throws
 void ai_torokoBlock(Entity *e) {
 	if(e->linkedEntity) {
-		e->x = e->linkedEntity->x + (e->linkedEntity->dir ? 8 << CSF : -(8 << CSF));
-		e->y = e->linkedEntity->y - (16 << CSF);
+		e->x = e->linkedEntity->x + (e->linkedEntity->dir ? 10 << CSF : -(10 << CSF));
+		e->y = e->linkedEntity->y - (8 << CSF);
 		return;
 	}
 	e->frame ^= 1;

@@ -271,7 +271,7 @@ void ai_sisters(Entity *e) {
 		// big starflash after dragons hit each other
 		case STATE_STARFLASH:
 		{
-			if (++e->timer > 30) {
+			if (++e->timer > 50) {
 				e->state = STATE_DELETE;
 				bossEntity = NULL;
 				
@@ -318,7 +318,7 @@ void ai_sisters_body(Entity *e) {
 		}
 	}
 	
-	ANIMATE(e, 4, 0,1,2);
+	ANIMATE(e, 3, 0,1,2);
 }
 
 void ai_sisters_head(Entity *e) {
@@ -383,9 +383,8 @@ void ai_sisters_head(Entity *e) {
 				e->timer = 0;
 			}
 			
-			// Close mouth after 3 hits, minimum of 1 second open
-			// This might be wrong but it works better than before at least
-			if (e->timer2 > 2 && e->timer > 50) {
+			// Close mouth after 11 hits (matching CSE2), minimum of 1 second open
+			if (e->timer2 > 10 && e->timer > 50) {
 				sound_play(SND_ENEMY_HURT, 5);
 				effect_create_smoke(e->x >> CSF, e->y >> CSF);
 				

@@ -114,7 +114,7 @@ void ai_red_bat_spawner(Entity *e) {
 			//if(PLAYER_DIST_Y(e, 64 << CSF)) {
 				if(e->flags & NPC_OPTION2) e->dir = 1;
 				e->state = 1;
-				e->timer = 160 + (random() & 0xFF);
+				e->timer = random() % 501;
 			//}
 		}
 		break;
@@ -131,20 +131,20 @@ void ai_red_bat_spawner(Entity *e) {
 }
 
 void ai_red_bat(Entity *e) {
-	ANIMATE(e, 4, 0,1,2);
+	ANIMATE(e, 2, 0,1,2);
 	
 	switch(e->state) {
 		case 0:
 		{
 			e->state = 1;
 			e->y_mark = e->y;
-			e->timer = random() & 63;
+			e->timer = random() % 51;
 		} /* fallthrough */
 		case 1:
 		{
 			if (e->timer == 0) {
 				e->state = 2;
-				e->y_speed = 0x3FF;
+				e->y_speed = 0x400;
 			} else {
 				e->timer--;
 				break;

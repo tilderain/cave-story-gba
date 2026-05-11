@@ -46,7 +46,9 @@ void ai_waterlevel(Entity *e) {
 		case WL_STAY_UP:	// rise quickly all the way to top and stay there
 		{
 			e->y_speed += (e->y > 0) ? -4 : 4;
-			LIMIT_Y(0x200);
+			// Asymmetric limit: rise fast (-0x200), settle slow (+0x100)
+			if (e->y_speed < -0x200) e->y_speed = -0x200;
+			if (e->y_speed > 0x100) e->y_speed = 0x100;
 		}
 		break;
 	}
@@ -85,13 +87,11 @@ void ai_shutter(Entity *e) {
 				case 2: e->y_next = e->y - 0x80; break;
 				case 3: e->y_next = e->y + 0x80; break;
 			}
-			if (e->type==OBJ_SHUTTER_BIG) {
-				if (!e->timer) {
-					camera_shake(20);
-					sound_play(SND_QUAKE, 5);
-					e->timer = 6;
-				} else e->timer--;
-			}
+			if (!e->timer) {
+				camera_shake(20);
+				sound_play(SND_QUAKE, 5);
+				e->timer = 8;
+			} else e->timer--;
 			e->x = e->x_next;
 			e->y = e->y_next;
 		}
@@ -129,7 +129,7 @@ void ai_almond_robot(Entity *e) {
 		case 10:	// blows up
 		{
 			sound_play(SND_BIG_CRASH, 5);
-			SMOKE_AREA((e->x>>CSF) - 12, (e->y>>CSF) - 12, 24, 24, 3);
+			SMOKE_AREA((e->x>>CSF) - 12, (e->y>>CSF) - 12, 24, 24, 8);
 			e->state = STATE_DELETE;
 		}
 		break;

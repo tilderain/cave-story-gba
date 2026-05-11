@@ -666,6 +666,7 @@ void ondeath_x_target(Entity *e) {
 void ai_x_fishy_missile(Entity *e) {
 	e->flags ^= NPC_SHOOTABLE;
 	if(++e->timer > 600) {
+		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		effect_create_smoke(e->x >> CSF, e->y >> CSF);
 		e->state = STATE_DELETE;
 		return;

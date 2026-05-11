@@ -214,7 +214,7 @@ void onspawn_balrog_medic(Entity *e) {
 
 void ai_balrog_medic(Entity *e) {
 	e->frame = 0;
-	RANDBLINK(e, 1, 200);
+	RANDBLINK(e, 1, 121);
 }
 void onspawn_gaudi_patient(Entity *e) {
 	e->y += pixel_to_sub(10);
@@ -241,14 +241,14 @@ void ai_gaudi_patient(Entity *e) {
 		} /* fallthrough */
 		case 21:
 		{
-			ANIMATE(e, 16, 2,3);
+			ANIMATE(e, 10, 2,3);
 		}
 		break;
 	}
 }
 
 void onspawn_baby_puppy(Entity *e) {
-	e->y -= 8 << CSF;
+	e->y -= 16 << CSF;
 }
 
 void ai_baby_puppy(Entity *e) {
@@ -260,7 +260,7 @@ void ai_baby_puppy(Entity *e) {
 		} /* fallthrough */
 		case 1:
 		{
-			ANIMATE(e, 8, 0,1);
+			ANIMATE(e, 7, 0,1);
 		}
 		break;
 	}
@@ -319,7 +319,8 @@ void ai_turning_human(Entity *e) {
 		
 		case 30:	// falling
 		{
-			if(e->y_speed < 0x5C0) e->y_speed += 0x40;
+			e->y_speed += 0x40;
+			LIMIT_Y(0x5FF);
 			// sneeze
 			if(++e->timer > 50) {
 				e->state = 40;

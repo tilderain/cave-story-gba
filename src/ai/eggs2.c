@@ -80,7 +80,7 @@ void ai_dragon_zombie(Entity *e) {
 			if (e->timer > 60) {
 				e->state = 1;
 				e->frame = 0;
-				e->timer = (random() & 127) + 90;	// random time till can fire again
+				e->timer = (random() % 101) + 100;	// random time till can fire again
 			}
 		}
 		break;
@@ -93,7 +93,7 @@ void ai_fallingspike_sm(Entity *e) {
 		{
 			e->x_mark = e->x;
 			
-			if (PLAYER_DIST_X(e, 12 << CSF))
+			if (PLAYER_DIST_X(e, 12 << CSF) && player.y > e->y)
 				e->state = 1;
 		}
 		break;
@@ -126,6 +126,7 @@ void ai_fallingspike_sm(Entity *e) {
 				
 				//SmokeClouds(o, 4, 2, 2);
 				//effect(e->CenterX(), e->CenterY(), EFFECT_BOOMFLASH);
+				effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 				effect_create_smoke(sub_to_pixel(e->x), sub_to_pixel(e->y));
 				e->state = STATE_DELETE;
 			}
@@ -141,8 +142,9 @@ void ai_fallingspike_lg(Entity *e) {
 		case 0:
 		{
 			e->x_mark = e->x;
+			e->y += 4 << CSF;
 			
-			if (PLAYER_DIST_X(e, 12 << CSF))
+			if (PLAYER_DIST_X(e, 12 << CSF) && player.y > e->y)
 				e->state = 1;
 		}
 		break;
@@ -202,8 +204,11 @@ void ai_fallingspike_lg(Entity *e) {
 				
 				e->state = 3;	// fall complete
 				e->timer = 0;
-				
+
 				sound_play(SND_BLOCK_DESTROY, 5);
+				effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
+				effect_create_smoke(e->x >> CSF, e->y >> CSF);
+				effect_create_smoke(e->x >> CSF, e->y >> CSF);
 				//SmokeClouds(o, 4, 2, 2);
 				
 				//effect(e->CenterX(), e->y + (sprites[e->sprite].block_d[0].y << CSF),
@@ -234,7 +239,7 @@ void ai_counterbomb(Entity *e) {
 			e->state = 1;
 			e->y_mark = e->y;
 			
-			e->timer = random() & 63;
+			e->timer = random() % 51;
 			e->timer2 = 0;
 		} /* fallthrough */
 		case 1:
@@ -263,10 +268,10 @@ void ai_counterbomb(Entity *e) {
 		{
 			if (e->timer == 0) {
 				if (e->timer2 < 5) {
-					Entity *number = entity_create(e->x + pixel_to_sub(8), e->y + pixel_to_sub(16),
+					Entity *number = entity_create(e->x + pixel_to_sub(16), e->y + pixel_to_sub(4),
 												  OBJ_COUNTER_BOMB_NUMBER, 0);
 					number->frame = e->timer2++;
-					e->timer = 50;
+					e->timer = 60;
 				} else {
 					// expand bounding box to cover explosion area
 					e->hidden = TRUE;
@@ -307,6 +312,7 @@ void ai_counterbomb(Entity *e) {
 	if (e->state == 2 || e->state == 3) {
 		e->y_speed += (e->y > e->y_mark) ? -0x10 : 0x10;
 		LIMIT_Y(0x100);
+		e->y += e->y_speed;
 	}
 }
 
