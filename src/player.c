@@ -975,7 +975,7 @@ void player_show_map_name(uint8_t ttl) {
         str = (const char*)(((const uint8_t*)STAGE_NAMES) + (stageID << 5));
     }
 
-    // 1. Clear Sprite VRAM (32 tiles * 32 bytes)
+    // 1. Clear Sprite VRAM (32 tiles * 32 bytes = TILE_NAMESIZE)
     uint32_t *vram32 = (uint32_t*)(0x06010000 + (TILE_NAMEINDEX * 32));
     for(int i = 0; i < 256; i++) vram32[i] = 0;
 

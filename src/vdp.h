@@ -108,7 +108,7 @@
 #define TILE_FACESIZE         36
 
 #define TILE_NAMEINDEX        (TILE_FACEINDEX + TILE_FACESIZE)
-#define TILE_NAMESIZE         16
+#define TILE_NAMESIZE         32
 
 // Space for shared sprite sheets (Enemies, Bosses, Items, etc)
 #define TILE_SHEETINDEX       (TILE_NAMEINDEX + TILE_NAMESIZE)

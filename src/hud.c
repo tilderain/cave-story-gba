@@ -45,8 +45,9 @@ static int8_t hudScrollDir;      // 0 = none, 1 = next (from right), -1 = prev (
 
 // Used for weapon switch display (all weapons shown during swap)
 #define SWAP_BEGIN    9
-// 4-tile block at end of swap area for 2x2-compatible weapon icon repack
-#define TILE_SWAPICONINDEX (TILE_EXWEPINDEX + 12)
+// 4-tile block in reserved space for 2x2-compatible weapon icon repack
+// (kept outside TILE_EXWEPINDEX to avoid overlapping with swap weapon tiles)
+#define TILE_SWAPICONINDEX (TILE_RESERVEDSPACE + 60)
 static uint8_t swapTimer, swapDir, swapWepNum;
 
 uint8_t showing = FALSE;
@@ -108,20 +109,20 @@ void hud_create() {
 		.x = 16 + 64 + 128,
 		.y = (pal_mode ? 24 : 16) + 128,
 		.size = SPRITE_SIZE(4, 2) | (5 << 4),
-		.attr = TILE_ATTR(PAL0,1,0,0,TILE_EXWEPINDEX*2)
+		.attr = TILE_ATTR(PAL0,1,0,0,TILE_EXWEPINDEX)
 	};
 	sprSwap[1] = (VDPSprite) {
 		.x = 16 + 96 + 128,
 		.y = (pal_mode ? 24 : 16) + 128,
 		.size = SPRITE_SIZE(4, 2) | (5 << 4),
-		.attr = TILE_ATTR(PAL0,1,0,0,(TILE_EXWEPINDEX+8)*2)
+		.attr = TILE_ATTR(PAL0,1,0,0,TILE_EXWEPINDEX+8)
 	};
 	// Weapon icon overlay — replaces the HUD weapon icon (always shown as separate sprite)
 	sprSwap[2] = (VDPSprite) {
 		.x = 16 + 128,
 		.y = (pal_mode ? 24 : 16) + 128,
 		.size = SPRITE_SIZE(2, 2) | (5 << 4),
-		.attr = TILE_ATTR(PAL0,1,0,0,TILE_SWAPICONINDEX*2)
+		.attr = TILE_ATTR(PAL0,1,0,0,TILE_SWAPICONINDEX)
 	};
 	hud_refresh_swap(TRUE);
 	// Blank weapon icon in HUD sprite (replaced by sprSwap[2] overlay)
@@ -391,8 +392,8 @@ void hud_refresh_weapon() {
 	memcpy(tileData[WPN+0], SPR_TILES(&SPR_ArmsImage, 0, hudWeapon), TILE_SIZE*2);
 	memcpy(tileData[WPN+2], &SPR_TILES(&SPR_ArmsImage, 0, hudWeapon)[TSIZE*2], TILE_SIZE*2);
 	// Queue DMA transfer for icon overlay (repacked as 2x2-compatible)
-	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[WPN+0], TILE_SWAPICONINDEX * TILE_SIZE, 16, 2);
-	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[WPN+2], (TILE_SWAPICONINDEX + 1) * TILE_SIZE, 16, 2);
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[WPN+0], TILE_SWAPICONINDEX * 16, 16, 2);
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[WPN+2], (TILE_SWAPICONINDEX + 1) * 16, 16, 2);
 }
 
 void hud_swap_weapon(uint8_t dir) {
@@ -419,7 +420,7 @@ void hud_refresh_swap(uint8_t force) {
 			// In 1D OBJ mapping with sprite width 4:
 			//   TL@+0, TR@+1, BL@+4, BR@+5  (weapon at cols 0-1)
 			//   TL@+2, TR@+3, BL@+6, BR@+7  (weapon at cols 2-3)
-			uint16_t baseTile = TILE_EXWEPINDEX * 2 + (swapWepNum >> 1) * 16;
+			uint16_t baseTile = TILE_EXWEPINDEX + (swapWepNum >> 1) * 8;
 			uint16_t colOff = (swapWepNum & 1) * 2; // 0 for cols 0-1, 2 for cols 2-3
 
 			const uint32_t *src = SPR_TILES(&SPR_ArmsImage, 0, type);
