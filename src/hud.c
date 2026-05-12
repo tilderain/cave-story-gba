@@ -24,7 +24,7 @@
 #define AMMO    20
 
 VDPSprite sprHUD[4];
-VDPSprite sprSwap[2];
+VDPSprite sprSwap[3];
 uint32_t tileData[28][8];
 
 // Values used to draw parts of the HUD
@@ -45,6 +45,8 @@ static int8_t hudScrollDir;      // 0 = none, 1 = next (from right), -1 = prev (
 
 // Used for weapon switch display (all weapons shown during swap)
 #define SWAP_BEGIN    9
+// 4-tile block at end of swap area for 2x2-compatible weapon icon repack
+#define TILE_SWAPICONINDEX (TILE_EXWEPINDEX + 12)
 static uint8_t swapTimer, swapDir, swapWepNum;
 
 uint8_t showing = FALSE;
@@ -105,17 +107,27 @@ void hud_create() {
 	sprSwap[0] = (VDPSprite) {
 		.x = 16 + 64 + 128,
 		.y = (pal_mode ? 24 : 16) + 128,
-		.size = SPRITE_SIZE(4, 2),
+		.size = SPRITE_SIZE(4, 2) | (5 << 4),
 		.attr = TILE_ATTR(PAL0,1,0,0,TILE_EXWEPINDEX*2)
 	};
 	sprSwap[1] = (VDPSprite) {
 		.x = 16 + 96 + 128,
 		.y = (pal_mode ? 24 : 16) + 128,
-		.size = SPRITE_SIZE(4, 2),
+		.size = SPRITE_SIZE(4, 2) | (5 << 4),
 		.attr = TILE_ATTR(PAL0,1,0,0,(TILE_EXWEPINDEX+8)*2)
 	};
+	// Weapon icon overlay — replaces the HUD weapon icon (always shown as separate sprite)
+	sprSwap[2] = (VDPSprite) {
+		.x = 16 + 128,
+		.y = (pal_mode ? 24 : 16) + 128,
+		.size = SPRITE_SIZE(2, 2) | (5 << 4),
+		.attr = TILE_ATTR(PAL0,1,0,0,TILE_SWAPICONINDEX*2)
+	};
 	hud_refresh_swap(TRUE);
-	// Draw blank tiles next to weapon
+	// Blank weapon icon in HUD sprite (replaced by sprSwap[2] overlay)
+	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX)*TILE_SIZE, 16, 2);
+	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+2)*TILE_SIZE, 16, 2);
+	// Draw blank tiles next to weapon area (columns 2-3)
 	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+1)*TILE_SIZE, 16, 2);
 	DMA_doDma(DMA_VRAM, (uint32_t)TILE_BLANK, (TILE_HUDINDEX+3)*TILE_SIZE, 16, 2);
 	// Fill health sprites' blank tile slots: heart sprite bottom (+34,+35)
@@ -169,9 +181,10 @@ void hud_update() {
 
 	// Handle weapon swap scroll animation (matches CSE2 gArmsEnergyX sliding)
 	if(hudScrollDir != 0) {
-		// Apply scroll offset to both weapon panel sprites
+		// Apply scroll offset to both weapon panel sprites and icon
 		sprHUD[0].x = (16 + 128) + hudScrollOffset;
 		sprHUD[1].x = (16 + 32 + 128) + hudScrollOffset;
+		sprSwap[2].x = (16 + 128) + hudScrollOffset;
 
 		// Move offset toward 0 (2 px/frame, matching CSE2's rate)
 		if(hudScrollOffset > 0) {
@@ -187,16 +200,20 @@ void hud_update() {
 			hudScrollDir = 0;
 			sprHUD[0].x = 16 + 128;
 			sprHUD[1].x = 16 + 32 + 128;
+			sprSwap[2].x = 16 + 128;
 		}
 	}
 
 	vdp_sprites_add(sprHUD, 4);
+	vdp_sprite_add(&sprSwap[2]); // Always shown as weapon icon overlay
 	// Handle weapon swap display animation
 	if(swapTimer) {
 		hud_refresh_swap(FALSE);
 	}
 	// Add swap display sprites if any weapons to show
-	if(swapWepNum > 0) vdp_sprites_add(sprSwap, swapWepNum > 2 ? 2 : 1);
+	if(swapWepNum > 0) {
+		vdp_sprites_add(sprSwap, swapWepNum > 2 ? 2 : 1);
+	}
 	// Only refresh one part of the HUD in a single frame, at most 8 tiles will be sent
 	if(hudMaxHealth != playerMaxHealth || hudHealth != player.health) {
 		hud_refresh_health();
@@ -373,9 +390,9 @@ void hud_refresh_weapon() {
 	hudWeapon = playerWeapon[currentWeapon].type;
 	memcpy(tileData[WPN+0], SPR_TILES(&SPR_ArmsImage, 0, hudWeapon), TILE_SIZE*2);
 	memcpy(tileData[WPN+2], &SPR_TILES(&SPR_ArmsImage, 0, hudWeapon)[TSIZE*2], TILE_SIZE*2);
-	// Queue DMA transfer for icon
-	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[WPN+0], (TILE_HUDINDEX)*TILE_SIZE, 16, 2);
-	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[WPN+2], (TILE_HUDINDEX+2)*TILE_SIZE, 16, 2);
+	// Queue DMA transfer for icon overlay (repacked as 2x2-compatible)
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[WPN+0], TILE_SWAPICONINDEX * TILE_SIZE, 16, 2);
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[WPN+2], (TILE_SWAPICONINDEX + 1) * TILE_SIZE, 16, 2);
 }
 
 void hud_swap_weapon(uint8_t dir) {
@@ -407,13 +424,13 @@ void hud_refresh_swap(uint8_t force) {
 
 			const uint32_t *src = SPR_TILES(&SPR_ArmsImage, 0, type);
 			// Top-left tile
-			DMA_queueDma(DMA_VRAM, (uint32_t)src,       (baseTile + colOff + 0) * 16, 16, 2);
+			DMA_queueDma(DMA_VRAM, (uint32_t)(src + 0),  (baseTile + colOff + 0) * 16, 8, 2);
 			// Top-right tile
-			DMA_queueDma(DMA_VRAM, (uint32_t)(src + 8), (baseTile + colOff + 1) * 16, 16, 2);
+			DMA_queueDma(DMA_VRAM, (uint32_t)(src + 8),  (baseTile + colOff + 1) * 16, 8, 2);
 			// Bottom-left tile
-			DMA_queueDma(DMA_VRAM, (uint32_t)(src + 16), (baseTile + colOff + 4) * 16, 16, 2);
+			DMA_queueDma(DMA_VRAM, (uint32_t)(src + 16), (baseTile + colOff + 4) * 16, 8, 2);
 			// Bottom-right tile
-			DMA_queueDma(DMA_VRAM, (uint32_t)(src + 24), (baseTile + colOff + 5) * 16, 16, 2);
+			DMA_queueDma(DMA_VRAM, (uint32_t)(src + 24), (baseTile + colOff + 5) * 16, 8, 2);
 
 			swapWepNum++;
 		}
@@ -425,8 +442,8 @@ void hud_refresh_swap(uint8_t force) {
 	} else { // End of animation, reset positions
 		sprSwap[0].x = 16 + 64 + 128;
 		sprSwap[1].x = 16 + 96 + 128;
-		sprSwap[0].size = SPRITE_SIZE(swapWepNum > 1 ? 4 : 2, 2);
-		sprSwap[1].size = SPRITE_SIZE(swapWepNum > 3 ? 4 : 2, 2);
+		sprSwap[0].size = SPRITE_SIZE(swapWepNum > 1 ? 4 : 2, 2) | (5 << 4);
+		sprSwap[1].size = SPRITE_SIZE(swapWepNum > 3 ? 4 : 2, 2) | (5 << 4);
 	}
 }
 

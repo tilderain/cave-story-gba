@@ -57,19 +57,27 @@ void effects_init() {
 	for(uint8_t i = 0; i < MAX_DAMAGE; i++) effDamage[i].ttl = 0;
 	for(uint8_t i = 0; i < MAX_SMOKE; i++) effSmoke[i].ttl = 0;
 	for(uint8_t i = 0; i < MAX_MISC; i++) effMisc[i].ttl = 0;
-	// Load each frame of the small smoke sprite
-	uint32_t stiles[7][32]; // [number of frames][tiles per frame * (tile bytes / sizeof(uint32_t))]
+	
+	// Load each frame of the small smoke sprite directly to VRAM
 	for(uint8_t i = 0; i < 7; i++) {
-		memcpy(stiles[i], SPR_TILES(&SPR_Smoke, 0, i), 128);
+		vdp_tiles_load_from_rom(SPR_TILES(&SPR_Smoke, 0, i), TILE_SMOKEINDEX + i * 4, 4);
 	}
-	// Transfer to VRAM
-	vdp_tiles_load_from_rom(stiles[0], TILE_SMOKEINDEX, TILE_SMOKESIZE);
-	// Load dissipation and gib effect tiles
-	vdp_tiles_load_from_rom(SPR_TILES(&SPR_Dissipate, 0, 0), TILE_DISSIPINDEX, TILE_DISSIPSIZE);
-	vdp_tiles_load_from_rom(SPR_TILES(&SPR_Gib, 0, 0), TILE_GIBINDEX, TILE_GIBSIZE);
-	vdp_tiles_load_from_rom(SPR_TILES(&SPR_Boomflash, 0, 0), TILE_BOOMINDEX, TILE_BOOMSIZE);
+	
+	// Load dissipation effect tiles (4 frames, 4 tiles each)
+	for(uint8_t i = 0; i < 4; i++) {
+		vdp_tiles_load_from_rom(SPR_TILES(&SPR_Dissipate, 0, i), TILE_DISSIPINDEX + i * 4, 4);
+	}
+	
+	// Load gib effect tiles (4 frames, 4 tiles each)
+	for(uint8_t i = 0; i < 4; i++) {
+		vdp_tiles_load_from_rom(SPR_TILES(&SPR_Gib, 0, i), TILE_GIBINDEX + i * 4, 4);
+	}
+	
+	// Load boomflash effect tiles (2 frames, 16 tiles each)
+	for(uint8_t i = 0; i < 2; i++) {
+		vdp_tiles_load_from_rom(SPR_TILES(&SPR_Boomflash, 0, i), TILE_BOOMINDEX + i * 16, 16);
+	}
 }
-
 void effects_clear() {
 	for(uint8_t i = 0; i < MAX_DAMAGE; i++) effDamage[i].ttl = 0;
 	for(uint8_t i = 0; i < MAX_MISC; i++) effMisc[i].ttl = 0;
@@ -97,8 +105,8 @@ IWRAM_CODE void effects_update() {
     	    }
     			DMA_doDma(DMA_VRAM,
     			          (uint32_t) dtiles[i][start],
-    			          (TILE_NUMBERINDEX + (i << 2)) * 32, // Bytes
-    			          tcount * 16, // Words
+    			          (TILE_NUMBERINDEX + (i << 2)) * 16,
+    			          tcount * 8,
     			          2);
     	} else {
     	        if(damageFollow[i].e) {
@@ -263,26 +271,26 @@ IWRAM_CODE void effects_update() {
                 vdp_sprite_add(&effMisc[i].sprite);
             }
             break;
-            case EFF_DISSIPATE:
-            {
-                if((effMisc[i].ttl & 3) == 0) effMisc[i].sprite.attr++;
-                sprite_pos(effMisc[i].sprite,
-                           effMisc[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 8,
-                           effMisc[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 8);
-                vdp_sprite_add(&effMisc[i].sprite);
-            }
-            break;
-            case EFF_GIB:
-            {
-                effMisc[i].x += effMisc[i].x_speed;
-                effMisc[i].y += effMisc[i].y_speed;
-                if((effMisc[i].ttl & 3) == 0) effMisc[i].sprite.attr++;
-                sprite_pos(effMisc[i].sprite,
-                           effMisc[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 4,
-                           effMisc[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 4);
-                vdp_sprite_add(&effMisc[i].sprite);
-            }
-            break;
+			case EFF_DISSIPATE:
+			{
+				if((effMisc[i].ttl & 3) == 0) effMisc[i].sprite.attr += 4;
+				sprite_pos(effMisc[i].sprite,
+						   effMisc[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 8,
+						   effMisc[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 8);
+				vdp_sprite_add(&effMisc[i].sprite);
+			}
+			break;
+			case EFF_GIB:
+			{
+				effMisc[i].x += effMisc[i].x_speed;
+				effMisc[i].y += effMisc[i].y_speed;
+				if((effMisc[i].ttl & 3) == 0) effMisc[i].sprite.attr += 4;
+				sprite_pos(effMisc[i].sprite,
+						   effMisc[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 4,
+						   effMisc[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 4);
+				vdp_sprite_add(&effMisc[i].sprite);
+			}
+			break;
             case EFF_BOOMFLASH:
             {
                 if(effMisc[i].ttl == 3) effMisc[i].sprite.attr += 16;

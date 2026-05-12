@@ -140,7 +140,7 @@
 #define TILE_TSSIZE             (TS_WIDTH * TS_HEIGHT)
 
 // Allocation of EXTRA1 - background
-#define TILE_BACKINDEX          TILE_EXTRA1INDEX
+#define TILE_BACKINDEX          512
 #define TILE_BACKSIZE           96
 
 #define TILE_WINDOWINDEX        108

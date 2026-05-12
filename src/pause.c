@@ -35,26 +35,26 @@ void draw_itemmenu(uint8_t resetCursor) {
     uint8_t top = pal_mode ? 1 : 0;
     // Fill the top part
     uint16_t y = top;
-    vdp_map_xy(VDP_PLAN_W, 0, 0, y);
-    vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(0), 1, y);
+    //vdp_map_xy(VDP_PLAN_W, 0, 0, y);
+    //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(0), 1, y);
     vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(1), 2, y, 36, 1, 0);
-    vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(2), 38, y);
-    vdp_map_xy(VDP_PLAN_W, 0, 39, y);
+    //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(2), 38, y);
+    //vdp_map_xy(VDP_PLAN_W, 0, 39, y);
     for(uint16_t i = 19; --i;) { // Body
         y++;
-        vdp_map_xy(VDP_PLAN_W, 0, 0, y);
-        vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(3), 1, y);
+        //vdp_map_xy(VDP_PLAN_W, 0, 0, y);
+        //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(3), 1, y);
         vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(4), 2, y, 36, 1, 0);
-        vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(5), 38, y);
-        vdp_map_xy(VDP_PLAN_W, 0, 39, y);
+        //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(5), 38, y);
+        //vdp_map_xy(VDP_PLAN_W, 0, 39, y);
     }
     // Bottom
     y++;
-    vdp_map_xy(VDP_PLAN_W, 0, 0, y);
-    vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(6), 1, y);
+    //vdp_map_xy(VDP_PLAN_W, 0, 0, y);
+    //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(6), 1, y);
     vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(7), 2, y, 36, 1, 0);
-    vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(8), 38, y);
-    vdp_map_xy(VDP_PLAN_W, 0, 39, y);
+    //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(8), 38, y);
+    //vdp_map_xy(VDP_PLAN_W, 0, 39, y);
 
     disable_ints;
     z80_request();
@@ -66,8 +66,8 @@ void draw_itemmenu(uint8_t resetCursor) {
     // Load tiles for the font letters
 #define LOAD_LETTER(c,in) (vdp_tiles_load_from_rom(TS_MsgFont.tiles+((c-0x20)<<3),      \
 						   TILE_HUDINDEX+in,1))
-#define DRAW_LETTER(in,xx,yy) (vdp_map_xy(VDP_PLAN_W,                                   \
-							TILE_ATTR(PAL0,1,0,0,TILE_HUDINDEX+in),xx,yy))
+//#define DRAW_LETTER(in,xx,yy) (vdp_map_xy(VDP_PLAN_W,                                   \
+//							TILE_ATTR(PAL0,1,0,0,TILE_HUDINDEX+in),xx,yy))
     // Load 8x8 numbers
     vdp_tiles_load_from_rom(TS_MsgFont.tiles+(('0'-0x20)<<3),TILE_HUDINDEX,10);
     // Lv, slash for weapon display
@@ -82,14 +82,14 @@ void draw_itemmenu(uint8_t resetCursor) {
     // Weapons
     y = top + 3;
     // --ARMS-- or --ぶき--
-    DRAW_LETTER(17,4,y);
-    DRAW_LETTER(17,5,y);
-    DRAW_LETTER(10,6,y);
-    DRAW_LETTER(11,7,y);
-    DRAW_LETTER(12,8,y);
-    DRAW_LETTER(13,9,y);
-    DRAW_LETTER(17,10,y);
-    DRAW_LETTER(17,11,y);
+    //DRAW_LETTER(17,4,y);
+    //DRAW_LETTER(17,5,y);
+    //DRAW_LETTER(10,6,y);
+    //DRAW_LETTER(11,7,y);
+    //DRAW_LETTER(12,8,y);
+    //DRAW_LETTER(13,9,y);
+    //DRAW_LETTER(17,10,y);
+    //DRAW_LETTER(17,11,y);
     y++;
     for(uint16_t i = 0; i < MAX_WEAPONS; i++) {
         Weapon *w = &playerWeapon[i];
@@ -99,47 +99,47 @@ void draw_itemmenu(uint8_t resetCursor) {
         uint16_t index = TILE_FACEINDEX + 16 + i*4;
         vdp_tiles_load_from_rom(SPR_TILES(&SPR_ArmsImage, 0, w->type), index, 4);
         // 4 mappings for ArmsImage icon
-        vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index),   x,   y);
-        vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index+2), x+1, y);
-        vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index+1), x,   y+1);
-        vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index+3), x+1, y+1);
+        //vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index),   x,   y);
+        //vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index+2), x+1, y);
+        //vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index+1), x,   y+1);
+        //vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index+3), x+1, y+1);
         // Lv
-        DRAW_LETTER(14,			x,	y+2);
-        DRAW_LETTER(15,			x+1,y+2);
-        DRAW_LETTER(w->level,	x+3,y+2);
+        //DRAW_LETTER(14,			x,	y+2);
+        //DRAW_LETTER(15,			x+1,y+2);
+        //DRAW_LETTER(w->level,	x+3,y+2);
 
         // Ammo & Max Ammo
         if(w->maxammo) {
             uint8_t ammo = w->ammo;
-            DRAW_LETTER(mod10[ammo], 		x+3, y+3);
-            DRAW_LETTER(mod10[div10[ammo]], x+2, y+3);
-            if(ammo >= 100) DRAW_LETTER(1, 	x+1, y+3);
+            //DRAW_LETTER(mod10[ammo], 		x+3, y+3);
+            //DRAW_LETTER(mod10[div10[ammo]], x+2, y+3);
+            if(ammo >= 100) //DRAW_LETTER(1, 	x+1, y+3);
             ammo = w->maxammo;
-            DRAW_LETTER(mod10[ammo], 		x+3, y+4);
-            DRAW_LETTER(mod10[div10[ammo]], x+2, y+4);
-            if(ammo >= 100) DRAW_LETTER(1, 	x+1, y+4);
-            DRAW_LETTER(16,	x,	y+4);
+            //DRAW_LETTER(mod10[ammo], 		x+3, y+4);
+            //DRAW_LETTER(mod10[div10[ammo]], x+2, y+4);
+            if(ammo >= 100) ;//DRAW_LETTER(1, 	x+1, y+4);
+            //DRAW_LETTER(16,	x,	y+4);
         } else {
             //   --
-            DRAW_LETTER(17,	x+2,y+3);
-            DRAW_LETTER(17,	x+3,y+3);
+            //DRAW_LETTER(17,	x+2,y+3);
+            //DRAW_LETTER(17,	x+3,y+3);
             // / --
-            DRAW_LETTER(16,	x,	y+4);
-            DRAW_LETTER(17,	x+2,y+4);
-            DRAW_LETTER(17,	x+3,y+4);
+            //DRAW_LETTER(16,	x,	y+4);
+            //DRAW_LETTER(17,	x+2,y+4);
+            //DRAW_LETTER(17,	x+3,y+4);
         }
     }
     // Items
     y = top + 10;
     // --ITEM-- or --もちもの--
-    DRAW_LETTER(17,4,y);
-    DRAW_LETTER(17,5,y);
-    DRAW_LETTER(18,6,y);
-    DRAW_LETTER(19,7,y);
-    DRAW_LETTER(20,8,y);
-    DRAW_LETTER(21,9,y);
-    DRAW_LETTER(17,10,y);
-    DRAW_LETTER(17,11,y);
+    //DRAW_LETTER(17,4,y);
+    //DRAW_LETTER(17,5,y);
+    //DRAW_LETTER(18,6,y);
+    //DRAW_LETTER(19,7,y);
+    //DRAW_LETTER(20,8,y);
+    //DRAW_LETTER(21,9,y);
+    //DRAW_LETTER(17,10,y);
+    //DRAW_LETTER(17,11,y);
     uint8_t held = 0;
 
     uint8_t item_base_y = 44; 
@@ -357,10 +357,10 @@ void itemcursor_move(int8_t oldindex, int8_t index) {
         w = 5;
         h = 4;
     }
-    vdp_map_xy(VDP_PLAN_W, TILE_WINDOWINDEX+4, x,   y);
-    vdp_map_xy(VDP_PLAN_W, TILE_WINDOWINDEX+4, x+w, y);
-    vdp_map_xy(VDP_PLAN_W, TILE_WINDOWINDEX+4, x,   y+h);
-    vdp_map_xy(VDP_PLAN_W, TILE_WINDOWINDEX+4, x+w, y+h);
+    //vdp_map_xy(VDP_PLAN_W, TILE_WINDOWINDEX+4, x,   y);
+    //vdp_map_xy(VDP_PLAN_W, TILE_WINDOWINDEX+4, x+w, y);
+    //vdp_map_xy(VDP_PLAN_W, TILE_WINDOWINDEX+4, x,   y+h);
+    //vdp_map_xy(VDP_PLAN_W, TILE_WINDOWINDEX+4, x+w, y+h);
     // Draw new position
     if(index >= 0) {
         x = 4 + (index % 6) * 4;
@@ -373,10 +373,10 @@ void itemcursor_move(int8_t oldindex, int8_t index) {
         w = 5;
         h = 4;
     }
-    vdp_map_xy(VDP_PLAN_W, TILE_FACEINDEX,   x,   y);
-    vdp_map_xy(VDP_PLAN_W, TILE_FACEINDEX+1, x+w, y);
-    vdp_map_xy(VDP_PLAN_W, TILE_FACEINDEX+2, x,   y+h);
-    vdp_map_xy(VDP_PLAN_W, TILE_FACEINDEX+3, x+w, y+h);
+    //vdp_map_xy(VDP_PLAN_W, TILE_FACEINDEX,   x,   y);
+    //vdp_map_xy(VDP_PLAN_W, TILE_FACEINDEX+1, x+w, y);
+    //vdp_map_xy(VDP_PLAN_W, TILE_FACEINDEX+2, x,   y+h);
+    //vdp_map_xy(VDP_PLAN_W, TILE_FACEINDEX+3, x+w, y+h);
 }
 
 void do_map() {
@@ -410,10 +410,10 @@ void do_map() {
             z80_request();
             uint8_t result = gen_maptile(x*8, y*8, index);
             if(!result) {
-                vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index), mapx+x, mapy+y);
+                //vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index), mapx+x, mapy+y);
                 index++;
             } else {
-                vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,TILE_SHEETINDEX+(result-1)), mapx+x, mapy+y);
+                //vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,TILE_SHEETINDEX+(result-1)), mapx+x, mapy+y);
             }
             z80_release();
             enable_ints;

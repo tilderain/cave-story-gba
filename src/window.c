@@ -102,19 +102,19 @@ void window_open(uint8_t mode) {
         ty1 = mode ? TEXT_Y1_TOP : TEXT_Y1,
         ty2 = mode ? TEXT_Y2_TOP : TEXT_Y2;
     
-    vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(0), WINDOW_X1, wy1);
+    //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(0), WINDOW_X1, wy1);
     // Draw horizontal borders based on actual GBA window width (26 tiles)
     vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(1), TEXT_X1, wy1, WINDOW_X2 - WINDOW_X1 - 1, 1, 0);
-    vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(2), WINDOW_X2, wy1);
+    //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(2), WINDOW_X2, wy1);
     for(uint8_t y = ty1; y <= ty2; y++) {
-        vdp_map_xy(VDP_PLAN_W, 0, 0, y);
-        vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(3), WINDOW_X1, y);
-        vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(5), WINDOW_X2, y);
-        vdp_map_xy(VDP_PLAN_W, 0, 29, y); // Row width is 30 columns (index 29 is the rightmost)
+        //vdp_map_xy(VDP_PLAN_W, 0, 0, y);
+        //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(3), WINDOW_X1, y);
+        //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(5), WINDOW_X2, y);
+        //vdp_map_xy(VDP_PLAN_W, 0, 29, y); // Row width is 30 columns (index 29 is the rightmost)
     }
-    vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(6), WINDOW_X1, wy2);
+    //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(6), WINDOW_X1, wy2);
     vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(7), TEXT_X1, wy2, WINDOW_X2 - WINDOW_X1 - 1, 1, 0);
-    vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(8), WINDOW_X2, wy2);
+    //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(8), WINDOW_X2, wy2);
 
     window_clear();
     
@@ -231,8 +231,8 @@ void window_draw_char(uint8_t c) {
 
 void window_draw_jchar(uint8_t iskanji, uint16_t c) {
 	if(!iskanji && c == '\n') {
-        //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(4), x, y);
-        //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(4), x, y+1);
+        ////vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(4), x, y);
+        ////vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(4), x, y+1);
 		textRow++;
 		textColumn = 0;
         cjk_newline();
@@ -270,10 +270,10 @@ void window_scroll_text() {
             if(c >= 0x80) {
                 uint16_t index = (VDP_PLAN_W >> 5) + 3;
                 index += (c - 0x80) << 2;
-                vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0, 1, 0, 0, index-4), msgTextX, msgTextY);
+                //vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0, 1, 0, 0, index-4), msgTextX, msgTextY);
             } else {
-                vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0, 1, 0, 0,
-                        TILE_FONTINDEX + c - 0x20), msgTextX, msgTextY);
+                //vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0, 1, 0, 0,
+                //        TILE_FONTINDEX + c - 0x20), msgTextX, msgTextY);
             }
             msgTextX++;
         }
@@ -584,14 +584,14 @@ void window_update() {
 			index = TILE_FONTINDEX - 0x20 + '_';
 		}
         if(++blinkTime == 8) {
-            vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index), x, y);
+            //vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index), x, y);
             if(cfg_language >= LANG_JA && cfg_language <= LANG_KO) {
-                vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index), x, y + 1);
+                //vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index), x, y + 1);
             }
         } else if(blinkTime == 16) {
-            vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(4), x, y);
+            //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(4), x, y);
             if(cfg_language >= LANG_JA && cfg_language <= LANG_KO) {
-                vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(4), x, y + 1);
+                //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(4), x, y + 1);
             }
             blinkTime = 0;
         }

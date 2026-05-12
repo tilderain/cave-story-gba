@@ -178,7 +178,7 @@ void cjk_drawsprite(uint16_t offset, uint16_t chr1, uint16_t chr2) {
     // Upload tiles immediately
     disable_ints;
     z80_request();
-    vdp_tiles_load((uint32_t*)cjkTileBuf, index, 6);
+    vdp_tiles_load_from_rom((uint32_t*)cjkTileBuf, index, 6);
     z80_release();
     enable_ints;
 }

@@ -133,8 +133,8 @@ void stage_load(uint16_t id) {
 			vdp_set_scrollmode(HSCROLL_PLANE, VSCROLL_PLANE);
 			if(background_info[stageBackground].tileset != NULL)
 			{
-				vdp_tiles_load((uint32_t*)background_info[stageBackground].tileset, TILE_BACKINDEX, 
-						background_info[stageBackground].width*background_info[stageBackground].height*8);
+				vdp_tiles_load((uint32_t*)background_info[stageBackground].tileset, TILE_BACKINDEX,
+						background_info[stageBackground].width*background_info[stageBackground].height);
 						
 			}
 
@@ -234,7 +234,7 @@ void stage_load_tileset() {
     //for(uint16_t i = 0; i < numtile; i += 128) {
      //   uint16_t num = min(numtile - i, 128);
         //decompress_uftc(buf, tileset_info[stageTileset].pat, i, num);
-        vdp_tiles_load((uint32_t*)tileset_info[stageTileset].pat, TILE_TSINDEX, tileset_info[stageTileset].size*32);
+        vdp_tiles_load((uint32_t*)tileset_info[stageTileset].pat, TILE_TSINDEX, tileset_info[stageTileset].size*4);
     //}
 	// Inject the breakable block sprite into the tileset
 	stagePXA = tileset_info[stageTileset].PXA;
@@ -641,7 +641,7 @@ void stage_draw_background() {
 
 static void stage_draw_moonback() {
     uint32_t tile_count = (PAT_bkMoon_end - PAT_bkMoon) / 32;
-    vdp_tiles_load((const uint32_t*)PAT_bkMoon, TILE_BACKINDEX, tile_count * 8);
+    vdp_tiles_load((const uint32_t*)PAT_bkMoon, TILE_BACKINDEX, tile_count);
 
     uint16_t *map = (uint16_t*)MAP_BASE_ADR(BASE_BACK);
     

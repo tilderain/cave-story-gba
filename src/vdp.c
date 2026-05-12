@@ -262,7 +262,7 @@ void vdp_dma_cram(uint32_t from, uint16_t to, uint16_t len) {
 // Tile patterns
 
 void vdp_tiles_load(volatile const uint32_t *data, uint16_t index, uint16_t num) {
-	DMA3COPY(data, VRAM + 0 + (index), num | COPY32);
+	DMA3COPY(data, VRAM + (index * TILE_SIZE), (num * 8) | COPY32);
 	//vdp_dma_vram((uint32_t) data, index, num);
 }
 
@@ -279,7 +279,6 @@ void vdp_tiles_load_from_rom(volatile const uint32_t *data, uint16_t index, uint
 // Tile maps
 
 void vdp_map_xy(uint16_t plan, uint16_t tile, uint16_t x, uint16_t y) {
-	return;
     uint16_t gba_base;
     switch(plan) {
         case VDP_PLAN_A: gba_base = BASE_STAGE; break;
