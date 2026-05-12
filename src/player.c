@@ -154,7 +154,7 @@ void player_init() {
 	mapNameTTL = 0;
 	missileEmptyFlag = FALSE;
 	// Booster trail sprite tiles
-	vdp_tiles_load_from_rom(SPR_TILES(&SPR_Boost, 0, 0), 12, 4);
+	vdp_tiles_load_from_rom(SPR_TILES(&SPR_Boost, 0, 0), TILE_BOOSTINDEX, 4);
 	// AIR Sprite
 	const SpriteDefinition *spr = cfg_language == LANG_JA ? &SPR_J_Air : &SPR_Air;
 	vdp_tiles_load_from_rom(SPR_TILES(spr, 0, 0), TILE_AIRINDEX, 4);

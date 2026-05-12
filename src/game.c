@@ -222,7 +222,7 @@ void game_reset(uint8_t load) {
 	const SpriteDefinition *wepSpr = weapon_info[playerWeapon[currentWeapon].type].sprite;
 	if(wepSpr) TILES_QUEUE(SPR_TILES(wepSpr,0,0), TILE_WEAPONINDEX,6);
 	
-	SHEET_LOAD(&SPR_Bonk, 1, 1, 1, 1, 0,0);
+	SHEET_LOAD(&SPR_Bonk, 1, 1, TILE_BONKINDEX, 1, 0,0);
 	SHEET_LOAD(&SPR_QMark, 1, 1, TILE_QMARKINDEX, 1, 0,0);
 	// Load up the main palettes
 	//vdp_colors_next(0, PAL_Main.data, 16);

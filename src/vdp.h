@@ -32,57 +32,123 @@
 #define FADE_LAST               2
 
 #define TILE_SIZE				32
+
 #define TILE_INDEX_MASK         0x7FF
 
-#define TILE_SYSTEMINDEX        0x0000
-#define TILE_USERINDEX			0
-#define TILE_FONTINDEX			96
-#define TILE_EXTRA1INDEX		128*128 // 128 tiles after PLAN_A
-#define TILE_EXTRA2INDEX		64 // 64 tiles after PLAN_B
+// ----------------------------------------------------------------------------
+// OBJ VRAM OFFSETS (Sprite Graphics)
+// GBA OBJ VRAM has room for 1024 tiles (32KB). 
+// Allocate the beginning for fixed assets and the rest for dynamic sheets.
+// ----------------------------------------------------------------------------
+
+// Fixed Assets (Loaded once or kept resident)
+#define TILE_PLAYERINDEX      0
+#define TILE_PLAYERSIZE       4
+
+#define TILE_WEAPONINDEX      (TILE_PLAYERINDEX + TILE_PLAYERSIZE)
+#define TILE_WEAPONSIZE       6
+
+#define TILE_HUDINDEX         (TILE_WEAPONINDEX + TILE_WEAPONSIZE)
+#define TILE_HUDSIZE          64
+
+#define TILE_NUMBERINDEX      (TILE_HUDINDEX + TILE_HUDSIZE)
+#define TILE_NUMBERSIZE       16
+
+#define TILE_SMOKEINDEX       (TILE_NUMBERINDEX + TILE_NUMBERSIZE)
+#define TILE_SMOKESIZE        28
+
+#define TILE_AIRINDEX         (TILE_SMOKEINDEX + TILE_SMOKESIZE)
+#define TILE_AIRSIZE          8
+
+#define TILE_QMARKINDEX       (TILE_AIRINDEX + TILE_AIRSIZE)
+#define TILE_QMARKSIZE        1
+
+
+#define TILE_WHIMINDEX        (TILE_QMARKINDEX + TILE_QMARKSIZE)
+#define TILE_WHIMSIZE         2
+
+#define TILE_BONKINDEX        (TILE_WHIMINDEX + TILE_WHIMSIZE)
+#define TILE_BONKSIZE         1
+
+#define TILE_BOOSTINDEX       (TILE_BONKINDEX + TILE_BONKSIZE)
+#define TILE_BOOSTSIZE        4
+
+#define TILE_FADEINDEX        (TILE_BOOSTINDEX + TILE_BOOSTSIZE)      
+#define TILE_FADESIZE         2
+
+#define TILE_GIBINDEX         (TILE_FADEINDEX + TILE_FADESIZE)
+#define TILE_GIBSIZE          4
+
+#define TILE_DISSIPINDEX      (TILE_GIBINDEX + TILE_GIBSIZE)
+#define TILE_DISSIPSIZE       16
+
+#define TILE_BOOMINDEX        (TILE_DISSIPINDEX + TILE_DISSIPSIZE)
+#define TILE_BOOMSIZE         32
+
+#define TILE_EXWEPINDEX       (TILE_BOOMINDEX + TILE_BOOMSIZE)
+#define TILE_EXWEPSIZE        16
+// 12 tiles at the end for nemesis vertical frames
+#define TILE_NEMINDEX         (TILE_EXWEPINDEX + TILE_EXWEPSIZE)
+#define TILE_NEMSIZE          12
+// 8 tiles after window plane for blade L3
+#define TILE_SLASHINDEX       (TILE_NEMINDEX + TILE_NEMSIZE)
+#define TILE_SLASHSIZE        8
+
+#define TILE_PROMPTINDEX      (TILE_SLASHINDEX + TILE_SLASHSIZE)
+#define TILE_PROMPTSIZE       28
+
+#define TILE_AIRTANKINDEX     (TILE_PROMPTINDEX + TILE_PROMPTSIZE)
+#define TILE_AIRTANKSIZE      9
+
+#define TILE_RESERVEDSPACE    (TILE_AIRTANKINDEX + TILE_AIRTANKSIZE)
+#define TILE_RESERVEDSIZE     64 // Deep padding buffer to prevent graphic overruns
+
+// Dynamic / Contextual Sprite Assets (loaded per stage/menu)
+#define TILE_FACEINDEX        (TILE_RESERVEDSPACE + TILE_RESERVEDSIZE)
+#define TILE_FACESIZE         36
+
+#define TILE_NAMEINDEX        (TILE_FACEINDEX + TILE_FACESIZE)
+#define TILE_NAMESIZE         16
+
+// Space for shared sprite sheets (Enemies, Bosses, Items, etc)
+#define TILE_SHEETINDEX       (TILE_NAMEINDEX + TILE_NAMESIZE)
+#define TILE_SHEETSIZE        (1024 - TILE_SHEETINDEX)
+
+// Specific fixed indices for cutscene sprites that override standard sheets
+#define TILE_CLOUDINDEX       TILE_SHEETINDEX
+#define TILE_CLOUD2INDEX      (TILE_CLOUDINDEX + (16*12))
+#define TILE_CLOUD3INDEX      (TILE_CLOUD2INDEX + (16*3))
+#define TILE_CLOUD4INDEX      (TILE_CLOUD3INDEX + (9*3))
+
+
+// ----------------------------------------------------------------------------
+// BG VRAM OFFSETS (Background Graphics)
+// ----------------------------------------------------------------------------
+#define TILE_SYSTEMINDEX        0
+#define TILE_USERINDEX          0
+#define TILE_FONTINDEX          96
+
+// Legacy Genesis defines used in background mappings
+#define TILE_EXTRA1INDEX        (128*128)
+#define TILE_EXTRA2INDEX        64
 
 // Tileset width/height
 #define TS_WIDTH 32
 #define TS_HEIGHT 16
 // Stage tileset is first in USERINDEX
-#define TILE_TSINDEX TILE_USERINDEX
-#define TILE_TSSIZE (TS_WIDTH * TS_HEIGHT)
-// Face graphics
-#define TILE_FACEINDEX (TILE_TSINDEX + TILE_TSSIZE)
-#define TILE_FACESIZE 36
-// 16 tiles for the map name display
-#define TILE_NAMEINDEX (TILE_FACEINDEX + TILE_FACESIZE)
-#define TILE_NAMESIZE 16
-// Space for shared sprite sheets
-#define TILE_SHEETINDEX (TILE_NAMEINDEX + TILE_NAMESIZE)
-#define TILE_SHEETSIZE (TILE_FONTINDEX - TILE_SHEETINDEX)
-// Space for prompt/item display at the end of the sprite tiles
-#define TILE_PROMPTINDEX (TILE_SHEETINDEX + TILE_SHEETSIZE - 28)
-#define TILE_AIRTANKINDEX (TILE_PROMPTINDEX - 9)
-// Allocation of EXTRA1 (128 tiles) - background & HUD
-#define TILE_BACKINDEX TILE_EXTRA1INDEX
-#define TILE_BACKSIZE 96
-#define TILE_HUDINDEX (64)
-#define TILE_HUDSIZE 32
-// Allocation of EXTRA2 (64 tiles) - Effects, window, misc
-#define TILE_NUMBERINDEX TILE_EXTRA2INDEX
-#define TILE_NUMBERSIZE 16
-#define TILE_SMOKEINDEX (TILE_NUMBERINDEX + TILE_NUMBERSIZE)
-#define TILE_SMOKESIZE 28
-#define TILE_WINDOWINDEX (TILE_SMOKEINDEX + TILE_SMOKESIZE)
-#define TILE_WINDOWSIZE 9
-#define TILE_AIRINDEX (TILE_WINDOWINDEX + TILE_WINDOWSIZE)
-#define TILE_AIRSIZE 8
-#define TILE_QMARKINDEX (TILE_AIRINDEX + TILE_AIRSIZE)
-#define TILE_QMARKSIZE 1
-#define TILE_WHIMINDEX (TILE_QMARKINDEX + TILE_QMARKSIZE)
-#define TILE_WHIMSIZE 2
+#define TILE_TSINDEX            TILE_USERINDEX
+#define TILE_TSSIZE             (TS_WIDTH * TS_HEIGHT)
 
+// Allocation of EXTRA1 - background
+#define TILE_BACKINDEX          TILE_EXTRA1INDEX
+#define TILE_BACKSIZE           96
+
+#define TILE_WINDOWINDEX        108
+#define TILE_WINDOWSIZE         9
 
 
 
 // Effects (must be past breakable block range 0-508, see stage.c stage_load_tileset)
-#define TILE_FADEINDEX      (TILE_QMARKINDEX + TILE_QMARKSIZE)      
-#define TILE_FADESIZE       2
 #define TILE_GIBINDEX       (TILE_FADEINDEX + TILE_FADESIZE)
 #define TILE_GIBSIZE        4
 #define TILE_DISSIPINDEX    (TILE_GIBINDEX + TILE_GIBSIZE)
@@ -92,20 +158,13 @@
 // 16 tiles for weapon swap display (4 weapons x 4 tiles each)
 #define TILE_EXWEPINDEX     (TILE_BOOMINDEX + TILE_BOOMSIZE)
 #define TILE_EXWEPSIZE      16
-// 12 tiles at the end for nemesis vertical frames
-#define TILE_NEMINDEX (0xFE80 >> 5)
-// 8 tiles after window plane for blade L3
-#define TILE_SLASHINDEX ((0xC000 >> 5) - 8)
+
+
+
+
 // Unused palette color tiles area
-#define TILE_PLAYERINDEX (TILE_SYSTEMINDEX + 2)
-#define TILE_PLAYERSIZE 4
 #define TILE_WEAPONINDEX (TILE_PLAYERINDEX + TILE_PLAYERSIZE)
 #define TILE_WEAPONSIZE 6
-
-#define TILE_CLOUDINDEX		(TILE_TSINDEX + 64)
-#define TILE_CLOUD2INDEX	(TILE_CLOUDINDEX + (16*12))
-#define TILE_CLOUD3INDEX	(TILE_CLOUD2INDEX + (16*3))
-#define TILE_CLOUD4INDEX	(TILE_CLOUD3INDEX + (9*3))
 
 #define TILE_ATTR(pal, prio, flipV, flipH, index)                               \
 	((((uint16_t)flipH) << 11) | (((uint16_t)flipV) << 12) |                    \

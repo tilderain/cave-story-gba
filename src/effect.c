@@ -21,7 +21,7 @@ typedef struct {
 	uint8_t type, ttl, timer, timer2;
 	int16_t x, y;
 	int8_t x_speed, y_speed;
-	uint8_t digit_count; 
+	uint8_t digit_count;
 } Effect;
 
 static Effect effDamage[MAX_DAMAGE], effSmoke[MAX_SMOKE], effMisc[MAX_MISC];
@@ -97,8 +97,8 @@ IWRAM_CODE void effects_update() {
     	    }
     			DMA_doDma(DMA_VRAM,
     			          (uint32_t) dtiles[i][start],
-    			          (TILE_NUMBERINDEX + (i << 2)) * 16,
-    			          tcount * 8,
+    			          (TILE_NUMBERINDEX + (i << 2)) * 32, // Bytes
+    			          tcount * 16, // Words
     			          2);
     	} else {
     	        if(damageFollow[i].e) {
@@ -142,15 +142,19 @@ IWRAM_CODE void effects_update() {
 			case EFF_BONKL:
 			case EFF_BONKR:
 			{
-				// CSE2 CARET_TINY_PARTICLES: friction (xm *= 4/5), render every frame
+				// CSE2 CARET_TINY_PARTICLES: friction (xm*=4/5), blink rcLeft[ani_wait/2%2]
 				effMisc[i].x_speed = (effMisc[i].x_speed * 4) / 5;
 				effMisc[i].y_speed = (effMisc[i].y_speed * 4) / 5;
 				effMisc[i].x += effMisc[i].x_speed;
 				effMisc[i].y += effMisc[i].y_speed;
-				sprite_pos(effMisc[i].sprite,
-					effMisc[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 4,
-					effMisc[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 4);
-				vdp_sprite_add(&effMisc[i].sprite);
+				effMisc[i].timer++;
+				// CSE2 ActCaret13 blink: rcLeft[ani_wait/2%2] toggles visibility every 2 frames
+				if((effMisc[i].timer / 2) % 2 == 0) {
+					sprite_pos(effMisc[i].sprite,
+						effMisc[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 4,
+						effMisc[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 4);
+					vdp_sprite_add(&effMisc[i].sprite);
+				}
 			}
 			break;
 			case EFF_ZZZ:
@@ -398,16 +402,18 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
 		effMisc[i].x = x;
 		effMisc[i].y = y;
 		switch(type) {
-			case EFF_BONKL: // Dots that appear when player bonks their head on the ceiling
+		case EFF_BONKL: // Dots that appear when player bonks their head on the ceiling
 			case EFF_BONKR:
 			{
 				// CSE2 CARET_TINY_PARTICLES: xm=Random(-0x600,0x600), ym=Random(-0x200,0x200), friction *=4/5
+				// Convert sub-pixel range to pixel: x = -3..+3, y = -1..+1
 				effMisc[i].ttl = 21;
-				effMisc[i].x_speed = (int16_t)((random() % 7) - 3);
-				effMisc[i].y_speed = (int16_t)((random() % 3) - 1);
+				effMisc[i].x_speed = (int8_t)((random() % 7) - 3);
+				effMisc[i].y_speed = (int8_t)((random() % 3) - 1);
+				effMisc[i].timer = 0;
 				effMisc[i].sprite = (VDPSprite) {
 					.size = SPRITE_SIZE(1, 1),
-					.attr = TILE_ATTR(PAL0,1,0,0,1)
+					.attr = TILE_ATTR(PAL0,1,0,0,TILE_BONKINDEX)
 				};
 			}
 			break;
@@ -429,7 +435,7 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
 				effMisc[i].ttl = 20;
 				effMisc[i].sprite = (VDPSprite) {
 					.size = SPRITE_SIZE(1, 1),
-					.attr = TILE_ATTR(PAL0,1,0,0,12)
+					.attr = TILE_ATTR(PAL0,1,0,0,TILE_BOOSTINDEX)
 				};
 			}
 			break;
@@ -442,13 +448,14 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
 				};
 			} 
 			break;
+
 			case EFF_FANL:
 			{
 				effMisc[i].x_speed = -(random() & 3) - 1;
 				effMisc[i].ttl = 20;
 				effMisc[i].sprite = (VDPSprite) {
 					.size = SPRITE_SIZE(1, 1),
-					.attr = TILE_ATTR(PAL0,1,0,0,1)
+					.attr = TILE_ATTR(PAL0,1,0,0,TILE_BONKINDEX)
 				};
 			}
 			break;
@@ -458,7 +465,7 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
 				effMisc[i].ttl = 20;
 				effMisc[i].sprite = (VDPSprite) {
 					.size = SPRITE_SIZE(1, 1),
-					.attr = TILE_ATTR(PAL0,1,0,0,1)
+					.attr = TILE_ATTR(PAL0,1,0,0,TILE_BONKINDEX)
 				};
 			}
 			break;
@@ -468,7 +475,7 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
 				effMisc[i].ttl = 20;
 				effMisc[i].sprite = (VDPSprite) {
 					.size = SPRITE_SIZE(1, 1),
-					.attr = TILE_ATTR(PAL0,1,0,0,1)
+					.attr = TILE_ATTR(PAL0,1,0,0,TILE_BONKINDEX)
 				};
 			}
 			break;
@@ -478,7 +485,7 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
 				effMisc[i].ttl = 20;
 				effMisc[i].sprite = (VDPSprite) {
 					.size = SPRITE_SIZE(1, 1),
-					.attr = TILE_ATTR(PAL0,1,0,0,1)
+					.attr = TILE_ATTR(PAL0,1,0,0,TILE_BONKINDEX)
 				};
 			}
 			break;
@@ -494,7 +501,7 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
 				effMisc[i].x_speed = (player.x_speed >> CSF) - 1 + (random() & 3);
 				effMisc[i].sprite = (VDPSprite) {
 					.size = SPRITE_SIZE(1, 1),
-					.attr = TILE_ATTR(PAL0,1,0,0,1)
+					.attr = TILE_ATTR(PAL0,1,0,0,TILE_BONKINDEX)
 				};
 			}
 			break;

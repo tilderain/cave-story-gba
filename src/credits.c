@@ -20,6 +20,7 @@
 
 #include "gamemode.h"
 #include "gba_video.h"
+#include "gbatext.h"
 
 #define TILE_ICONINDEX	(TILE_SHEETINDEX + 24*6 + 228)
 
@@ -62,6 +63,8 @@ void credits_main() {
 	uint8_t skipScroll = 0;
 
     cjk_reset(CJK_CREDITS);
+
+	canvas_init_fullscreen();
 
 	inFade = FALSE;
 	ready = TRUE;

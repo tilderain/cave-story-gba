@@ -150,7 +150,7 @@ void stage_load(uint16_t id) {
 			vdp_map_clear(VDP_PLAN_B);
             backScrollTable[0] = (SCREEN_HEIGHT >> 3) + 1;
 			//	gbatodo
-			vdp_tiles_load_from_rom((uint32_t*)BG_Water, TILE_WATERINDEX, 64);
+			vdp_tiles_load((uint32_t*)BG_Water, TILE_WATERINDEX, 64);
 		} else if(stageBackgroundType == 5) { // Fog
 			vdp_set_scrollmode(HSCROLL_TILE, VSCROLL_PLANE);
 			// Use background color from tileset
@@ -239,7 +239,7 @@ void stage_load_tileset() {
 	// Inject the breakable block sprite into the tileset
 	stagePXA = tileset_info[stageTileset].PXA;
 	for(uint16_t i = 0; i < numtile >> 2; i++) {
-		if(stagePXA[i] == 0x43) vdp_tiles_load_from_rom(TS_Break.tiles, TILE_TSINDEX + (i << 2), 4);
+		if(stagePXA[i] == 0x43) vdp_tiles_load((uint32_t*)TS_Break.tiles, TILE_TSINDEX + (i << 2), 4);
 	}
 	// Search for any "wind" tiles and note their index to animate later
 	currentsCount = 0;
