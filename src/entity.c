@@ -948,10 +948,30 @@ void entity_drop_powerup(Entity *e) {
 	// CSE2: Spawn individual XP items with random velocity (trajectory handled by onspawn_energy)
 	if(chance >= 2 && e->experience > 0) { // Weapon Energy
 		uint8_t count = e->experience;
-		if(count > 4) count = 4; // CSE2: most enemies drop 1-4 individual XP
-		for(uint8_t i = 0; i < count; i++) {
-			Entity *exp = entity_create(e->x, e->y, OBJ_XP, 0);
-			if(exp) exp->experience = 1;
+		while (count)
+		{
+			int sub_exp;
+
+			if (count >= 20)
+			{
+				count -= 20;
+				sub_exp = 20;
+			}
+			else if (count >= 5)
+			{
+				count -= 5;
+				sub_exp = 5;
+			}
+			else if (count >= 1)
+			{
+				count -= 1;
+				sub_exp = 1;
+			}
+
+			Entity *exp = entity_create(e->x, e->y, OBJ_XP,
+				sub_exp > 6 ? NPC_OPTION2 : 0);
+			exp->experience = sub_exp;
+
 		}
 	} else if(chance == 1 && (player_has_weapon(WEAPON_MISSILE) ||
 		player_has_weapon(WEAPON_SUPERMISSILE))) { // Missiles
