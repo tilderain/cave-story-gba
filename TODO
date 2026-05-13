@@ -1,5 +1,32 @@
 
 
+fix damage numbers 4 overlapping into HUD
+gaudi
+moonback
+
+prtoside palette
+cent tiles
+
+machinegun bullet
+blade bullet
+
+remaning boomflash
+fade full
+
+gun down frame on down 
+
+hp bar palette
+fix weapon slide always happening
+
+camera shake accuracy
+
+bkwater
+core sprites
+
+machinegun gravity
+
+hp flash when hit
+hp drain animation
 HUD Status Bar
 
 Title screen
@@ -8,7 +35,6 @@ Title screen
 
 Textbox 
 merge upstream
-Fade
 Camp 
 
 Accuracy pass - mychar
@@ -22,11 +48,6 @@ Accuracy pass - mychar
 Sort OBJ Vram
 ==GFX==
 Per sheet palette ?
-polar star shoot fx
-bullet hit wall
-blood particle
-boomflash
-bkmoon
 fix bkred in hell
 fix second healthbar tile offset
 reverse chinfish direction
@@ -35,7 +56,6 @@ original sprite palettes
 boss bar
 
 teleporter anim
-hp anim
 <RMU
 <FMU
 

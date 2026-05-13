@@ -255,14 +255,32 @@ void hud_refresh_health() {
 		fillHP -= 8;
 	}
 	// Heart icon and two digits displaying current health
-	memcpy(tileData[0], &SPR_TILES(&SPR_Hud2, 0, 0)[12*TSIZE], TILE_SIZE);
+	memcpy(tileData[0], &SPR_TILES(&SPR_Hud2, 0, 0)[12*TSIZE], TILE_SIZE*3);
 	uint8_t digit = div10[hudHealth];
 	if(digit) {
-		memcpy(tileData[1], &TS_Numbers.tiles[(digit)*TSIZE], TILE_SIZE);
-	} else {
-		memcpy(tileData[1], TILE_BLANK, TILE_SIZE);
+		// Overlay tens digit on top of tileData[1] (palette index 0 = transparent)
+		const uint8_t *src = (const uint8_t*)&TS_Numbers.tiles[(digit)*TSIZE];
+		uint8_t *dst = (uint8_t*)tileData[1];
+		for(uint32_t i = 0; i < TILE_SIZE; i++) {
+			uint8_t s = src[i];
+			uint8_t d = dst[i];
+			uint8_t lo = (s & 0x0F) ? (s & 0x0F) : (d & 0x0F);
+			uint8_t hi = (s & 0xF0) ? (s & 0xF0) : (d & 0xF0);
+			dst[i] = lo | hi;
+		}
 	}
-	memcpy(tileData[2], &TS_Numbers.tiles[mod10[hudHealth]*TSIZE], TILE_SIZE);
+	// Overlay ones digit on top of tileData[2]
+	{
+		const uint8_t *src = (const uint8_t*)&TS_Numbers.tiles[mod10[hudHealth]*TSIZE];
+		uint8_t *dst = (uint8_t*)tileData[2];
+		for(uint32_t i = 0; i < TILE_SIZE; i++) {
+			uint8_t s = src[i];
+			uint8_t d = dst[i];
+			uint8_t lo = (s & 0x0F) ? (s & 0x0F) : (d & 0x0F);
+			uint8_t hi = (s & 0xF0) ? (s & 0xF0) : (d & 0xF0);
+			dst[i] = lo | hi;
+		}
+	}
 	// Queue DMA transfer for health display
 	// Heart+digit at TILE_HUDINDEX+32 (sprite tile 160, DMA 96-97)
 	// HP bar at TILE_HUDINDEX+42 (sprite tile 164, DMA 106-107, internal pos 2,1)
