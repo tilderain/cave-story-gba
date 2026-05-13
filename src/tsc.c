@@ -414,15 +414,15 @@ void tsc_show_boss_health() {
 	memset(teleMenuSprite, 0, sizeof(VDPSprite) * 8);
 	uint8_t yoff = pal_mode ? 24 : 16;
 	teleMenuSprite[5] = (VDPSprite) { 
-		.x = 160 + 32 + 128, .y = SCREEN_HEIGHT - yoff + 128,
+		.x = 106 + 32 + 128, .y = SCREEN_HEIGHT - yoff + 132,
 		.size = SPRITE_SIZE(4,1), .attr = TILE_ATTR(PAL0,1,0,0,TILE_NAMEINDEX)
 	};
 	teleMenuSprite[6] = (VDPSprite) { 
-		.x = 160 + 64 + 128, .y = SCREEN_HEIGHT - yoff + 128,
+		.x = 106 + 64 + 128, .y = SCREEN_HEIGHT - yoff + 132,
 		.size = SPRITE_SIZE(4,1), .attr = TILE_ATTR(PAL0,1,0,0,TILE_NAMEINDEX+4)
 	};
 	teleMenuSprite[7] = (VDPSprite) { 
-		.x = 160 + 96 + 128, .y = SCREEN_HEIGHT - yoff + 128,
+		.x = 106 + 96 + 128, .y = SCREEN_HEIGHT - yoff + 132,
 		.size = SPRITE_SIZE(4,1), .attr = TILE_ATTR(PAL0,1,0,0,TILE_NAMEINDEX+8)
 	};
 }
