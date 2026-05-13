@@ -73,6 +73,7 @@ EWRAM_DATA uint8_t stage_buffer[17932];
  uint8_t stageBackgroundType = 0;
 
 IWRAM_DATA uint16_t moon_scroll_table[160];
+static bool moon_dma_active = false;
 
 static void stage_load_tileset();
 static void stage_load_blocks();
@@ -125,6 +126,11 @@ void stage_load(uint16_t id) {
     z80_request();
 	sheets_load_stage(id, FALSE, TRUE);
 	// Load backgrounds
+	// Stop moon HBlank DMA if leaving a moon background
+	if(moon_dma_active && (background_info[stage_info[id].background].type != 1 && background_info[stage_info[id].background].type != 5)) {
+		REG_DMA0CNT = 0;
+		moon_dma_active = false;
+	}
 	if(background_info[stage_info[id].background].type == 4 || stageBackground != stage_info[id].background) {
 		stageBackground = stage_info[id].background;
 		stageBackgroundType = background_info[stageBackground].type;
@@ -142,6 +148,12 @@ void stage_load(uint16_t id) {
 		} else if(stageBackgroundType == 1) { // Moon
 			vdp_set_scrollmode(HSCROLL_TILE, VSCROLL_PLANE);
 			stage_draw_moonback();
+			// Set up HBlank DMA once for parallax (not every frame!)
+			REG_DMA0CNT = 0;
+			REG_DMA0SAD = (uint32_t)moon_scroll_table;
+			REG_DMA0DAD = (uint32_t)&REG_BG0HOFS;
+			REG_DMA0CNT = 1 | DMA_DST_FIXED | DMA_REPEAT | DMA_HBLANK | DMA_ENABLE;
+			moon_dma_active = true;
 		} else if(stageBackgroundType == 2) { // Solid Color
 			vdp_set_scrollmode(HSCROLL_PLANE, VSCROLL_PLANE);
 			vdp_map_clear(VDP_PLAN_B);
@@ -156,6 +168,12 @@ void stage_load(uint16_t id) {
 			// Use background color from tileset
 			vdp_set_backcolor(32);
 			stage_draw_moonback();
+			// Set up HBlank DMA once for parallax (not every frame!)
+			REG_DMA0CNT = 0;
+			REG_DMA0SAD = (uint32_t)moon_scroll_table;
+			REG_DMA0DAD = (uint32_t)&REG_BG0HOFS;
+			REG_DMA0CNT = 1 | DMA_DST_FIXED | DMA_REPEAT | DMA_HBLANK | DMA_ENABLE;
+			moon_dma_active = true;
 		}
 	}
     z80_release();
@@ -418,14 +436,10 @@ void stage_update() {
 			else              moon_scroll_table[i] = t << 1; // Bottom fast clouds
 		}
 
-		// 3. Setup HBlank DMA
-		// We use DMA channel 0 (highest priority)
-		// Source: our table, Destination: BG0 Horizontal Offset Register
-		// Mode: HBlank, Repeat: Yes
-		REG_DMA0CNT = 0; // Stop any previous DMA
+		// 3. Reset DMA source pointer for this frame
+		// DMA was configured once when the moon stage loaded (not every frame!)
+		// Stopping and restarting HBlank DMA every frame can lock up the bus on real hardware
 		REG_DMA0SAD = (uint32_t)moon_scroll_table;
-		REG_DMA0DAD = (uint32_t)&REG_BG0HOFS; // Use BG0 if VDP_PLAN_B is BG0
-		REG_DMA0CNT = 1 | DMA_DST_FIXED | DMA_REPEAT | DMA_HBLANK | DMA_ENABLE;
 
 		vdp_vscroll(VDP_PLAN_B, 0); // Keep vertical static
 	} else if(stageBackgroundType == 3) {

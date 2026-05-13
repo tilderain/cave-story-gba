@@ -30,8 +30,8 @@ volatile uint8_t vblank = 0;
 
 void aftervsync() {
 
-	REG_DMA0CNT = 0; 
-	
+	// Note: Moon HBlank parallax DMA (stage.c) stays running across frames.
+	// Do NOT stop DMA0 here — it would kill the HBlank transfers mid-frame on hardware.
 	disable_ints;
     z80_request();
 
