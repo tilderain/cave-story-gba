@@ -71,6 +71,7 @@ extern const uint16_t PAL_RiverAlt[];
 extern const uint16_t  PAL_Sega		[];
 extern const uint16_t  PAL_Main		[];
 extern const uint16_t  PAL_Sym			[];
+extern const uint16_t  PAL_Caret			[];
 extern const uint16_t  PAL_Regu		[];
 extern const uint16_t  PAL_Gunsmith	[];
 extern const uint16_t  PAL_Plant		[];

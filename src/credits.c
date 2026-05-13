@@ -81,6 +81,8 @@ void credits_main() {
 	vdp_colors(0, PAL_Main, 16);
 	vdp_colors(16, PAL_Sym, 16);
 	vdp_colors(48, PAL_Regu, 16);
+
+	vdp_colors(7*16, PAL_Caret, 16);
 	// Stick camera to upper right
 	camera.target = NULL;
 	camera.x = pixel_to_sub(SCREEN_HALF_W);

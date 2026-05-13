@@ -592,7 +592,7 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
             {
                 effMisc[i].ttl = 6;
                 effMisc[i].sprite = (VDPSprite) {
-                    .size = SPRITE_SIZE(4, 4),
+                    .size = SPRITE_SIZE(4, 4) | (7 << 4),
                     .attr = TILE_ATTR(PAL0,1,0,0,TILE_BOOMINDEX)
                 };
             }
@@ -612,7 +612,7 @@ static void fade_setup(VDPSprite *spr0, VDPSprite *spr1, VDPSprite *spr2, uint8_
     // Frame 0: TILE_HUDINDEX (64)
     // Frame 1: TILE_HUDINDEX + 16 (80)
     // Frame 2: TILE_HUDINDEX + 32 (96)
-    //SHEET_LOAD(&SPR_Fade, 3, 4*4, TILE_HUDINDEX, TRUE, 0, 1, 2);
+    SHEET_LOAD(&SPR_Fade, 3, 4*4, TILE_HUDINDEX, TRUE, 0, 1, 2);
 
     // This is the solid black tile used for the window/background
     DMA_doDma(DMA_VRAM, (uint32_t) tblack, TILE_FADEINDEX*TILE_SIZE, TILE_SIZE/2, 2);

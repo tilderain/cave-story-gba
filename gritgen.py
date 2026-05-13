@@ -370,6 +370,7 @@ sprTable = [
 ["bubbleintro.png",6,6],
 ["itemimage.png",3,2],
 ["itemimage_g.png" ,3,2],
+["boomflash.png" ,4,4],
 	]
 
 # Specifically for UI elements and unique large objects

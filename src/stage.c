@@ -536,6 +536,7 @@ void stage_setup_palettes() {
 		vdp_colors_next(32, tileset_info[stage_info[stageID].tileset].palette, 16);
 	}*/
 	vdp_colors_next(48, stage_info[stageID].npcPalette, 16);
+	vdp_colors_next(7*16, PAL_Caret, 16);
 }
 
 void stage_draw_tile(uint16_t x, uint16_t y, const uint8_t* pxa){
