@@ -77,6 +77,16 @@ void effects_init() {
 	for(uint8_t i = 0; i < 2; i++) {
 		vdp_tiles_load_from_rom(SPR_TILES(&SPR_Boomflash, 0, i), TILE_BOOMINDEX + i * 16, 16);
 	}
+
+	// Load caret hit tiles (4 frames, 4 tiles each)
+	for(uint8_t i = 0; i < 4; i++) {
+		vdp_tiles_load_from_rom(SPR_TILES(&SPR_CaretHit, 0, i), TILE_HITINDEX + i * 4, 4);
+	}
+
+	// Load caret shoot tiles (4 frames, 4 tiles each)
+	for(uint8_t i = 0; i < 4; i++) {
+		vdp_tiles_load_from_rom(SPR_TILES(&SPR_CaretShoot, 0, i), TILE_SHOOTINDEX + i * 4, 4);
+	}
 }
 void effects_clear() {
 	for(uint8_t i = 0; i < MAX_DAMAGE; i++) effDamage[i].ttl = 0;
@@ -273,7 +283,8 @@ IWRAM_CODE void effects_update() {
             break;
 			case EFF_DISSIPATE:
 			{
-				if((effMisc[i].ttl & 3) == 0) effMisc[i].sprite.attr += 4;
+				if((effMisc[i].ttl % 7) == 0) effMisc[i].sprite.attr += 4;
+				effMisc[i].y--;
 				sprite_pos(effMisc[i].sprite,
 						   effMisc[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 8,
 						   effMisc[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 8);
@@ -297,6 +308,24 @@ IWRAM_CODE void effects_update() {
                 sprite_pos(effMisc[i].sprite,
                            effMisc[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 16,
                            effMisc[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 16);
+                vdp_sprite_add(&effMisc[i].sprite);
+            }
+            break;
+            case EFF_SHOOT:
+            {
+                if((effMisc[i].ttl & 3) == 0) effMisc[i].sprite.attr += 4;
+                sprite_pos(effMisc[i].sprite,
+                           effMisc[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 8,
+                           effMisc[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 8);
+                vdp_sprite_add(&effMisc[i].sprite);
+            }
+            break;
+            case EFF_HIT:
+            {
+                if((effMisc[i].ttl & 3) == 0) effMisc[i].sprite.attr += 4;
+                sprite_pos(effMisc[i].sprite,
+                           effMisc[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 8,
+                           effMisc[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 8);
                 vdp_sprite_add(&effMisc[i].sprite);
             }
             break;
@@ -519,7 +548,7 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
                 uint8_t loc = 0;
                 SHEET_FIND(loc, SHEET_PSTAR);
                 effMisc[i].sprite = (VDPSprite) {
-                    .size = SPRITE_SIZE(2, 2),
+                    .size = SPRITE_SIZE(2, 2) | (7 << 4),
                     .attr = TILE_ATTR(PAL0,1,0,0,sheets[loc].index+8)
                 };
             }
@@ -570,9 +599,9 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
             break;
             case EFF_DISSIPATE:
             {
-                effMisc[i].ttl = 15;
+                effMisc[i].ttl = 24;
                 effMisc[i].sprite = (VDPSprite) {
-                    .size = SPRITE_SIZE(2, 2),
+                    .size = SPRITE_SIZE(2, 2) | (7 << 4),
                     .attr = TILE_ATTR(PAL0,1,0,0,TILE_DISSIPINDEX)
                 };
             }
@@ -594,6 +623,24 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
                 effMisc[i].sprite = (VDPSprite) {
                     .size = SPRITE_SIZE(4, 4) | (7 << 4),
                     .attr = TILE_ATTR(PAL0,1,0,0,TILE_BOOMINDEX)
+                };
+            }
+            break;
+            case EFF_SHOOT:
+            {
+                effMisc[i].ttl = 12;
+                effMisc[i].sprite = (VDPSprite) {
+                    .size = SPRITE_SIZE(2, 2) | (7 << 4),
+                    .attr = TILE_ATTR(PAL0,1,0,0,TILE_SHOOTINDEX)
+                };
+            }
+            break;
+            case EFF_HIT:
+            {
+                effMisc[i].ttl = 12;
+                effMisc[i].sprite = (VDPSprite) {
+                    .size = SPRITE_SIZE(2, 2) | (7 << 4),
+                    .attr = TILE_ATTR(PAL0,1,0,0,TILE_HITINDEX)
                 };
             }
             break;

@@ -95,6 +95,8 @@ SPRITE SPR_WStar        "sprite/wstar.png"          1 1 NONE
 SPRITE SPR_Dissipate    "sprite/dissipate.png"      2 2 NONE
 SPRITE SPR_Gib          "sprite/gib.png"            1 1 NONE
 SPRITE SPR_Boomflash    "sprite/boomflash.png"      4 4 NONE
+SPRITE SPR_CaretHit     "sprite/carethit.png"       2 2 NONE
+SPRITE SPR_CaretShoot   "sprite/caretshoot.png"     2 2 NONE
 
 SPRITE SPR_Fade         "sprite/fade.png"           4 4 NONE
 

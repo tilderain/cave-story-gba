@@ -85,7 +85,13 @@
 #define TILE_BOOMINDEX        (TILE_DISSIPINDEX + TILE_DISSIPSIZE)
 #define TILE_BOOMSIZE         32
 
-#define TILE_EXWEPINDEX       (TILE_BOOMINDEX + TILE_BOOMSIZE)
+#define TILE_HITINDEX         (TILE_BOOMINDEX + TILE_BOOMSIZE)
+#define TILE_HITSIZE          16
+
+#define TILE_SHOOTINDEX       (TILE_HITINDEX + TILE_HITSIZE)
+#define TILE_SHOOTSIZE        16
+
+#define TILE_EXWEPINDEX       (TILE_SHOOTINDEX + TILE_SHOOTSIZE)
 #define TILE_EXWEPSIZE        16
 // 12 tiles at the end for nemesis vertical frames
 #define TILE_NEMINDEX         (TILE_EXWEPINDEX + TILE_EXWEPSIZE)
@@ -153,7 +159,7 @@
 
 
 // 16 tiles for weapon swap display (4 weapons x 4 tiles each)
-#define TILE_EXWEPINDEX     (TILE_BOOMINDEX + TILE_BOOMSIZE)
+#define TILE_EXWEPINDEX     (TILE_SHOOTINDEX + TILE_SHOOTSIZE)
 #define TILE_EXWEPSIZE      16
 
 

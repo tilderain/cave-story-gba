@@ -470,12 +470,13 @@ void entity_handle_bullet(Entity *e, Bullet *b) {
         bullet_deactivate(b);
 		if(e->flags & NPC_INVINCIBLE) {
 			sound_play(SND_TINK, 5);
+			effect_create_misc(EFF_HIT, b->x >> CSF, b->y >> CSF, FALSE);
 		} else {
 			if(b->damage < e->health) sound_play(e->hurtSound, 5);
 		}
-        if(b->type == WEAPON_POLARSTAR) {
-            effect_create_misc(EFF_PSTAR_HIT, b->x >> CSF, b->y >> CSF, FALSE);
-        }
+        //if(b->type == WEAPON_POLARSTAR) {
+            //effect_create_misc(EFF_HIT, b->x >> CSF, b->y >> CSF, FALSE);
+        //}
 	}
 	if(!(e->flags & NPC_INVINCIBLE)) {
 		if(e->health <= b->damage) {

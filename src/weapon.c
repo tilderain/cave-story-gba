@@ -234,9 +234,9 @@ void weapon_fire_snake(Weapon *w) {
 	}
 	// Muzzle flash (CSE2 CARET_SHOOT)
 	if(b->dir < 2)
-		effect_create_misc(EFF_PSTAR_HIT, (player.x>>CSF) + (b->dir ? 12 : -12), (player.y>>CSF) + 2, FALSE);
+		effect_create_misc(EFF_SHOOT, (player.x>>CSF) + (b->dir ? 12 : -12), (player.y>>CSF) + 2, FALSE);
 	else
-		effect_create_misc(EFF_PSTAR_HIT, player.x>>CSF, (player.y>>CSF) + (b->dir == DOWN ? 10 : -10), FALSE);
+		effect_create_misc(EFF_SHOOT, player.x>>CSF, (player.y>>CSF) + (b->dir == DOWN ? 10 : -10), FALSE);
 	set_extent_box(b);
 }
 
@@ -291,9 +291,9 @@ void weapon_fire_polarstar(Weapon *w) {
 	}
 	// Muzzle flash (CSE2 CARET_SHOOT)
 	if(b->dir < 2)
-		effect_create_misc(EFF_PSTAR_HIT, (player.x>>CSF) + (b->dir ? 12 : -12), (player.y>>CSF) + 3, FALSE);
+		effect_create_misc(EFF_SHOOT, (player.x>>CSF) + (b->dir ? 12 : -12), (player.y>>CSF) + 3, FALSE);
 	else
-		effect_create_misc(EFF_PSTAR_HIT, player.x>>CSF, (player.y>>CSF) + (b->dir == DOWN ? 8 : -8), FALSE);
+		effect_create_misc(EFF_SHOOT, player.x>>CSF, (player.y>>CSF) + (b->dir == DOWN ? 8 : -8), FALSE);
 	set_extent_box(b);
 }
 
@@ -342,9 +342,9 @@ void weapon_fire_fireball(Weapon *w) {
 	}
 	// Muzzle flash (CSE2 CARET_SHOOT)
 	if(b->dir < 2)
-		effect_create_misc(EFF_PSTAR_HIT, (player.x>>CSF) + (b->dir ? 12 : -12), (player.y>>CSF) + 4, FALSE);
+		effect_create_misc(EFF_SHOOT, (player.x>>CSF) + (b->dir ? 12 : -12), (player.y>>CSF) + 4, FALSE);
 	else
-		effect_create_misc(EFF_PSTAR_HIT, player.x>>CSF, (player.y>>CSF) + (b->dir == DOWN ? 12 : -12), FALSE);
+		effect_create_misc(EFF_SHOOT, player.x>>CSF, (player.y>>CSF) + (b->dir == DOWN ? 12 : -12), FALSE);
 	set_extent_box(b);
 }
 
@@ -402,9 +402,9 @@ void weapon_fire_machinegun(Weapon *w) {
 	}
 	// Muzzle flash (CSE2 CARET_SHOOT)
 	if(b->dir < 2)
-		effect_create_misc(EFF_MGUN_HIT, (player.x>>CSF) + (b->dir ? 12 : -12), (player.y>>CSF) + 3, FALSE);
+		effect_create_misc(EFF_SHOOT, (player.x>>CSF) + (b->dir ? 12 : -12), (player.y>>CSF) + 3, FALSE);
 	else
-		effect_create_misc(EFF_MGUN_HIT, player.x>>CSF, (player.y>>CSF) + (b->dir == DOWN ? 12 : -12), FALSE);
+		effect_create_misc(EFF_SHOOT, player.x>>CSF, (player.y>>CSF) + (b->dir == DOWN ? 12 : -12), FALSE);
 	set_extent_box(b);
 }
 
@@ -479,9 +479,9 @@ void weapon_fire_missile(Weapon *w) {
 	{
 		uint8_t dir = FIREDIR;
 		if(dir < 2)
-			effect_create_misc(EFF_PSTAR_HIT, (player.x>>CSF) + (dir ? 12 : -12), (player.y>>CSF) + 2, FALSE);
+			effect_create_misc(EFF_SHOOT, (player.x>>CSF) + (dir ? 12 : -12), (player.y>>CSF) + 2, FALSE);
 		else
-			effect_create_misc(EFF_PSTAR_HIT, player.x>>CSF, (player.y>>CSF) + (dir == DOWN ? 12 : -12), FALSE);
+			effect_create_misc(EFF_SHOOT, player.x>>CSF, (player.y>>CSF) + (dir == DOWN ? 12 : -12), FALSE);
 	}
 }
 
@@ -692,9 +692,9 @@ void weapon_fire_nemesis(Weapon *w) {
     b->last_hit[1] = NULL;
 	// Muzzle flash (CSE2 CARET_SHOOT)
 	if(b->dir < 2)
-		effect_create_misc(EFF_PSTAR_HIT, (player.x>>CSF) + ((b->dir&1) ? 16 : -16), (player.y>>CSF) + 1, FALSE);
+		effect_create_misc(EFF_SHOOT, (player.x>>CSF) + ((b->dir&1) ? 16 : -16), (player.y>>CSF) + 1, FALSE);
 	else
-		effect_create_misc(EFF_PSTAR_HIT, (player.x>>CSF) - 4, (player.y>>CSF) + ((b->dir&1) ? 12 : -12), FALSE);
+		effect_create_misc(EFF_SHOOT, (player.x>>CSF) - 4, (player.y>>CSF) + ((b->dir&1) ? 12 : -12), FALSE);
 	set_extent_box(b);
 }
 
@@ -762,9 +762,9 @@ void weapon_fire_spur(Weapon *w) {
 	spur_ymark = b->y >> CSF;
 	// Muzzle flash (CSE2 CARET_SHOOT)
 	if(b->dir < 2)
-		effect_create_misc(EFF_PSTAR_HIT, (player.x>>CSF) + (b->dir ? 12 : -12), (player.y>>CSF) + 2, FALSE);
+		effect_create_misc(EFF_SHOOT, (player.x>>CSF) + (b->dir ? 12 : -12), (player.y>>CSF) + 2, FALSE);
 	else
-		effect_create_misc(EFF_PSTAR_HIT, player.x>>CSF, (player.y>>CSF) + (b->dir == DOWN ? 8 : -8), FALSE);
+		effect_create_misc(EFF_SHOOT, player.x>>CSF, (player.y>>CSF) + (b->dir == DOWN ? 8 : -8), FALSE);
 	set_extent_box(b);
 }
 
@@ -826,7 +826,7 @@ void bullet_update_polarstar(Bullet *b) {
 	} else if(block == 0x41) { // Bullet hit a wall
 		b->ttl = 0;
 		sound_play(SND_SHOT_HIT, 3);
-        effect_create_misc(EFF_PSTAR_HIT, bx, by, FALSE);
+        effect_create_misc(EFF_HIT, bx, by, FALSE);
 	} else if(block & BLOCK_SLOPE) {
         int8_t height = heightmap[block & 3][bx & 15];
         if(block & 4) height = -height;
@@ -834,7 +834,7 @@ void bullet_update_polarstar(Bullet *b) {
         if(overlap > 0) {
             b->ttl = 0;
             sound_play(SND_SHOT_HIT, 3);
-            effect_create_misc(EFF_PSTAR_HIT, bx, by, FALSE);
+            effect_create_misc(EFF_SHOOT, bx, by, FALSE);
         }
     } else {
 		sprite_pos(b->sprite, 
@@ -842,7 +842,7 @@ void bullet_update_polarstar(Bullet *b) {
 			sub_to_pixel(b->y - camera.y) + SCREEN_HALF_H - 8);
 		vdp_sprite_add(&b->sprite);
 		if(!--b->ttl) {
-		    effect_create_misc(EFF_PSTAR_HIT, bx, by, FALSE);
+		    effect_create_misc(EFF_SHOOT, bx, by, FALSE);
 		}
 	}
 }
@@ -887,7 +887,7 @@ void bullet_update_fireball(Bullet *b) {
 	if((hit_ground && hit_ceil) || ((block_left == 0x41 || block_left == 0x43) && (block_right == 0x41 || block_right == 0x43))) {
 		b->ttl = 0;
 		sound_play(SND_SHOT_HIT, 3);
-		effect_create_misc(EFF_PSTAR_HIT, b->x >> CSF, b->y >> CSF, FALSE);
+		effect_create_misc(EFF_SHOOT, b->x >> CSF, b->y >> CSF, FALSE);
 		return;
 	}
 	// Play sound on wall bounce
@@ -918,7 +918,7 @@ void bullet_update_machinegun(Bullet *b) {
 	} else if(block == 0x41) { // Bullet hit a wall
 		b->ttl = 0;
 		sound_play(SND_SHOT_HIT, 3);
-        effect_create_misc(EFF_MGUN_HIT, sub_to_pixel(b->x), sub_to_pixel(b->y), FALSE);
+        effect_create_misc(EFF_HIT, sub_to_pixel(b->x), sub_to_pixel(b->y), FALSE);
 	} else {
 		sprite_pos(b->sprite,
 			sub_to_pixel(b->x - camera.x) + SCREEN_HALF_W - 8,
@@ -1204,7 +1204,7 @@ void bullet_update_nemesis(Bullet *b) {
 	uint8_t block = blk(b->x, 0, b->y, 0);
 	if(block == 0x41) {
 		b->ttl = 0;
-        effect_create_misc(EFF_PSTAR_HIT, b->x >> CSF, b->y >> CSF, FALSE);
+        effect_create_misc(EFF_SHOOT, b->x >> CSF, b->y >> CSF, FALSE);
 	} else if(block == 0x43) {
 		bullet_destroy_block(sub_to_block(b->x), sub_to_block(b->y));
 		effect_create_smoke(sub_to_pixel(b->x), sub_to_pixel(b->y));
@@ -1228,7 +1228,7 @@ void bullet_update_spur(Bullet *b) {
 	if(block == 0x41) {
 		sound_play(SND_SHOT_HIT, 2);
 		b->ttl = 0;
-		effect_create_misc(EFF_PSTAR_HIT, b->x >> CSF, b->y >> CSF, FALSE);
+		effect_create_misc(EFF_SHOOT, b->x >> CSF, b->y >> CSF, FALSE);
 	} else if(block == 0x43) {
 		bullet_destroy_block(sub_to_block(b->x), sub_to_block(b->y));
 		effect_create_smoke(sub_to_pixel(b->x), sub_to_pixel(b->y));
@@ -1306,7 +1306,7 @@ void bullet_update_spur_tail(Bullet *b) {
     if(block == 0x41) {
         sound_play(SND_SHOT_HIT, 2);
         b->ttl = 0;
-        effect_create_misc(EFF_PSTAR_HIT, b->x >> CSF, b->y >> CSF, FALSE);
+        effect_create_misc(EFF_SHOOT, b->x >> CSF, b->y >> CSF, FALSE);
     } else if(block == 0x43) {
         bullet_destroy_block(sub_to_block(b->x), sub_to_block(b->y));
         effect_create_smoke(sub_to_pixel(b->x), sub_to_pixel(b->y));

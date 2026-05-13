@@ -12,6 +12,7 @@ enum {
 	EFF_PSTAR_HIT, EFF_MGUN_HIT, EFF_BUBB_POP, EFF_FIRETRAIL, EFF_SNAKETRAIL,
 	EFF_DISSIPATE, EFF_GIB,
 	EFF_BOOMFLASH,
+	EFF_SHOOT, EFF_HIT,
 };
 
 // Only send tiles for 1 damage string per frame
