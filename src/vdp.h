@@ -151,13 +151,7 @@
 
 
 
-// Effects (must be past breakable block range 0-508, see stage.c stage_load_tileset)
-#define TILE_GIBINDEX       (TILE_FADEINDEX + TILE_FADESIZE)
-#define TILE_GIBSIZE        4
-#define TILE_DISSIPINDEX    (TILE_GIBINDEX + TILE_GIBSIZE)
-#define TILE_DISSIPSIZE     16
-#define TILE_BOOMINDEX      (TILE_DISSIPINDEX + TILE_DISSIPSIZE)
-#define TILE_BOOMSIZE       32
+
 // 16 tiles for weapon swap display (4 weapons x 4 tiles each)
 #define TILE_EXWEPINDEX     (TILE_BOOMINDEX + TILE_BOOMSIZE)
 #define TILE_EXWEPSIZE      16

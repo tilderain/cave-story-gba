@@ -68,9 +68,9 @@ void effects_init() {
 		vdp_tiles_load_from_rom(SPR_TILES(&SPR_Dissipate, 0, i), TILE_DISSIPINDEX + i * 4, 4);
 	}
 	
-	// Load gib effect tiles (4 frames, 4 tiles each)
+	// Load gib effect tiles (4 frames, 1 tiles each)
 	for(uint8_t i = 0; i < 4; i++) {
-		vdp_tiles_load_from_rom(SPR_TILES(&SPR_Gib, 0, i), TILE_GIBINDEX + i * 4, 4);
+		vdp_tiles_load_from_rom(SPR_TILES(&SPR_Gib, 0, i), TILE_GIBINDEX + i, 1);
 	}
 	
 	// Load boomflash effect tiles (2 frames, 16 tiles each)
@@ -284,7 +284,7 @@ IWRAM_CODE void effects_update() {
 			{
 				effMisc[i].x += effMisc[i].x_speed;
 				effMisc[i].y += effMisc[i].y_speed;
-				if((effMisc[i].ttl & 3) == 0) effMisc[i].sprite.attr += 4;
+				if((effMisc[i].ttl & 3) == 0) effMisc[i].sprite.attr += 1;
 				sprite_pos(effMisc[i].sprite,
 						   effMisc[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 4,
 						   effMisc[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 4);
@@ -581,9 +581,9 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
             {
                 effMisc[i].x_speed = (random() & 3) - 1;
                 effMisc[i].y_speed = (random() & 3) - 1;
-                effMisc[i].ttl = 15;
+                effMisc[i].ttl = 12;
                 effMisc[i].sprite = (VDPSprite) {
-                    .size = SPRITE_SIZE(2, 2),
+                    .size = SPRITE_SIZE(1, 1),
                     .attr = TILE_ATTR(PAL1,1,0,0,TILE_GIBINDEX)
                 };
             }
@@ -612,7 +612,7 @@ static void fade_setup(VDPSprite *spr0, VDPSprite *spr1, VDPSprite *spr2, uint8_
     // Frame 0: TILE_HUDINDEX (64)
     // Frame 1: TILE_HUDINDEX + 16 (80)
     // Frame 2: TILE_HUDINDEX + 32 (96)
-    SHEET_LOAD(&SPR_Fade, 3, 4*4, TILE_HUDINDEX, TRUE, 0, 1, 2);
+    //SHEET_LOAD(&SPR_Fade, 3, 4*4, TILE_HUDINDEX, TRUE, 0, 1, 2);
 
     // This is the solid black tile used for the window/background
     DMA_doDma(DMA_VRAM, (uint32_t) tblack, TILE_FADEINDEX*TILE_SIZE, TILE_SIZE/2, 2);
