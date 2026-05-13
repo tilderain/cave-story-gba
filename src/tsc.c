@@ -198,7 +198,7 @@ void tsc_init() {
 	teleMenuSlotCount = 0;
 	teleMenuSelection = 0;
 	memset(teleMenuEvent, 0, 16);
-	vdp_tiles_load_from_rom(TS_Window.tiles, TILE_WINDOWINDEX, TS_Window.numTile);
+	//vdp_tiles_load_from_rom(TS_Window.tiles, TILE_WINDOWINDEX, TS_Window.numTile);
 	tsc_load(headEvents, (const uint8_t*)TSC_GLOB[HEAD], HEAD_EVENT_COUNT);
 }
 
