@@ -493,7 +493,7 @@ void entity_handle_bullet(Entity *e, Bullet *b) {
 			return;
 		}
 		// CSE2: spawn 3 CARET_HURT_PARTICLES at midpoint between bullet and NPC
-		if(!e->damage_time) {
+		if(e->damage_time < 14) {
 			int16_t mx = ((b->x + e->x) >> 1) >> CSF;
 			int16_t my = ((b->y + e->y) >> 1) >> CSF;
 			effect_create_misc(EFF_GIB, mx, my, FALSE);
@@ -502,7 +502,7 @@ void entity_handle_bullet(Entity *e, Bullet *b) {
 		}
 		if((e->flags & NPC_SHOWDAMAGE) || e->shakeWhenHit) {
 			e->damage_value -= b->damage;
-			e->damage_time = 30;
+			e->damage_time = 16;
 		}
 		e->health -= b->damage;
 		if(b->type == WEAPON_SPUR || b->type == WEAPON_SPUR_TAIL) {
