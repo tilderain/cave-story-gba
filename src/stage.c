@@ -599,20 +599,36 @@ void stage_draw_screen_credits() {
 	}
 }
 
-// Draws just one block
+// Draws just one block (handles foreground/background layers)
 void stage_draw_block(uint16_t x, uint16_t y) {
 	if(x >= stageWidth || y >= stageHeight) return;
-	uint16_t b, xx, yy; uint8_t p;
-	p = (stage_get_block_type(x, y) & 0x40) > 0;
+	uint16_t b, xx, yy;
+	uint16_t ta = stage_get_block_type(x, y);
 	b = TILE_TSINDEX + (stage_get_block(x, y) << 2);
-	xx = block_to_tile(x) % 64;
-	yy = block_to_tile(y) % 32;
+	xx = block_to_tile(x);  // tile x coord of top-left sub-tile
+	yy = block_to_tile(y);  // tile y coord of top-left sub-tile
 
-	vdp_map_xy(VDP_PLAN_A, TILE_ATTR(2, p, 0, 0, b), xx, yy);
-	vdp_map_xy(VDP_PLAN_A, TILE_ATTR(2, p, 0, 0, b+1), xx+1, yy);
-	vdp_map_xy(VDP_PLAN_A, TILE_ATTR(2, p, 0, 0, b+2), xx, yy+1);
-	vdp_map_xy(VDP_PLAN_A, TILE_ATTR(2, p, 0, 0, b+3), xx+1, yy+1);
-	
+	// GBA map byte offset for tile (xx, yy): xx*2 + yy*64
+	int xloc = ((xx * 2) % 64);
+	int yloc = ((yy * 64));
+
+	u16* adr_fg = MAP_BASE_ADR(BASE_STAGE) + ((xloc + yloc) % 2048);
+	u16* adr_bg = MAP_BASE_ADR(BASE_STAGE_BACK) + ((xloc + yloc) % 2048);
+
+	if((ta & 0x40) > 0) {
+		// Foreground tile: draw to BG1 (Plan A), clear BG2
+		adr_fg[0] = b;     adr_fg[1] = b + 1;
+		adr_fg[32] = b+2;  adr_fg[33] = b + 3;
+		adr_bg[0] = TILE_TSINDEX; adr_bg[1] = TILE_TSINDEX;
+		adr_bg[32] = TILE_TSINDEX; adr_bg[33] = TILE_TSINDEX;
+	} else {
+		// Background tile: draw to BG2, clear BG1 (Plan A)
+		adr_fg[0] = TILE_TSINDEX; adr_fg[1] = TILE_TSINDEX;
+		adr_fg[32] = TILE_TSINDEX; adr_fg[33] = TILE_TSINDEX;
+		adr_bg[0] = b;     adr_bg[1] = b + 1;
+		adr_bg[32] = b+2;  adr_bg[33] = b + 3;
+	}
+
 }
 
 // Fills VDP_PLAN_B with a tiled background

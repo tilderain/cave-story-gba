@@ -599,7 +599,7 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
             break;
             case EFF_DISSIPATE:
             {
-                effMisc[i].ttl = 24;
+                effMisc[i].ttl = 20;
                 effMisc[i].sprite = (VDPSprite) {
                     .size = SPRITE_SIZE(2, 2) | (7 << 4),
                     .attr = TILE_ATTR(PAL0,1,0,0,TILE_DISSIPINDEX)
