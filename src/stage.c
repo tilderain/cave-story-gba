@@ -91,9 +91,19 @@ static void stage_draw_moonback();
 uint16_t stageID = 0;
 
 void stage_load(uint16_t id) {
-
-	iprintf("Loading stage %d\n", id);
+	//iprintf("Loading stage %d\n", id);
 	vdp_set_display(FALSE);
+    // Ensure Window 0 is the only one active during load
+	REG_DISPCNT |= WIN0_ON;
+    REG_DISPCNT &= ~(WIN1_ON | OBJ_WIN_ON);
+
+    // 2. Setup Window to cover the WHOLE screen
+    REG_WIN0H = 0x0000;              // Width: 0
+    REG_WIN0V = (0 << 8) | 160;      // Height: 0 to 160 (Full Screen)
+    
+    REG_WININ = 0;                   // Inside: Show nothing
+    REG_WINOUT = (1<<3);             // Outside (Everything): Show BG3 (Black)
+    
 
 	oldstate = 65535;
 	// Prevents an issue where a column of the previous map would get drawn over the new one

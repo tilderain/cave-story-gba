@@ -92,8 +92,10 @@ static void fade_win_enable(void) {
     //   bit 0=BG0, 1=BG1, 2=BG2, 3=BG3, 4=OBJ
     // Inside window (game side): show game BG layers and sprites
     REG_WININ  = (1<<0) | (1<<1) | (1<<2) | (1<<4);
-    // Outside window (black side): show BG3 (black tiles) and sprites
-    REG_WINOUT = (1<<3) | (1<<4);
+    // Outside window (black side): show only BG3 (black tiles) — no OBJ
+    // This prevents game sprites (player, entities, effects) from
+    // bleeding through the covered/black area during the fade.
+    REG_WINOUT = (1<<3);
     // Full-height window
     REG_WIN0V  = (0 << 8) | SCREEN_HEIGHT;
     // Enable WIN0 in display control
