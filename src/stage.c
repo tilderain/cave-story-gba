@@ -403,9 +403,9 @@ void stage_load_entities() {
 // Replaces a block with another (for <CMP, <SMP, and breakable blocks)
 void stage_replace_block(int16_t bx, int16_t by, uint8_t index) {
 	stageBlocks[stageTable[by] + bx] = index;
+	// Only redraw if block is within the 16x16 block area centered on camera
 	int16_t cx = sub_to_block(camera.x), cy = sub_to_block(camera.y);
-	if(cx - 16 > bx || cx + 16 < bx || cy - 8 > by || cy + 8 < by) return;
-	// Only redraw if change was made onscreen
+	if(cx - 8 > bx || cx + 7 < bx || cy - 8 > by || cy + 7 < by) return;
 	stage_draw_block(bx, by);
 }
 
