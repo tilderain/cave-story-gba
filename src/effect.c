@@ -666,7 +666,7 @@ void effect_create_smoke(int16_t x, int16_t y) {
 			}
 		}
 		// CSE2 ActNpc004: 8 frames × ~5 ticks = 40 frames total
-		effSmoke[i].ttl = 40;
+		effSmoke[i].ttl = 32;
 		effSmoke[i].timer = 0;  // animation timer
 		// Animation frame cycles every 5 ticks (40/8=5), matching CSE2 ani_wait > 4
 		effSmoke[i].sprite = (VDPSprite) {
