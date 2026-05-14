@@ -17,6 +17,7 @@
 #include "hud.h"
 #include "gbatext.h"
 
+#include "stage.h"
 typedef struct {
 	VDPSprite sprite;
 	uint8_t type, ttl, timer, timer2;
@@ -37,73 +38,280 @@ uint8_t dqueued = 0;
 // Then copy to VRAM via DMA transfer
 uint32_t dtiles[MAX_DAMAGE][4][8];
 
-// Add this dedicated memory for the fades:
-static VDPSprite fadeSpr[3][8];
-
-uint8_t fadeSweepDir;
-#define bval (1<<15) | TILE_FADEINDEX
-static const uint16_t winmap[40] = { 
-	bval,bval,bval,bval,bval,bval,bval,bval,bval,bval,
-	bval,bval,bval,bval,bval,bval,bval,bval,bval,bval,
-	bval,bval,bval,bval,bval,bval,bval,bval,bval,bval,
-	bval,bval,bval,bval,bval,bval,bval,bval,bval,bval,
-};
-static const uint32_t tblack[8] = {
-	0x00000000,0x00000000,0x00000000,0x00000000,
-	0x00000000,0x00000000,0x00000000,0x00000000,
-};
+// === Pure BG3 Fade System (CSE2-compatible) ===
 
 int8_t fadeSweepTimer;
 
-// GBA BG3 tilemap save buffer (32x32 = 1024 entries)
-// + saved pixel data for charbase 2 tile 0 (8 uint32_ts)
+// BG3 tilemap & tile 0 save buffer for save/restore
 static uint16_t bg3_map_save[1024];
 static uint32_t bg3_tile0_save[8];
 
-// GBA window / BG3 helpers for fade sweep
-static void bg3_save_screenblock(void) {
+// Fade grid: 15x10 cells, each 16x16 pixels
+#define FADE_GRID_W      15
+#define FADE_GRID_H      10
+#define FADE_FRAMES      16
+#define FADE_TILE_BASE   640   // 64 tiles in BG3 charbase 2
+
+typedef struct {
+    int mode;       // 0=none, 1=fadein, 2=fadeout
+    int bMask;      // 1=full mask active
+    int count;      // sweep line position
+    int dir;        // 0=right, 2=left, 1=bottom, 3=top, 4=diamond
+    int8_t ani_no[FADE_GRID_H][FADE_GRID_W];
+    int8_t flag[FADE_GRID_H][FADE_GRID_W];
+} FadeState;
+static FadeState gFade;
+
+// Load 16 frames of 16x16 fade tiles from SPR_Fade into BG3 charbase 2
+// Each frame = 2x2 BG tiles = 4 tiles
+// Palette: palette bank 3, index 1 = covered (black)
+EWRAM_CODE static void fade_generate_tiles(void) {
+    for (int f = 0; f < FADE_FRAMES; f++) {
+        vdp_tiles_load(
+            SPR_TILES(&SPR_Fade, 0, f),
+            1024 + FADE_TILE_BASE + f * 4,
+            4
+        );
+    }
+}
+
+// Map all fade cells to the BG3 tilemap
+EWRAM_CODE static void put_fade_bg3(void) {
     volatile uint16_t* map = (volatile uint16_t*)0x0600E800;
-    for(int i = 0; i < 1024; i++) bg3_map_save[i] = map[i];
-    // Also save charbase 2 tile 0 pixel data (we clobber it)
-    volatile uint32_t* tile0 = (volatile uint32_t*)0x06008000;
-    for(int i = 0; i < 8; i++) bg3_tile0_save[i] = tile0[i];
+    for (int y = 0; y < FADE_GRID_H; y++) {
+        for (int x = 0; x < FADE_GRID_W; x++) {
+            int an = gFade.ani_no[y][x];
+            uint16_t base = FADE_TILE_BASE + an * 4;
+            int my = y * 2, mx = x * 2;
+            map[my * 32 + mx]       = base | CHAR_PALETTE(3);
+            map[my * 32 + mx + 1]   = (base + 1) | CHAR_PALETTE(3);
+            map[(my + 1) * 32 + mx] = (base + 2) | CHAR_PALETTE(3);
+            map[(my + 1) * 32 + mx + 1] = (base + 3) | CHAR_PALETTE(3);
+        }
+    }
 }
 
-static void bg3_restore_screenblock(void) {
+// CSE2 ProcFade: advance sweep line, update cell animation frames
+// Returns 1 when the fade transition is complete
+EWRAM_CODE static int proc_fade(void) {
+    if (gFade.mode == 0) return 1;
+
+    int x, y;
+
+    switch (gFade.mode) {
+        case 2: // Fade out
+            switch (gFade.dir) {
+                case 0:
+                    for (y = 0; y < FADE_GRID_H; ++y)
+                        for (x = 0; x < FADE_GRID_W; ++x)
+                            if ((FADE_GRID_W - 1) - gFade.count == x)
+                                gFade.flag[y][x] = 1;
+                    break;
+                case 2:
+                    for (y = 0; y < FADE_GRID_H; ++y)
+                        for (x = 0; x < FADE_GRID_W; ++x)
+                            if (gFade.count == x)
+                                gFade.flag[y][x] = 1;
+                    break;
+                case 1:
+                    for (y = 0; y < FADE_GRID_H; ++y)
+                        for (x = 0; x < FADE_GRID_W; ++x)
+                            if ((FADE_GRID_H - 1) - gFade.count == y)
+                                gFade.flag[y][x] = 1;
+                    break;
+                case 3:
+                    for (y = 0; y < FADE_GRID_H; ++y)
+                        for (x = 0; x < FADE_GRID_W; ++x)
+                            if (gFade.count == y)
+                                gFade.flag[y][x] = 1;
+                    break;
+                case 4:
+                    for (y = 0; y < (FADE_GRID_H / 2); ++y)
+                        for (x = 0; x < (FADE_GRID_W / 2); ++x)
+                            if (gFade.count == x + y)
+                                gFade.flag[y][x] = 1;
+
+                    for (y = 0; y < (FADE_GRID_H / 2); ++y)
+                        for (x = (FADE_GRID_W / 2); x < FADE_GRID_W; ++x)
+                            if (gFade.count == y + ((FADE_GRID_W - 1) - x))
+                                gFade.flag[y][x] = 1;
+
+                    for (y = (FADE_GRID_H / 2); y < FADE_GRID_H; ++y)
+                        for (x = 0; x < (FADE_GRID_W / 2); ++x)
+                            if (gFade.count == x + ((FADE_GRID_H - 1) - y))
+                                gFade.flag[y][x] = 1;
+
+                    for (y = (FADE_GRID_H / 2); y < FADE_GRID_H; ++y)
+                        for (x = (FADE_GRID_W / 2); x < FADE_GRID_W; ++x)
+                            if (gFade.count == ((FADE_GRID_W - 1) - x) + ((FADE_GRID_H - 1) - y))
+                                gFade.flag[y][x] = 1;
+                    break;
+            }
+
+            for (y = 0; y < FADE_GRID_H; ++y)
+                for (x = 0; x < FADE_GRID_W; ++x)
+                    if (gFade.ani_no[y][x] < 15 && gFade.flag[y][x])
+                        ++gFade.ani_no[y][x];
+
+            if (++gFade.count > ((FADE_GRID_W > FADE_GRID_H) ? FADE_GRID_W : FADE_GRID_H) + 16) {
+                gFade.bMask = 1;
+                gFade.mode = 0;
+            }
+            break;
+
+        case 1: // Fade in
+            gFade.bMask = 0;
+
+            switch (gFade.dir) {
+                case 0:
+                    for (y = 0; y < FADE_GRID_H; ++y)
+                        for (x = 0; x < FADE_GRID_W; ++x)
+                            if ((FADE_GRID_W - 1) - gFade.count == x)
+                                gFade.flag[y][x] = 1;
+                    break;
+                case 2:
+                    for (y = 0; y < FADE_GRID_H; ++y)
+                        for (x = 0; x < FADE_GRID_W; ++x)
+                            if (gFade.count == x)
+                                gFade.flag[y][x] = 1;
+                    break;
+                case 1:
+                    for (y = 0; y < FADE_GRID_H; ++y)
+                        for (x = 0; x < FADE_GRID_W; ++x)
+                            if ((FADE_GRID_H - 1) - gFade.count == y)
+                                gFade.flag[y][x] = 1;
+                    break;
+                case 3:
+                    for (y = 0; y < FADE_GRID_H; ++y)
+                        for (x = 0; x < FADE_GRID_W; ++x)
+                            if (gFade.count == y)
+                                gFade.flag[y][x] = 1;
+                    break;
+                case 4:
+                    for (y = 0; y < (FADE_GRID_H / 2); ++y)
+                        for (x = 0; x < (FADE_GRID_W / 2); ++x)
+                            if ((FADE_GRID_W - 1) - gFade.count == x + y)
+                                gFade.flag[y][x] = 1;
+
+                    for (y = 0; y < (FADE_GRID_H / 2); ++y)
+                        for (x = (FADE_GRID_W / 2); x < FADE_GRID_W; ++x)
+                            if ((FADE_GRID_W - 1) - gFade.count == y + ((FADE_GRID_W - 1) - x))
+                                gFade.flag[y][x] = 1;
+
+                    for (y = (FADE_GRID_H / 2); y < FADE_GRID_H; ++y)
+                        for (x = 0; x < (FADE_GRID_W / 2); ++x)
+                            if ((FADE_GRID_W - 1) - gFade.count == x + ((FADE_GRID_H - 1) - y))
+                                gFade.flag[y][x] = 1;
+
+                    for (y = (FADE_GRID_H / 2); y < FADE_GRID_H; ++y)
+                        for (x = (FADE_GRID_W / 2); x < FADE_GRID_W; ++x)
+                            if ((FADE_GRID_W - 1) - gFade.count == ((FADE_GRID_W - 1) - x) + ((FADE_GRID_H - 1) - y))
+                                gFade.flag[y][x] = 1;
+                    break;
+            }
+
+            for (y = 0; y < FADE_GRID_H; ++y)
+                for (x = 0; x < FADE_GRID_W; ++x)
+                    if (gFade.ani_no[y][x] > 0 && gFade.flag[y][x])
+                        --gFade.ani_no[y][x];
+
+            if (++gFade.count > ((FADE_GRID_W > FADE_GRID_H) ? FADE_GRID_W : FADE_GRID_H) + 16)
+                gFade.mode = 0;
+            break;
+    }
+
+    return (gFade.mode == 0) ? 1 : 0;
+}
+
+// Blocking fade out (with palette fade at end)
+EWRAM_CODE void do_fadeout_sweep(uint8_t dir) {
+    // Save BG3 state
     volatile uint16_t* map = (volatile uint16_t*)0x0600E800;
-    for(int i = 0; i < 1024; i++) map[i] = bg3_map_save[i];
-    // Restore charbase 2 tile 0 pixel data
+    for (int i = 0; i < 1024; i++) bg3_map_save[i] = map[i];
     volatile uint32_t* tile0 = (volatile uint32_t*)0x06008000;
-    for(int i = 0; i < 8; i++) tile0[i] = bg3_tile0_save[i];
+    for (int i = 0; i < 8; i++) bg3_tile0_save[i] = tile0[i];
+
+    // Generate tiles and set palette (using palette bank 3, NOT overwritten by vdp_sprites_update)
+    fade_generate_tiles();
+    BG_COLORS[49] = 0x0000; // Palette bank 3, index 1 = black for fade pixels
+
+    // Init fade-out state
+    memset(&gFade, 0, sizeof(gFade));
+    gFade.mode = 2;
+    gFade.dir = dir;
+    gFade.bMask = 0;
+
+    // Run animation
+    for (;;) {
+        if (proc_fade()) break;
+        put_fade_bg3();
+
+        player_draw();
+        entities_draw();
+		stage_update();
+        vdp_sprites_update();
+
+        vdp_vsync();
+        ready = TRUE;
+        aftervsync();
+    }
+
+    // Palette fade to full black
+    vdp_colors(0, PAL_FadeOut, 64);
+    ready = TRUE;
+    aftervsync();
+
+    // Restore BG3 state
+    for (int i = 0; i < 1024; i++) map[i] = bg3_map_save[i];
+    for (int i = 0; i < 8; i++) tile0[i] = bg3_tile0_save[i];
+
+    gFade.mode = 0;
 }
 
-static void bg3_fill_black(void) {
-    // Load black tile (all pixels = palette index 1 = opaque) into BG3 charbase 2 tile 0
-    // Address 0x06008000 = VRAM offset for charbase 2 tile 0
-    DMA3COPY(tblack, (void*)0x06008000, 8 | COPY32);
+// Non-blocking fade in (timer-driven from game loop)
+EWRAM_CODE void start_fadein_sweep(uint8_t dir) {
+    // Save BG3 state
+    volatile uint16_t* map = (volatile uint16_t*)0x0600E800;
+    for (int i = 0; i < 1024; i++) bg3_map_save[i] = map[i];
+    volatile uint32_t* tile0 = (volatile uint32_t*)0x06008000;
+    for (int i = 0; i < 8; i++) bg3_tile0_save[i] = tile0[i];
 
-    // Fill entire BG3 tilemap (screenblock 29 at 0x0600E800) with tile 0
-    for(int i = 0; i < 1024; i++)
-        ((volatile uint16_t*)0x0600E800)[i] = 0;
+    // Generate tiles and set palette
+    fade_generate_tiles();
+    BG_COLORS[49] = 0x0000; // Palette bank 3, index 1 = black for fade
+
+    // Init fade-in state: all cells start at max (fully black)
+    memset(&gFade, 0, sizeof(gFade));
+    gFade.mode = 1;
+    gFade.dir = dir;
+    gFade.bMask = 1;
+    for (int y = 0; y < FADE_GRID_H; y++)
+        for (int x = 0; x < FADE_GRID_W; x++)
+            gFade.ani_no[y][x] = FADE_FRAMES - 1;
+
+    // Render initial full-black frame
+    put_fade_bg3();
+
+    fadeSweepTimer = 1; // Mark as active
 }
 
-static void fade_win_enable(void) {
-    // WININ/WINOUT use bits 0-4 (NOT DISPCNT bits 8-12):
-    //   bit 0=BG0, 1=BG1, 2=BG2, 3=BG3, 4=OBJ
-    // Inside window (game side): show game BG layers and sprites
-    REG_WININ  = (1<<0) | (1<<1) | (1<<2) | (1<<4);
-    // Outside window (black side): show only BG3 (black tiles) — no OBJ
-    // This prevents game sprites (player, entities, effects) from
-    // bleeding through the covered/black area during the fade.
-    REG_WINOUT = (1<<3);
-    // Full-height window
-    REG_WIN0V  = (0 << 8) | SCREEN_HEIGHT;
-    // Enable WIN0 in display control
-    REG_DISPCNT |= WIN0_ON;
-}
-
-static void fade_win_disable(void) {
-    REG_DISPCNT &= ~WIN0_ON;
+// Per-frame step for non-blocking fade-in
+EWRAM_CODE void update_fadein_sweep(void) {
+    if (gFade.mode != 0) {
+        proc_fade();
+        put_fade_bg3();
+        
+        if (gFade.mode == 0) {
+            fadeSweepTimer = -1; // Fade finished!
+            // Fade complete: restore BG3 state
+            volatile uint16_t* map = (volatile uint16_t*)0x0600E800;
+            for (int i = 0; i < 1024; i++) map[i] = bg3_map_save[i];
+            volatile uint32_t* tile0 = (volatile uint32_t*)0x06008000;
+            for (int i = 0; i < 8; i++) tile0[i] = bg3_tile0_save[i];
+            
+            hud_force_redraw();
+        }
+    }
 }
 void effects_init() {
 	for(uint8_t i = 0; i < MAX_DAMAGE; i++) effDamage[i].ttl = 0;
@@ -701,139 +909,4 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
 	}
 }
 
-static void fade_setup(VDPSprite *spr0, VDPSprite *spr1, VDPSprite *spr2, uint8_t dir, uint8_t fadein) {
-	// Fill window plane
-	for(uint16_t y = 0; y < SCREEN_HEIGHT / 8; y++) {
-	//	DMA_doDma(DMA_VRAM, (uint32_t) winmap, VDP_PLAN_W + y*128, 40, 2);
-	}
-
-    // Load all 3 frames (4x4 tiles each) sequentially starting at TILE_HUDINDEX
-    // Frame 0: TILE_HUDINDEX (64)
-    // Frame 1: TILE_HUDINDEX + 16 (80)
-    // Frame 2: TILE_HUDINDEX + 32 (96)
-    SHEET_LOAD(&SPR_Fade, 3, 4*4, TILE_HUDINDEX, TRUE, 0, 1, 2);
-
-    // This is the solid black tile used for the window/background
-    DMA_doDma(DMA_VRAM, (uint32_t) tblack, TILE_FADEINDEX*TILE_SIZE, TILE_SIZE/2, 2);
-
-    // GBA: Save BG3 tilemap, fill with black tiles, enable window
-    bg3_save_screenblock();
-    bg3_fill_black();
-    // Initialize window boundary before enabling:
-    // fade-out = full game visible, fade-in = all black
-    REG_WIN0H = fadein ? 0 : ((0 << 8) | SCREEN_WIDTH);
-    fade_win_enable();
-	// Setup sprites
-	for(uint16_t i = 0; i < (pal_mode ? 8 : 7); i++) {
-		spr0[i].y = 0x80 + i * 32;
-		spr1[i].y = 0x80 + i * 32;
-		spr2[i].y = 0x80 + i * 32;
-		if(fadein) {
-			if(dir) { // Start from right
-				spr0[i].x = 0x80 + SCREEN_WIDTH + 64;
-				spr1[i].x = 0x80 + SCREEN_WIDTH + 32;
-				spr2[i].x = 0x80 + SCREEN_WIDTH + 0;
-			} else { // Start from left
-				spr0[i].x = 0x80 - 96;
-				spr1[i].x = 0x80 - 64;
-				spr2[i].x = 0x80 - 32;
-			}
-		} else {
-			if(dir) { // Start from right
-				spr0[i].x = 0x80 + SCREEN_WIDTH + 0 - 80;
-				spr1[i].x = 0x80 + SCREEN_WIDTH + 32 - 80;
-				spr2[i].x = 0x80 + SCREEN_WIDTH + 64 - 80;
-			} else { // Start from left
-				spr0[i].x = 0x80 - 32 + 80;
-				spr1[i].x = 0x80 - 64 + 80;
-				spr2[i].x = 0x80 - 96 + 80;
-			}
-		}
-		if(i == 7) {
-			spr0[i].size = SPRITE_SIZE(4,2) | (8 << 4);
-			spr1[i].size = SPRITE_SIZE(4,2) | (8 << 4);
-			spr2[i].size = SPRITE_SIZE(4,2) | (8 << 4);
-		} else {
-			spr0[i].size = SPRITE_SIZE(4,4) | (8 << 4);
-			spr1[i].size = SPRITE_SIZE(4,4) | (8 << 4);
-			spr2[i].size = SPRITE_SIZE(4,4) | (8 << 4);
-		}
-
-        spr0[i].attr = TILE_ATTR(PAL0, 1, 0, (fadein?dir:!dir), TILE_HUDINDEX + 32);
-        spr1[i].attr = TILE_ATTR(PAL0, 1, 0, (fadein?dir:!dir), TILE_HUDINDEX );
-        spr2[i].attr = TILE_ATTR(PAL0, 1, 0, (fadein?dir:!dir), TILE_HUDINDEX + 16);
-	}
-}
-
-EWRAM_CODE void do_fadeout_sweep(uint8_t dir) {
-	fade_setup(fadeSpr[0], fadeSpr[1], fadeSpr[2], dir, FALSE);
-	for(uint16_t f = 0; f < SCREEN_WIDTH / 16 + 6; f++) {
-		for(uint16_t i = 0; i < (pal_mode ? 8 : 7); i++) {
-			fadeSpr[0][i].x += dir ? -16 : 16;
-			fadeSpr[1][i].x += dir ? -16 : 16;
-			fadeSpr[2][i].x += dir ? -16 : 16;
-		}
-		vdp_sprites_add(fadeSpr[0], pal_mode ? 8 : 7);
-		vdp_sprites_add(fadeSpr[1], pal_mode ? 8 : 7);
-		vdp_sprites_add(fadeSpr[2], pal_mode ? 8 : 7);
-		player_draw();
-		entities_draw();
-
-		int pixel_pos = (f + 1) * 16;
-		if(pixel_pos > SCREEN_WIDTH) pixel_pos = SCREEN_WIDTH;
-		if(dir) {
-			int game_right = (SCREEN_WIDTH > pixel_pos) ? (SCREEN_WIDTH - pixel_pos) : 0;
-			REG_WIN0H = (0 << 8) | game_right;
-		} else {
-			REG_WIN0H = (pixel_pos << 8) | SCREEN_WIDTH;
-		}
-		vdp_vsync();
-		ready = TRUE;
-		aftervsync();
-	}
-	vdp_colors(0, PAL_FadeOut, 64);
-	ready = TRUE;
-	aftervsync();
-	fade_win_disable();
-	bg3_restore_screenblock();
-}
-
-EWRAM_CODE void update_fadein_sweep(void) {
-	fadeSweepTimer--;
-	if(fadeSweepTimer >= 0) {
-		for(uint16_t i = 0; i < (pal_mode ? 8 : 7); i++) {
-			fadeSpr[0][i].x += fadeSweepDir ? -16 : 16;
-			fadeSpr[1][i].x += fadeSweepDir ? -16 : 16;
-			fadeSpr[2][i].x += fadeSweepDir ? -16 : 16;
-		}
-		vdp_sprites_add(fadeSpr[0], pal_mode ? 8 : 7);
-		vdp_sprites_add(fadeSpr[1], pal_mode ? 8 : 7);
-		vdp_sprites_add(fadeSpr[2], pal_mode ? 8 : 7);
-
-		int elapsed = (SCREEN_WIDTH / 16 + 6) - fadeSweepTimer;
-		
-		// Apply the -16 offset up front for both directions
-		int pixel_pos = elapsed * 16 - 16;
-		if(pixel_pos < 0) pixel_pos = 0;
-		if(pixel_pos > SCREEN_WIDTH) pixel_pos = SCREEN_WIDTH;
-
-		if(fadeSweepDir) {
-			int game_left = SCREEN_WIDTH - pixel_pos;
-			REG_WIN0H = (game_left << 8) | SCREEN_WIDTH;
-		} else {
-			REG_WIN0H = (0 << 8) | pixel_pos;
-		}
-	} else {
-		fade_win_disable();
-		bg3_restore_screenblock();
-		hud_force_redraw();
-	}
-}
-
-
-
-void start_fadein_sweep(uint8_t dir) {
-	fade_setup(fadeSpr[0], fadeSpr[1], fadeSpr[2], dir, TRUE);
-	fadeSweepTimer = SCREEN_WIDTH / 16 + 6;
-	fadeSweepDir = dir;
-}
+// Old sprite-based fade functions removed; replaced by pure BG3 fade above.

@@ -98,7 +98,7 @@ SPRITE SPR_Boomflash    "sprite/boomflash.png"      4 4 NONE
 SPRITE SPR_CaretHit     "sprite/carethit.png"       2 2 NONE
 SPRITE SPR_CaretShoot   "sprite/caretshoot.png"     2 2 NONE
 
-SPRITE SPR_Fade         "sprite/fade.png"           4 4 NONE
+SPRITE SPR_Fade         "sprite/fade.png"           2 2 NONE
 
 # Use PAL_sym
 SPRITE SPR_Polar		"sprite/polar.png"			6 1 0 0 NONE
