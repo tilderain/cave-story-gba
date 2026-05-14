@@ -331,18 +331,31 @@ void window_prompt_open() {
 	promptSpr[0] = (VDPSprite) {
 		.x = tile_to_pixel(PROMPT_X) + 128,
 		.y = tile_to_pixel(PROMPT_Y) + 128,
-		.size = SPRITE_SIZE(4, 3),
+		.size = SPRITE_SIZE(4, 3) | (9 << 4),
 		.attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX+4)
 	};
 	promptSpr[1] = (VDPSprite) {
 		.x = tile_to_pixel(PROMPT_X) + 32 + 128,
 		.y = tile_to_pixel(PROMPT_Y) + 128,
-		.size = SPRITE_SIZE(4, 3),
-		.attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX+16)
+		.size = SPRITE_SIZE(4, 3) | (9 << 4),
+		.attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX+20)
 	};
 	TILES_QUEUE(SPR_TILES(&SPR_Pointer,0,0), TILE_PROMPTINDEX, 4);
 	const SpriteDefinition *spr = cfg_language == LANG_JA ? &SPR_J_Prompt : &SPR_Prompt;
-	TILES_QUEUE(SPR_TILES(spr,0,0), TILE_PROMPTINDEX+4, 24);
+	const uint32_t *sprTiles = SPR_TILES(spr,0,0);
+	// Source is 8 tiles wide (Yes cols 0-3, No cols 4-7), 3 rows tall
+	// GBA renders 32x24 as 32x32 (4x4 tiles), so pad each with a blank row
+	//
+	// Yes text: extract cols 0-3 from each of the 3 source rows
+	TILES_QUEUE(sprTiles + 0,     TILE_PROMPTINDEX+4,  4); // Row 0, cols 0-3 (tiles 0..3)
+	TILES_QUEUE(sprTiles + 32,    TILE_PROMPTINDEX+8,  4); // Row 1, cols 0-3 (tiles 4..7)
+	TILES_QUEUE(sprTiles + 128,   TILE_PROMPTINDEX+12, 4); // Row 2, cols 0-3 (tiles 16..19)
+	TILES_QUEUE(TILE_BLANK,       TILE_PROMPTINDEX+16, 4); // Blank row for 32x32 padding
+	// No text: extract cols 4-7 from each of the 3 source rows
+	TILES_QUEUE(sprTiles + 64,    TILE_PROMPTINDEX+20, 4); // Row 0, cols 4-7 (tiles 8..11)
+	TILES_QUEUE(sprTiles + 96,    TILE_PROMPTINDEX+24, 4); // Row 1, cols 4-7 (tiles 12..15)
+	TILES_QUEUE(sprTiles + 160,   TILE_PROMPTINDEX+28, 4); // Row 2, cols 4-7 (tiles 20..23)
+	TILES_QUEUE(TILE_BLANK,       TILE_PROMPTINDEX+32, 4); // Blank row for 32x32 padding
 }
 
 void window_prompt_close() {
@@ -401,34 +414,59 @@ void window_show_item(uint16_t item) {
 		sprDef = &SPR_ItemImage;
 		pal = PAL0;
 	}
-    int pal_line = 6;
+    int pal_line = 9;
     handSpr = (VDPSprite) {
         .x = SCREEN_HALF_W - 12 + 128,
         .y = ITEM_Y_START,
-        .size = SPRITE_SIZE(2, 2) | (pal_line << 4),
+        .size = SPRITE_SIZE(2, 2) | (6 << 4), //armsitem pal
         .attr = TILE_ATTR(0,1,0,0,TILE_PROMPTINDEX)
     };
     // Right side (8x16)
     handSprR = (VDPSprite) {
         .x = SCREEN_HALF_W - 12 + 16 + 128,
         .y = ITEM_Y_START,
-        .size = SPRITE_SIZE(1, 2) | (pal_line << 4),
+        .size = SPRITE_SIZE(1, 2) | (6 << 4),
         .attr = TILE_ATTR(0,1,0,0,TILE_PROMPTINDEX + 4) // Offset tile by 4
     };
 	promptSpr[0] = (VDPSprite) {
 		.x = SCREEN_HALF_W - 24 + 128,
 		.y = SCREEN_HALF_H + 8 + 128,
-		.size = SPRITE_SIZE(3, 3),
+		.size = SPRITE_SIZE(3, 3) | (pal_line << 4),
 		.attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX+6)
 	};
 	promptSpr[1] = (VDPSprite) {
 		.x = SCREEN_HALF_W + 128,
 		.y = SCREEN_HALF_H + 8 + 128,
-		.size = SPRITE_SIZE(3, 3),
-		.attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX+15)
+		.size = SPRITE_SIZE(3, 3) | (pal_line << 4),
+		.attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX+22)
 	};
 	TILES_QUEUE(SPR_TILES(sprDef,item,0), TILE_PROMPTINDEX, 6);
-	TILES_QUEUE(SPR_TILES(&SPR_ItemWin,0,0), TILE_PROMPTINDEX+6, 18);
+	// SPR_ItemWin: 48x24px, split into 4 sub-sprites by rescomp:
+	//   sprite0 (tiles 0-7): 32x16 top-left  (covers L cols 0-2 + R col 0)
+	//   sprite1 (tiles 8-11): 16x16 top-right (covers R cols 1-2)
+	//   sprite2 (tiles 12-15): 32x8 bottom-left (covers L cols 0-2 + R col 0)
+	//   sprite3 (tiles 16-17): 16x8 bottom-right  (covers R cols 1-2)
+	// GBA renders 24x24 as 32x32 (4x4 tiles), expand each half to 4 cols
+	const uint32_t *itemWinTiles = SPR_TILES(&SPR_ItemWin,0,0);
+	// Left half at TILE_PROMPTINDEX+6: L0,0 L1,0 L2,0 B | L0,1 L1,1 L2,1 B | L0,2 L1,2 L2,2 B | B B B B
+	TILES_QUEUE(itemWinTiles + 0,   TILE_PROMPTINDEX+6,  3); // Row 0: L0,0 L1,0 L2,0 (tiles 0..2)
+	TILES_QUEUE(TILE_BLANK,         TILE_PROMPTINDEX+9,  1);
+	TILES_QUEUE(itemWinTiles + 32,  TILE_PROMPTINDEX+10, 3); // Row 1: L0,1 L1,1 L2,1 (tiles 4..6)
+	TILES_QUEUE(TILE_BLANK,         TILE_PROMPTINDEX+13, 1);
+	TILES_QUEUE(itemWinTiles + 96,  TILE_PROMPTINDEX+14, 3); // Row 2: L0,2 L1,2 L2,2 (tiles 12..14)
+	TILES_QUEUE(TILE_BLANK,         TILE_PROMPTINDEX+17, 1);
+	TILES_QUEUE(TILE_BLANK,         TILE_PROMPTINDEX+18, 4); // Row 3 blank
+	// Right half at TILE_PROMPTINDEX+22: R0,0 R1,0 R2,0 B | R0,1 R1,1 R2,1 B | R0,2 R1,2 R2,2 B | B B B B
+	TILES_QUEUE(itemWinTiles + 24,  TILE_PROMPTINDEX+22, 1); // Row 0: R0,0 (tile 3)
+	TILES_QUEUE(itemWinTiles + 64,  TILE_PROMPTINDEX+23, 2); // Row 0: R1,0 R2,0 (tiles 8..9)
+	TILES_QUEUE(TILE_BLANK,         TILE_PROMPTINDEX+25, 1);
+	TILES_QUEUE(itemWinTiles + 56,  TILE_PROMPTINDEX+26, 1); // Row 1: R0,1 (tile 7)
+	TILES_QUEUE(itemWinTiles + 80,  TILE_PROMPTINDEX+27, 2); // Row 1: R1,1 R2,1 (tiles 10..11)
+	TILES_QUEUE(TILE_BLANK,         TILE_PROMPTINDEX+29, 1);
+	TILES_QUEUE(itemWinTiles + 120, TILE_PROMPTINDEX+30, 1); // Row 2: R0,2 (tile 15)
+	TILES_QUEUE(itemWinTiles + 128, TILE_PROMPTINDEX+31, 2); // Row 2: R1,2 R2,2 (tiles 16..17)
+	TILES_QUEUE(TILE_BLANK,         TILE_PROMPTINDEX+33, 1);
+	TILES_QUEUE(TILE_BLANK,         TILE_PROMPTINDEX+34, 4); // Row 3 blank
 }
 
 void window_show_weapon(uint16_t item) {
@@ -443,17 +481,35 @@ void window_show_weapon(uint16_t item) {
 	promptSpr[0] = (VDPSprite) {
 		.x = SCREEN_HALF_W - 24 + 128,
 		.y = SCREEN_HALF_H + 8 + 128,
-		.size = SPRITE_SIZE(3, 3),
+		.size = SPRITE_SIZE(3, 3) | (9 << 4),
 		.attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX+6)
 	};
 	promptSpr[1] = (VDPSprite) {
 		.x = SCREEN_HALF_W + 128,
 		.y = SCREEN_HALF_H + 8 + 128,
-		.size = SPRITE_SIZE(3, 3),
-		.attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX+15)
+		.size = SPRITE_SIZE(3, 3) | (9 << 4),
+		.attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX+22)
 	};
 	TILES_QUEUE(SPR_TILES(&SPR_ArmsImage,0,item), TILE_PROMPTINDEX, 6);
-	TILES_QUEUE(SPR_TILES(&SPR_ItemWin,0,0), TILE_PROMPTINDEX+6, 18);
+	// Source is 6 tiles wide (left half cols 0-2, right half cols 3-5), 3 rows tall
+	// GBA renders 24x24 as 32x32 (4x4 tiles), need to expand 3 cols → 4 cols per row
+	const uint32_t *itemWinTiles = SPR_TILES(&SPR_ItemWin,0,0);
+	// Left window half at TILE_PROMPTINDEX+6
+	TILES_QUEUE(itemWinTiles + 0,   TILE_PROMPTINDEX+6,  3); // Row 0, cols 0-2 (tiles 0..2)
+	TILES_QUEUE(TILE_BLANK,         TILE_PROMPTINDEX+9,  1); // Row 0, col 3 padding
+	TILES_QUEUE(itemWinTiles + 48,  TILE_PROMPTINDEX+10, 3); // Row 1, cols 0-2 (tiles 6..8)
+	TILES_QUEUE(TILE_BLANK,         TILE_PROMPTINDEX+13, 1); // Row 1, col 3 padding
+	TILES_QUEUE(itemWinTiles + 96,  TILE_PROMPTINDEX+14, 3); // Row 2, cols 0-2 (tiles 12..14)
+	TILES_QUEUE(TILE_BLANK,         TILE_PROMPTINDEX+17, 1); // Row 2, col 3 padding
+	TILES_QUEUE(TILE_BLANK,         TILE_PROMPTINDEX+18, 4); // Row 3 blank
+	// Right window half at TILE_PROMPTINDEX+22
+	TILES_QUEUE(itemWinTiles + 24,  TILE_PROMPTINDEX+22, 3); // Row 0, cols 3-5 (tiles 3..5)
+	TILES_QUEUE(TILE_BLANK,         TILE_PROMPTINDEX+25, 1); // Row 0, col 6 padding
+	TILES_QUEUE(itemWinTiles + 72,  TILE_PROMPTINDEX+26, 3); // Row 1, cols 3-5 (tiles 9..11)
+	TILES_QUEUE(TILE_BLANK,         TILE_PROMPTINDEX+29, 1); // Row 1, col 6 padding
+	TILES_QUEUE(itemWinTiles + 120, TILE_PROMPTINDEX+30, 3); // Row 2, cols 3-5 (tiles 15..17)
+	TILES_QUEUE(TILE_BLANK,         TILE_PROMPTINDEX+33, 1); // Row 2, col 6 padding
+	TILES_QUEUE(TILE_BLANK,         TILE_PROMPTINDEX+34, 4); // Row 3 blank
 }
 
 // Modify window_update to perform the shift if there is debt

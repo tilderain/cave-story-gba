@@ -237,4 +237,10 @@ void game_reset(uint8_t load) {
     for (int i = 0; i < 16; i++) {
         OBJ_COLORS[96 + i]  = saturate_color(PAL_itemimage[i]);   // Line 6
     }
+
+    // Upload textbox palette to OBJ line 9 and BG line 6
+    for (int i = 0; i < 16; i++) {
+        OBJ_COLORS[144 + i] = saturate_color(PAL_textbox[i]);     // OBJ Line 9
+        BG_COLORS[96 + i]   = saturate_color(PAL_textbox[i]);     // BG  Line 6
+    }
 }

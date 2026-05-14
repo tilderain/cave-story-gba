@@ -546,6 +546,15 @@ int get_sprite_size(uint8_t size)
 	if (w == 1 && h == 3)
 		return Sprite_16x32;
 
+	// Additional mappings for non-standard sizes
+	if (w == 3 && h == 2) return Sprite_32x32;  // 32x24px (4x3 tiles) -> 32x32
+	if (w == 2 && h == 2) return Sprite_32x32;  // 24x24px (3x3 tiles) -> 32x32
+	if (w == 2 && h == 1) return Sprite_32x16;  // 24x16px (3x2 tiles) -> 32x16
+	if (w == 1 && h == 2) return Sprite_16x32;  // 16x24px (2x3 tiles) -> 16x32
+	if (w == 2 && h == 3) return Sprite_32x32;  // 24x32px (3x4 tiles) -> 32x32
+	if (w == 0 && h == 2) return Sprite_8x32;   // 8x24px  (1x3 tiles) -> 8x32
+	if (w == 2 && h == 0) return Sprite_32x8;   // 24x8px  (3x1 tiles) -> 32x8
+
 	return Sprite_16x16;
 }
 
@@ -631,6 +640,15 @@ IWRAM_CODE void vdp_sprites_update() {
         for(int i=0; i<16; i++) { // OBJ Pal 3
             *temppointer2++ = saturate_color(stage_info[stageID].npcPalette2[i]);
         }
+
+	// Upload npcsym palette (PAL_Sym) to BG Bank 4 for breakable blocks
+	if(stage_info[stageID].tileset != NULL) {
+		temppointer = BG_COLORS + 64;
+		for(int i=0; i<16; i++) {
+			*temppointer++ = saturate_color(PAL_Sym[i]);
+		}
+	}
+
 	//temp text color
 	//BG_COLORS[16+16+0]=RGB5(31,31,31);
 	BG_COLORS[16+16+1]=RGB5(31,31,31);

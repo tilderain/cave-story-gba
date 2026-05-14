@@ -550,6 +550,8 @@ void stage_setup_palettes() {
 		vdp_colors_next(32, tileset_info[stage_info[stageID].tileset].palette, 16);
 	}*/
 	vdp_colors_next(48, stage_info[stageID].npcPalette, 16);
+	// npcsym palette for breakable blocks (BG Bank 4)
+	vdp_dma_cram((uint32_t)PAL_Sym, 64 << 1, 16);
 	vdp_colors_next(7*16, PAL_Caret, 16);
 }
 
@@ -557,6 +559,8 @@ void stage_draw_tile(uint16_t x, uint16_t y, const uint8_t* pxa){
 	uint16_t b = stage_get_block(x>>1, y>>1);
 	uint16_t t = b << 2; //((b&15) << 1) + ((b>>4) << 6);
 	uint16_t ta = pxa[b];
+	// Use npcsym palette (BG Bank 4) for breakable blocks
+	uint16_t pal_attr = (pxa[b] == 0x43) ? CHAR_PALETTE(4) : 0;
 	//uint16_t pal = (ta == 0x43 || ta & 0x80) ? PAL1 : PAL2;
 	int xloc = ((x*2)%64);
 	int yloc = ((y*2*32));
@@ -567,14 +571,14 @@ void stage_draw_tile(uint16_t x, uint16_t y, const uint8_t* pxa){
 	if((ta&0x40) > 0)
 	{
 		//Foreground
-		*adr = TILE_TSINDEX + t + (x&1) + ((y&1)<<1);
+		*adr = (TILE_TSINDEX + t + (x&1) + ((y&1)<<1)) | pal_attr;
 		*adr2 = TILE_TSINDEX;
 	}
 	else
-	{	
+	{
 		//Background
 		*adr = TILE_TSINDEX;
-		*adr2 = TILE_TSINDEX + t + (x&1) + ((y&1)<<1);
+		*adr2 = (TILE_TSINDEX + t + (x&1) + ((y&1)<<1)) | pal_attr;
 	}
 
 }
@@ -618,9 +622,13 @@ void stage_draw_block(uint16_t x, uint16_t y) {
 	if(x >= stageWidth || y >= stageHeight) return;
 	uint16_t b, xx, yy;
 	uint16_t ta = stage_get_block_type(x, y);
-	b = TILE_TSINDEX + (stage_get_block(x, y) << 2);
+	uint16_t block = stage_get_block(x, y);
+	b = TILE_TSINDEX + (block << 2);
 	xx = block_to_tile(x);  // tile x coord of top-left sub-tile
 	yy = block_to_tile(y);  // tile y coord of top-left sub-tile
+
+	// Use npcsym palette (BG Bank 4) for breakable blocks
+	uint16_t pal_attr = (stagePXA && stagePXA[block] == 0x43) ? CHAR_PALETTE(4) : 0;
 
 	// GBA map byte offset for tile (xx, yy): xx*2 + yy*64
 	int xloc = ((xx * 2) % 64);
@@ -631,16 +639,16 @@ void stage_draw_block(uint16_t x, uint16_t y) {
 
 	if((ta & 0x40) > 0) {
 		// Foreground tile: draw to BG1 (Plan A), clear BG2
-		adr_fg[0] = b;     adr_fg[1] = b + 1;
-		adr_fg[32] = b+2;  adr_fg[33] = b + 3;
+		adr_fg[0] = b | pal_attr;     adr_fg[1] = (b + 1) | pal_attr;
+		adr_fg[32] = (b+2) | pal_attr;  adr_fg[33] = (b + 3) | pal_attr;
 		adr_bg[0] = TILE_TSINDEX; adr_bg[1] = TILE_TSINDEX;
 		adr_bg[32] = TILE_TSINDEX; adr_bg[33] = TILE_TSINDEX;
 	} else {
 		// Background tile: draw to BG2, clear BG1 (Plan A)
 		adr_fg[0] = TILE_TSINDEX; adr_fg[1] = TILE_TSINDEX;
 		adr_fg[32] = TILE_TSINDEX; adr_fg[33] = TILE_TSINDEX;
-		adr_bg[0] = b;     adr_bg[1] = b + 1;
-		adr_bg[32] = b+2;  adr_bg[33] = b + 3;
+		adr_bg[0] = b | pal_attr;     adr_bg[1] = (b + 1) | pal_attr;
+		adr_bg[32] = (b+2) | pal_attr;  adr_bg[33] = (b + 3) | pal_attr;
 	}
 
 }
