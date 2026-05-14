@@ -18,12 +18,18 @@
 uint8_t songPlaying, songResume;
 // soundChannel cycles between 1-3 to allow 3 sounds to play at once
 uint8_t soundChannel;
+// Saved module position for RMU to resume from
+static uint16_t songResumePos;
+
+// Fade-out state: -1 = not fading, 100..0 = fade volume
+static int16_t songFadeVolume = -1;
 
 uint8_t snes_ost_enabled = true;
 uint8_t alt_drums_enabled = true;
 
 void sound_init() {
     songPlaying = songResume = 0;
+    songResumePos = 0;
     // Here we are pointing the XGM driver to each sound effect in the game
     // and their length (in frames) indexed in sound_info
     disable_ints;
@@ -61,6 +67,8 @@ void song_play(uint8_t id) {
 	}
 	if(id == songPlaying && gamemode != GM_SOUNDTEST) return;
 	songResume = songPlaying;
+	songResumePos = mmGetPosition();
+	songFadeVolume = -1; // Cancel any in-progress fade
 	// Track 0 in song_info is NULL, but others could be potentially
 	if(song_info_xm[id].song == 0) {
 		id = 0;
@@ -103,9 +111,39 @@ void song_stop() {
 }
 
 void song_resume() {
+	// Save the position BEFORE calling song_play(), which overwrites songResumePos
+	uint16_t pos = songResumePos;
 	song_play(songResume);
+	// Restore saved module position so the song continues where it left off
+	if(songPlaying)
+		mmSetPosition(pos);
 }
 
 uint8_t song_get_playing() {
 	return songPlaying;
+}
+
+void song_fade_init() {
+	if(!songPlaying) return;
+	songFadeVolume = 100;
+}
+
+void song_fade_update() {
+	if(songFadeVolume < 0) return;
+
+	songFadeVolume -= 2;
+	if(songFadeVolume <= 0) {
+		songFadeVolume = -1;
+		mmStop();
+		songPlaying = 0;
+		return;
+	}
+
+	// Map linear 0-100 volume to module volume
+	uint16_t vol;
+	if(snes_ost_enabled)
+		vol = (songFadeVolume * 800) / 100;
+	else
+		vol = (songFadeVolume * 1024) / 100;
+	mmSetModuleVolume(vol);
 }

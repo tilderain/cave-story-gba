@@ -194,6 +194,7 @@ IWRAM_CODE void game_main(uint8_t load) {
 		}
 		PF_BGCOLOR(0x888);
 		system_update();
+		song_fade_update();
 		ready = TRUE;
 		PF_BGCOLOR(0x000);
 		vdp_vsync();

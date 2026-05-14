@@ -693,9 +693,9 @@ uint8_t execute_command() {
 			song_play(args[0]);
 		}
 		break;
-		case CMD_FMU: // Fade out music (we just stop for now)
+		case CMD_FMU: // Fade out music
 		{
-			song_stop();
+			song_fade_init();
 		}
 		break;
 		case CMD_RMU: // Resume previously playing music

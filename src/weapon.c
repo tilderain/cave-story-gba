@@ -834,7 +834,7 @@ void bullet_update_polarstar(Bullet *b) {
         if(overlap > 0) {
             b->ttl = 0;
             sound_play(SND_SHOT_HIT, 3);
-            effect_create_misc(EFF_SHOOT, bx, by, FALSE);
+            effect_create_misc(EFF_HIT, bx, by, FALSE);
         }
     } else {
 		sprite_pos(b->sprite, 

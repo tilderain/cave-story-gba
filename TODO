@@ -93,8 +93,6 @@ original sprite palettes
 boss bar
 
 teleporter anim
-<RMU
-<FMU
 
 curly looking up
 ironhead
@@ -147,6 +145,20 @@ weapon bobbing
 
 FON many
 map system
+
+down arrow on falling blocks
+camera in hell b1
+heavy press not firing
+
+Set quote tile index above 4
+ballos ball extension
+ballos 4th phase hitbox
+
+boss defeat white animation
+
+xxisland
+
+teleportation rect cut
 
 
 link cable multiplayer ..

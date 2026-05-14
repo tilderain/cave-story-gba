@@ -103,6 +103,10 @@ void song_stop();
 void song_resume();
 // Returns ID of current song
 uint8_t song_get_playing();
+// Start fading out current song
+void song_fade_init();
+// Called each frame to progress the fade
+void song_fade_update();
 
 extern uint8_t snes_ost_enabled;
 extern uint8_t alt_drums_enabled;
