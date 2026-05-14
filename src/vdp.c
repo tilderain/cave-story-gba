@@ -184,8 +184,12 @@ void vdp_vsync() {
 // Register stuff
 
 void vdp_set_display(uint8_t enabled) {
-		return;
-	*vdp_ctrl_port = 0x8134 | (enabled ? 0x40 : 0) | (pal_mode ? 0x08 : 0);
+	return;
+    if (enabled) {
+        REG_DISPCNT &= ~0x0080; // Clear Forced Blank bit (Turn screen ON)
+    } else {
+        REG_DISPCNT |= 0x0080;  // Set Forced Blank bit (Turn screen OFF)
+    }
 }
 
 void vdp_set_autoinc(uint8_t val) {
@@ -601,6 +605,10 @@ IWRAM_CODE void vdp_sprites_update() {
     }
     temppointer2 = OBJ_COLORS + 33;
     *temppointer2 = saturate_color(palette[0]);
+
+	temppointer = OBJ_COLORS + (16*8) + 1; // fade color
+    *temppointer = (0 | (0 << 5) | (4 << 10));
+
     temppointer = BG_COLORS + 1;
     if(stage_info[stageID].tileset != NULL)
         for(int i=1; i<16; i++) { // OBJ Pal 0

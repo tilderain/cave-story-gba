@@ -136,8 +136,8 @@ typedef struct {
 } Event;
 
 // Array of pointers to each event in the current TSC
-Event headEvents[HEAD_EVENT_COUNT];
-Event stageEvents[MAX_EVENTS];
+EWRAM_DATA Event headEvents[HEAD_EVENT_COUNT];
+EWRAM_DATA Event stageEvents[MAX_EVENTS];
 uint16_t lastRunEvent = 0;
 
 const uint8_t *curCommand = NULL;

@@ -15,6 +15,7 @@
 
 #include "gba.h"
 #include "hud.h"
+#include "gbatext.h"
 
 typedef struct {
 	VDPSprite sprite;
@@ -48,11 +49,60 @@ static const uint16_t winmap[40] = {
 	bval,bval,bval,bval,bval,bval,bval,bval,bval,bval,
 };
 static const uint32_t tblack[8] = {
-	0x11111111,0x11111111,0x11111111,0x11111111,
-	0x11111111,0x11111111,0x11111111,0x11111111,
+	0x00000000,0x00000000,0x00000000,0x00000000,
+	0x00000000,0x00000000,0x00000000,0x00000000,
 };
 
 int8_t fadeSweepTimer;
+
+// GBA BG3 tilemap save buffer (32x32 = 1024 entries)
+// + saved pixel data for charbase 2 tile 0 (8 uint32_ts)
+static uint16_t bg3_map_save[1024];
+static uint32_t bg3_tile0_save[8];
+
+// GBA window / BG3 helpers for fade sweep
+static void bg3_save_screenblock(void) {
+    volatile uint16_t* map = (volatile uint16_t*)0x0600E800;
+    for(int i = 0; i < 1024; i++) bg3_map_save[i] = map[i];
+    // Also save charbase 2 tile 0 pixel data (we clobber it)
+    volatile uint32_t* tile0 = (volatile uint32_t*)0x06008000;
+    for(int i = 0; i < 8; i++) bg3_tile0_save[i] = tile0[i];
+}
+
+static void bg3_restore_screenblock(void) {
+    volatile uint16_t* map = (volatile uint16_t*)0x0600E800;
+    for(int i = 0; i < 1024; i++) map[i] = bg3_map_save[i];
+    // Restore charbase 2 tile 0 pixel data
+    volatile uint32_t* tile0 = (volatile uint32_t*)0x06008000;
+    for(int i = 0; i < 8; i++) tile0[i] = bg3_tile0_save[i];
+}
+
+static void bg3_fill_black(void) {
+    // Load black tile (all pixels = palette index 1 = opaque) into BG3 charbase 2 tile 0
+    // Address 0x06008000 = VRAM offset for charbase 2 tile 0
+    DMA3COPY(tblack, (void*)0x06008000, 8 | COPY32);
+
+    // Fill entire BG3 tilemap (screenblock 29 at 0x0600E800) with tile 0
+    for(int i = 0; i < 1024; i++)
+        ((volatile uint16_t*)0x0600E800)[i] = 0;
+}
+
+static void fade_win_enable(void) {
+    // WININ/WINOUT use bits 0-4 (NOT DISPCNT bits 8-12):
+    //   bit 0=BG0, 1=BG1, 2=BG2, 3=BG3, 4=OBJ
+    // Inside window (game side): show game BG layers and sprites
+    REG_WININ  = (1<<0) | (1<<1) | (1<<2) | (1<<4);
+    // Outside window (black side): show BG3 (black tiles) and sprites
+    REG_WINOUT = (1<<3) | (1<<4);
+    // Full-height window
+    REG_WIN0V  = (0 << 8) | SCREEN_HEIGHT;
+    // Enable WIN0 in display control
+    REG_DISPCNT |= WIN0_ON;
+}
+
+static void fade_win_disable(void) {
+    REG_DISPCNT &= ~WIN0_ON;
+}
 void effects_init() {
 	for(uint8_t i = 0; i < MAX_DAMAGE; i++) effDamage[i].ttl = 0;
 	for(uint8_t i = 0; i < MAX_SMOKE; i++) effSmoke[i].ttl = 0;
@@ -98,7 +148,7 @@ void effects_clear_smoke() {
 	for(uint8_t i = 0; i < MAX_SMOKE; i++) effSmoke[i].ttl = 0;
 }
 
-IWRAM_CODE void effects_update() {
+EWRAM_CODE void effects_update() {
 	for(uint8_t i = 0; i < MAX_DAMAGE; i++) {
     	if(!effDamage[i].ttl) continue;
     	effDamage[i].ttl--;
@@ -663,6 +713,14 @@ static void fade_setup(VDPSprite *spr0, VDPSprite *spr1, VDPSprite *spr2, uint8_
 
     // This is the solid black tile used for the window/background
     DMA_doDma(DMA_VRAM, (uint32_t) tblack, TILE_FADEINDEX*TILE_SIZE, TILE_SIZE/2, 2);
+
+    // GBA: Save BG3 tilemap, fill with black tiles, enable window
+    bg3_save_screenblock();
+    bg3_fill_black();
+    // Initialize window boundary before enabling:
+    // fade-out = full game visible, fade-in = all black
+    REG_WIN0H = fadein ? 0 : ((0 << 8) | SCREEN_WIDTH);
+    fade_win_enable();
 	// Setup sprites
 	for(uint16_t i = 0; i < (pal_mode ? 8 : 7); i++) {
 		spr0[i].y = 0x80 + i * 32;
@@ -680,23 +738,23 @@ static void fade_setup(VDPSprite *spr0, VDPSprite *spr1, VDPSprite *spr2, uint8_
 			}
 		} else {
 			if(dir) { // Start from right
-				spr0[i].x = 0x80 + SCREEN_WIDTH + 0;
-				spr1[i].x = 0x80 + SCREEN_WIDTH + 32;
-				spr2[i].x = 0x80 + SCREEN_WIDTH + 64;
+				spr0[i].x = 0x80 + SCREEN_WIDTH + 0 - 80;
+				spr1[i].x = 0x80 + SCREEN_WIDTH + 32 - 80;
+				spr2[i].x = 0x80 + SCREEN_WIDTH + 64 - 80;
 			} else { // Start from left
-				spr0[i].x = 0x80 - 32;
-				spr1[i].x = 0x80 - 64;
-				spr2[i].x = 0x80 - 96;
+				spr0[i].x = 0x80 - 32 + 80;
+				spr1[i].x = 0x80 - 64 + 80;
+				spr2[i].x = 0x80 - 96 + 80;
 			}
 		}
 		if(i == 7) {
-			spr0[i].size = SPRITE_SIZE(4,2);
-			spr1[i].size = SPRITE_SIZE(4,2);
-			spr2[i].size = SPRITE_SIZE(4,2);
+			spr0[i].size = SPRITE_SIZE(4,2) | (8 << 4);
+			spr1[i].size = SPRITE_SIZE(4,2) | (8 << 4);
+			spr2[i].size = SPRITE_SIZE(4,2) | (8 << 4);
 		} else {
-			spr0[i].size = SPRITE_SIZE(4,4);
-			spr1[i].size = SPRITE_SIZE(4,4);
-			spr2[i].size = SPRITE_SIZE(4,4);
+			spr0[i].size = SPRITE_SIZE(4,4) | (8 << 4);
+			spr1[i].size = SPRITE_SIZE(4,4) | (8 << 4);
+			spr2[i].size = SPRITE_SIZE(4,4) | (8 << 4);
 		}
 
         spr0[i].attr = TILE_ATTR(PAL0, 1, 0, (fadein?dir:!dir), TILE_HUDINDEX + 32);
@@ -705,11 +763,9 @@ static void fade_setup(VDPSprite *spr0, VDPSprite *spr1, VDPSprite *spr2, uint8_
 	}
 }
 
-void do_fadeout_sweep(uint8_t dir) {
+EWRAM_CODE void do_fadeout_sweep(uint8_t dir) {
 	fade_setup(fadeSpr[0], fadeSpr[1], fadeSpr[2], dir, FALSE);
-	// Fade loop
 	for(uint16_t f = 0; f < SCREEN_WIDTH / 16 + 6; f++) {
-		// Update Sprites
 		for(uint16_t i = 0; i < (pal_mode ? 8 : 7); i++) {
 			fadeSpr[0][i].x += dir ? -16 : 16;
 			fadeSpr[1][i].x += dir ? -16 : 16;
@@ -720,30 +776,29 @@ void do_fadeout_sweep(uint8_t dir) {
 		vdp_sprites_add(fadeSpr[2], pal_mode ? 8 : 7);
 		player_draw();
 		entities_draw();
-		//sys_wait_vblank();
-		// Update window plane
-		if(f > 5) {
-			const uint8_t x = dir ? (20 - (f-5)) | 0x80 : f-5;
-			vdp_set_window(x, 0);
+
+		int pixel_pos = (f + 1) * 16;
+		if(pixel_pos > SCREEN_WIDTH) pixel_pos = SCREEN_WIDTH;
+		if(dir) {
+			int game_right = (SCREEN_WIDTH > pixel_pos) ? (SCREEN_WIDTH - pixel_pos) : 0;
+			REG_WIN0H = (0 << 8) | game_right;
+		} else {
+			REG_WIN0H = (pixel_pos << 8) | SCREEN_WIDTH;
 		}
+		vdp_vsync();
 		ready = TRUE;
 		aftervsync();
 	}
 	vdp_colors(0, PAL_FadeOut, 64);
-	vdp_set_window(0, 0);
+	ready = TRUE;
+	aftervsync();
+	fade_win_disable();
+	bg3_restore_screenblock();
 }
-void start_fadein_sweep(uint8_t dir) {
-	fade_setup(fadeSpr[0], fadeSpr[1], fadeSpr[2], dir, TRUE);
-	fadeSweepTimer = SCREEN_WIDTH / 16 + 6;
-	fadeSweepDir = dir;
-	// Cover screen with window (black), and load target palette immediately
-	vdp_set_window(20, 0);
-	//vdp_colors_apply_next_now();
-}
-void update_fadein_sweep(void) {
+
+EWRAM_CODE void update_fadein_sweep(void) {
 	fadeSweepTimer--;
 	if(fadeSweepTimer >= 0) {
-		// Update VDPSprites
 		for(uint16_t i = 0; i < (pal_mode ? 8 : 7); i++) {
 			fadeSpr[0][i].x += fadeSweepDir ? -16 : 16;
 			fadeSpr[1][i].x += fadeSweepDir ? -16 : 16;
@@ -752,15 +807,31 @@ void update_fadein_sweep(void) {
 		vdp_sprites_add(fadeSpr[0], pal_mode ? 8 : 7);
 		vdp_sprites_add(fadeSpr[1], pal_mode ? 8 : 7);
 		vdp_sprites_add(fadeSpr[2], pal_mode ? 8 : 7);
-		// Update window plane
-		if(fadeSweepTimer > 5) {
-			const uint8_t x = fadeSweepDir ? (fadeSweepTimer-5) : (20 - (fadeSweepTimer-5)) | 0x80;
-			vdp_set_window(x, 0);
+
+		int elapsed = (SCREEN_WIDTH / 16 + 6) - fadeSweepTimer;
+		
+		// Apply the -16 offset up front for both directions
+		int pixel_pos = elapsed * 16 - 16;
+		if(pixel_pos < 0) pixel_pos = 0;
+		if(pixel_pos > SCREEN_WIDTH) pixel_pos = SCREEN_WIDTH;
+
+		if(fadeSweepDir) {
+			int game_left = SCREEN_WIDTH - pixel_pos;
+			REG_WIN0H = (game_left << 8) | SCREEN_WIDTH;
 		} else {
-			vdp_set_window(0, 0);
+			REG_WIN0H = (0 << 8) | pixel_pos;
 		}
 	} else {
-		// After the fade is done, need to restore HUD tiles we clobbered
+		fade_win_disable();
+		bg3_restore_screenblock();
 		hud_force_redraw();
 	}
+}
+
+
+
+void start_fadein_sweep(uint8_t dir) {
+	fade_setup(fadeSpr[0], fadeSpr[1], fadeSpr[2], dir, TRUE);
+	fadeSweepTimer = SCREEN_WIDTH / 16 + 6;
+	fadeSweepDir = dir;
 }
