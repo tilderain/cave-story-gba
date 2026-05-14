@@ -47,7 +47,7 @@ static int8_t hudScrollDir;      // 0 = none, 1 = next (from right), -1 = prev (
 #define SWAP_BEGIN    9
 // 4-tile block in reserved space for 2x2-compatible weapon icon repack
 // (kept outside TILE_EXWEPINDEX to avoid overlapping with swap weapon tiles)
-#define TILE_SWAPICONINDEX (TILE_RESERVEDSPACE + 60)
+#define TILE_SWAPICONINDEX (TILE_RESERVEDSPACE)
 static uint8_t swapTimer, swapDir, swapWepNum;
 
 uint8_t showing = FALSE;

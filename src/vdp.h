@@ -49,13 +49,13 @@
 #define TILE_WEAPONSIZE       6
 
 #define TILE_HUDINDEX         (TILE_WEAPONINDEX + TILE_WEAPONSIZE)
-#define TILE_HUDSIZE          64
+#define TILE_HUDSIZE          108
 
 #define TILE_NUMBERINDEX      (TILE_HUDINDEX + TILE_HUDSIZE)
-#define TILE_NUMBERSIZE       16
+#define TILE_NUMBERSIZE       24
 
-#define TILE_BRUHINDEX       (TILE_NUMBERINDEX + TILE_NUMBERSIZE)
-#define TILE_BRUHSIZE        28
+#define TILE_BRUHINDEX       (TILE_NUMBERINDEX + TILE_NUMBERSIZE) // Map name / weapon icon conflict
+#define TILE_BRUHSIZE        24
 
 #define TILE_AIRINDEX         (TILE_BRUHINDEX + TILE_BRUHSIZE)
 #define TILE_AIRSIZE          8
@@ -110,7 +110,7 @@
 #define TILE_SMOKESIZE        28
 
 #define TILE_RESERVEDSPACE    (TILE_SMOKEINDEX + TILE_SMOKESIZE)
-#define TILE_RESERVEDSIZE     64 // Deep padding buffer to prevent graphic overruns
+#define TILE_RESERVEDSIZE     8 // Deep padding buffer to prevent graphic overruns
 
 // Dynamic / Contextual Sprite Assets (loaded per stage/menu)
 #define TILE_FACEINDEX        (TILE_RESERVEDSPACE + TILE_RESERVEDSIZE)
