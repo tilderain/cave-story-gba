@@ -344,7 +344,7 @@ void player_update() {
 	if(player.damage_time > 0) {
 		player.damage_time--;
 		if(player.damage_time == 0) {
-			effect_create_damage(player.damage_value, &player, -8, -4);
+			effect_create_damage(player.damage_value, &player, 0, 0);
 			player.damage_value = 0;
 		}
 	}

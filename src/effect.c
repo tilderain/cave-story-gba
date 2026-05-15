@@ -381,13 +381,13 @@ EWRAM_CODE void effects_update() {
     	} else {
     	        if(damageFollow[i].e) {
     	            // Only move upward while ttl > 30
-    	            if(effDamage[i].ttl > 30) damageFollow[i].yoff -= effDamage[i].ttl & 1;
+    	            if(effDamage[i].ttl > 40) damageFollow[i].yoff -= effDamage[i].ttl & 1;
 	
     	            effDamage[i].x = (damageFollow[i].e->x >> CSF) + (damageFollow[i].xoff - 8);
     	            effDamage[i].y = (damageFollow[i].e->y >> CSF) + (damageFollow[i].yoff - 8);
     	        } else {
     	            // Only move upward while ttl > 30
-    	            if(effDamage[i].ttl > 30) effDamage[i].y -= effDamage[i].ttl & 1;
+    	            if(effDamage[i].ttl > 40) effDamage[i].y -= effDamage[i].ttl & 1;
     	        }
     	    }
     	sprite_pos(effDamage[i].sprite,

@@ -322,6 +322,8 @@ void hud_refresh_energy(uint8_t hard) {
         if(hudEnergy != playerWeapon[currentWeapon].energy) hudMaxBlink = 1;
 	} else {
 		hudMaxEnergy = max(weapon_info[playerWeapon[currentWeapon].type].experience[hudLevel-1], 10);
+		tempMaxEnergy = hudMaxEnergy;
+		tempEnergy = hudEnergy;
 	}
 	if(!hard) {
 		if(hudEnergyTimer == 0) {
