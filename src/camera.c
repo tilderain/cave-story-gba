@@ -145,9 +145,7 @@ void camera_update() {
 		if((x_next & 0xF000) == ((x_next + x_shake) & 0xF000)) x_next += x_shake;
 		if((y_next & 0xF000) == ((y_next + y_shake) & 0xF000)) y_next += y_shake;
 	}
-	// Shifted values
-	camera.x_shifted = (x_next >> CSF) - SCREEN_HALF_W;
-	camera.y_shifted = (y_next >> CSF) - SCREEN_HALF_H;
+	// Shifted values are assigned after morphing below
 	// Update quick fetch cutoff values
 	camera_xmin = camera.x - pixel_to_sub(SCREEN_HALF_W + 96);
 	camera_xsize = pixel_to_sub(SCREEN_WIDTH + 160);

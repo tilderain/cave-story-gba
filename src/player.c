@@ -1103,11 +1103,11 @@ void player_draw() {
 			lookingDown = FALSE;
 			player.animtime = 0;
 			if(joy_down(BUTTON_UP) && !controlsLocked) {
-				player.frame = (player.y_speed > 0) ? UPWALK2 : UPWALK1;
+				player.frame = (player.y_speed > 0) ? UPWALK1 : UPWALK2;
 			} else if(joy_down(BUTTON_DOWN) && !controlsLocked) {
 				player.frame = JUMPDN;
 			} else {
-				player.frame = (player.y_speed > 0) ? WALK2 : WALK1;
+				player.frame = (player.y_speed > 0) ? WALK1 : WALK2;
 			}
 		}
 		if((player.animtime & 1) && player.timer2 == 1) sound_play(SND_PLAYER_WALK, 2);
