@@ -21,6 +21,25 @@
 #include "gamemode.h" 
 
 u8 saturate = false;
+// Fast integer soft-clip curve
+// - 0 to 22: Untouched (Linear)
+// - 23 to 30: Compressed 2:1 (Gently eases into the brights)
+// - 31 to 38: Compressed 4:1 (Heavily compresses overblown colors)
+// - 39+: Caps at 28
+IWRAM_CODE static inline int apply_soft_clip(int val, int orig) {
+    if (orig == 31) return 31; // Always preserve pure max-intensity channels
+    if (val < 0) return 0;
+    
+    if (val <= 22) {
+        return val;
+    } else if (val <= 30) {
+        return 22 + ((val - 22) >> 1); // Maps 23-30 down to 22-26
+    } else {
+        val = 26 + ((val - 30) >> 2);  // Maps 31+ starting at 26
+        return (val > 30) ? 30 : val;  // Finally cap at 28
+    }
+}
+
 IWRAM_CODE uint16_t saturate_color(uint16_t color) {
     if(!saturate) return color;
 
@@ -28,6 +47,11 @@ IWRAM_CODE uint16_t saturate_color(uint16_t color) {
     int r = color & 0x1F;
     int g = (color >> 5) & 0x1F;
     int b = (color >> 10) & 0x1F;
+
+    // Store original values to check for max intensity later
+    int orig_r = r;
+    int orig_g = g;
+    int orig_b = b;
 
     // 2. Calculate average brightness (Grayscale)
     int gray = (r + g + b) / 3;
@@ -42,11 +66,10 @@ IWRAM_CODE uint16_t saturate_color(uint16_t color) {
     g = (g * 21) >> 4;
     b = (b * 21) >> 4;
 
-
-    // 5. Clamp strictly to 0-31 range
-    if (r < 0) r = 0; else if (r > 31) r = 31;
-    if (g < 0) g = 0; else if (g > 31) g = 31;
-    if (b < 0) b = 0; else if (b > 31) b = 31;
+    // 5. Apply Soft Clipping Curve to preserve color differentiation
+    r = apply_soft_clip(r, orig_r);
+    g = apply_soft_clip(g, orig_g);
+    b = apply_soft_clip(b, orig_b);
 
     // 6. Repack
     return (uint16_t)(r | (g << 5) | (b << 10));
