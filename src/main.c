@@ -192,7 +192,7 @@ EWRAM_CODE int main() {
 				canvas_init_fullscreen();
 				camera_init();
 				camera.target = NULL;
-				splash_main();
+				//splash_main();
 				intro_main();
 				continue;
 			}
@@ -213,7 +213,7 @@ EWRAM_CODE int main() {
 				canvas_init_fullscreen();
 				camera_init();
 				camera.target = NULL;
-				splash_main();
+				//splash_main();
 				intro_main();
 				continue;
 			}

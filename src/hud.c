@@ -37,6 +37,15 @@ uint8_t hudMaxBlink;
 // Used for bar animation
 uint8_t hudEnergyPixel, hudEnergyTimer, hudEnergyDest;
 
+// CSE2-style delayed health drain (Matches PutMyLife: gMC.lifeBr / gMC.lifeBr_count)
+// When health drops: bar stays at old value for 30 frames, then drains 1 HP/frame
+static uint8_t hudHealthBr;      // draining health value (CSE2: lifeBr)
+static uint8_t hudHealthBrTimer; // delay counter before drain starts (CSE2: lifeBr_count)
+
+// Pixel-smooth drain: bar drains 1 pixel/frame instead of jumping ~13px per HP
+// The visual bar position always tracks this; hudHealthBr updates when pixel reaches active level
+static uint8_t hudHealthBrPixel; // pixel position (0-40) for smooth bar rendering
+
 // Weapon swap scroll animation
 // Matches CSE2 gArmsEnergyX sliding: forward (next) scrolls in from right (+16px),
 // backward (prev) scrolls in from left (-16px). Slides at 2px/frame over 8 frames.
@@ -74,6 +83,7 @@ void hud_create() {
 	hudMaxHealth = hudHealth = hudWeapon = hudLevel = hudMaxAmmo = hudAmmo = 255;
     hudEnergy = hudMaxEnergy = 10;
 	hudEnergyPixel = hudEnergyTimer = hudEnergyDest = 0;
+	hudHealthBr = hudHealthBrTimer = hudHealthBrPixel = 0;
 	hudScrollOffset = 0;
 	hudScrollDir = 0;
 	hudPendingFirstShow = 1;
@@ -252,17 +262,99 @@ void hud_update() {
 void hud_refresh_health() {
 	// Redraw health if it changed
 	hudMaxHealth = max(playerMaxHealth, 1); // Just so it's impossible to divide zero
+
+	// CSE2-style delayed health drain (PutMyLife: gMC.lifeBr / gMC.lifeBr_count)
+	// Pixel-smooth: drains 1 pixel/frame after 30-frame delay, hudHealthBr
+	// updates when the pixel tracker reaches the active health level
+	if(hudHealthBr < player.health) {
+		hudHealthBr = player.health;  // Health gained: sync immediately
+		hudHealthBrTimer = 0;
+	}
+
+	if(hudHealthBr > player.health) {
+		if(++hudHealthBrTimer > 30) {
+			// Delay over — pixel-smooth drain toward active health level
+			int16_t fh_active = ((uint16_t)((player.health << 5) + (player.health << 3))) / hudMaxHealth;
+			if(hudHealthBrPixel > (uint8_t)fh_active) {
+				hudHealthBrPixel--;
+			} else {
+				// Pixel caught up — decrement HP drain value
+				hudHealthBr--;
+				if(hudHealthBr == player.health)
+				{
+					hudHealthBrTimer = 0;
+				}
+			}
+		}
+	} else {
+		hudHealthBrTimer = 0;
+	}
+
 	hudHealth = player.health;
-	// 40 * hudHealth / hudMaxHealth
-	int16_t fillHP = ((uint16_t)((hudHealth<<5) + (hudHealth<<3))) / hudMaxHealth;
+
+	// Calculate pixel fill levels
+	int16_t fillHP_active = ((uint16_t)((hudHealth<<5) + (hudHealth<<3))) / hudMaxHealth;
+	int16_t fillHP_drain  = hudHealthBrPixel;  // pixel-smooth drain value
+
+	// Sync pixel tracker if not already set (e.g. first call after init)
+	if(hudHealthBrPixel > 40 || hudHealthBrPixel < fillHP_active)
+		hudHealthBrPixel = fillHP_active;
+	if(hudHealthBrPixel < fillHP_drain)
+		hudHealthBrPixel = fillHP_drain;
+	fillHP_drain = hudHealthBrPixel;
+
+	// Build 5 health bar tiles with two-color drain effect
+	// Active health (up to fillHP_active): color 6 — normal bar fill from TS_HudBar
+	// Draining ghost (fillHP_active to fillHP_drain): color 4 — dimmed trailing bar
 	for(uint8_t i = 0; i < 5; i++) {
-		// The TS_HudBar tileset has two rows of 8 tiles, where the section of the
-		// bar is empty at tile 0 and full at tile 7
-		int16_t addrHP = min(fillHP*TSIZE, 7*TSIZE);
-		if(addrHP < 0) addrHP = 0;
-		// Fill in the bar
-		memcpy(tileData[i+3], &TS_HudBar.tiles[addrHP], TILE_SIZE);
-		fillHP -= 8;
+		int16_t tileStart = i * 8;
+
+		// Pixels of each type within this 8-pixel tile
+		int8_t activeInTile = fillHP_active - tileStart;
+		if(activeInTile < 0) activeInTile = 0;
+		if(activeInTile > 8) activeInTile = 8;
+
+		int8_t drainInTile = fillHP_drain - tileStart;
+		if(drainInTile < 0) drainInTile = 0;
+		if(drainInTile > 8) drainInTile = 8;
+
+		uint8_t *tileOut = (uint8_t*)tileData[i + 3];
+
+		if(drainInTile == 0) {
+			// No fill at all — empty tile
+			memcpy(tileOut, &TS_HudBar.tiles[0], TILE_SIZE);
+		} else if(activeInTile == drainInTile && hudHealthBr == player.health) {
+			// No drain — use normal tile directly
+			int16_t addrHP = min(drainInTile * TSIZE, 7 * TSIZE);
+			memcpy(tileOut, &TS_HudBar.tiles[addrHP], TILE_SIZE);
+		} else {
+			// Ghost base: copy drain-level tile, remap color 6 → color 4
+			int16_t addrDrain = min(drainInTile * TSIZE, 7 * TSIZE);
+			memcpy(tileOut, &TS_HudBar.tiles[addrDrain], TILE_SIZE);
+			for(uint32_t b = 0; b < TILE_SIZE; b++) {
+				uint8_t lo = tileOut[b] & 0x0F;
+				uint8_t hi = (tileOut[b] >> 4) & 0x0F;
+				if(lo == 6) lo = 4;
+				if(hi == 6) hi = 4;
+				tileOut[b] = lo | (hi << 4);
+			}
+			// Overlay active portion on top (restores original colors)
+			if(activeInTile > 0) {
+				int16_t addrActive = min(activeInTile * TSIZE, 7 * TSIZE);
+				const uint8_t *srcActive = (const uint8_t*)&TS_HudBar.tiles[addrActive];
+				for(uint32_t b = 0; b < TILE_SIZE; b++) {
+					uint8_t s = srcActive[b];
+					uint8_t d = tileOut[b];
+					uint8_t sLo = s & 0x0F;
+					uint8_t sHi = (s >> 4) & 0x0F;
+					uint8_t dLo = d & 0x0F;
+					uint8_t dHi = (d >> 4) & 0x0F;
+					if(sLo != 0) dLo = sLo;
+					if(sHi != 0) dHi = sHi;
+					tileOut[b] = dLo | (dHi << 4);
+				}
+			}
+		}
 	}
 	// Heart icon and two digits displaying current health
 	memcpy(tileData[0], &SPR_TILES(&SPR_Hud2, 0, 0)[12*TSIZE], TILE_SIZE*3);

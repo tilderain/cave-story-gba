@@ -427,7 +427,7 @@ const npc_info_def npc_info[NPC_COUNT + 9 + 20 + 17] = {
 	{ NULL, 			NOSHEET, 		PAL3, 0, &onspawn_ballos, 		&ai_ballos_f2, 		&ondeath_ballos 	,""}, // Ballos (Form 2)
 	{ NULL, 			NOSHEET, 		PAL3, 0, &onspawn_ballos, 		&ai_ballos_f3, 		&ondeath_ballos 	,""}, // Ballos (Form 3)
 	/* Splash screen */
-#ifdef SEGA_LOGO
+#ifdef TRUE
 	{ &SPR_Sega, 		NOSHEET, 		PAL0, 3, &onspawn_segalogo, 	&ai_segalogo, 		&ai_null 			,""}, // Sega Logo
 	{ &SPR_Sega2, 		NOSHEET, 		PAL0, 3, &onspawn_segalogo, 	&ai_segalogo, 		&ai_null 			,""}, // Sega Logo being crushed
 	{ &SPR_Balrog, 		NOSHEET, 		PAL1, 2, &onspawn_balrog_splash,&ai_balrog_splash, 	&ai_null 			,""}, // Balrog in splash screen

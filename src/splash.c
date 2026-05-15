@@ -22,13 +22,14 @@
 
 #include "gamemode.h"
 
+#include "bank_data.h"
 void splash_main() {
-#ifdef SEGA_LOGO
+#ifdef TRUE
 	gamemode = GM_SPLASH;
 	
 	// Init screen stuff
-	vdp_colors(0, PAL_Sega.data, 16);
-	vdp_colors(16, PAL_Sym.data, 16);
+	vdp_colors(0, PAL_Sega, 16);
+	vdp_colors(16, PAL_Sym, 16);
 	// Init some subsystems used
 	sheets_load_splash();
 	effects_init();

@@ -598,7 +598,7 @@ void ai_forcefield(Entity *e) {
 	ANIMATE(e, 1, 0,1,2,3);
 }
 
-#ifdef SEGA_LOGO
+#ifdef TRUE
 void onspawn_segalogo(Entity *e) {
 	e->alwaysActive = TRUE;
 	e->display_box = (bounding_box) { 48, 16, 48, 16 };

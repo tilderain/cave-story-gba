@@ -79,6 +79,8 @@ uint8_t blinkTime = 0;
 
 uint8_t windowOnTop = 0;
 
+static uint8_t promptWait = 0;
+
 #include "gbatext.h"
 
 static int16_t faceXOffset = 0; // Current horizontal sliding offset
@@ -316,11 +318,10 @@ uint8_t window_tick() {
 
 void window_prompt_open() {
 	promptAnswer = TRUE; // Yes is default
+	promptWait = 0;
 	sound_play(SND_MENU_PROMPT, 5);
 	// Load hand sprite and move next to yes
 	handSpr = (VDPSprite) {
-		//.x = tile_to_pixel(PROMPT_X) - 4 + 128,
-		//.y = tile_to_pixel(PROMPT_Y + 1) - 4 + 128,
 		.size = SPRITE_SIZE(2, 2),
 		.attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX)
 	};
@@ -328,15 +329,17 @@ void window_prompt_open() {
 	if(!promptAnswer) cursor_x += cfg_language == LANG_JA ? 26 : 34; // "いいえ" starts more left than "No"
 	int16_t cursor_y = (PROMPT_Y << 3) + 4;
 	sprite_pos(handSpr, cursor_x, cursor_y);
+	// Start prompt box 8px below final position (CSE2: slides up 4px/frame for 2 frames)
+	int16_t initial_ofs = 8;
 	promptSpr[0] = (VDPSprite) {
 		.x = tile_to_pixel(PROMPT_X) + 128,
-		.y = tile_to_pixel(PROMPT_Y) + 128,
+		.y = tile_to_pixel(PROMPT_Y) + 128 + initial_ofs,
 		.size = SPRITE_SIZE(4, 3) | (9 << 4),
 		.attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX+4)
 	};
 	promptSpr[1] = (VDPSprite) {
 		.x = tile_to_pixel(PROMPT_X) + 32 + 128,
-		.y = tile_to_pixel(PROMPT_Y) + 128,
+		.y = tile_to_pixel(PROMPT_Y) + 128 + initial_ofs,
 		.size = SPRITE_SIZE(4, 3) | (9 << 4),
 		.attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX+20)
 	};
@@ -367,20 +370,36 @@ uint8_t window_prompt_answer() {
 }
 
 uint8_t window_prompt_update() {
-	if(joy_pressed(btn[cfg_btn_jump])) {
-		sound_play(SND_MENU_SELECT, 5);
-		window_prompt_close();
-		return TRUE;
-	} else if(joy_pressed(BUTTON_LEFT) || joy_pressed(BUTTON_RIGHT)) {
-		promptAnswer = !promptAnswer;
-		sound_play(SND_MENU_MOVE, 5);
-		int16_t cursor_x = (PROMPT_X << 3) - 9;
-		if(!promptAnswer) cursor_x += cfg_language == LANG_JA ? 26 : 34; // "いいえ" starts more left than "No"
-		int16_t cursor_y = (PROMPT_Y << 3) + 4;
-		sprite_pos(handSpr, cursor_x, cursor_y);
+	promptWait++;
+
+	// CSE2: slide prompt box up 4px/frame for first 2 frames
+	int16_t y_ofs = 0;
+	if (promptWait < 2)
+		y_ofs = (2 - promptWait) * 4; // wait=1 → +4, wait=2 → 0
+	promptSpr[0].y = tile_to_pixel(PROMPT_Y) + 128 + y_ofs;
+	promptSpr[1].y = tile_to_pixel(PROMPT_Y) + 128 + y_ofs;
+
+	// Only process input after wait > 16 (CSE2 behavior)
+	if (promptWait > 16) {
+		if (joy_pressed(btn[cfg_btn_jump])) {
+			sound_play(SND_MENU_SELECT, 5);
+			window_prompt_close();
+			return TRUE;
+		} else if (joy_pressed(BUTTON_LEFT) || joy_pressed(BUTTON_RIGHT)) {
+			promptAnswer = !promptAnswer;
+			sound_play(SND_MENU_MOVE, 5);
+			int16_t cursor_x = (PROMPT_X << 3) - 9;
+			if (!promptAnswer) cursor_x += cfg_language == LANG_JA ? 26 : 34;
+			int16_t cursor_y = (PROMPT_Y << 3) + 4;
+			sprite_pos(handSpr, cursor_x, cursor_y);
+		}
 	}
-    vdp_sprite_add(&handSpr);
-    vdp_sprites_add(promptSpr, 2);
+
+	// Cursor appears at wait >= 16 (CSE2: flashes once at wait == 16)
+	if (promptWait >= 16)
+		vdp_sprite_add(&handSpr);
+
+	vdp_sprites_add(promptSpr, 2);
 	return FALSE;
 }
 

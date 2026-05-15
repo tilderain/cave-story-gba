@@ -13,6 +13,7 @@ Various, details [here](doc/LICENSE.md)
 - gbadev discord: Moral support
 - Řrřola: Org2XM
 - Livvy94: Cave Story SNES Soundtrack
+- Wirelex.exe: Pixel logo
 - Ravenworks
 - Pixel
 
