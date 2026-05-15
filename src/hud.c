@@ -195,6 +195,7 @@ void hud_hide() {
 	showing = FALSE;
 }
 
+
 void hud_update() {
 	uint8_t weaponChange = FALSE;
 	//if(paused) return;
@@ -235,8 +236,9 @@ void hud_update() {
 	if(swapWepNum > 0) {
 		vdp_sprites_add(sprSwap, swapWepNum > 2 ? 2 : 1);
 	}
-	// Only refresh one part of the HUD in a single frame, at most 8 tiles will be sent
-	if(hudMaxHealth != playerMaxHealth || hudHealth != player.health) {
+	
+	// FIX: Keep refreshing health while the delayed drain value hasn't caught up
+	if(hudMaxHealth != playerMaxHealth || hudHealth != player.health || hudHealthBr > player.health) {
 		hud_refresh_health();
 	}
     if(hudScrollDir == 0 && hudWeapon != playerWeapon[currentWeapon].type) {
@@ -259,31 +261,28 @@ void hud_update() {
 	//}
 }
 
+
 void hud_refresh_health() {
 	// Redraw health if it changed
 	hudMaxHealth = max(playerMaxHealth, 1); // Just so it's impossible to divide zero
 
 	// CSE2-style delayed health drain (PutMyLife: gMC.lifeBr / gMC.lifeBr_count)
-	// Pixel-smooth: drains 1 pixel/frame after 30-frame delay, hudHealthBr
-	// updates when the pixel tracker reaches the active health level
 	if(hudHealthBr < player.health) {
 		hudHealthBr = player.health;  // Health gained: sync immediately
 		hudHealthBrTimer = 0;
 	}
 
 	if(hudHealthBr > player.health) {
-		if(++hudHealthBrTimer > 30) {
+		if(hudHealthBrTimer < 255) hudHealthBrTimer++;
+		if(hudHealthBrTimer > 30) {
 			// Delay over — pixel-smooth drain toward active health level
 			int16_t fh_active = ((uint16_t)((player.health << 5) + (player.health << 3))) / hudMaxHealth;
 			if(hudHealthBrPixel > (uint8_t)fh_active) {
 				hudHealthBrPixel--;
 			} else {
-				// Pixel caught up — decrement HP drain value
-				hudHealthBr--;
-				if(hudHealthBr == player.health)
-				{
-					hudHealthBrTimer = 0;
-				}
+				// Pixel caught up — snap HP drain value 
+				hudHealthBr = player.health;
+				hudHealthBrTimer = 0;
 			}
 		}
 	} else {
@@ -296,71 +295,51 @@ void hud_refresh_health() {
 	int16_t fillHP_active = ((uint16_t)((hudHealth<<5) + (hudHealth<<3))) / hudMaxHealth;
 	int16_t fillHP_drain  = hudHealthBrPixel;  // pixel-smooth drain value
 
-	// Sync pixel tracker if not already set (e.g. first call after init)
+	// Sync pixel tracker if not already set
 	if(hudHealthBrPixel > 40 || hudHealthBrPixel < fillHP_active)
 		hudHealthBrPixel = fillHP_active;
 	if(hudHealthBrPixel < fillHP_drain)
 		hudHealthBrPixel = fillHP_drain;
 	fillHP_drain = hudHealthBrPixel;
 
-	// Build 5 health bar tiles with two-color drain effect
-	// Active health (up to fillHP_active): color 6 — normal bar fill from TS_HudBar
-	// Draining ghost (fillHP_active to fillHP_drain): color 4 — dimmed trailing bar
+	// Build 5 health bar tiles from initial transparent values, directly setting the pixel colors
 	for(uint8_t i = 0; i < 5; i++) {
 		int16_t tileStart = i * 8;
-
-		// Pixels of each type within this 8-pixel tile
-		int8_t activeInTile = fillHP_active - tileStart;
-		if(activeInTile < 0) activeInTile = 0;
-		if(activeInTile > 8) activeInTile = 8;
-
-		int8_t drainInTile = fillHP_drain - tileStart;
-		if(drainInTile < 0) drainInTile = 0;
-		if(drainInTile > 8) drainInTile = 8;
-
 		uint8_t *tileOut = (uint8_t*)tileData[i + 3];
 
-		if(drainInTile == 0) {
-			// No fill at all — empty tile
-			memcpy(tileOut, &TS_HudBar.tiles[0], TILE_SIZE);
-		} else if(activeInTile == drainInTile && hudHealthBr == player.health) {
-			// No drain — use normal tile directly
-			int16_t addrHP = min(drainInTile * TSIZE, 7 * TSIZE);
-			memcpy(tileOut, &TS_HudBar.tiles[addrHP], TILE_SIZE);
-		} else {
-			// Ghost base: copy drain-level tile, remap color 6 → color 4
-			int16_t addrDrain = min(drainInTile * TSIZE, 7 * TSIZE);
-			memcpy(tileOut, &TS_HudBar.tiles[addrDrain], TILE_SIZE);
-			for(uint32_t b = 0; b < TILE_SIZE; b++) {
-				uint8_t lo = tileOut[b] & 0x0F;
-				uint8_t hi = (tileOut[b] >> 4) & 0x0F;
-				if(lo == 6) lo = 4;
-				if(hi == 6) hi = 4;
-				tileOut[b] = lo | (hi << 4);
+		// Draw the empty TS_HudBar tile underneath as the base background
+		// (Index 0 is the empty health bar frame)
+		memcpy(tileOut, &TS_HudBar.tiles[0], TILE_SIZE);
+
+		for(uint8_t x = 0; x < 8; x++) {
+			int16_t px = tileStart + x;
+			uint8_t color;
+			
+			if (px < fillHP_active) {
+				color = 6; // Active health (red pixels)
+			} else if (px < fillHP_drain) {
+				color = 4; // Draining health (ghost pixels)
+			} else {
+				color = 5; // Empty pixels
 			}
-			// Overlay active portion on top (restores original colors)
-			if(activeInTile > 0) {
-				int16_t addrActive = min(activeInTile * TSIZE, 7 * TSIZE);
-				const uint8_t *srcActive = (const uint8_t*)&TS_HudBar.tiles[addrActive];
-				for(uint32_t b = 0; b < TILE_SIZE; b++) {
-					uint8_t s = srcActive[b];
-					uint8_t d = tileOut[b];
-					uint8_t sLo = s & 0x0F;
-					uint8_t sHi = (s >> 4) & 0x0F;
-					uint8_t dLo = d & 0x0F;
-					uint8_t dHi = (d >> 4) & 0x0F;
-					if(sLo != 0) dLo = sLo;
-					if(sHi != 0) dHi = sHi;
-					tileOut[b] = dLo | (dHi << 4);
+
+			// Draw only rows 2 to 5 (leaving the background's top/bottom borders intact)
+			for(uint8_t y = 2; y < 6; y++) {
+				uint8_t b = y * 4 + (x / 2); // 4 bytes per row
+				if(x % 2 == 0) {
+					tileOut[b] = (tileOut[b] & 0x0F) | (color << 4); // Left pixel (High nibble)
+				} else {
+					tileOut[b] = (tileOut[b] & 0xF0) | color;        // Right pixel (Low nibble)
 				}
 			}
 		}
 	}
+
 	// Heart icon and two digits displaying current health
 	memcpy(tileData[0], &SPR_TILES(&SPR_Hud2, 0, 0)[12*TSIZE], TILE_SIZE*3);
 	uint8_t digit = div10[hudHealth];
 	if(digit) {
-		// Overlay tens digit on top of tileData[1] (palette index 0 = transparent)
+		// Overlay tens digit on top of tileData[1]
 		const uint8_t *src = (const uint8_t*)&TS_Numbers.tiles[(digit)*TSIZE];
 		uint8_t *dst = (uint8_t*)tileData[1];
 		for(uint32_t i = 0; i < TILE_SIZE; i++) {
@@ -384,12 +363,8 @@ void hud_refresh_health() {
 		}
 	}
 	// Queue DMA transfer for health display
-	// Heart+digit at TILE_HUDINDEX+32 (sprite tile 160, DMA 96-97)
-	// HP bar at TILE_HUDINDEX+42 (sprite tile 164, DMA 106-107, internal pos 2,1)
 	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[0], (TILE_HUDINDEX+32)*TILE_SIZE, 24, 2);
-	// First bar half → last tile of sprHUD[2] + sprHUD[2] bottom row
 	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[3], (TILE_HUDINDEX+33)*TILE_SIZE + 16, 8, 2);
-	// Second bar half → sprHUD[3]
 	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[4], (TILE_HUDINDEX+42)*TILE_SIZE, 32, 2);
 }
 
