@@ -425,6 +425,15 @@ void hud_refresh_swap(uint8_t force) {
 	if(force) swapTimer = 0;
 	if(force || swapTimer == SWAP_BEGIN) {
 		swapWepNum = 0;
+
+		// Pre-count total available weapons for stride calculation
+		uint8_t total = 0;
+		for(uint8_t wep = currentWeapon + 1; ; wep++) {
+			if(wep >= MAX_WEAPONS) wep = 0;
+			if(wep == currentWeapon) break;
+			if(playerWeapon[wep].type != WEAPON_NONE) total++;
+		}
+
 		for(uint8_t wep = currentWeapon + 1; ; wep++) {
 			if(wep >= MAX_WEAPONS) wep = 0;
 			if(wep == currentWeapon) break;
@@ -432,13 +441,15 @@ void hud_refresh_swap(uint8_t force) {
 			uint8_t type = playerWeapon[wep].type;
 			if(type == WEAPON_NONE) continue;
 
-			// 32x16 sprite holds 2 weapons side-by-side (16x16 each)
-			// Sprite 0: cols 0-1 (weapon 0), cols 2-3 (weapon 1)
-			// Sprite 1: cols 0-1 (weapon 2), cols 2-3 (weapon 3)
-			// In 1D OBJ mapping with sprite width 4:
-			//   TL@+0, TR@+1, BL@+4, BR@+5  (weapon at cols 0-1)
-			//   TL@+2, TR@+3, BL@+6, BR@+7  (weapon at cols 2-3)
-			uint16_t baseTile = TILE_EXWEPINDEX + (swapWepNum >> 1) * 8;
+			// Each sprite is 32x16 (4 tiles wide, 2 tiles tall) except when it holds
+			// only 1 weapon (total=1 for sprite 0, total=3 for sprite 1) → 16x16.
+			// VDP reads tiles consecutively left-to-right, top-to-bottom:
+			//   32x16: TL@+0, TR@+1, BL@+4, BR@+5 for cols 0-1 (stride 4)
+			//            TL@+2, TR@+3, BL@+6, BR@+7 for cols 2-3
+			//   16x16: TL@+0, TR@+1, BL@+2, BR@+3 (stride 2)
+			uint8_t spriteIdx = swapWepNum >> 1;
+			uint8_t stride = ((spriteIdx == 0 && total == 1) || (spriteIdx == 1 && total == 3)) ? 2 : 4;
+			uint16_t baseTile = TILE_EXWEPINDEX + spriteIdx * 8;
 			uint16_t colOff = (swapWepNum & 1) * 2; // 0 for cols 0-1, 2 for cols 2-3
 
 			const uint32_t *src = SPR_TILES(&SPR_ArmsImage, 0, type);
@@ -447,9 +458,9 @@ void hud_refresh_swap(uint8_t force) {
 			// Top-right tile
 			DMA_queueDma(DMA_VRAM, (uint32_t)(src + 8),  (baseTile + colOff + 1) * 16, 8, 2);
 			// Bottom-left tile
-			DMA_queueDma(DMA_VRAM, (uint32_t)(src + 16), (baseTile + colOff + 4) * 16, 8, 2);
+			DMA_queueDma(DMA_VRAM, (uint32_t)(src + 16), (baseTile + colOff + stride) * 16, 8, 2);
 			// Bottom-right tile
-			DMA_queueDma(DMA_VRAM, (uint32_t)(src + 24), (baseTile + colOff + 5) * 16, 8, 2);
+			DMA_queueDma(DMA_VRAM, (uint32_t)(src + 24), (baseTile + colOff + stride + 1) * 16, 8, 2);
 
 			swapWepNum++;
 		}
