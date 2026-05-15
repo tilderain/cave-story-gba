@@ -130,3 +130,5 @@ void canvas_init_fullscreen(void);
 void canvas_shift_pixels_up_2();
 
 extern uint8_t s_canvas_is_fullscreen;
+
+void canvas_fix_tilemap(uint8_t on_top);

@@ -1131,8 +1131,8 @@ void player_draw() {
 				sub_to_pixel(player.x) - sub_to_pixel(camera.x) + SCREEN_HALF_W - 8,
 				sub_to_pixel(player.y) - sub_to_pixel(camera.y) + SCREEN_HALF_H - 8);
 
-		if(tscState == TSC_IDLE)
-			vdp_map_clear(VDP_PLAN_W);
+		//if(tscState == TSC_IDLE)
+		//	vdp_map_clear(VDP_PLAN_W);
 		//int x = sub_to_pixel(player.x) - sub_to_pixel(camera.x) + SCREEN_HALF_W - 8;
 		//int y = sub_to_pixel(player.y) - sub_to_pixel(camera.y) + SCREEN_HALF_H - 8;
 		//x = (x + 4) / 8; y = (y + 80) / 8;

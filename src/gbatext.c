@@ -180,6 +180,20 @@ void canvas_init(void) {
     BG3HOFS = 0;
     BG3VOFS = 0;
 }
+
+void canvas_fix_tilemap(uint8_t on_top) {
+    int map_row = on_top ? 1 : 14;  
+    int map_col = 2; 
+
+    // Re-point the tilemap entries to the canvas VRAM tiles
+    // We do NOT call canvas_clear() here so existing text stays
+    for (int row = 0; row < 8; row++) { 
+        for (int col = 0; col < CANVAS_TILES_W; col++) {
+            int tile_idx = CANVAS_TILE_BASE + (row * CANVAS_TILES_W) + col;
+            BG3_MAP_BASE[(map_row + row) * 32 + (map_col + col)] = (uint16_t)(tile_idx | (2 << 12));
+        }
+    }
+}
 // ---------------------------------------------------------------------------
 // canvas_clear - zero all canvas tile pixel data (makes canvas transparent)
 // ---------------------------------------------------------------------------

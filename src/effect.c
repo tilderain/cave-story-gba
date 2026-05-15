@@ -18,6 +18,7 @@
 #include "gbatext.h"
 
 #include "stage.h"
+#include "window.h"
 typedef struct {
 	VDPSprite sprite;
 	uint8_t type, ttl, timer, timer2;
@@ -296,18 +297,27 @@ EWRAM_CODE void start_fadein_sweep(uint8_t dir) {
 }
 
 // Per-frame step for non-blocking fade-in
+
 EWRAM_CODE void update_fadein_sweep(void) {
     if (gFade.mode != 0) {
         proc_fade();
         put_fade_bg3();
         
         if (gFade.mode == 0) {
-            fadeSweepTimer = -1; // Fade finished!
-            // Fade complete: restore BG3 state
-            volatile uint16_t* map = (volatile uint16_t*)0x0600E800;
-            for (int i = 0; i < 1024; i++) map[i] = bg3_map_save[i];
-            volatile uint32_t* tile0 = (volatile uint32_t*)0x06008000;
-            for (int i = 0; i < 8; i++) tile0[i] = bg3_tile0_save[i];
+            fadeSweepTimer = -1; 
+
+            if (windowOpen) {
+                // If a script started showing text during the fade,
+                // fix the tilemap entries so the text remains visible.
+                canvas_fix_tilemap(windowOnTop);
+            } else {
+                // If no window is active, we can safely clear the map
+                volatile uint16_t* map = (volatile uint16_t*)0x0600E800;
+                for (int i = 0; i < 1024; i++) map[i] = 0;
+            }
+            
+            // Note: We skip restoring bg3_tile0_save here because 
+            // the canvas system manages its own VRAM tiles.
             
             hud_force_redraw();
         }

@@ -70,6 +70,8 @@ IWRAM_CODE void game_main(uint8_t load) {
 	}
 	paused = FALSE;
 
+	vdp_map_clear(VDP_PLAN_W);
+
 	while(TRUE) {
 		PF_BGCOLOR(0x000);
 

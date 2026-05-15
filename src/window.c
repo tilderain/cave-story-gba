@@ -79,6 +79,8 @@ uint8_t blinkTime = 0;
 
 uint8_t windowOnTop = 0;
 
+uint8_t windowCleared = 1;
+
 static uint8_t promptWait = 0;
 
 #include "gbatext.h"
@@ -119,6 +121,8 @@ void window_open(uint8_t mode) {
     //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(8), WINDOW_X2, wy2);
 
     window_clear();
+
+    windowCleared = 0;
     
     if(!paused) {
         if(showingFace > 0) window_draw_face();
@@ -174,6 +178,15 @@ void window_close(void) {
 	}
 	showingItem = 0;
 	windowOpen = FALSE;
+
+
+    if(!windowCleared)
+    {
+        windowCleared = true;
+	    // Clear the tilemap so the window and canvas immediately disappear
+	    vdp_map_clear(VDP_PLAN_W);
+    }
+
     //if(textMode == TM_MSG) textMode = TM_NORMAL;
 	canvas_clear();
 }
