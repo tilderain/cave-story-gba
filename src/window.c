@@ -42,7 +42,7 @@
 #define TEXT_Y2_TOP (WINDOW_Y2_TOP - 1) // Row 5
 
 // Prompt window location (Yes/No dialog)
-#define PROMPT_X 18                   // Centered for GBA width
+#define PROMPT_X 22                   // Centered for GBA width
 #define PROMPT_Y 11                   // Placed perfectly above the bottom window
 
 #define ITEM_Y_START	(SCREEN_HALF_H + 128)
@@ -376,6 +376,7 @@ uint8_t window_prompt_update() {
 	int16_t y_ofs = 0;
 	if (promptWait < 2)
 		y_ofs = (2 - promptWait) * 4; // wait=1 → +4, wait=2 → 0
+    if(promptWait > 200) promptWait = 200;
 	promptSpr[0].y = tile_to_pixel(PROMPT_Y) + 128 + y_ofs;
 	promptSpr[1].y = tile_to_pixel(PROMPT_Y) + 128 + y_ofs;
 
