@@ -409,16 +409,16 @@ void hud_refresh_weapon() {
 	hudWeapon = playerWeapon[currentWeapon].type;
 	memcpy(tileData[WPN+0], SPR_TILES(&SPR_ArmsImage, 0, hudWeapon), TILE_SIZE*2);
 	memcpy(tileData[WPN+2], &SPR_TILES(&SPR_ArmsImage, 0, hudWeapon)[TSIZE*2], TILE_SIZE*2);
-	// Queue DMA transfer for icon overlay (repacked as 2x2-compatible)
+	// Queue DMA transfer for icon overlay (4 consecutive tiles: TL, TR, BL, BR)
 	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[WPN+0], TILE_SWAPICONINDEX * 16, 16, 2);
-	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[WPN+2], (TILE_SWAPICONINDEX + 1) * 16, 16, 2);
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[WPN+2], (TILE_SWAPICONINDEX + 2) * 16, 16, 2);
 }
 
 void hud_swap_weapon(uint8_t dir) {
 	swapTimer = SWAP_BEGIN;
 	swapDir = dir;
-	sprSwap[0].x += swapDir ? 18 : -18;
-	sprSwap[1].x += swapDir ? 18 : -18;
+	sprSwap[0].x = 16 + 64 + 128 + (dir ? 18 : -18);
+	sprSwap[1].x = 16 + 96 + 128 + (dir ? 18 : -18);
 }
 
 void hud_refresh_swap(uint8_t force) {
