@@ -1164,8 +1164,8 @@ void player_draw() {
                 arms_y -= 8;
                 // Vertical gun shifts horizontally based on direction to stay in hand
                 arms_x = (player.dir == 0) ? (px - 6) : (px - 2); 
-            } else if(player.frame == 6 || player.frame == 7) { 
-                // LOOKDOWN or JUMP-DOWN
+            } else if(player.frame == 7) {
+                // JUMP-DOWN
                 vert = 1; vdir = 1;
                 arms_y += 6; // Lowered for downward aim
                 arms_x = (player.dir == 0) ? (px - 6) : (px - 2);

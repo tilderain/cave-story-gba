@@ -1,9 +1,6 @@
 #pragma once
 #include <malloc.h>
-//GBATODO
-#define SYS_hardReset() /*__asm__("move   #0x2700,%sr\n\t" \
-                                "move.l (0),%a7\n\t"     \
-                                "jmp    _hard_reset")*/
+void SYS_hardReset();
 
 //GBATODO
 #define enable_ints //__asm__("move #0x2500,%sr")

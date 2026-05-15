@@ -33,6 +33,11 @@
 uint8_t gamemode = 0;
 uint8_t paused = 0;
 uint8_t gameFrozen = 0;
+uint8_t hardReset = 0;
+
+void SYS_hardReset() {
+	hardReset = 1;
+}
 
 // On PAL the screen height is 16 pixels more, so these can't be constants
 uint8_t SCREEN_HALF_H = 0;
@@ -141,6 +146,7 @@ IWRAM_CODE void game_main(uint8_t load) {
 				if(rtn > 0) {
 					if(rtn == 1) { // Return to title screen
 						SYS_hardReset();
+						break;
 					} else if(rtn == 2) {
 						vdp_colors(0, PAL_FadeOut, 64);
 						vdp_color(15, 0x000);

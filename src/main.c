@@ -5,6 +5,7 @@
 #include "common.h"
 
 #include "audio.h"
+#include "camera.h"
 #include "dma.h"
 #include "effect.h"
 #include "error.h"
@@ -181,6 +182,20 @@ EWRAM_CODE int main() {
 			canvas_clear();
 			canvas_setup_tilemap(0);
 			game_main(select);
+			if(hardReset) {
+				//RegisterRamReset(RESET_VRAM | RESET_OAM);
+				vdp_init();
+				//REG_DISPCNT &= ~0x0080; // Clear Forced Blank bit (Turn screen ON)
+				hardReset = 0;
+				song_stop();
+				vdp_sprites_clear();
+				canvas_init_fullscreen();
+				camera_init();
+				camera.target = NULL;
+				splash_main();
+				intro_main();
+				continue;
+			}
 			credits_main();
 		} else if(select == 2) {
 			soundtest_main();
@@ -188,6 +203,20 @@ EWRAM_CODE int main() {
 			config_main();
 		} else {
 			game_main(select);
+			if(hardReset) {
+				hardReset = 0;
+				song_stop();
+				vdp_set_display(FALSE);
+				vdp_map_clear(VDP_PLAN_A);
+				vdp_map_clear(VDP_PLAN_B);
+				vdp_sprites_clear();
+				canvas_init_fullscreen();
+				camera_init();
+				camera.target = NULL;
+				splash_main();
+				intro_main();
+				continue;
+			}
 			credits_main();
 		}
     }

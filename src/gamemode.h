@@ -14,6 +14,7 @@ enum GameMode {
 };
 
 extern uint8_t gamemode;
+extern uint8_t hardReset;
 extern uint8_t paused;
 extern uint8_t gameFrozen;
 

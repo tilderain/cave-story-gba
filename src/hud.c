@@ -42,6 +42,7 @@ uint8_t hudEnergyPixel, hudEnergyTimer, hudEnergyDest;
 // backward (prev) scrolls in from left (-16px). Slides at 2px/frame over 8 frames.
 static int8_t hudScrollOffset;   // current pixel offset: -16 to 16, 0 = normal
 static int8_t hudScrollDir;      // 0 = none, 1 = next (from right), -1 = prev (from left)
+static uint8_t hudPendingFirstShow; // 1 while waiting to do first-show slide-in
 
 // Used for weapon switch display (all weapons shown during swap)
 #define SWAP_BEGIN    9
@@ -75,6 +76,7 @@ void hud_create() {
 	hudEnergyPixel = hudEnergyTimer = hudEnergyDest = 0;
 	hudScrollOffset = 0;
 	hudScrollDir = 0;
+	hudPendingFirstShow = 1;
 	swapTimer = swapDir = swapWepNum = 0;
 	// Create the sprites
 	sprHUD[0] = (VDPSprite) {
@@ -169,6 +171,14 @@ void hud_force_energy() {
 
 void hud_show() {
 	showing = TRUE;
+	if(hudPendingFirstShow) {
+		hudPendingFirstShow = 0;
+		hudScrollDir = 1;
+		hudScrollOffset = 16;
+		sprHUD[0].x = (16 + 128) + 16;
+		sprHUD[1].x = (16 + 32 + 128) + 16;
+		sprSwap[2].x = (16 + 128) + 16;
+	}
 }
 
 void hud_hide() {
@@ -393,15 +403,20 @@ void hud_refresh_weapon() {
 	else if(diff < -2) diff += MAX_WEAPONS; // wrap forward:  4→0 → diff=1
 
 	if(hudLastWeaponIdx == 0xFF) {
-		// First load — no scroll animation
-		hudScrollDir = 0;
-		hudScrollOffset = 0;
+		// First load — tile load only, scroll is handled by hud_show() on first show
 	} else if(diff > 0) {
 		hudScrollDir = 1;      // forward → scroll in from right
 		hudScrollOffset = 16;
-	} else {
+	} else if(diff < 0) {
 		hudScrollDir = -1;     // backward → scroll in from left
 		hudScrollOffset = -16;
+	}
+	// diff == 0: no weapon change — leave existing scroll state alone (don't kill in-progress animation)
+	// Apply scroll offset to sprite positions immediately if scrolling
+	if(hudScrollDir != 0) {
+		sprHUD[0].x = (16 + 128) + hudScrollOffset;
+		sprHUD[1].x = (16 + 32 + 128) + hudScrollOffset;
+		sprSwap[2].x = (16 + 128) + hudScrollOffset;
 	}
 	hudLastWeaponIdx = newIdx;
 
