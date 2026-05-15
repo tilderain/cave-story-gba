@@ -294,8 +294,11 @@ void hud_refresh_health() {
 	// Queue DMA transfer for health display
 	// Heart+digit at TILE_HUDINDEX+32 (sprite tile 160, DMA 96-97)
 	// HP bar at TILE_HUDINDEX+42 (sprite tile 164, DMA 106-107, internal pos 2,1)
-	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[0], (TILE_HUDINDEX+32)*TILE_SIZE, 32, 2);
-	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[3], (TILE_HUDINDEX+42)*TILE_SIZE, 32, 2);
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[0], (TILE_HUDINDEX+32)*TILE_SIZE, 24, 2);
+	// First bar half → last tile of sprHUD[2] + sprHUD[2] bottom row
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[3], (TILE_HUDINDEX+33)*TILE_SIZE + 16, 8, 2);
+	// Second bar half → sprHUD[3]
+	DMA_queueDma(DMA_VRAM, (uint32_t)tileData[4], (TILE_HUDINDEX+42)*TILE_SIZE, 32, 2);
 }
 
 void hud_refresh_energy(uint8_t hard) {
