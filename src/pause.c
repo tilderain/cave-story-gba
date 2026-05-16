@@ -21,6 +21,7 @@
 #include "vdp.h"
 #include "weapon.h"
 #include "window.h"
+#include "gbatext.h"
 #include "xgm.h"
 
 #include "pause.h"
@@ -29,10 +30,37 @@
 VDPSprite itemSprite[MAX_ITEMS][2];
 int8_t selectedItem = 0;
 
+// Draw window frame tiles on BG3 as the inventory background
+static void draw_inventory_bg(void) {
+    uint16_t pal = (6 << 12); // Same palette as window_draw_frame (PAL_textbox)
+    BG3HOFS = 0; // Reset scroll
+
+    // Row 0: Top border (TL corner, top edge tiles, TR corner)
+    BG3_MAP_BASE[1] = (TILE_WINDOWINDEX_BG + 0) | pal;
+    for (int col = 2; col < 28; col++)
+        BG3_MAP_BASE[col] = (TILE_WINDOWINDEX_BG + 1) | pal;
+    BG3_MAP_BASE[28] = (TILE_WINDOWINDEX_BG + 2) | pal;
+
+    // Rows 1-10: Content rows (L edge, fill, R edge)
+    for (int row = 1; row < 11; row++) {
+        BG3_MAP_BASE[row * 32 + 1] = (TILE_WINDOWINDEX_BG + 3) | pal;  // L edge
+        for (int col = 2; col < 28; col++)
+            BG3_MAP_BASE[row * 32 + col] = (TILE_WINDOWINDEX_BG + 4) | pal;  // fill
+        BG3_MAP_BASE[row * 32 + 28] = (TILE_WINDOWINDEX_BG + 5) | pal;  // R edge
+    }
+
+    // Row 11: Bottom border (BL corner, bottom edge, BR corner)
+    // Stops before the textbox window which starts at row 12
+    BG3_MAP_BASE[11 * 32 + 1] = (TILE_WINDOWINDEX_BG + 6) | pal;
+    for (int col = 2; col < 28; col++)
+        BG3_MAP_BASE[11 * 32 + col] = (TILE_WINDOWINDEX_BG + 7) | pal;
+    BG3_MAP_BASE[11 * 32 + 28] = (TILE_WINDOWINDEX_BG + 8) | pal;
+}
+
 void draw_itemmenu(uint8_t resetCursor) {
     vdp_set_display(FALSE);
     vdp_sprites_clear();
-    uint8_t top = pal_mode ? 1 : 0;
+    int8_t top = -2;
     // Fill the top part
     uint16_t y = top;
     //vdp_map_xy(VDP_PLAN_W, 0, 0, y);
@@ -63,6 +91,9 @@ void draw_itemmenu(uint8_t resetCursor) {
     vdp_tiles_load_from_rom(TS_ItemSel.tiles, TILE_FACEINDEX, TS_ItemSel.numTile);
     // Redraw message box at the bottom of the screen
     window_open(FALSE);
+    // Draw window frame tiles on BG3 as inventory background
+    // (must be after window_open since it clears BG3_MAP_BASE)
+    draw_inventory_bg();
     // Load tiles for the font letters
 #define LOAD_LETTER(c,in) (vdp_tiles_load_from_rom(TS_MsgFont.tiles+((c-0x20)<<3),      \
 						   TILE_HUDINDEX+in,1))

@@ -195,12 +195,12 @@ void window_close(void) {
     if(!windowCleared)
     {
         windowCleared = true;
-        
+
         // Check if there is an active fade or full-black state
         if (gFade.bMask || gFade.mode != 0) {
             // Restore the fade blocks into the region we just closed
-            put_fade_bg3(); 
-        } else {
+            put_fade_bg3();
+        } else if (!paused) {
 	        // Clear the tilemap so the window and canvas immediately disappear
 	        vdp_map_clear(VDP_PLAN_W);
         }

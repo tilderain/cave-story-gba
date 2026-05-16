@@ -319,9 +319,15 @@ void canvas_setup_tilemap(uint8_t on_top) {
     int map_row = on_top ? 1 : 13;
     int map_col = 2;
 
-    // If there is NO fade active and NO full black mask, clear the whole map
+    // If there is NO fade active and NO full black mask, clear the map area
     if (!gFade.bMask && gFade.mode == 0) {
-        for (int i = 0; i < 1024; i++) BG3_MAP_BASE[i] = 0;
+        // Only clear the dialog area rows to preserve content outside it
+        // (e.g. inventory background on rows 0-11)
+        int clear_start = on_top ? 0 : 12;
+        int clear_end = on_top ? 7 : 20;
+        for (int row = clear_start; row < clear_end; row++)
+            for (int col = 0; col < 32; col++)
+                BG3_MAP_BASE[row * 32 + col] = 0;
     }
 
     // IMPORTANT: Only map 6 rows of tiles to the screen

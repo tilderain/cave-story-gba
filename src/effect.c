@@ -68,11 +68,12 @@ EWRAM_CODE static void fade_generate_tiles(void) {
 EWRAM_CODE void put_fade_bg3(void) {
     volatile uint16_t* map = (volatile uint16_t*)0x0600E800;
     
-    // Define the boundaries of the window tilemap
-    int w_x1 = 2;
-    int w_x2 = 2 + 26; // 28
-    int w_y1 = windowOnTop ? 1 : 14;
-    int w_y2 = w_y1 + 8;
+    // Define the boundaries of the window tilemap (in tile coordinates)
+    // Window frame occupies tile columns 1-28 and rows 12-19 (bottom) or 0-6 (top)
+    int w_x1 = 1;
+    int w_x2 = 29;
+    int w_y1 = windowOnTop ? 0 : 12;
+    int w_y2 = windowOnTop ? 7 : 20;
     
     for (int y = 0; y < FADE_GRID_H; y++) {
         for (int x = 0; x < FADE_GRID_W; x++) {

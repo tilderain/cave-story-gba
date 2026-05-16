@@ -212,13 +212,13 @@ EWRAM_CODE int main() {
 		} else if(select == 3) {
 			config_main();
 		} else {
+			canvas_clear();
+			canvas_setup_tilemap(0);
 			game_main(select);
 			if(hardReset) {
+				vdp_init();
 				hardReset = 0;
 				song_stop();
-				vdp_set_display(FALSE);
-				vdp_map_clear(VDP_PLAN_A);
-				vdp_map_clear(VDP_PLAN_B);
 				vdp_sprites_clear();
 				canvas_init_fullscreen();
 				camera_init();
