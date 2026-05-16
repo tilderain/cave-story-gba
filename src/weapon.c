@@ -923,26 +923,42 @@ void bullet_update_machinegun(Bullet *b) {
 		sprite_pos(b->sprite,
 			sub_to_pixel(b->x - camera.x) + SCREEN_HALF_W - 8,
 			sub_to_pixel(b->y - camera.y) + SCREEN_HALF_H - 8);
+		
+		uint8_t expanded = FALSE;
+		VDPSprite b2;
+
 		// Expand sprite of level 3 after a couple frames
 		if(b->level == 3) {
 			if(b->ttl == 18) {
+				// Advance the frame pointer to the appropriate tile index
 				if(b->dir == UP || b->dir == DOWN) {
-					b->sprite.size = SPRITE_SIZE(2, 4);
 					b->sprite.attr += 4;
-					if(b->sprite.attr & (1<<12)) b->sprite.y -= 16;
-				} else {
-					b->sprite.size = SPRITE_SIZE(4, 2);
-					if(b->sprite.attr & (1<<11)) b->sprite.x -= 16;
 				}
-			} else if(b->ttl < 18) {
-				if(b->sprite.attr & (1<<12)) b->sprite.y -= 16;
-				if(b->sprite.attr & (1<<11)) b->sprite.x -= 16;
+			}
+			if(b->ttl <= 18) {
+				expanded = TRUE;
+				b->sprite.size = SPRITE_SIZE(2, 2); // Force 16x16 front
+				
+				b2 = b->sprite;
+				b2.attr += 4; // Shift to tail frame
+				
+				if(b->dir == UP || b->dir == DOWN) {
+					if(b->sprite.attr & (1<<12)) b2.y -= 16; // DOWN (VFLIPPED)
+					else b2.y += 16; // UP
+				} else {
+					if(b->sprite.attr & (1<<11)) b2.x -= 16; // RIGHT (HFLIPPED)
+					else b2.x += 16; // LEFT
+				}
 			}
 		}
+
 		vdp_sprite_add(&b->sprite);
+		if(expanded) vdp_sprite_add(&b2);
+		
 		b->ttl--;
 	}
 }
+
 
 void bullet_update_missile(Bullet *b) {
 	b->ttl--;
@@ -1260,12 +1276,6 @@ void bullet_update_spur(Bullet *b) {
 					.size = SPRITE_SIZE(2,2),
 					.attr = TILE_ATTR(PAL0,0,0,0,sheets[t->sheet].index+(t->dir < 2 ? 0 : 8)),
 				};
-				//switch(t->dir) {
-				//	case LEFT:  t->x += (b->state<<11); break;
-				//	case RIGHT: t->x -= (b->state<<11); break;
-				//	case UP:    t->y += (b->state<<11); break;
-				//	case DOWN:  t->y -= (b->state<<11); break;
-				//}
 			}
 		}
 		b->ttl--;
@@ -1274,30 +1284,44 @@ void bullet_update_spur(Bullet *b) {
 		sprite_pos(b->sprite, 
 			sub_to_pixel(b->x - camera.x) + SCREEN_HALF_W - 8,
 			sub_to_pixel(b->y - camera.y) + SCREEN_HALF_H - 8);
+
+		uint8_t expanded = FALSE;
+		VDPSprite b2;
+
 		if(b->ttl == 28) {
 			if(b->dir == UP || b->dir == DOWN) {
-				b->sprite.size = SPRITE_SIZE(2, 4);
 				b->sprite.attr += 4;
 				if(b->sprite.attr & (1<<12)) {
-					b->sprite.y -= 16;
 					b->hit_box.top += 16;
 				} else {
 					b->hit_box.bottom += 16;
 				}
 			} else {
-				b->sprite.size = SPRITE_SIZE(4, 2);
 				if(b->sprite.attr & (1<<11)) {
-					b->sprite.x -= 16;
 					b->hit_box.right += 16;
 				} else {
 					b->hit_box.left += 16;
 				}
 			}
-		} else if(b->ttl < 28) {
-			if(b->sprite.attr & (1<<12)) b->sprite.y -= 16;
-			if(b->sprite.attr & (1<<11)) b->sprite.x -= 16;
 		}
+		
+		if(b->ttl <= 28) {
+			expanded = TRUE;
+			b->sprite.size = SPRITE_SIZE(2, 2);
+			b2 = b->sprite;
+			b2.attr += 4;
+			
+			if(b->dir == UP || b->dir == DOWN) {
+				if(b->sprite.attr & (1<<12)) b2.y -= 16;
+				else b2.y += 16;
+			} else {
+				if(b->sprite.attr & (1<<11)) b2.x -= 16;
+				else b2.x += 16;
+			}
+		}
+
 		vdp_sprite_add(&b->sprite);
+		if(expanded) vdp_sprite_add(&b2);
 	}
 }
 
@@ -1319,32 +1343,47 @@ void bullet_update_spur_tail(Bullet *b) {
         sprite_pos(b->sprite,
                    sub_to_pixel(b->x - camera.x) + SCREEN_HALF_W - 8,
                    sub_to_pixel(b->y - camera.y) + SCREEN_HALF_H - 8);
+
+		uint8_t expanded = FALSE;
+		VDPSprite b2;
+
         if (b->ttl == 18) {
             if (b->dir == UP || b->dir == DOWN) {
-                b->sprite.size = SPRITE_SIZE(2, 4);
                 b->sprite.attr += 4;
                 if (b->sprite.attr & (1 << 12)) {
-                    b->sprite.y -= 16;
                     b->hit_box.top += 16;
                 } else {
                     b->hit_box.bottom += 16;
                 }
             } else {
-                b->sprite.size = SPRITE_SIZE(4, 2);
                 if (b->sprite.attr & (1 << 11)) {
-                    b->sprite.x -= 16;
                     b->hit_box.right += 16;
                 } else {
                     b->hit_box.left += 16;
                 }
             }
-        } else if (b->ttl < 18) {
-            if (b->sprite.attr & (1 << 12)) b->sprite.y -= 16;
-            if (b->sprite.attr & (1 << 11)) b->sprite.x -= 16;
         }
+		
+		if (b->ttl <= 18) {
+			expanded = TRUE;
+			b->sprite.size = SPRITE_SIZE(2, 2);
+			b2 = b->sprite;
+			b2.attr += 4;
+			
+			if(b->dir == UP || b->dir == DOWN) {
+				if(b->sprite.attr & (1<<12)) b2.y -= 16;
+				else b2.y += 16;
+			} else {
+				if(b->sprite.attr & (1<<11)) b2.x -= 16;
+				else b2.x += 16;
+			}
+		}
+
         vdp_sprite_add(&b->sprite);
+		if(expanded) vdp_sprite_add(&b2);
     }
 }
+
 
 Bullet *bullet_colliding(Entity *e) {
 	extent_box ee = (extent_box) {
