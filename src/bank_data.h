@@ -354,6 +354,11 @@ extern const uint8_t PAT_bkMoon[];
 extern const uint8_t PAT_bkMoon_end[];
 extern const uint16_t MAP_bkMoon[];
 
+
+extern const uint8_t PAT_bkFog[];
+extern const uint8_t PAT_bkFog_end[];
+extern const uint16_t MAP_bkFog[];
+
 extern const uint8_t PAT_FogTop[];
 extern const uint8_t MAP_FogTop[];
 extern const uint8_t PAT_FogBtm[];

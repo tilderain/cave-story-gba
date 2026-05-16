@@ -415,6 +415,11 @@ if __name__ == '__main__':
 			subprocess.run(['grit', fn, '-gt', '-gB4', '-m', '-mRtf', '-mZn', '-ftb', '-fh!'])
 			os.rename(fn.rsplit('.', 1)[0] + '.img.bin', fn.rsplit('.', 1)[0] + '.pat')
 			os.rename(fn.rsplit('.', 1)[0] + '.map.bin', fn.rsplit('.', 1)[0] + '.map')
+		elif fn.startswith("bkFog") and (fn.endswith(".png") or fn.endswith(".bmp")):
+			# -m = export map, -mRtf = reduce duplicate & flipped tiles, -mZn = uncompressed map
+			subprocess.run(['grit', fn, '-gt', '-gB4', '-m', '-mRtf', '-mZn', '-ftb', '-fh!'])
+			os.rename(fn.rsplit('.', 1)[0] + '.img.bin', fn.rsplit('.', 1)[0] + '.pat')
+			os.rename(fn.rsplit('.', 1)[0] + '.map.bin', fn.rsplit('.', 1)[0] + '.map')			
 		elif fn.startswith("bk") and (fn.endswith(".png") or fn.endswith(".bmp")):
 			subprocess.run(['grit', fn, '-gt', '-gB4', '-ftb', '-m!', '-fh!'])
 		elif fn.startswith("soundtest") and (fn.endswith(".png") or fn.endswith(".bmp")):

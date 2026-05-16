@@ -154,7 +154,7 @@ BIN BG_Black		"../res/back/bkBlack.img.bin"
 BIN BG_Green		"../res/back/bkGreen.img.bin" 
 
 //BIN BG_Moon		"../res/back/bkMoon.img.bin" 
-BIN BG_Fog		"../res/back/bkFog.img.bin" 
+//BIN BG_Fog		"../res/back/bkFog.img.bin"
 
 BIN PAL_bkBlue		"../res/back/bkBlue.pal.bin"
 BIN PAL_bkGard		"../res/back/bkGard.pal.bin"
@@ -416,6 +416,11 @@ BIN     NPC_TABLE		"../res/npc.tbl"
 # Moon
 PCM		PAT_bkMoon		"../res/back/bkMoon.pat"
 BIN		MAP_bkMoon		"../res/back/bkMoon.map"
+
+# Moon
+PCM		PAT_bkFog		"../res/back/bkFog.pat"
+BIN		MAP_bkFog		"../res/back/bkFog.map"
+
 # Sound Test
 BIN		PAT_SndTest	    "../res/back/soundtest.pat"
 BIN		MAP_SndTest	    "../res/back/soundtest.map"

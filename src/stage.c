@@ -430,13 +430,28 @@ void stage_update() {
 		backScrollTimer++;
 		
 		uint16_t t = backScrollTimer;
-		for(int i = 0; i < 160; i++) {
-			// Define the horizontal scroll for each line based on height
-			if (i < 88)       moon_scroll_table[i] = 30; // Top (Moon/Slow Clouds)
-			else if (i < 122 - 12) moon_scroll_table[i] = t >> 1; // Mid clouds
-			else if (i < 145 - 4) moon_scroll_table[i] = t;      // Faster clouds
-			else              moon_scroll_table[i] = t << 1; // Bottom fast clouds
+
+		if(stageBackgroundType == 1)
+		{
+			for(int i = 0; i < 160; i++) {
+				// Define the horizontal scroll for each line based on height
+				if (i < 88)       moon_scroll_table[i] = 30; // Top (Moon/Slow Clouds)
+				else if (i < 122 - 12) moon_scroll_table[i] = t >> 1; // Mid clouds
+				else if (i < 145 - 4) moon_scroll_table[i] = t;      // Faster clouds
+				else              moon_scroll_table[i] = t << 1; // Bottom fast clouds
+			}
 		}
+		else
+		{
+			for(int i = 0; i < 160; i++) {
+				// Define the horizontal scroll for each line based on height
+				if (i < 89)       moon_scroll_table[i] = 30; // Top (Moon/Slow Clouds)
+				else if (i < 123) moon_scroll_table[i] = t >> 1; // Mid clouds
+				else if (i < 145) moon_scroll_table[i] = t;      // Faster clouds
+				else              moon_scroll_table[i] = t << 1; // Bottom fast clouds
+			}
+		}
+
 
 		vdp_vscroll(VDP_PLAN_B, 0); // Keep vertical static
 	} else if(stageBackgroundType == 3) {
@@ -676,8 +691,14 @@ void stage_draw_background() {
 }
 
 static void stage_draw_moonback() {
-    uint32_t tile_count = (PAT_bkMoon_end - PAT_bkMoon) / 32;
-    vdp_tiles_load((const uint32_t*)PAT_bkMoon, TILE_BACKINDEX, tile_count);
+	uint8_t* pat = (stageBackgroundType == 1) ? PAT_bkMoon : PAT_bkFog;
+	uint8_t* pat_end = (stageBackgroundType == 1) ? PAT_bkMoon_end : PAT_bkFog_end;
+
+	uint16_t* mapsrc = (stageBackgroundType == 1) ? MAP_bkMoon : MAP_bkFog;
+
+    uint32_t tile_count = (pat_end - pat) / 32;
+
+    vdp_tiles_load((const uint32_t*)pat, TILE_BACKINDEX, tile_count);
 
     uint16_t *map = (uint16_t*)MAP_BASE_ADR(BASE_BACK);
     
@@ -686,7 +707,7 @@ static void stage_draw_moonback() {
     for(uint16_t y = 0; y < 32; y++) {
         for(uint16_t x = 0; x < 32; x++) { // GBA is 30 tiles wide
             // SKIP 10 tiles (x + 10) to point to the right side of the 40-wide map
-            uint16_t source_tile = MAP_bkMoon[y * 32 + (x)];
+            uint16_t source_tile = mapsrc[y * 32 + (x)];
             
             uint16_t final_tile = (source_tile & 0x03FF);
             map[y * 32 + x] = (source_tile & 0x0C00) | final_tile | CHAR_PALETTE(1);
