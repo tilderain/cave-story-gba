@@ -26,9 +26,11 @@
 
 #include "gbatext.h"
 
+#include "bank_data.h"
+
 void intro_main() {
 	gamemode = GM_INTRO;
-
+	vdp_colors(16, PAL_Intro, 16);
 	start_fadein_sweep(1);
 	// Init some subsystems used
 	sheets_load_intro();

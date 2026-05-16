@@ -460,10 +460,20 @@ EWRAM_CODE void effects_update() {
 			break;
 			case EFF_ZZZ:
 			{
-				if(++effMisc[i].timer > 25) {
+				if(++effMisc[i].timer > 4) {		// CSE2 ActCaret05: ani_wait > 4
 					effMisc[i].timer = 0;
-					effMisc[i].sprite.attr++;
+					if(++effMisc[i].timer2 >= 7) {
+						// sequence 0→1→2→3→2→1→0 then disappear
+						effMisc[i].ttl = 0;
+					} else if(effMisc[i].timer2 < 4) {
+						effMisc[i].sprite.attr++;
+					} else {
+						effMisc[i].sprite.attr--;
+					}
 				}
+				// CSE2 ActCaret05: x += 0x80, y -= 0x80 each frame (drift up-right)
+				effMisc[i].x += (effMisc[i].ttl & 3) == 0;
+				effMisc[i].y -= (effMisc[i].ttl & 3) == 0;
 				sprite_pos(effMisc[i].sprite,
 					effMisc[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 4,
 					effMisc[i].y - sub_to_pixel(camera.y) + SCREEN_HALF_H - 4);
@@ -743,6 +753,7 @@ void effect_create_misc(uint8_t type, int16_t x, int16_t y, uint8_t only_one) {
 				SHEET_FIND(sheet, SHEET_ZZZ);
 				if(sheet == NOSHEET) break;
 				effMisc[i].ttl = 100;
+				effMisc[i].timer2 = 0;
 				effMisc[i].sprite = (VDPSprite) {
 					.size = SPRITE_SIZE(1, 1),
 					.attr = TILE_ATTR(PAL0,1,0,0,sheets[sheet].index)

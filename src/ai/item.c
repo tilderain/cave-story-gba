@@ -68,17 +68,20 @@ void ai_energy(Entity *e) {
 			e->hidden = (e->timer & 3) > 1;
 		}
 
-		e->x += e->x_speed;
-		e->y += e->y_speed;
 		if(e->left_gravity) {
 			e->x_speed -= 6;
 			if(blk(e->x, -4, e->y, 0) == 0x41) e->x_speed = 0xFF;
 		} else {
-			// CSE2 ActNpc001: ym += 0x2A, capped at 0x5FF
+			// CSE2 ActNpc001: gravity FIRST
 			if(e->y_speed < 0x5FF) e->y_speed += 0x2A;
-			if(e->x_speed > 0) e->x_speed--;
-			if(e->x_speed < 0) e->x_speed++;
-			// Check below / above first
+
+			// CSE2: speed caps at ±0x5FF
+			if(e->x_speed > 0x5FF) e->x_speed = 0x5FF;
+			if(e->x_speed < -0x5FF) e->x_speed = -0x5FF;
+			if(e->y_speed > 0x5FF) e->y_speed = 0x5FF;
+			if(e->y_speed < -0x5FF) e->y_speed = -0x5FF;
+
+			// CSE2: floor bounce (flag & 8)
 			uint8_t block_below = blk(e->x, 0, e->y, e->display_box.top);
 			uint8_t block_above = blk(e->x, 0, e->y, -e->display_box.top);
 			if(block_below == 0x41 || block_below == 0x43) {
@@ -100,15 +103,31 @@ void ai_energy(Entity *e) {
 					}
 				}
 			} else if(block_above == 0x41 || block_above == 0x43) {
-				// CSE2: ym *= -1 (full velocity reversal on ceiling)
-				e->y_speed = -e->y_speed;
+				// CSE2: ceiling bounce only if moving up (ym < 0)
+				if(e->y_speed < 0) e->y_speed = -e->y_speed;
 			}
-			// Check in front
-			uint8_t block_front = blk(e->x, e->x_speed > 0 ? 4 : -4, e->y, -1);
-			if(block_front == 0x41 || block_front == 0x43) { // hit a wall
+
+			// CSE2: wall bounce with direction check (flag & 1/4 && xm toward wall)
+			if((blk(e->x, -4, e->y, -1) == 0x41 || blk(e->x, -4, e->y, -1) == 0x43) && e->x_speed < 0)
 				e->x_speed = -e->x_speed;
+			if((blk(e->x, 4, e->y, -1) == 0x41 || blk(e->x, 4, e->y, -1) == 0x43) && e->x_speed > 0)
+				e->x_speed = -e->x_speed;
+
+			// CSE2: stuck-in-surface handling (flag & 0xD = left|right|floor)
+			if(block_below == 0x41 || block_below == 0x43 ||
+			   blk(e->x, -4, e->y, -1) == 0x41 || blk(e->x, -4, e->y, -1) == 0x43 ||
+			   blk(e->x, 4, e->y, -1) == 0x41 || blk(e->x, 4, e->y, -1) == 0x43) {
+				sound_play(SND_XP_BOUNCE, 0);
+				if(++e->timer2 > 2)
+					e->y -= 1 << CSF;
+			} else {
+				e->timer2 = 0;
 			}
 		}
+
+		// CSE2: movement LAST
+		e->x += e->x_speed;
+		e->y += e->y_speed;
 	}
 }
 

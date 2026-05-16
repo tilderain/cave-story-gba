@@ -46,8 +46,8 @@ void put_fade_bg3(void);
 #define PROMPT_X 22                   // Centered for GBA width
 #define PROMPT_Y 11                   // Placed perfectly above the bottom window
 
-#define ITEM_Y_START	(SCREEN_HALF_H + 128)
-#define ITEM_Y_END		(SCREEN_HALF_H + 12 + 128)
+#define ITEM_Y_START	(SCREEN_HALF_H + 128) - 16
+#define ITEM_Y_END		(SCREEN_HALF_H + 12 + 128) - 16
 
 static int s_scroll_debt = 0; // Tracks how many pixels we still need to shift up
 
@@ -474,14 +474,14 @@ void window_show_item(uint16_t item) {
         .attr = TILE_ATTR(0,1,0,0,TILE_PROMPTINDEX + 4) // Offset tile by 4
     };
 	promptSpr[0] = (VDPSprite) {
-		.x = SCREEN_HALF_W - 24 + 128,
-		.y = SCREEN_HALF_H + 8 + 128,
+		.x = SCREEN_HALF_W - 24 + 128 - 2,
+		.y = SCREEN_HALF_H + 8 + 128 - 16,
 		.size = SPRITE_SIZE(3, 3) | (pal_line << 4),
 		.attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX+6)
 	};
 	promptSpr[1] = (VDPSprite) {
-		.x = SCREEN_HALF_W + 128,
-		.y = SCREEN_HALF_H + 8 + 128,
+		.x = SCREEN_HALF_W + 128 - 2,
+		.y = SCREEN_HALF_H + 8 + 128 - 16,
 		.size = SPRITE_SIZE(3, 3) | (pal_line << 4),
 		.attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX+22)
 	};
@@ -524,14 +524,14 @@ void window_show_weapon(uint16_t item) {
 		.attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX)
 	};
 	promptSpr[0] = (VDPSprite) {
-		.x = SCREEN_HALF_W - 24 + 128,
-		.y = SCREEN_HALF_H + 8 + 128,
+		.x = SCREEN_HALF_W - 24 + 128 - 2,
+		.y = SCREEN_HALF_H + 8 + 128 - 16,
 		.size = SPRITE_SIZE(3, 3) | (9 << 4),
 		.attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX+6)
 	};
 	promptSpr[1] = (VDPSprite) {
-		.x = SCREEN_HALF_W + 128,
-		.y = SCREEN_HALF_H + 8 + 128,
+		.x = SCREEN_HALF_W + 128 - 2,
+		.y = SCREEN_HALF_H + 8 + 128 - 16,
 		.size = SPRITE_SIZE(3, 3) | (9 << 4),
 		.attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX+22)
 	};

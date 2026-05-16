@@ -586,7 +586,26 @@ void ai_lifeup(Entity *e) {
 }
 
 void ai_chest(Entity *e) {
-	ANIMATE(e, 8, 0,1,2);
+	// CSE2 ActNpc015 - idle on frame 0, briefly blinks animation at random intervals
+	switch(e->state) {
+		case 0:
+			e->state = 1;
+			// fallthrough
+		case 1:
+			e->frame = 0;
+			if(!(random() % 31)) e->state = 2;	// CSE2 Random(0,30) == 0
+			break;
+		case 2:
+			if(++e->animtime > 1) {
+				e->animtime = 0;
+				++e->frame;
+			}
+			if(e->frame > 2) {
+				e->frame = 0;
+				e->state = 1;
+			}
+			break;
+	}
 	ai_grav(e);
 }
 

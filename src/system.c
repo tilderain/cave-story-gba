@@ -221,12 +221,22 @@ void system_update() {
 	}
 }
 
+#include "effect.h"
+
 void system_new() {
 	time.hour = time.minute = time.second = time.frame = 0;
 	counter.hour = counter.minute = counter.second = counter.frame = 0;
 	for(uint16_t i = 0; i < FLAGS_LEN; i++) flags[i] = 0;
 	if(sram_state == SRAM_INVALID) system_set_flag(FLAG_DISABLESAVE, TRUE);
+
+	if(!system_get_skip_flag(5))
+		do_fadeout_sweep(1);
 	stage_load(13);
+	if(!system_get_skip_flag(5))
+	{
+		vdp_map_clear(VDP_PLAN_A);     // Wipe stage layers (FG)
+		vdp_map_clear(VDP_PLAN_B);     // Wipe background layer (BG)
+	}
 	tsc_call_event(GAME_START_EVENT);
 }
 
