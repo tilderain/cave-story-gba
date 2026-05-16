@@ -544,42 +544,27 @@ bool IsBitSet(uint16_t b, int pos)
    return (b & (1 << pos)) != 0;
 }
 
-int get_sprite_size(uint8_t size)
-{
-	int w = (size&12) >> 2;
-	int h = size&3;
-	//printf("sizew %d sizeh %d\n", w, h);
+static const uint8_t GBA_SPRITE_SIZES[16] = {
+    (0 << 2) | 0, // 0x0: 8x8   -> Square 8x8
+    (2 << 2) | 0, // 0x1: 8x16  -> Vertical 8x16
+    (2 << 2) | 1, // 0x2: 8x24  -> Vertical 8x32
+    (2 << 2) | 1, // 0x3: 8x32  -> Vertical 8x32
 
-	if (w == 0 && h == 0)
-		return Sprite_8x8;
-	if (w == 1 && h == 1)
-		return Sprite_16x16;
-	if (w == 3 && h == 3)
-		return Sprite_32x32;
-	if (w == 1 && h == 0)
-		return Sprite_16x8;
-	if (w == 3 && h == 0)
-		return Sprite_32x8;
-	if (w == 3 && h == 1)
-		return Sprite_32x16;	
-	if (w == 0 && h == 1)
-		return Sprite_8x16;
-	if (w == 0 && h == 3)
-		return Sprite_8x32;
-	if (w == 1 && h == 3)
-		return Sprite_16x32;
+    (1 << 2) | 0, // 0x4: 16x8  -> Horizontal 16x8
+    (0 << 2) | 1, // 0x5: 16x16 -> Square 16x16
+    (2 << 2) | 2, // 0x6: 16x24 -> Vertical 16x32
+    (2 << 2) | 2, // 0x7: 16x32 -> Vertical 16x32
 
-	// Additional mappings for non-standard sizes
-	if (w == 3 && h == 2) return Sprite_32x32;  // 32x24px (4x3 tiles) -> 32x32
-	if (w == 2 && h == 2) return Sprite_32x32;  // 24x24px (3x3 tiles) -> 32x32
-	if (w == 2 && h == 1) return Sprite_32x16;  // 24x16px (3x2 tiles) -> 32x16
-	if (w == 1 && h == 2) return Sprite_16x32;  // 16x24px (2x3 tiles) -> 16x32
-	if (w == 2 && h == 3) return Sprite_32x32;  // 24x32px (3x4 tiles) -> 32x32
-	if (w == 0 && h == 2) return Sprite_8x32;   // 8x24px  (1x3 tiles) -> 8x32
-	if (w == 2 && h == 0) return Sprite_32x8;   // 24x8px  (3x1 tiles) -> 32x8
+    (1 << 2) | 1, // 0x8: 24x8  -> Horizontal 32x8
+    (1 << 2) | 2, // 0x9: 24x16 -> Horizontal 32x16
+    (0 << 2) | 2, // 0xA: 24x24 -> Square 32x32
+    (0 << 2) | 2, // 0xB: 24x32 -> Square 32x32
 
-	return Sprite_16x16;
-}
+    (1 << 2) | 1, // 0xC: 32x8  -> Horizontal 32x8
+    (1 << 2) | 2, // 0xD: 32x16 -> Horizontal 32x16
+    (0 << 2) | 2, // 0xE: 32x24 -> Square 32x32
+    (0 << 2) | 2  // 0xF: 32x32 -> Square 32x32
+};
 
 IWRAM_CODE void vdp_sprites_update() {
 	if(!sprite_count) return;
@@ -588,21 +573,11 @@ IWRAM_CODE void vdp_sprites_update() {
 
 	for(int i=0;i<sprite_count;i++)
 	{
-		int size = get_sprite_size(sprite_table[i].size);
+		uint8_t gen_size = sprite_table[i].size & 0x0F;
+		uint8_t gba_size = GBA_SPRITE_SIZES[gen_size];
 
-		char size_bits = 0; char shape_bits = 0;
-
-    	switch (size) {
-    	    case Sprite_8x8:   size_bits = 0; shape_bits = 0; break;
-    	    case Sprite_16x16: size_bits = 1; shape_bits = 0; break;
-    	    case Sprite_32x32: size_bits = 2; shape_bits = 0; break;
-    	    case Sprite_16x8:  size_bits = 0; shape_bits = 1; break;
-    	    case Sprite_32x8:  size_bits = 1; shape_bits = 1; break;
-    	    case Sprite_32x16: size_bits = 2; shape_bits = 1; break;
-    	    case Sprite_8x16:  size_bits = 0; shape_bits = 2; break;
-    	    case Sprite_8x32:  size_bits = 1; shape_bits = 2; break;
-    	    case Sprite_16x32: size_bits = 2; shape_bits = 2; break;
-    	}
+		char shape_bits = gba_size >> 2;
+		char size_bits = gba_size & 3;
 
 		obj_buffer[i].attr0 = OBJ_Y(sprite_table[i].y - 128) | OBJ_SHAPE(shape_bits);
 		obj_buffer[i].attr1 = OBJ_X(sprite_table[i].x - 128) | OBJ_SIZE(size_bits);

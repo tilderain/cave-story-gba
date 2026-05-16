@@ -155,7 +155,7 @@ void credits_main() {
 						icon[i] = (VDPSprite) {
 							.x = textX * 8 - 22 + 128,
 							.y = SCREEN_HEIGHT - 6 + 128,
-							.size = SPRITE_SIZE(3, 3),
+							.size = SPRITE_SIZE(2, 2),
 							.attr = TILE_ATTR(credits_info[pc].icon.pal,
 									1,0,0,TILE_ICONINDEX + i * 9)
 						};
