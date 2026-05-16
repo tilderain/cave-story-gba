@@ -93,7 +93,7 @@ uint8_t titlescreen_main() {
 
 
 	vdp_puts(VDP_PLAN_A, "Start Game", 12, 10);
-	vdp_puts(VDP_PLAN_A, "Continue", 12, 12);
+	//vdp_puts(VDP_PLAN_A, "Continue", 12, 12);
 	vdp_puts(VDP_PLAN_A, "Sound Test", 12, 14);
 	vdp_puts(VDP_PLAN_A, "Config", 12, 16);
 	// Debug

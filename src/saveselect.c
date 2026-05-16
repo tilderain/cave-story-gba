@@ -34,7 +34,11 @@
 
 enum { CM_LOAD, CM_COPY, CM_PASTE, CM_DELETE, CM_CONFIRM };
 
+// Cache save file data for sprite rendering in the main loop
+static SaveEntry file_cache[SRAM_FILE_MAX];
+
 static void draw_cursor_mode(uint8_t mode) {
+	vdp_text_clear(VDP_PLAN_A, 7, 0, 16);
 	switch(mode) {
 		case CM_LOAD:    vdp_puts(VDP_PLAN_A, " Load Save Data ", 7, 0); break;
 		case CM_COPY:    vdp_puts(VDP_PLAN_A, " Copy Save Data ", 7, 0); break;
@@ -59,6 +63,7 @@ static uint8_t refresh_file(uint8_t index) {
 	SaveEntry file;
 	
 	system_peekdata(index, &file);
+	file_cache[index] = file; // Cache for sprite rendering
     disable_ints;
     z80_request();
 	vdp_text_clear(VDP_PLAN_A, 5, y, 25); // Erase any previous stage name text
@@ -107,8 +112,9 @@ static uint8_t refresh_file(uint8_t index) {
 			memcpy(tileData[2], &TS_Numbers.tiles[mod10[file.health]*8], 32);
 			uint16_t tile = TILE_SHEETINDEX + index*8;
 			DMA_doDma(DMA_VRAM, (uint32_t)tileData[0], tile*32, 16*8, 2);
+			// Clear BG tiles (health bar rendered as sprites now)
 			for(int i = 0; i < 8; i++) {
-				vdp_map_xy(VDP_PLAN_A, TILE_ATTR(PAL0,0,0,0,tile+i), 5+i, y+2); // Shifted to y+2
+				vdp_map_xy(VDP_PLAN_A, 0, 5+i, y+2);
 			}
 		}
 		
@@ -119,12 +125,12 @@ static uint8_t refresh_file(uint8_t index) {
 			uint16_t x = 15 + i*2;
 			uint16_t tile = TILE_FACEINDEX - 40 + index*20 + i*4;
 			vdp_tiles_load_from_rom(SPR_TILES(&SPR_ArmsImage, 0, file.weapon[i]), tile, 4);
-			
-			// 4 mappings for ArmsImage icon (Shifted to y+2 and y+3)
-			vdp_map_xy(VDP_PLAN_A, TILE_ATTR(PAL0,0,0,0,tile),   x,   y+2);
-			vdp_map_xy(VDP_PLAN_A, TILE_ATTR(PAL0,0,0,0,tile+2), x+1, y+2);
-			vdp_map_xy(VDP_PLAN_A, TILE_ATTR(PAL0,0,0,0,tile+1), x,   y+3);
-			vdp_map_xy(VDP_PLAN_A, TILE_ATTR(PAL0,0,0,0,tile+3), x+1, y+3);
+
+			// Clear BG tiles (weapons rendered as sprites now)
+			vdp_map_xy(VDP_PLAN_A, 0, x,   y+2);
+			vdp_map_xy(VDP_PLAN_A, 0, x+1, y+2);
+			vdp_map_xy(VDP_PLAN_A, 0, x,   y+3);
+			vdp_map_xy(VDP_PLAN_A, 0, x+1, y+3);
 		}
 	} else {
 		// Empty File Handling
@@ -183,6 +189,10 @@ uint8_t saveselect_main() {
 	vdp_map_clear(VDP_PLAN_A);
 	vdp_map_clear(VDP_PLAN_B);
 	vdp_sprites_clear();
+
+	// Copy BG palette bank 0 to OBJ palette bank 0 for sprite rendering
+	for(uint8_t i = 0; i < 16; i++) OBJ_COLORS[i] = BG_COLORS[i];
+
 	VDPSprite sprCursor = { 
 		.attr = TILE_ATTR(tpal,0,0,1,TILE_SHEETINDEX+32),
 		.size = SPRITE_SIZE(2,2)
@@ -291,6 +301,36 @@ uint8_t saveselect_main() {
 			// Draw quote sprite at cursor position
 			sprite_pos(sprCursor, cursor_pos[cursor].x, cursor_pos[cursor].y);
 		}
+		// Add health bar and weapon sprites from cached file data
+		for(uint8_t f = 0; f < SRAM_FILE_MAX; f++) {
+			if(!file_cache[f].used) continue;
+			uint8_t row = 2 + f * 4;
+			int16_t py = (row + 2) * 8; // pixel y for health/weapon row
+
+			// Health bar: 8× 8x8 sprites (heart, 2 digits, 5 bar segments)
+			uint16_t hb_tile = (TILE_SHEETINDEX + f * 8) * 2;
+			for(uint8_t ti = 0; ti < 8; ti++) {
+				VDPSprite hs = {
+					.attr = TILE_ATTR(0, 1, 0, 0, hb_tile + ti),
+					.size = SPRITE_SIZE(1, 1)
+				};
+				sprite_pos(hs, 40 + ti * 8, py);
+				vdp_sprite_add(&hs);
+			}
+
+			// Weapons: 16x16 sprites (max 5)
+			for(uint8_t wi = 0; wi < 5; wi++) {
+				if(!file_cache[f].weapon[wi]) continue;
+				uint16_t wpn_tile = TILE_FACEINDEX - 40 + f * 20 + wi * 4;
+				VDPSprite ws = {
+					.attr = TILE_ATTR(0, 1, 0, 0, wpn_tile),
+					.size = SPRITE_SIZE(2, 2)
+				};
+				sprite_pos(ws, (15 + wi * 2) * 8, py);
+				vdp_sprite_add(&ws);
+			}
+		}
+
 	    vdp_sprite_add(&sprCursor);
 		
 		ready = TRUE;

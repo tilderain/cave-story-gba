@@ -641,7 +641,7 @@ void system_load_levelselect(uint8_t file) {
 	}
 	stage_load(rid);
 	song_play(song);
-	sram_file = SRAM_FILE_CHEAT + file;
+	sram_file = 0;
 }
 
 uint8_t system_checkdata() {
