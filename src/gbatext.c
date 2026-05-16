@@ -162,8 +162,8 @@ static inline volatile uint16_t* bg3_map_entry(int tx, int ty) {
 // ---------------------------------------------------------------------------
 void canvas_init(void) {
     // Default to the bottom window
-    int map_row = 14; 
-    int map_col = 2;  
+    int map_row = 13;
+    int map_col = 2;
 
     for (int i = 0; i < 1024; i++) {
         BG3_MAP_BASE[i] = 0;
@@ -182,12 +182,13 @@ void canvas_init(void) {
 }
 
 void canvas_fix_tilemap(uint8_t on_top) {
-    int map_row = on_top ? 1 : 14;  
+    int map_row = on_top ? 1 : 13;
     int map_col = 2; 
 
     // Re-point the tilemap entries to the canvas VRAM tiles
     // We do NOT call canvas_clear() here so existing text stays
-    for (int row = 0; row < 8; row++) { 
+    // Only map 6 rows — the last 2 rows are a hidden scroll gutter
+    for (int row = 0; row < 6; row++) {
         for (int col = 0; col < CANVAS_TILES_W; col++) {
             int tile_idx = CANVAS_TILE_BASE + (row * CANVAS_TILES_W) + col;
             BG3_MAP_BASE[(map_row + row) * 32 + (map_col + col)] = (uint16_t)(tile_idx | (2 << 12));
@@ -315,8 +316,8 @@ void canvas_reset_scroll(void) {
 #include "effect.h"
 void canvas_setup_tilemap(uint8_t on_top) {
     s_canvas_is_fullscreen = 0;
-    int map_row = on_top ? 1 : 14;  
-    int map_col = 2; 
+    int map_row = on_top ? 1 : 13;
+    int map_col = 2;
 
     // If there is NO fade active and NO full black mask, clear the whole map
     if (!gFade.bMask && gFade.mode == 0) {
@@ -325,7 +326,7 @@ void canvas_setup_tilemap(uint8_t on_top) {
 
     // IMPORTANT: Only map 6 rows of tiles to the screen
     // The canvas is 8 rows high, so the last 2 rows are a hidden "gutter"
-    for (int row = 0; row < 8; row++) { 
+    for (int row = 0; row < 6; row++) {
         for (int col = 0; col < CANVAS_TILES_W; col++) {
             int tile_idx = CANVAS_TILE_BASE + (row * CANVAS_TILES_W) + col;
             BG3_MAP_BASE[(map_row + row) * 32 + (map_col + col)] = (uint16_t)(tile_idx | (2 << 12));

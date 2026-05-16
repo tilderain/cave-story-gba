@@ -26,13 +26,13 @@ void put_fade_bg3(void);
 // Window location (GBA is 30 columns wide and 20 rows tall)
 #define WINDOW_X1 1
 #define WINDOW_X2 28                  // Leaves a 1-tile margin on the right (GBA column 28)
-#define WINDOW_Y1 13                  // Placed at row 13 (so bottom box occupies rows 13-19)
+#define WINDOW_Y1 12                  // Placed at row 12 (so bottom box occupies rows 12-19)
 #define WINDOW_Y2 19                  // Placed at row 19 (the very bottom of GBA screen)
 
 // Text area location within window
 #define TEXT_X1 (WINDOW_X1 + 1)       // Col 2
 #define TEXT_X2 (WINDOW_X2 - 1)       // Col 27
-#define TEXT_Y1 (WINDOW_Y1 + 1)       // Row 14 (where bottom text begins)
+#define TEXT_Y1 (WINDOW_Y1 + 1)       // Row 13 (where bottom text begins)
 #define TEXT_Y2 (WINDOW_Y2 - 1)       // Row 18
 #define TEXT_X1_FACE (WINDOW_X1 + 8)  // Col 9 (leaves room for face on GBA width)
 
@@ -238,8 +238,17 @@ void window_draw_char(uint8_t c) {
         textRow++;
         if (textRow > 2) {
             // Trigger a 16-pixel scroll animation
-            s_scroll_debt += 16; 
-            
+            s_scroll_debt += 16;
+
+            // When fast-forwarding, debt can exceed 16 (one smooth scroll).
+            // Immediately scroll the canvas VRAM to prevent text from being
+            // drawn at Y positions beyond the canvas area, which would
+            // corrupt other VRAM tiles (including window frame tiles).
+            while (s_scroll_debt > 16) {
+                canvas_scroll_up();
+                s_scroll_debt -= 16;
+            }
+
             textRow = 2; // Stay on the bottom row
             textColumn = 0;
             spaceCounter = spaceOffset = 0;
@@ -661,8 +670,8 @@ void window_update() {
         // Resting X: (WINDOW_X1 * 8) + 4 = 12
         // Notice we DO NOT add faceXOffset here anymore! 
         // The sprite stays anchored while the VRAM shift creates the sliding mask effect.
-        int16_t fx = (WINDOW_X1 * 8) + 4 + 128;
-        int16_t fy = (windowOnTop ? (WINDOW_Y1_TOP * 8) : (WINDOW_Y1 * 8)) + 4 + 128;
+        int16_t fx = (WINDOW_X1 * 8) + 4 + 128 + 4;
+        int16_t fy = (windowOnTop ? (WINDOW_Y1_TOP * 8) : (WINDOW_Y1 * 8)) + 4 + 128 + 4;
 
         uint16_t tileOffset = TILE_FACEINDEX;
 
