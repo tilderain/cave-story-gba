@@ -136,7 +136,7 @@ extern uint16_t *stageTable;
 // level layout (allowing player to reach some areas) so it is necessary to do this
 // 8 bytes (header) + 17924 bytes (data) = 17932 total
 
-extern uint8_t stage_buffer[17932];
+extern uint8_t stage_buffer[17932 + 2000];
 
 // For the rest of the code to keep working, we point to the buffer:
 #define stagePXM    (&stage_buffer[0])

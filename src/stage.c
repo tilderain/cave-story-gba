@@ -58,7 +58,7 @@ uint16_t stageWidth, stageHeight = 0;
 // This takes up extra space, but there are times where scripts make modifications to the
 // level layout (allowing player to reach some areas) so it is necessary to do this
 // 8 bytes (header) + 17924 bytes (data) = 17932 total
-EWRAM_DATA uint8_t stage_buffer[17932];
+EWRAM_DATA uint8_t stage_buffer[17932 + 2000];
 
 // For the rest of the code to keep working, we point to the buffer:
 #define stagePXM    (&stage_buffer[0])
@@ -438,10 +438,13 @@ void stage_update() {
 			else              moon_scroll_table[i] = t << 1; // Bottom fast clouds
 		}
 
+
 		// 3. Reset DMA source pointer for this frame
-		// DMA was configured once when the moon stage loaded (not every frame!)
-		// Stopping and restarting HBlank DMA every frame can lock up the bus on real hardware
+		// HBlank DMA with Repeat does NOT reload the source address automatically at the end of the frame.
+		// It must be disabled and re-enabled during VBlank to reset the source pointer.
+		REG_DMA0CNT = 0;
 		REG_DMA0SAD = (uint32_t)moon_scroll_table;
+		REG_DMA0CNT = 1 | DMA_DST_FIXED | DMA_REPEAT | DMA_HBLANK | DMA_ENABLE;
 
 		vdp_vscroll(VDP_PLAN_B, 0); // Keep vertical static
 	} else if(stageBackgroundType == 3) {
