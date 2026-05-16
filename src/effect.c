@@ -53,7 +53,7 @@ FadeState gFade;
 
 // Load 16 frames of 16x16 fade tiles from SPR_Fade into BG3 charbase 2
 // Each frame = 2x2 BG tiles = 4 tiles
-// Palette: palette bank 3, index 1 = covered (black)
+// Palette: palette bank 3, index 1 = covered (Cave Story blue)
 EWRAM_CODE static void fade_generate_tiles(void) {
     for (int f = 0; f < FADE_FRAMES; f++) {
         vdp_tiles_load(
@@ -222,7 +222,7 @@ EWRAM_CODE void do_fadeout_sweep(uint8_t dir) {
 
     // Generate tiles and set palette (using palette bank 3, NOT overwritten by vdp_sprites_update)
     fade_generate_tiles();
-    BG_COLORS[49] = 0x0000; // Palette bank 3, index 1 = black for fade pixels
+    BG_COLORS[49] = 0x1000; // Palette bank 3, index 1 = Cave Story blue #000020 for fade pixels
 
     // Init fade-out state
     memset(&gFade, 0, sizeof(gFade));
@@ -276,9 +276,9 @@ EWRAM_CODE void start_fadein_sweep(uint8_t dir) {
 
     // Generate tiles and set palette
     fade_generate_tiles();
-    BG_COLORS[49] = 0x0000; // Palette bank 3, index 1 = black for fade
+    BG_COLORS[49] = 0x1000; // Palette bank 3, index 1 = Cave Story blue #000020 for fade
 
-    // Init fade-in state: all cells start at max (fully black)
+    // Init fade-in state: all cells start at max (fully blue)
     memset(&gFade, 0, sizeof(gFade));
     gFade.mode = 1;
     gFade.dir = dir;
