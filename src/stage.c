@@ -73,7 +73,7 @@ EWRAM_DATA uint8_t stage_buffer[17932 + 2000];
  uint8_t stageBackgroundType = 0;
 
 IWRAM_DATA uint16_t moon_scroll_table[160];
-static bool moon_dma_active = false;
+bool moon_dma_active = false;
 
 static void stage_load_tileset();
 static void stage_load_blocks();
@@ -427,24 +427,16 @@ void stage_update() {
 		vdp_vscroll(VDP_PLAN_A, sub_to_pixel(camera.y) - SCREEN_HALF_H);
 
 		// 2. Parallax Background Logic (Moon/Clouds)
-		backScrollTimer--;
+		backScrollTimer++;
 		
 		uint16_t t = backScrollTimer;
 		for(int i = 0; i < 160; i++) {
 			// Define the horizontal scroll for each line based on height
-			if (i < 88)       moon_scroll_table[i] = t >> 2; // Top (Moon/Slow Clouds)
-			else if (i < 112) moon_scroll_table[i] = t >> 1; // Mid clouds
-			else if (i < 136) moon_scroll_table[i] = t;      // Faster clouds
+			if (i < 88)       moon_scroll_table[i] = 30; // Top (Moon/Slow Clouds)
+			else if (i < 122 - 12) moon_scroll_table[i] = t >> 1; // Mid clouds
+			else if (i < 145 - 4) moon_scroll_table[i] = t;      // Faster clouds
 			else              moon_scroll_table[i] = t << 1; // Bottom fast clouds
 		}
-
-
-		// 3. Reset DMA source pointer for this frame
-		// HBlank DMA with Repeat does NOT reload the source address automatically at the end of the frame.
-		// It must be disabled and re-enabled during VBlank to reset the source pointer.
-		REG_DMA0CNT = 0;
-		REG_DMA0SAD = (uint32_t)moon_scroll_table;
-		REG_DMA0CNT = 1 | DMA_DST_FIXED | DMA_REPEAT | DMA_HBLANK | DMA_ENABLE;
 
 		vdp_vscroll(VDP_PLAN_B, 0); // Keep vertical static
 	} else if(stageBackgroundType == 3) {
@@ -694,7 +686,7 @@ static void stage_draw_moonback() {
     for(uint16_t y = 0; y < 32; y++) {
         for(uint16_t x = 0; x < 32; x++) { // GBA is 30 tiles wide
             // SKIP 10 tiles (x + 10) to point to the right side of the 40-wide map
-            uint16_t source_tile = MAP_bkMoon[y * 40 + (x + 5)];
+            uint16_t source_tile = MAP_bkMoon[y * 32 + (x)];
             
             uint16_t final_tile = (source_tile & 0x03FF);
             map[y * 32 + x] = (source_tile & 0x0C00) | final_tile | CHAR_PALETTE(1);

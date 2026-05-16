@@ -61,12 +61,22 @@ IWRAM_DATA u8 myMixingBuffer[ MM_MIXLEN_31KHZ ] __attribute((aligned(4)));
 
 void myCoolVblankHandler()
 {
+
+	if (moon_dma_active) {
+        REG_DMA0CNT = 0;
+        REG_DMA0SAD = (uint32_t)moon_scroll_table;
+        REG_DMA0CNT = 1 | DMA_DST_FIXED | DMA_REPEAT | DMA_HBLANK | DMA_ENABLE;
+    }
+
 	//REG_IME = 0;
 	mmVBlank();
 	mmFrame();
 	//REG_IME = 1;
 	
 	vblank = true;
+
+
+
 }
 
 void maxmodInit( void )

@@ -138,6 +138,9 @@ extern uint16_t *stageTable;
 
 extern uint8_t stage_buffer[17932 + 2000];
 
+extern uint16_t moon_scroll_table[160];
+extern bool moon_dma_active;
+
 // For the rest of the code to keep working, we point to the buffer:
 #define stagePXM    (&stage_buffer[0])
 #define stageBlocks (&stage_buffer[8])
