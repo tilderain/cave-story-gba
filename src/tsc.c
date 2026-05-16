@@ -350,7 +350,7 @@ uint8_t tsc_update() {
 				controlsLocked = FALSE;
 				hud_show();
 			} else if(joy_pressed(BUTTON_LEFT)) {
-				sprite_index(teleMenuSprite[teleMenuSelection], 
+				sprite_index(teleMenuSprite[teleMenuSelection],
 						sheets[teleMenuSheet].index + teleMenuSelection*16);
 				if(teleMenuSelection == 0) {
 					teleMenuSelection = teleMenuSlotCount - 1;
@@ -363,7 +363,7 @@ uint8_t tsc_update() {
 				while(tscState != TSC_IDLE) execute_command();
 				tscState = TSC_TELEMENU; // Don't break away from the menu
 			} else if(joy_pressed(BUTTON_RIGHT)) {
-				sprite_index(teleMenuSprite[teleMenuSelection], 
+				sprite_index(teleMenuSprite[teleMenuSelection],
 						sheets[teleMenuSheet].index + teleMenuSelection*16);
 				if(teleMenuSelection == teleMenuSlotCount - 1) {
 					teleMenuSelection = 0;
@@ -371,7 +371,7 @@ uint8_t tsc_update() {
 					teleMenuSelection++;
 				}
 				sound_play(SND_MENU_MOVE, 5);
-				
+
 				tsc_call_event(1000 + teleMenuSelection + 1);
 				while(tscState != TSC_IDLE) execute_command();
 				tscState = TSC_TELEMENU;
@@ -477,13 +477,13 @@ static void tsc_render_warp_text() {
 	// Copy our string to VRAM
 	DMA_queueDma(DMA_VRAM, (uint32_t) (ts + (16<<3)), TILE_NAMEINDEX << 5, (8 * TILE_SIZE) >> 1, 2);
 	// Create sprites to display the string
-	teleMenuSprite[6] = (VDPSprite) { 
-		.x = 160 - 32 + 128, .y = 32 + 128,
-		.size = SPRITE_SIZE(4,1), .attr = TILE_ATTR(PAL0,1,0,0,TILE_NAMEINDEX)
+	teleMenuSprite[6] = (VDPSprite) {
+		.x = SCREEN_HALF_W - 32 + 128, .y = 32 + 128,
+		.size = SPRITE_SIZE(4,1), .attr = TILE_ATTR(PAL0,1,0,0,(TILE_NAMEINDEX*2))
 	};
-	teleMenuSprite[7] = (VDPSprite) { 
-		.x = 160 + 128, .y = 32 + 128,
-		.size = SPRITE_SIZE(4,1), .attr = TILE_ATTR(PAL0,1,0,0,TILE_NAMEINDEX+4)
+	teleMenuSprite[7] = (VDPSprite) {
+		.x = SCREEN_HALF_W + 128, .y = 32 + 128,
+		.size = SPRITE_SIZE(4,1), .attr = TILE_ATTR(PAL0,1,0,0,(TILE_NAMEINDEX*2)+4)
 	};
 }
 
@@ -497,7 +497,7 @@ void tsc_show_teleport_menu() {
 	for(uint8_t i = 0; i < 8; i++) {
         if(teleportEvent[i]) teleMenuSlotCount++;
 	}
-	uint16_t spr_x = 160 - (teleMenuSlotCount * 20);
+	uint16_t spr_x = SCREEN_HALF_W - (teleMenuSlotCount * 20);
 	uint8_t iterCount = 0;
     for(uint8_t i = 0; i < 8; i++) {
         if(teleportEvent[i] == 0) continue;
@@ -978,6 +978,7 @@ uint8_t execute_command() {
 		{
 			args[0] = tsc_read_word();
 			args[1] = tsc_read_word();
+			sound_play(SND_GET_ITEM, 5);
 			player_give_weapon(args[0], args[1]);
 			lastAmmoNum = args[1];
 		}
@@ -1018,6 +1019,7 @@ uint8_t execute_command() {
 		break;
 		case CMD_IT_ADD: // Give item (1)
 			args[0] = tsc_read_word();
+			sound_play(SND_GET_ITEM, 5);
 			player_give_item(args[0]);
 			break;
 		case CMD_IT_SUB: // Remove item (1)

@@ -236,7 +236,8 @@ EWRAM_CODE void do_fadeout_sweep(uint8_t dir) {
         put_fade_bg3();
 
         player_draw();
-        entities_draw();
+		entities_update(true);
+       // entities_draw();
 		stage_update();
         vdp_sprites_update();
 
