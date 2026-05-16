@@ -24,8 +24,12 @@
 
 #include "gba.h"
 
+#include "gbatext.h"
+
 void intro_main() {
 	gamemode = GM_INTRO;
+
+	start_fadein_sweep(1);
 	// Init some subsystems used
 	sheets_load_intro();
 	vdp_sprites_clear();
@@ -46,6 +50,8 @@ void intro_main() {
 	//vdp_puts(VDP_PLAN_A, "Studio Pixel Presents", 10, 8);
     vdp_puts(VDP_PLAN_A, "Based on the Work of", 10, 6);
     vdp_puts(VDP_PLAN_A, "    Studio Pixel    ", 10, 8);
+
+	canvas_init_fullscreen();
 	uint16_t timer = 0;
 	//oldstate = 0;
 	while(++timer <= 400 && !joy_pressed(BUTTON_C) && !joy_pressed(BUTTON_START)) {
@@ -53,7 +59,9 @@ void intro_main() {
             vdp_text_clear(VDP_PLAN_A, 10, 6, 20);
             vdp_text_clear(VDP_PLAN_A, 10, 8, 20);
 		}
-
+    vdp_puts(VDP_PLAN_A, "Based on the Work of", 10, 6);
+    vdp_puts(VDP_PLAN_A, "    Studio Pixel    ", 10, 8);
+		update_fadein_sweep();
 
 		camera.target = NULL;
 	int32_t cam_locked_x = player.x + pixel_to_sub(165);
@@ -73,6 +81,16 @@ void intro_main() {
 		vdp_vsync();
 		aftervsync();
 	}
+
+	if(!joy_pressed(BUTTON_C) && !joy_pressed(BUTTON_START))
+	{
+		do_fadeout_sweep(1);
+		gFade.bMask = 0; 
+		gFade.mode = 0;
+	}
+
+
+
 	vdp_text_clear(VDP_PLAN_A, 10, 8, 20);
 	vdp_fade(NULL, PAL_FadeOut, 4, FALSE);
 	entities_clear();

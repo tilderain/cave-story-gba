@@ -47,21 +47,9 @@ int8_t fadeSweepTimer;
 static uint16_t bg3_map_save[1024];
 static uint32_t bg3_tile0_save[8];
 
-// Fade grid: 15x10 cells, each 16x16 pixels
-#define FADE_GRID_W      15
-#define FADE_GRID_H      10
-#define FADE_FRAMES      16
-#define FADE_TILE_BASE   640   // 64 tiles in BG3 charbase 2
 
-typedef struct {
-    int mode;       // 0=none, 1=fadein, 2=fadeout
-    int bMask;      // 1=full mask active
-    int count;      // sweep line position
-    int dir;        // 0=right, 2=left, 1=bottom, 3=top, 4=diamond
-    int8_t ani_no[FADE_GRID_H][FADE_GRID_W];
-    int8_t flag[FADE_GRID_H][FADE_GRID_W];
-} FadeState;
-static FadeState gFade;
+
+FadeState gFade;
 
 // Load 16 frames of 16x16 fade tiles from SPR_Fade into BG3 charbase 2
 // Each frame = 2x2 BG tiles = 4 tiles
@@ -223,7 +211,7 @@ EWRAM_CODE static int proc_fade(void) {
 
     return (gFade.mode == 0) ? 1 : 0;
 }
-
+#include "gamemode.h"
 // Blocking fade out (with palette fade at end)
 EWRAM_CODE void do_fadeout_sweep(uint8_t dir) {
     // Save BG3 state
@@ -263,8 +251,16 @@ EWRAM_CODE void do_fadeout_sweep(uint8_t dir) {
     aftervsync();
 
     // Restore BG3 state
-    for (int i = 0; i < 1024; i++) map[i] = bg3_map_save[i];
-    for (int i = 0; i < 8; i++) tile0[i] = bg3_tile0_save[i];
+
+    if (gamemode == GM_GAME) {
+        gFade.bMask = 1; 
+        // Do NOT restore map here. Let the next stage's Fade In handle it.
+    } else {
+        // Only restore if we aren't in the middle of a stage transition
+        volatile uint16_t* map = (volatile uint16_t*)0x0600E800;
+        for (int i = 0; i < 1024; i++) map[i] = bg3_map_save[i];
+    }
+
 
     gFade.mode = 0;
 }

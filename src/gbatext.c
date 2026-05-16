@@ -312,8 +312,10 @@ void canvas_reset_scroll(void) {
 // Re-points the canvas region of the tilemap and clears canvas pixels.
 // on_top: matches your windowOnTop flag
 // ---------------------------------------------------------------------------
-
+#include "effect.h"
 void canvas_setup_tilemap(uint8_t on_top) {
+
+    if (gFade.bMask) return; 
     s_canvas_is_fullscreen = 0;
     int map_row = on_top ? 1 : 14;  
     int map_col = 2; 

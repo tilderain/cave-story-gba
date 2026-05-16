@@ -93,7 +93,6 @@ uint16_t stageID = 0;
 void stage_load(uint16_t id) {
 	//iprintf("Loading stage %d\n", id);
 	vdp_set_display(FALSE);
-
     
 	oldstate = 65535;
 	// Prevents an issue where a column of the previous map would get drawn over the new one
@@ -101,7 +100,10 @@ void stage_load(uint16_t id) {
 	stageID = id;
 
 	// Clear out or deactivate stuff from the old stage
-	fadeSweepTimer = -1;
+
+    if (fadeSweepTimer <= 0) {
+        fadeSweepTimer = -1;
+    }
 	effects_clear();
 	entities_clear();
 	if(stageTable) {

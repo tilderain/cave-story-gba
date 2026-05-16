@@ -51,3 +51,19 @@ void start_fadein_sweep(uint8_t dir);
 
 // Frame step for fade in effect
 void update_fadein_sweep(void);
+
+// Fade grid: 15x10 cells, each 16x16 pixels
+#define FADE_GRID_W      15
+#define FADE_GRID_H      10
+#define FADE_FRAMES      16
+#define FADE_TILE_BASE   640   // 64 tiles in BG3 charbase 2
+
+typedef struct {
+    int mode;       // 0=none, 1=fadein, 2=fadeout
+    int bMask;      // 1=full mask active
+    int count;      // sweep line position
+    int dir;        // 0=right, 2=left, 1=bottom, 3=top, 4=diamond
+    int8_t ani_no[FADE_GRID_H][FADE_GRID_W];
+    int8_t flag[FADE_GRID_H][FADE_GRID_W];
+} FadeState;
+extern FadeState gFade;

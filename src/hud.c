@@ -195,11 +195,10 @@ void hud_hide() {
 	showing = FALSE;
 }
 
-
 void hud_update() {
 	uint8_t weaponChange = FALSE;
 	//if(paused) return;
-	if(!showing || fadeSweepTimer > 0) return;
+    if(!showing || fadeSweepTimer > 0 || gFade.bMask) return;
 
 	// Handle weapon swap scroll animation (matches CSE2 gArmsEnergyX sliding)
 	if(hudScrollDir != 0) {

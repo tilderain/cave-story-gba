@@ -1106,7 +1106,7 @@ uint8_t execute_command() {
 				inFade = FALSE; // Unlock sprites from updating
 				vdp_vsync(); // Wait a frame to let the sprites redraw
 				aftervsync();
-				start_fadein_sweep(player.dir);
+				start_fadein_sweep(args[0]);
 			} else {
 				vdp_color_next(0, 0x200);
 				vdp_fade(PAL_FadeOutBlue, NULL, 4, TRUE);
@@ -1125,7 +1125,7 @@ uint8_t execute_command() {
 				if(gamemode == GM_INTRO) {
 					vdp_fade(NULL, PAL_FadeOut, 4, FALSE);
 				} else {
-					do_fadeout_sweep(player.dir);
+					do_fadeout_sweep(args[0]);
 				}
 				inFade = TRUE;
 			} else {
