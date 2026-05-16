@@ -135,7 +135,6 @@ void song_fade_update() {
 	if(songFadeVolume <= 0) {
 		songFadeVolume = -1;
 		mmStop();
-		songPlaying = 0;
 		return;
 	}
 

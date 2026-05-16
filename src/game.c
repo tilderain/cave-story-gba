@@ -157,12 +157,27 @@ IWRAM_CODE void game_main(uint8_t load) {
 						hud_show();
 						playerIFrames = 0;
 						stage_setup_palettes();
+						// Clear the BG3 fade overlay so screen isn't left black
+						gFade.bMask = 0;
+						fadeSweepTimer = -1;
+						volatile uint16_t* map = (volatile uint16_t*)0x0600E800;
+						for (int i = 0; i < 1024; i++) map[i] = 0;
 						vdp_fade(NULL, NULL, 4, TRUE);
 						continue;
 					} else if(rtn == 3) {
 						vdp_colors(0, PAL_FadeOut, 64);
 						vdp_color(15, 0x000);
 						game_reset(FALSE); // Start from beginning
+						stageBackground = 0;
+						hud_show();
+						playerIFrames = 0;
+						stage_setup_palettes();
+						// Clear the BG3 fade overlay so screen isn't left black
+						gFade.bMask = 0;
+						fadeSweepTimer = -1;
+						volatile uint16_t* map = (volatile uint16_t*)0x0600E800;
+						for (int i = 0; i < 1024; i++) map[i] = 0;
+						vdp_fade(NULL, NULL, 4, TRUE);
 						continue;
 					} else { // End credits
 						break;
