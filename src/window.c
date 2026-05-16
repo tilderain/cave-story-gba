@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 
+void put_fade_bg3(void); 
 // Window location (GBA is 30 columns wide and 20 rows tall)
 #define WINDOW_X1 1
 #define WINDOW_X2 28                  // Leaves a 1-tile margin on the right (GBA column 28)
@@ -141,8 +142,9 @@ uint8_t window_is_open() {
 	return windowOpen;
 }
 
+
 void window_clear() {
-    iprintf("\x1b[2J");
+    //iprintf("\x1b[2J");
     uint8_t x = showingFace ? TEXT_X1_FACE : TEXT_X1;
     uint8_t y = windowOnTop ? TEXT_Y1_TOP : TEXT_Y1;
     uint8_t w = showingFace ? 19 : 26; // GBA friendly text widths
@@ -154,6 +156,9 @@ void window_clear() {
     enable_ints;
 
     window_clear_text();
+    
+    // Fix the mapping if <CLR destroyed the VRAM reference layout
+    canvas_fix_tilemap(windowOnTop);
 }
 
 
@@ -171,6 +176,7 @@ void window_clear_text() {
     canvas_clear(); 
 }
 
+
 void window_close(void) {
 	if(!paused && fadeSweepTimer < 0) {
 	    vdp_set_window(0, 0);
@@ -179,17 +185,23 @@ void window_close(void) {
 	showingItem = 0;
 	windowOpen = FALSE;
 
-
     if(!windowCleared)
     {
         windowCleared = true;
-	    // Clear the tilemap so the window and canvas immediately disappear
-	    vdp_map_clear(VDP_PLAN_W);
+        
+        // Check if there is an active fade or full-black state
+        if (gFade.bMask || gFade.mode != 0) {
+            // Restore the fade blocks into the region we just closed
+            put_fade_bg3(); 
+        } else {
+	        // Clear the tilemap so the window and canvas immediately disappear
+	        vdp_map_clear(VDP_PLAN_W);
+        }
     }
 
-    //if(textMode == TM_MSG) textMode = TM_NORMAL;
 	canvas_clear();
 }
+
 
 #include "vdp.h"
 

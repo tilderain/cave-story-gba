@@ -314,14 +314,14 @@ void canvas_reset_scroll(void) {
 // ---------------------------------------------------------------------------
 #include "effect.h"
 void canvas_setup_tilemap(uint8_t on_top) {
-
-    if (gFade.bMask) return; 
     s_canvas_is_fullscreen = 0;
     int map_row = on_top ? 1 : 14;  
     int map_col = 2; 
 
-    // Clear tilemap
-    for (int i = 0; i < 1024; i++) BG3_MAP_BASE[i] = 0;
+    // If there is NO fade active and NO full black mask, clear the whole map
+    if (!gFade.bMask && gFade.mode == 0) {
+        for (int i = 0; i < 1024; i++) BG3_MAP_BASE[i] = 0;
+    }
 
     // IMPORTANT: Only map 6 rows of tiles to the screen
     // The canvas is 8 rows high, so the last 2 rows are a hidden "gutter"

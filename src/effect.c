@@ -65,17 +65,33 @@ EWRAM_CODE static void fade_generate_tiles(void) {
 }
 
 // Map all fade cells to the BG3 tilemap
-EWRAM_CODE static void put_fade_bg3(void) {
+EWRAM_CODE void put_fade_bg3(void) {
     volatile uint16_t* map = (volatile uint16_t*)0x0600E800;
+    
+    // Define the boundaries of the window tilemap
+    int w_x1 = 2;
+    int w_x2 = 2 + 26; // 28
+    int w_y1 = windowOnTop ? 1 : 14;
+    int w_y2 = w_y1 + 8;
+    
     for (int y = 0; y < FADE_GRID_H; y++) {
         for (int x = 0; x < FADE_GRID_W; x++) {
             int an = gFade.ani_no[y][x];
             uint16_t base = FADE_TILE_BASE + an * 4;
             int my = y * 2, mx = x * 2;
-            map[my * 32 + mx]       = base | CHAR_PALETTE(3);
-            map[my * 32 + mx + 1]   = (base + 1) | CHAR_PALETTE(3);
-            map[(my + 1) * 32 + mx] = (base + 2) | CHAR_PALETTE(3);
-            map[(my + 1) * 32 + mx + 1] = (base + 3) | CHAR_PALETTE(3);
+            
+            // Only overwrite if we are not inside an active text window bounds
+            if (!windowOpen || mx < w_x1 || mx >= w_x2 || my < w_y1 || my >= w_y2)
+                map[my * 32 + mx]       = base | CHAR_PALETTE(3);
+                
+            if (!windowOpen || (mx + 1) < w_x1 || (mx + 1) >= w_x2 || my < w_y1 || my >= w_y2)
+                map[my * 32 + mx + 1]   = (base + 1) | CHAR_PALETTE(3);
+                
+            if (!windowOpen || mx < w_x1 || mx >= w_x2 || (my + 1) < w_y1 || (my + 1) >= w_y2)
+                map[(my + 1) * 32 + mx] = (base + 2) | CHAR_PALETTE(3);
+                
+            if (!windowOpen || (mx + 1) < w_x1 || (mx + 1) >= w_x2 || (my + 1) < w_y1 || (my + 1) >= w_y2)
+                map[(my + 1) * 32 + mx + 1] = (base + 3) | CHAR_PALETTE(3);
         }
     }
 }
