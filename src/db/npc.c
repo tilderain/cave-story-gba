@@ -291,7 +291,7 @@ const npc_info_def npc_info[NPC_COUNT + 9 + 20 + 17] = {
 	{ &SPR_Chaco2, 		NOSHEET, 		PAL3, 1, &ai_null, 				&ai_mimiga_caged, 	&ai_null 			,""}, // Chaco (Caged)
 	{ &SPR_DoctorB, 	NOSHEET, 		PAL1, 1, &onspawn_persistent, 	&ai_boss_doctor, 	&ondeath_event 		,""}, // Doctor (Boss)
 	{ NULL, 			SHEET_DOCSHOT, 	PAL1, 1, &onspawn_persistent, 	&ai_doctor_shot, 	&ondeath_nodrop 	,""}, // Doctor Red Wave
-	{ NULL, 			SHEET_DOCSHOT, 	PAL1, 1, &onspawn_persistent, 	&ai_doctor_blast, 	&ondeath_nodrop 	,""}, // Doctor Red Ball (Fast)
+	{ NULL, 			SHEET_DOCSHOT, 	PAL1, 1, &onspawn_persistent, 	&ai_doctor_shot_trail,&ondeath_nodrop 	,""}, // Doctor Shot Trail
 	{ NULL, 			SHEET_DOCSHOT, 	PAL1, 1, &onspawn_persistent, 	&ai_doctor_blast, 	&ondeath_nodrop 	,""}, // Doctor Red Ball (Slow)
 	{ &SPR_DoctorM, 	NOSHEET, 		PAL1, 4, &onspawn_persistent, 	&ai_muscle_doctor, 	&ondeath_event 		,""}, // Muscle Doctor (Boss)
 	{ &SPR_Igor, 		NOSHEET, 		PAL3, 4, &ai_null, 				&ai_igor_balcony, 	&ondeath_default 	,""}, // Igor

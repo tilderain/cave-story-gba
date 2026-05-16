@@ -78,7 +78,7 @@ bool moon_dma_active = false;
 static void stage_load_tileset();
 static void stage_load_blocks();
 
-static void stage_draw_block(uint16_t x, uint16_t y);
+
 //static void stage_draw_screen();
 static void stage_draw_screen_credits();
 void stage_draw_background();

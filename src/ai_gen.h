@@ -326,6 +326,7 @@ void ai_core_blast(Entity *);
 void ai_boss_doctor(Entity *);
 void ai_doctor_shot(Entity *);
 void ai_doctor_blast(Entity *);
+void ai_doctor_shot_trail(Entity *);
 void onspawn_red_crystal(Entity *);
 void ai_red_crystal(Entity *);
 void ai_doctor_crowned(Entity *);

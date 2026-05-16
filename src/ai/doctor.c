@@ -269,6 +269,7 @@ void ai_doctor_shot(Entity *e) {
 		case 0:
 		{
 			e->state = 1;
+			e->flags |= NPC_SHOOTABLE;
 			if(e->flags & NPC_OPTION2) e->angle = 0x80;
 			if(e->flags & NPC_OPTION1) e->dir = 1;
 			e->x_mark = e->x;
@@ -288,6 +289,8 @@ void ai_doctor_shot(Entity *e) {
 			
 			e->x = e->x_mark + (((int32_t)cos[e->angle] * (int32_t)e->timer2) >> 3);
 			e->y = e->y_mark + (((int32_t)sin[e->angle] * (int32_t)e->timer2) >> 1);
+
+			entity_create(e->x, e->y, OBJ_DOCTOR_SHOT_TRAIL, 0);
 		}
 		break;
 	}
@@ -295,27 +298,34 @@ void ai_doctor_shot(Entity *e) {
 
 // from his "explosion" attack
 void ai_doctor_blast(Entity *e) {
+	if(e->state == 0) {
+		e->state = 1;
+		e->flags |= NPC_SHOOTABLE;
+	}
 	e->timer++;
 	// they're bouncy
 	if (e->timer & 1) {
 		if (e->x_speed < 0 && blk(e->x, -6, e->y, 0) == 0x41)
 			e->x_speed = abs(e->x_speed);
-			
+
 		if (e->x_speed > 0 && blk(e->x, 6, e->y, 0) == 0x41)
 			e->x_speed = -abs(e->x_speed);
-		
+
 		if (e->y_speed < 0 && blk(e->x, 0, e->y, -6) == 0x41)
 			e->y_speed = 0x200;
-		
+
 		if (e->y_speed > 0 && blk(e->x, 0, e->y, 6) == 0x41)
 			e->y_speed = -0x200;
 	}
-	
+
 	e->x += e->x_speed;
 	e->y += e->y_speed;
-	
+
 	if (e->timer & 2) e->frame ^= 1;
-	
+
+	if (e->timer % 4 == 1)
+		entity_create(e->x, e->y, OBJ_DOCTOR_SHOT_TRAIL, 0);
+
 	if (e->timer > 250) {
 		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);
 		e->state = STATE_DELETE;
@@ -323,9 +333,25 @@ void ai_doctor_blast(Entity *e) {
 	}
 }
 
+// trail effect for doctor wave shot and blast
+// Matches CSE2 ActNpc265: 3-frame animation, 3 ticks per frame, then self-destruct
+void ai_doctor_shot_trail(Entity *e) {
+	if(e->state == 0) {
+		e->state = 1;
+		e->frame = 1;	// trail uses frames 1-3 (frame 0 is the wave shot)
+	}
+
+	if(++e->animtime > 3) {
+		e->animtime = 0;
+		if(++e->frame > 3)
+			e->state = STATE_DELETE;
+	}
+}
+
 void onspawn_red_crystal(Entity *e) {
 	e->alwaysActive = TRUE;
 	crystal_entity = e;
+	e->flags |= NPC_SHOOTABLE;
 }
 
 void ai_red_crystal(Entity *e) {

@@ -50,24 +50,32 @@ void intro_main() {
 	
 	// Create "Studio Pixel Presents" text
 	//vdp_puts(VDP_PLAN_A, "Studio Pixel Presents", 10, 8);
-    vdp_puts(VDP_PLAN_A, "Based on the Work of", 10, 6);
-    vdp_puts(VDP_PLAN_A, "    Studio Pixel    ", 10, 8);
 
-	canvas_init_fullscreen();
 	uint16_t timer = 0;
 	//oldstate = 0;
+	bool canvas_init = false;
 	while(++timer <= 400 && !joy_pressed(BUTTON_C) && !joy_pressed(BUTTON_START)) {
 		if(timer == 150) {
-            vdp_text_clear(VDP_PLAN_A, 10, 6, 20);
-            vdp_text_clear(VDP_PLAN_A, 10, 8, 20);
+            //vdp_text_clear(VDP_PLAN_A, 10, 6, 20);
+            //vdp_text_clear(VDP_PLAN_A, 10, 8, 20);
+			canvas_clear();
 		}
-    vdp_puts(VDP_PLAN_A, "Based on the Work of", 10, 6);
-    vdp_puts(VDP_PLAN_A, "    Studio Pixel    ", 10, 8);
+
+    	vdp_puts(VDP_PLAN_A, "Based on the Work of", 10, 6);
+   		vdp_puts(VDP_PLAN_A, "    Studio Pixel    ", 10, 8);
+
 		update_fadein_sweep();
+		// Fade completion zeroes BG3 tilemap; re-init canvas to restore text visibility
+		if(gFade.mode == 0 && canvas_init == false) 
+		{
+			canvas_init_fullscreen();
+			canvas_init = true;
+		}
 
 		camera.target = NULL;
-	int32_t cam_locked_x = player.x + pixel_to_sub(165);
-	int32_t cam_locked_y = player.y + pixel_to_sub(140);
+		int32_t cam_locked_x = player.x + pixel_to_sub(165);
+		int32_t cam_locked_y = player.y + pixel_to_sub(140);
+		
 		camera_set_position(cam_locked_x, cam_locked_y);
 
 		vdp_hscroll(VDP_PLAN_A, -sub_to_pixel(camera.x) + SCREEN_HALF_W + 8);
