@@ -91,6 +91,33 @@ static int16_t faceXOffset = 0; // Current horizontal sliding offset
 void window_clear_text();
 void window_draw_face();
 
+static void window_draw_frame(uint8_t mode) {
+    uint16_t wy1 = mode ? WINDOW_Y1_TOP : WINDOW_Y1;
+    uint16_t wy2 = mode ? WINDOW_Y2_TOP : WINDOW_Y2;
+    uint8_t x1 = WINDOW_X1, x2 = WINDOW_X2;
+
+    // Palette bank 6 — PAL_textbox is loaded at BG_COLORS[96]
+    uint16_t pal = (6 << 12);
+
+    // Top border: corner (tile 0), edge (tile 1), corner (tile 2)
+    BG3_MAP_BASE[wy1 * 32 + x1] = (TILE_WINDOWINDEX_BG + 0) | pal;
+    for (int col = x1 + 1; col < x2; col++)
+        BG3_MAP_BASE[wy1 * 32 + col] = (TILE_WINDOWINDEX_BG + 1) | pal;
+    BG3_MAP_BASE[wy1 * 32 + x2] = (TILE_WINDOWINDEX_BG + 2) | pal;
+
+    // Sides: left edge (tile 3), right edge (tile 5)
+    for (int row = wy1 + 1; row < wy2; row++) {
+        BG3_MAP_BASE[row * 32 + x1] = (TILE_WINDOWINDEX_BG + 3) | pal;
+        BG3_MAP_BASE[row * 32 + x2] = (TILE_WINDOWINDEX_BG + 5) | pal;
+    }
+
+    // Bottom border: corner (tile 6), edge (tile 7), corner (tile 8)
+    BG3_MAP_BASE[wy2 * 32 + x1] = (TILE_WINDOWINDEX_BG + 6) | pal;
+    for (int col = x1 + 1; col < x2; col++)
+        BG3_MAP_BASE[wy2 * 32 + col] = (TILE_WINDOWINDEX_BG + 7) | pal;
+    BG3_MAP_BASE[wy2 * 32 + x2] = (TILE_WINDOWINDEX_BG + 8) | pal;
+}
+
 void window_open(uint8_t mode) {
     mapNameTTL = 0; // Hide map name to avoid tile conflict
     if(cfg_language >= LANG_JA && cfg_language <= LANG_KO) {
@@ -107,20 +134,6 @@ void window_open(uint8_t mode) {
         ty1 = mode ? TEXT_Y1_TOP : TEXT_Y1,
         ty2 = mode ? TEXT_Y2_TOP : TEXT_Y2;
     
-    //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(0), WINDOW_X1, wy1);
-    // Draw horizontal borders based on actual GBA window width (26 tiles)
-    vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(1), TEXT_X1, wy1, WINDOW_X2 - WINDOW_X1 - 1, 1, 0);
-    //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(2), WINDOW_X2, wy1);
-    for(uint8_t y = ty1; y <= ty2; y++) {
-        //vdp_map_xy(VDP_PLAN_W, 0, 0, y);
-        //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(3), WINDOW_X1, y);
-        //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(5), WINDOW_X2, y);
-        //vdp_map_xy(VDP_PLAN_W, 0, 29, y); // Row width is 30 columns (index 29 is the rightmost)
-    }
-    //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(6), WINDOW_X1, wy2);
-    vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(7), TEXT_X1, wy2, WINDOW_X2 - WINDOW_X1 - 1, 1, 0);
-    //vdp_map_xy(VDP_PLAN_W, WINDOW_ATTR(8), WINDOW_X2, wy2);
-
     window_clear();
 
     windowCleared = 0;
@@ -135,6 +148,7 @@ void window_open(uint8_t mode) {
     windowOpen = TRUE;
 
     canvas_setup_tilemap(mode);  // clears canvas, resets scroll, fixes tilemap
+    window_draw_frame(mode);     // draw frame tiles on BG3
 }
 
 
@@ -144,15 +158,8 @@ uint8_t window_is_open() {
 
 
 void window_clear() {
-    //iprintf("\x1b[2J");
-    uint8_t x = showingFace ? TEXT_X1_FACE : TEXT_X1;
-    uint8_t y = windowOnTop ? TEXT_Y1_TOP : TEXT_Y1;
-    uint8_t w = showingFace ? 19 : 26; // GBA friendly text widths
-
     disable_ints;
-    //z80_request();
-    vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(4), x, y, w, 6, 0);
-    //z80_release();
+    // Fill handled by canvas system — frame stays intact
     enable_ints;
 
     window_clear_text();

@@ -28,6 +28,7 @@
 #include "tsc.h"
 
 #include "gba_video.h"
+#include "gba_dma.h"
 #include "gbatext.h"
 
 int s_scroll_timer = 0;
@@ -198,7 +199,9 @@ void tsc_init() {
 	teleMenuSlotCount = 0;
 	teleMenuSelection = 0;
 	memset(teleMenuEvent, 0, 16);
-	//vdp_tiles_load_from_rom(TS_Window.tiles, TILE_WINDOWINDEX, TS_Window.numTile);
+	// Load window frame tiles to BG3 CHAR_BASE(2) VRAM
+	uint16_t *bg3_vram = (uint16_t*)(VRAM + 0x8000);
+	DMA3COPY(TS_Window.tiles, bg3_vram + TILE_WINDOWINDEX_BG * 16, (TS_Window.numTile * 8) | COPY32);
 	tsc_load(headEvents, (const uint8_t*)TSC_GLOB[HEAD], HEAD_EVENT_COUNT);
 }
 

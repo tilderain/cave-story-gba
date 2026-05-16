@@ -5,6 +5,9 @@
  
 #define WINDOW_ATTR(x) TILE_ATTR(PAL0, 1, 0, 0, TILE_WINDOWINDEX+(x))
 
+// Window frame tiles in BG3 CHAR_BASE(2) VRAM (placed after canvas tiles at 1-208)
+#define TILE_WINDOWINDEX_BG     209
+
 // Instant text mode
 #define TM_NORMAL	0
 #define TM_MSG		1 // TUR
