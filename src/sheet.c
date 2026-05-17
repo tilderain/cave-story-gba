@@ -521,6 +521,12 @@ void sheets_load_stage(uint16_t sid, uint8_t init_base, uint8_t init_tiloc) {
 		{	SHEET_ADD(SHEET_AHCHOO, cfg_language == LANG_JA ? &SPR_AhchooJ : &SPR_AhchooE, 2,2,2, 0,0, 0,1);
 		} break;
 	}
+	// Always ensure SHEET_DROP is loaded for water droplets
+	uint8_t drop_sheet = NOSHEET;
+	SHEET_FIND(drop_sheet, SHEET_DROP);
+	if(drop_sheet == NOSHEET) {
+		SHEET_ADD(SHEET_DROP, &SPR_Drop, 1,1,1, 0,0);
+	}
 	// Weapons at the end
 	for(uint8_t i = 0; i < MAX_WEAPONS; i++) sheets_load_weapon(&playerWeapon[i]);
 	// Special case for Sand Zone Bar because Curly uses the machine gun

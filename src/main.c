@@ -27,7 +27,7 @@
 
 
 #include "bank_data.h"
-
+#include "gbatext.h"
 volatile uint8_t ready = 0;
 volatile uint8_t vblank = 0;
 
@@ -97,6 +97,23 @@ void myCoolVblankHandler()
 
 }
 
+void afterReset()
+{
+	//RegisterRamReset(RESET_VRAM | RESET_OAM | RESET_PALETTE);
+	vdp_init();
+	// BG0 uses charblock 1 — clear its first tile to blank
+	vdp_tiles_load(TILE_BLANK, 512, 1);
+	//REG_DISPCNT &= ~0x0080; // Clear Forced Blank bit (Turn screen ON)
+	hardReset = 0;
+	song_stop();
+	vdp_sprites_clear();
+	canvas_init_fullscreen();
+	camera_init();
+	camera.target = NULL;
+	splash_main();
+	intro_main();
+}
+
 void maxmodInit( void )
 {
     irqSet( IRQ_VBLANK, myCoolVblankHandler );
@@ -144,7 +161,7 @@ void maxmodInit( void )
 	mmSetEffectsVolume(1024);
 }
 
-#include "gbatext.h"
+
 __attribute__((used)) const char save_detection[] = "SRAM_V113";
 #define REG_WAITCNT *(volatile u16*)0x04000204
 EWRAM_CODE int main() {
@@ -204,42 +221,26 @@ EWRAM_CODE int main() {
 	intro_main();
     while(TRUE) {
 		uint8_t select = titlescreen_main();
+		if(hardReset) { afterReset(); continue; }
 		if(select == 0) {
 			select = saveselect_main();
+			if(hardReset) { afterReset(); continue; }
 			if(select >= 4) continue;
 			canvas_clear();
 			canvas_setup_tilemap(0);
 			game_main(select);
 			if(hardReset) {
-				//RegisterRamReset(RESET_VRAM | RESET_OAM);
-				vdp_init();
-				// BG0 uses charblock 1 — clear its first tile to blank
-				vdp_tiles_load(TILE_BLANK, 512, 1);
-				//REG_DISPCNT &= ~0x0080; // Clear Forced Blank bit (Turn screen ON)
-				hardReset = 0;
-				song_stop();
-				vdp_sprites_clear();
-				canvas_init_fullscreen();
-				camera_init();
-				camera.target = NULL;
-				//splash_main();
-				intro_main();
+				afterReset();
 				continue;
 			}
 			credits_main();
 		} else if(select == 2) {
 			soundtest_main();
+			if(hardReset) { afterReset(); continue; }
 		} else if(select == 3) {
 			config_main();
 			if(hardReset) {
-				hardReset = 0;
-				song_stop();
-				vdp_sprites_clear();
-				canvas_init_fullscreen();
-				camera_init();
-				camera.target = NULL;
-				splash_main();
-				intro_main();
+				afterReset();
 				continue;
 			}
 		} else {
@@ -247,15 +248,7 @@ EWRAM_CODE int main() {
 			canvas_setup_tilemap(0);
 			game_main(select);
 			if(hardReset) {
-				vdp_init();
-				hardReset = 0;
-				song_stop();
-				vdp_sprites_clear();
-				canvas_init_fullscreen();
-				camera_init();
-				camera.target = NULL;
-				//splash_main();
-				intro_main();
+				afterReset();
 				continue;
 			}
 			credits_main();

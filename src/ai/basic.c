@@ -497,31 +497,37 @@ void ai_refill(Entity *e) {
 
 void ai_sprinkler(Entity *e) {
 	if (e->flags & NPC_OPTION2) return;
-	
-	//if (++e->animtime & 1) e->frame ^= 1;
-	// Make sure this is an odd number so half the drops will show at once
-	if (++e->timer == 7) { 
-		Entity *drop = entity_create(e->x, e->y, OBJ_WATER_DROPLET, 0);
-		drop->x_speed = -0x3FF + (random() & 0x7FF);
-		drop->y_speed = -0x6FF + (random() & 0x3FF);
-		e->timer = 0;
+
+	// Animation: toggle between frame 0 and 1 every 2 frames
+	if (++e->animtime > 1) {
+		e->animtime = 0;
+		e->frame++;
 	}
+	if (e->frame > 1) {
+		e->frame = 0;
+		return;
+	}
+
+	if (++e->state % 2) {
+		Entity *drop = entity_create(e->x, e->y, OBJ_WATER_DROPLET, 0);
+		drop->x_speed = (random() % 0x801) - 0x400;
+		drop->y_speed = (int)(random() % 0x781) - 0x600;
+	}
+	Entity *drop = entity_create(e->x, e->y, OBJ_WATER_DROPLET, 0);
+	drop->x_speed = (random() % 0x801) - 0x400;
+	drop->y_speed = (int)(random() % 0x781) - 0x600;
+	
 }
 
 void ai_water_droplet(Entity *e) {
-	if(e->x_speed > 0) {
-		e->x_speed -= 4;
-	} else {
-		e->x_speed += 4;
-	}
 	e->y_speed += 0x20;
-	if(e->y_speed > 0x5FF) e->y_speed = 0x5FF;
+	if (e->y_speed > 0x5FF) e->y_speed = 0x5FF;
 	e->x += e->x_speed;
 	e->y += e->y_speed;
-	e->hidden ^= 1;
+
 	if (++e->timer > 10) {
 		uint8_t block = stage_get_block_type(sub_to_block(e->x), sub_to_block(e->y));
-		if(block & BLOCK_WATER || (block & BLOCK_SOLID && !(block & BLOCK_SLOPE)))
+		if (block & BLOCK_WATER || (block & BLOCK_SOLID && !(block & BLOCK_SLOPE)))
 			e->state = STATE_DELETE;
 	}
 }
@@ -1000,7 +1006,8 @@ void ai_intro_doctor(Entity *e) {
 }
 
 void ai_drip_generator(Entity *e) {
-    if((random() & 127) == 0) {
-        entity_create(e->x, e->y - 0x1800, OBJ_WATER_DROPLET, 0);
-    }
+	if ((random() % 101) == 2) {
+		int32_t x = e->x + ((int)(random() % 13) - 6) * 0x200;
+		entity_create(x, e->y - 0xE00, OBJ_WATER_DROPLET, 0);
+	}
 }

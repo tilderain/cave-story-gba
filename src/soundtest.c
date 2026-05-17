@@ -89,6 +89,7 @@ void soundtest_main() {
     song_stop();
     oldstate = 65535;
     while(TRUE) {
+        if(hardReset) return;
         vdp_colors_bg(0, PAL_SndTest, 16);
 
         if(joy_pressed(BUTTON_LEFT)) {

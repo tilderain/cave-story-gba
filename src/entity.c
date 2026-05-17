@@ -273,8 +273,28 @@ EWRAM_CODE void entities_update(uint8_t draw) {
 			player.x = player.x_next;
 			player.y = player.y_next;
 			if(collided && player.health > 0 && (e->type == OBJ_BLOCK_MOVEH || e->type == OBJ_BLOCK_MOVEV)) {
-				if(blk(player.x, 0, player.y, 0) == 0x41) {
-					// Player got crushed
+				// Crushing detection: check player edge in push direction (not center)
+				uint8_t crushed = FALSE;
+				if(e->type == OBJ_BLOCK_MOVEH) {
+					// Block moving left pushes player left into wall
+					if(collision.right && e->x_speed <= 0)
+						crushed = blk(player.x, -5, player.y, -5) == 0x41 ||
+								  blk(player.x, -5, player.y,  5) == 0x41;
+					// Block moving right pushes player right into wall
+					if(collision.left && e->x_speed >= 0)
+						crushed = blk(player.x,  5, player.y, -5) == 0x41 ||
+								  blk(player.x,  5, player.y,  5) == 0x41;
+				} else { // OBJ_BLOCK_MOVEV
+					// Block moving down pushes player down into floor
+					if(collision.top && e->y_speed > 0)
+						crushed = blk(player.x, -2, player.y, 8) == 0x41 ||
+								  blk(player.x,  2, player.y, 8) == 0x41;
+					// Block moving up pushes player up into ceiling
+					if(collision.bottom && e->y_speed < 0)
+						crushed = blk(player.x, -2, player.y, -8) == 0x41 ||
+								  blk(player.x,  2, player.y, -8) == 0x41;
+				}
+				if(crushed) {
 					if(player_inflict_damage(100)) return;
 				}
 			}

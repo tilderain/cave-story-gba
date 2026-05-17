@@ -358,6 +358,7 @@ void config_main() {
 	//set_page(page);
 	oldstate = 65535;
 	while(TRUE) {
+		if(hardReset) break;
 		if(joy_pressed(BUTTON_UP)) {
 			do {
 				if(cursor == 0) cursor = numItems - 1;
@@ -386,7 +387,6 @@ void config_main() {
                 break;
             }
 			press_menuitem(&menu[page][cursor], page, &sprCursor);
-			if(hardReset) break;
 		} else if(joy_pressed(btn[cfg_btn_shoot])) {
             system_save_config();
 			break;

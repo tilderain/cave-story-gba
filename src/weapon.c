@@ -1411,9 +1411,10 @@ void bullet_missile_explode(Bullet *b) {
 	b->ttl = missile_settings[pal_mode||cfg_60fps][index].boom_time;
 	uint8_t size = (b->type == WEAPON_SUPERMISSILE) ? 24 : 32;
 	b->hit_box = (bounding_box) { size, size, size, size };
-	// TODO: Explosion graphic instead of smoke
+	// CSE2 spawning boomflash explosion sprite via ActBullet_Bom / ActBullet_SuperBom
+	effect_create_misc(EFF_BOOMFLASH, sub_to_pixel(b->x), sub_to_pixel(b->y), FALSE);
 	for(uint8_t i = 0; i < 2; i++) {
-		effect_create_smoke(sub_to_pixel(b->x) - 15 + (random() & 31), 
+		effect_create_smoke(sub_to_pixel(b->x) - 15 + (random() & 31),
 							sub_to_pixel(b->y) - 15 + (random() & 31));
 	}
 }

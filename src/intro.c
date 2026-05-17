@@ -55,6 +55,7 @@ void intro_main() {
 	//oldstate = 0;
 	bool canvas_init = false;
 	while(++timer <= 400 && !joy_pressed(BUTTON_C) && !joy_pressed(BUTTON_START)) {
+		if(hardReset) { entities_clear(); effects_clear(); return; }
 		if(timer == 150) {
             //vdp_text_clear(VDP_PLAN_A, 10, 6, 20);
             //vdp_text_clear(VDP_PLAN_A, 10, 8, 20);

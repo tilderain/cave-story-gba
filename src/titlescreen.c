@@ -55,6 +55,9 @@ uint8_t titlescreen_main() {
 	vdp_set_display(FALSE);
 	vdp_map_clear(VDP_PLAN_A);
 	vdp_map_clear(VDP_PLAN_B);
+	// BG0 uses CHAR_BASE(1), so cleared tilemap entries point to VRAM tile 512.
+	// After the intro loaded its background there, we must re-blank it.
+	vdp_tiles_load(TILE_BLANK, TILE_BACKINDEX, 1);
 	vdp_sprites_clear();
 	// Check save data, only enable continue if save data exists
 
@@ -121,7 +124,8 @@ uint8_t titlescreen_main() {
 	if(song_get_playing() != tsong) song_play(tsong);
 	oldstate = 65535;
 	while(!joy_pressed(btn[cfg_btn_jump]) && !joy_pressed(btn[cfg_btn_pause])) {
-		
+		if(hardReset) return 0xFF;
+
 		//iprintf("titlescreen %d %d \n", joystate, joy_pressed(btn[cfg_btn_jump]));
 
 		for(uint8_t i = 0; i < 2; i++) {
@@ -213,6 +217,7 @@ uint8_t titlescreen_main() {
 		
 		oldstate = 65535;
 		while(!joy_pressed(btn[cfg_btn_jump]) && !joy_pressed(btn[cfg_btn_pause])) {
+			if(hardReset) return 0xFF;
 			if(joy_pressed(BUTTON_UP)) {
 				vdp_font_pal(PAL1);
 				vdp_puts(VDP_PLAN_A, levelStr[cursor], tx, ty + cursor);

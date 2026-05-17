@@ -212,6 +212,7 @@ uint8_t saveselect_main() {
 
 	oldstate = 65535;
 	while(TRUE) {
+		if(hardReset) return 0xFF;
 		if(joy_pressed(btn[cfg_btn_jump]) || joy_pressed(btn[cfg_btn_pause])) { // Confirm action
 			if(cursor < SRAM_FILE_MAX) {
 				switch(cursorMode) {

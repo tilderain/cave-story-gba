@@ -440,6 +440,8 @@ enum {
 	OBJ_CLOUD4,
     OBJ_DOCTORM_BLEED,
     OBJ_DOCTORM_DIE,
+    OBJ_UDMINI_ROTATOR, // 407 - 4 spinning minicores around Undead Core
+    OBJ_UD_HITBOX,      // 408 - hitbox targets for Undead Core
 };
 
 // Locations in npc.tbl where data for each property begins

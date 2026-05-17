@@ -96,6 +96,7 @@ void onspawn_undead_core(Entity *e) {
 	pieces[CFACE]->hit_box = (bounding_box) { 24, 14, 24, 14 };
 	pieces[CFACE]->display_box = (bounding_box) { 28, 16, 28, 16 };
 	pieces[CFACE]->health = 1000;
+	pieces[CFACE]->hurtSound = SND_ENEMY_HURT_COOL;
 
 	// create front rotators
 	//rotator[0] = create_rotator(0, 0);

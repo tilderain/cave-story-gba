@@ -555,10 +555,28 @@ static void player_update_walk() {
 			(stageBackgroundType == 4 && water_entity && player.y > water_entity->y)) {
 		if(!player.underwater) {
 			player.underwater = TRUE;
-			sound_play(SND_SPLASH, 5);
-			effect_create_misc(EFF_SPLASH, player.x >> CSF, player.y >> CSF, FALSE);
-			effect_create_misc(EFF_SPLASH, player.x >> CSF, player.y >> CSF, FALSE);
-			effect_create_misc(EFF_SPLASH, player.x >> CSF, player.y >> CSF, FALSE);
+			// CSE2 accurate splash: spawn water droplets instead of effects
+			if(!player.grounded && player.y_speed > 0x200) {
+				// Falling into water
+				for(uint8_t i = 0; i < 8; i++) {
+					Entity *drop = entity_create(
+						player.x + ((int)(random() % 17) - 8) * 0x200,
+						player.y, OBJ_WATER_DROPLET, 0);
+					drop->x_speed = player.x_speed + (int)(random() % 0x401) - 0x200;
+					drop->y_speed = (int)(random() % 0x281) - 0x200 - (player.y_speed / 2);
+				}
+				sound_play(SND_SPLASH, 5);
+			} else if(player.x_speed > 0x200 || player.x_speed < -0x200) {
+				// Skimming across water surface
+				for(uint8_t i = 0; i < 8; i++) {
+					Entity *drop = entity_create(
+						player.x + ((int)(random() % 17) - 8) * 0x200,
+						player.y, OBJ_WATER_DROPLET, 0);
+					drop->x_speed = player.x_speed + (int)(random() % 0x401) - 0x200;
+					drop->y_speed = (int)(random() % 0x281) - 0x200;
+				}
+				sound_play(SND_SPLASH, 5);
+			}
 		}
 		// Half everything, maybe inaccurate?
 		acc >>= 1;

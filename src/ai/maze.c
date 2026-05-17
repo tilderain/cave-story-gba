@@ -45,6 +45,7 @@ void ai_blockh(Entity *e) {
 				(e->x_speed < 0 && stage_get_block_type(
 					sub_to_block(e->x_next - 0x1C00), sub_to_block(e->y)) == 0x41)) {
 				camera_shake(10);
+				sound_play(SND_QUAKE, 5);
 				e->x_speed = 0;
 				e->flags ^= NPC_OPTION2;
 				e->state = dir ? 10 : 20;
@@ -92,6 +93,7 @@ void ai_blockv(Entity *e) {
 				(e->y_speed < 0 && stage_get_block_type(
 					sub_to_block(e->x - 0x200), sub_to_block(e->y_next - 0x1C00)) == 0x41)) {
 				camera_shake(10);
+				sound_play(SND_QUAKE, 5);
 				e->y_speed = 0;
 				e->flags ^= NPC_OPTION2;
 				e->state = dir ? 10 : 20;
@@ -776,6 +778,7 @@ void ai_firewhirr(Entity *e) {
 		case 0:
 		{
 			e->display_box = (bounding_box) { 12,16,12,16 };
+			e->timer2 = 100; // CSE2: first shot after 21 proximity frames (count1: 0->20, reset -100)
 			e->state = 1;
 			e->timer = random() % 51; // CSE2: Random(0, 50)
 			e->y_mark = e->y;
@@ -785,7 +788,7 @@ void ai_firewhirr(Entity *e) {
 		{
 			if (!e->timer) {
 				e->state = 10;
-				e->y_speed = -0x200;
+				e->y_speed = 0x200;
 			}
 			else e->timer--;
 		}
@@ -821,11 +824,9 @@ void ai_firewhirr(Entity *e) {
 }
 
 void ai_firewhirr_shot(Entity *e) {
-	ANIMATE(e, 4, 0,1,2);	// CSE2: ani_wait > 3
+	ANIMATE(e, 2, 0,1,2);	// CSE2: ani_wait > 1
+	e->y_next = e->y;	// CSE2: no vertical movement
 	e->x_next = e->x + (!e->dir ? -0x200 : 0x200);
-	e->y_speed += 0x20;
-	LIMIT_Y(0x5FF);
-	e->y_next = e->y + e->y_speed;
 
 	if ((!e->dir && collide_stage_leftwall(e)) ||
 		(e->dir && collide_stage_rightwall(e))) {
