@@ -211,6 +211,17 @@ EWRAM_CODE int main() {
 			soundtest_main();
 		} else if(select == 3) {
 			config_main();
+			if(hardReset) {
+				hardReset = 0;
+				song_stop();
+				vdp_sprites_clear();
+				canvas_init_fullscreen();
+				camera_init();
+				camera.target = NULL;
+				splash_main();
+				intro_main();
+				continue;
+			}
 		} else {
 			canvas_clear();
 			canvas_setup_tilemap(0);

@@ -62,28 +62,28 @@ typedef struct {
 
 const MenuItem menu[NUM_PAGES + 1][MAX_OPTIONS] = {
 	{ // Controller
-		{ 4,  /*1,  AKI,    */MI_INPUT, "Jump / Confirm", &cfg_btn_jump },
-		{ 6,  /*2,  AKI+60, */MI_INPUT, "Shoot / Cancel", &cfg_btn_shoot },
-		{ 8,  /*3,  AKI+120,*/MI_INPUT, "Switch Weapon (3btn)", &cfg_btn_ffwd },
-        { 9,  /*3,  0,      */MI_LABEL, "Fast Fwd Text (6btn)", NULL },
-		{ 11, /*4,  AKI+180,*/MI_INPUT, "Switch Right (6btn)", &cfg_btn_rswap },
-		{ 13, /*5,  AKI+240,*/MI_INPUT, "Switch Left (6btn)", &cfg_btn_lswap },
-		{ 15, /*6,  AKI+300,*/MI_INPUT, "Open Map (6btn)", &cfg_btn_map },
-		{ 17, /*7,  AKI+360,*/MI_INPUT, "Pause Menu", &cfg_btn_pause },
+		{ 3,  /*1,  AKI,    */MI_INPUT, "Jump / Confirm", &cfg_btn_jump },
+		{ 5,  /*2,  AKI+60, */MI_INPUT, "Shoot / Cancel", &cfg_btn_shoot },
+		{ 7,  /*3,  AKI+120,*/MI_INPUT, "Fast Fwd Text", &cfg_btn_ffwd },
+        //{ 9,  /*3,  0,      */MI_LABEL, "Fast Fwd Text (6btn)", NULL },
+		{ 9, /*4,  AKI+180,*/MI_INPUT, "Switch Right", &cfg_btn_rswap },
+		{ 11, /*5,  AKI+240,*/MI_INPUT, "Switch Left", &cfg_btn_lswap },
+		{ 13, /*6,  AKI+300,*/MI_INPUT, "Open Map", &cfg_btn_map },
+		{ 15, /*7,  AKI+360,*/MI_INPUT, "Pause Menu", &cfg_btn_pause },
 
-		{ 20, /*8,  AKI+420,*/MI_MODE,  "Force Button Mode", &cfg_force_btn },
+	//	{ 20, /*8,  AKI+420,*/MI_MODE,  "Force Button Mode", &cfg_force_btn },
 
 		{ 23, /*19, BKI,    */MI_ACTION, "Apply", (uint8_t*)1 },
 		{ 25, /*20, BKI+40, */MI_ACTION, "Reset to Default", (uint8_t*)0 },
 	},{ // Gameplay
-		{ 4,  /*9,  AKI,    */MI_TOGGLE, "CS+ Speed (NTSC Only)", &cfg_60fps },
-		{ 7,  /*10, AKI+60, */MI_TOGGLE, "Enable Fast Forward", &cfg_ffwd },
-		{ 9,  /*11, AKI+120,*/MI_TOGGLE, "Use Up to Interact", &cfg_updoor },
-		{ 11, /*12, AKI+180,*/MI_TOGGLE, "Screen Shake in Hell", &cfg_hellquake },
-		{ 13, /*13, AKI+240,*/MI_TOGGLE, "Vulnerable After Pause", &cfg_iframebug },
-		{ 15, /*14, AKI+300,*/MI_TOGGLE, "Message Blip Sound", &cfg_msg_blip },
-		{ 17, /*15, AKI+360,*/MI_TOGGLE, "Mute BGM", &cfg_music_mute },
-		{ 19, /*16, AKI+420,*/MI_TOGGLE, "Mute SFX", &cfg_sfx_mute },
+		{ 3,  /*9,  AKI,    */MI_TOGGLE, "60 fps", &cfg_60fps },
+		{ 5,  /*10, AKI+60, */MI_TOGGLE, "Enable Fast Forward", &cfg_ffwd },
+		{ 7,  /*11, AKI+120,*/MI_TOGGLE, "Use Up to Interact", &cfg_updoor },
+		{ 9, /*12, AKI+180,*/MI_TOGGLE, "Screen Shake in Hell", &cfg_hellquake },
+		{ 11, /*13, AKI+240,*/MI_TOGGLE, "Vulnerable After Pause", &cfg_iframebug },
+		{ 13, /*14, AKI+300,*/MI_TOGGLE, "Message Blip Sound", &cfg_msg_blip },
+		{ 15, /*15, AKI+360,*/MI_TOGGLE, "Mute BGM", &cfg_music_mute },
+		{ 17, /*16, AKI+420,*/MI_TOGGLE, "Mute SFX", &cfg_sfx_mute },
 
 		{ 23, /*19, BKI,    */MI_ACTION, "Apply", (uint8_t*)1 },
 		{ 25, /*20, BKI+40, */MI_ACTION, "Reset to Default", (uint8_t*)0 },
@@ -95,7 +95,7 @@ const MenuItem menu[NUM_PAGES + 1][MAX_OPTIONS] = {
 
 const char boolstr[2][4] = { "OFF", "ON " };
 const char modestr[3][6] = { "OFF ", "3BTN", "6BTN" };
-/*
+
 const uint16_t jboolstr[2][2] = { 
 	{ 0x100+80, 0x100+61 },  // なし
 	{ 0x100+40, 0x100+110 }, // ある
@@ -127,7 +127,30 @@ static void DrawJStr(uint16_t x, uint16_t y, uint16_t tile_index, uint16_t item_
 		tile_index += 4;
 	}
 }
-*/
+
+static void config_text_clear(uint16_t x, uint16_t y, uint16_t len) {
+    // Clears exactly 2 full tile rows (16px). The 12px config font spans
+    // tile rows y and y+1, and clearing 16px keeps us on tile boundaries
+    // so we don't bleed partial pixels into adjacent menu rows.
+    int px = x * 8;
+    int py = y * 8;
+    int pixel_len = len * 8;
+
+    for (int row = 0; row < 16; row++) {
+        for (int col = 0; col < pixel_len; col++) {
+            int final_x = px + col;
+            int final_y = py + row;
+
+            if (final_x >= 0 && final_x < 240 && final_y >= 0 && final_y < 160) {
+                int tile_col = final_x >> 3;
+                int tile_row = final_y >> 3;
+                int tile_idx = CANVAS_TILE_BASE + (tile_row * CANVAS_TILES_W_FULL) + tile_col;
+                write_tile_pixel(tile_idx, final_x & 7, final_y & 7, 0);
+            }
+        }
+    }
+}
+
 void draw_menuitem(const MenuItem *item) {
 	//if(cfg_language == LANG_JA) {
     //    if(item->jstr_index) {
@@ -136,8 +159,7 @@ void draw_menuitem(const MenuItem *item) {
     //        DrawJStr(4, item->y, item->jtile_index, item->jstr_index);
     //    }
     //} else {
-        vdp_text_clear(VDP_PLAN_A, 2, item->y, 36);
-        vdp_text_clear(VDP_PLAN_A, 2, item->y+1, 36);
+        config_text_clear(2, item->y, 36);
 		vdp_puts(VDP_PLAN_A, item->caption, 4, item->y);
 	//}
 	switch(item->type) {
@@ -227,6 +249,7 @@ void press_menuitem(const MenuItem *item, uint8_t page, VDPSprite *sprCursor) {
 		case MI_INPUT: {
 			sound_play(SND_MENU_SELECT, 5);
 			uint8_t released = FALSE;
+			config_text_clear(22, item->y, 7);
 			vdp_puts(VDP_PLAN_A, "Press..", 22, item->y);
 			while(TRUE) {
 				if(!(joystate & btn[cfg_btn_jump])) released = TRUE;
@@ -314,6 +337,7 @@ void config_main() {
 		} else if(joy_pressed(btn[cfg_btn_jump])) {
 			if(menu[page][cursor].type == MI_RETURN) break;
 			press_menuitem(&menu[page][cursor], page, &sprCursor);
+			if(hardReset) break;
 		} else if(joy_pressed(btn[cfg_btn_shoot])) {
 			break;
 		}
@@ -389,6 +413,7 @@ void act_format(uint8_t page) {
 				vdp_vsync(); aftervsync();
 			}
 			SYS_hardReset();
+			return;
 		} else {
 			timer++;
 			switch(starts) {
