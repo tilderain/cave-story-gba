@@ -8,10 +8,12 @@
 #include "camera.h"
 #include "dma.h"
 #include "effect.h"
+#include "entity.h"
 #include "error.h"
 #include "gamemode.h"
 #include "joy.h"
 #include "memory.h"
+#include "player.h"
 #include "resources.h"
 #include "stage.h"
 #include "system.h"
@@ -68,6 +70,22 @@ void aftervsync() {
     // L + R + Select = hard reset (return to title)
     if(joy_pressed(BUTTON_X) && (joystate & (BUTTON_Y | BUTTON_Z)) == (BUTTON_Y | BUTTON_Z)) {
         SYS_hardReset();
+    }
+
+    // Select + L = previous stage (debug)
+    if((cheatEnable[0] || cheatEnable[1]) && gamemode == GM_GAME && joy_pressed(BUTTON_Y) && (joystate & BUTTON_X)) {
+        if(stageID > 0) {
+            player.x = block_to_sub(12) + pixel_to_sub(8);
+            player.y = block_to_sub(12) + pixel_to_sub(8);
+            stage_load(stageID - 1);
+        }
+    }
+
+    // Select + R = next stage (debug)
+    if((cheatEnable[0] || cheatEnable[1]) && gamemode == GM_GAME && joy_pressed(BUTTON_Z) && (joystate & BUTTON_X)) {
+        player.x = block_to_sub(12) + pixel_to_sub(8);
+        player.y = block_to_sub(12) + pixel_to_sub(8);
+        stage_load(stageID + 1);
     }
 }
 #include "gbaram.h"

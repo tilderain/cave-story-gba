@@ -1,7 +1,26 @@
 # Cave Story GBA
 ![Picture](doc/screen01.png)
 
-Work in progress port of [Cave Story MD](https://github.com/andwn/cave-story-md) by andwn, for the GBA.
+Work in progress port of [Cave Story MD by andwn](https://github.com/andwn/cave-story-md), for the GBA.
+
+## Download
+"Stable" releases can be found in the [Releases](https://github.com/tilderain/cave-story-gba/releases) tab.
+
+## Default Controls
+
+- `A` - Jump, confirm
+- `B` - Shoot
+- `R` - Fast forward through scripted events
+- `L`, `R` - Switch weapon
+- `Select` - Toggle extra brightness
+- `Start` - Pause / Item Menu
+
+### Cheats
+On title menu :
+- Stage Select: up, down, left, right, Start. Not Like Sonic.
+- Infinite health/ammo: up, up, down, down, left, right, left, right
+
+You can still get crushed, drown and fall out of bounds.
 ## Compilation
 1. Install devkitPro : https://devkitpro.org/wiki/Getting_Started .
 2. Go into devkitPro shell and do `pacman -S gba-dev base-devel gcc python`

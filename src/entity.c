@@ -185,7 +185,7 @@ uint16_t entities_count() {
 	return entities_count_active() + entities_count_inactive();
 }
 
-EWRAM_CODE void entities_update(uint8_t draw) {
+IWRAM_CODE void entities_update(uint8_t draw) {
 	uint16_t new_active_count = 0;
 	Entity *e = entityList;
 	

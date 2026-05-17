@@ -32,6 +32,8 @@
 #define ANIM_SPEED	7
 #define ANIM_FRAMES	4
 
+uint8_t cheatEnable[2] = { FALSE, FALSE };
+
 static const uint16_t cheat[2][10] = {
 	{ BUTTON_UP, BUTTON_DOWN, BUTTON_LEFT, BUTTON_RIGHT, 0 },
 	{ BUTTON_UP, BUTTON_UP, BUTTON_DOWN, BUTTON_DOWN, 
@@ -46,7 +48,8 @@ uint8_t titlescreen_main() {
 
 	gamemode = GM_TITLE;
 	
-	uint8_t cheatEntry[2] = { 0, 0 }, cheatEnable[2] = { FALSE, FALSE };
+	uint8_t cheatEntry[2] = { 0, 0 };
+	
 	uint8_t cursor = 0;
 	uint32_t besttime = 0xFFFFFFFF;
 	uint8_t tsong = SONG_TITLE;

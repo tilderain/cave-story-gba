@@ -42,3 +42,5 @@ void config_main();
 void credits_main();
 void credits_show_image(uint16_t id);
 void credits_clear_image();
+
+extern uint8_t cheatEnable[2];
