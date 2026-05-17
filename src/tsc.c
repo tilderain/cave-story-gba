@@ -715,11 +715,19 @@ uint8_t execute_command() {
 		}
 		break;
 		
-		// TODO: Persistent sounds, skip for now
-		case CMD_SPS: break;
-		case CMD_CPS: break;
-		case CMD_SSS: args[0] = tsc_read_word(); break;
-		case CMD_CSS: break;
+		// <SSS / <CSS - stream noise, <SPS / <CPS - persistent noise
+		// CSE2: SetNoise(1, freq) plays 40+41 at freq/freq+100, SetNoise(2) plays 58
+		case CMD_SPS: sound_play_rate(SND_PROPELLOR, 0x400); break;
+		case CMD_CPS: sound_stop(SND_PROPELLOR); break;
+		case CMD_SSS: {
+			uint16_t freq = tsc_read_word();
+			// 2195 = normal rate in CSE2, map to maxmod 0x400
+			uint16_t rate = (freq * 1024) / 2195;
+			sound_play_rate(SND_STREAM1, rate);
+			sound_play_rate(SND_STREAM2, (freq + 100) * 1024 / 2195);
+			break;
+		}
+		case CMD_CSS: sound_stop(SND_STREAM1); sound_stop(SND_STREAM2); break;
 			
 		case CMD_NOD: // Wait for player input
 		{

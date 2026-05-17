@@ -118,7 +118,7 @@ uint8_t titlescreen_main() {
 	
 	vdp_set_display(TRUE);
 
-	song_play(tsong);
+	if(song_get_playing() != tsong) song_play(tsong);
 	oldstate = 65535;
 	while(!joy_pressed(btn[cfg_btn_jump]) && !joy_pressed(btn[cfg_btn_pause])) {
 		

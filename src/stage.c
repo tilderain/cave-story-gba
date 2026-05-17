@@ -552,11 +552,11 @@ void stage_update() {
 				break;
 				default: return;
 			}
-			// Replace the tile in the tileset
-			DMA_doDma(DMA_VRAM, (uint32_t) (from_ts + (from_index << 5)), to_index << 5, 32, 2);
+			// Replace the tile in the tileset (BG VRAM instead of OBJ)
+			vdp_tiles_load((uint32_t*)(from_ts + (from_index << 5)), to_index, 2);
 			from_index += 16;
 			to_index += 2;
-			DMA_doDma(DMA_VRAM, (uint32_t) (from_ts + (from_index << 5)), to_index << 5, 32, 2);
+			vdp_tiles_load((uint32_t*)(from_ts + (from_index << 5)), to_index, 2);
 		}
 	}
     //z80_release();

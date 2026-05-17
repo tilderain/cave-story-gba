@@ -58,6 +58,31 @@ void sound_play(uint8_t id, uint8_t priority) {
     sfx_handles[id] = mmEffect((mm_word)sound_info[id].sound);
 }
 
+void sound_stop(uint8_t id) {
+    if(id >= 0x90 && id < 0xA0) id -= 0x40;
+    if(id == 0 || id >= SOUND_COUNT) return;
+    if(sfx_handles[id] && mmEffectActive(sfx_handles[id]))
+        mmEffectCancel(sfx_handles[id]);
+}
+
+// Play a sound with a custom rate (6.10 fixed point, 0x400 = normal)
+void sound_play_rate(uint8_t id, uint16_t rate) {
+    if(id >= 0x90 && id < 0xA0) id -= 0x40;
+    if(id == 0 || id >= SOUND_COUNT) return;
+    if(cfg_sfx_mute) return;
+
+    if(sfx_handles[id] && mmEffectActive(sfx_handles[id]))
+        mmEffectCancel(sfx_handles[id]);
+
+    mm_sound_effect fx = {
+        .id = (mm_word)sound_info[id].sound,
+        .rate = rate,
+        .volume = 255,
+        .panning = 128
+    };
+    sfx_handles[id] = mmEffectEx(&fx);
+}
+
 void song_play(uint8_t id) {
 	// Muted?
 	if(cfg_music_mute && gamemode != GM_SOUNDTEST) {

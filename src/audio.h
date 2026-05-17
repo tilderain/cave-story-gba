@@ -94,6 +94,10 @@
 void sound_init();
 // Play sound by ID, priority is 0-15, 15 is most important
 void sound_play(uint8_t id, uint8_t priority);
+// Stop a currently playing sound effect by ID
+void sound_stop(uint8_t id);
+// Play a sound at a given frequency (6.10 fixed-point rate, 0x400 = normal)
+void sound_play_rate(uint8_t id, uint16_t rate);
 // Play a song by ID
 void song_play(uint8_t id);
 // Stops music if playing, same as song_play(0)

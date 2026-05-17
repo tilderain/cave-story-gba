@@ -64,8 +64,9 @@ static const uint16_t mframeindex[5] = {
 // initilize all the pieces of the Core boss.
 void onspawn_core(Entity *e) {
 	e->state = CORE_SLEEP;
+	e->alwaysActive = TRUE;
 	e->flags = NPC_SHOWDAMAGE;
-	
+
 	e->x = pixel_to_sub(1150);
 	e->y = pixel_to_sub(212);
 	e->x_speed = 0;
@@ -84,12 +85,14 @@ void onspawn_core(Entity *e) {
 	pieces[2] = entity_create(0, 0, OBJ_MINICORE, 0);
 	
 	// set up the front piece
+	pieces[CFRONT]->alwaysActive = TRUE;
 	pieces[CFRONT]->linkedEntity = e;
 	pieces[CFRONT]->flags = NPC_SHOOTABLE | NPC_INVINCIBLE;
 	pieces[CFRONT]->hit_box = (bounding_box) { 3*8+4, 4*8+4, 3*8+4, 4*8+4 };
 	pieces[CFRONT]->display_box = (bounding_box) { 4*8, 6*8, 4*8, 6*8 };
 	
 	// set up our back piece
+	pieces[CBACK]->alwaysActive = TRUE;
 	pieces[CBACK]->linkedEntity = e;
 	pieces[CBACK]->flags |= NPC_SHOOTABLE | NPC_INVINCIBLE;
 	pieces[CBACK]->hit_box = (bounding_box) { 6*8, 5*8, 2*8, 5*8 };
@@ -112,6 +115,7 @@ void onspawn_core(Entity *e) {
 	pieces[4]->y = (e->y + 0x4000);
 
 	for(uint8_t i = 0; i < 5; i++) {
+		pieces[i]->alwaysActive = TRUE;
 		pieces[i]->flags = (NPC_SHOOTABLE | NPC_INVINCIBLE | NPC_IGNORESOLID);
 		pieces[i]->health = 1000;
 		pieces[i]->state = MC_SLEEP;
