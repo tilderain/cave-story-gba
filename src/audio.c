@@ -49,7 +49,9 @@ void sound_play(uint8_t id, uint8_t priority) {
     if(id >= 0x90 && id < 0xA0) id -= 0x40;
 
 	if(id == 0) return;
-    
+
+    if(cfg_sfx_mute) return;
+
     if(sfx_handles[id] && mmEffectActive(sfx_handles[id]))
         mmEffectCancel(sfx_handles[id]);
     
@@ -60,7 +62,7 @@ void song_play(uint8_t id) {
 	// Muted?
 	if(cfg_music_mute && gamemode != GM_SOUNDTEST) {
 		if(songPlaying) {
-            xgm_music_pause();
+			mmStop();
 			songPlaying = 0;
 		}
 		return;

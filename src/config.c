@@ -265,14 +265,12 @@ void press_menuitem(const MenuItem *item, uint8_t page, VDPSprite *sprCursor) {
 			}
 			sound_play(SND_MENU_SELECT, 5);
 			switch(joystate & BUTTON_BTN) {
-				case BUTTON_A: *item->valptr = 6; break;
 				case BUTTON_B: *item->valptr = 4; break;
 				case BUTTON_C: *item->valptr = 5; break;
-				case BUTTON_X: *item->valptr = 10; break;
-				case BUTTON_Y: *item->valptr = 9; break;
-				case BUTTON_Z: *item->valptr = 8; break;
 				case BUTTON_START: *item->valptr = 7; break;
-				case BUTTON_MODE: *item->valptr = 11; break;
+				case BUTTON_Z: *item->valptr = 8; break;
+				case BUTTON_Y: *item->valptr = 9; break;
+				case BUTTON_X: *item->valptr = 10; break;
 			}
 		}
 		break;

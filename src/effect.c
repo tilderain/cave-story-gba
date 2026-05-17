@@ -264,7 +264,7 @@ EWRAM_CODE void do_fadeout_sweep(uint8_t dir) {
     }
 
     // Palette fade to full black
-    vdp_colors(0, PAL_FadeOut, 64);
+    //vdp_colors(0, PAL_FadeOut, 64);
     ready = TRUE;
     aftervsync();
 

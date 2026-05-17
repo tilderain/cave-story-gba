@@ -25,7 +25,7 @@
 #define BUTTON_MODE     0x0800
 
 #define BUTTON_DIR      0x000F
-#define BUTTON_BTN      0x0FF0
+#define BUTTON_BTN      0x030F
 
 #define JOY_TYPE_PAD3           0x00
 #define JOY_TYPE_PAD6           0x01
