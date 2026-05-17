@@ -447,6 +447,16 @@ void hud_refresh_energy(uint8_t hard) {
 		for(uint8_t i = 0; i < 5; i++) {
 			memcpy(tileData[XP_BAR+i+3], &TS_HudFlash.tiles[i * TSIZE], TILE_SIZE);
 		}
+	} else {
+		// timer == 1 or 3: render current (non-flash) bar to prevent
+		// stale flash data in tileData from persisting in VRAM
+		int16_t fillXP = hudEnergyPixel;
+		for(uint8_t i = 0; i < 5; i++) {
+			int16_t addrXP = min(fillXP * TSIZE, 7 * TSIZE);
+			if(addrXP < 0) addrXP = 0;
+			memcpy(tileData[XP_BAR + i + 3], &TS_HudBar.tiles[addrXP + 8 * TSIZE], TILE_SIZE);
+			fillXP -= 8;
+		}
 	}
 	// "Lv." and 1 digit for the level
 	memcpy(tileData[XP_BAR+0], &SPR_TILES(&SPR_Hud2, 0, 0)[8*TSIZE], TILE_SIZE);

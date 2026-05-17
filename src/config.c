@@ -333,10 +333,14 @@ void config_main() {
             sound_play(SND_MENU_MOVE, 0);
 			set_page(page);
 		} else if(joy_pressed(btn[cfg_btn_jump])) {
-			if(menu[page][cursor].type == MI_RETURN) break;
+            if(menu[page][cursor].type == MI_RETURN) {
+                system_save_config(); // Save on "Return" menu item
+                break;
+            }
 			press_menuitem(&menu[page][cursor], page, &sprCursor);
 			if(hardReset) break;
 		} else if(joy_pressed(btn[cfg_btn_shoot])) {
+            system_save_config();
 			break;
 		}
 		// Animate quote sprite
