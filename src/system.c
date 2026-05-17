@@ -237,6 +237,7 @@ void system_new() {
 		vdp_map_clear(VDP_PLAN_A);     // Wipe stage layers (FG)
 		vdp_map_clear(VDP_PLAN_B);     // Wipe background layer (BG)
 	}
+	stageBackground = 255;             // Force background redraw on next stage load
 	tsc_call_event(GAME_START_EVENT);
 }
 
