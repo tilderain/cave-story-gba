@@ -252,6 +252,7 @@ void vdp_sprite_add(const VDPSprite *spr);
 void vdp_sprites_add(const VDPSprite *spr, uint16_t num);
 void vdp_sprites_clear();
 void vdp_sprites_update();
+void vdp_load_stage_palettes();
 
 // Text
 void vdp_font_load(const uint32_t *tiles);

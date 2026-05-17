@@ -51,6 +51,13 @@ void aftervsync() {
 
     //vdp_fade_step_calc();
     joy_update();
+
+    // Saturation toggle always pressable across any mode
+    if(joy_pressed(btn[cfg_btn_map])) {
+        saturate ^= 1;
+        vdp_load_stage_palettes();
+        stage_setup_palettes();
+    }
 }
 #include "gbaram.h"
 

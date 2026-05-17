@@ -23,6 +23,8 @@
 #include "gamemode.h"
 
 #include "bank_data.h"
+
+#include "gba.h"
 void splash_main() {
 #ifdef TRUE
 	gamemode = GM_SPLASH;
@@ -30,6 +32,9 @@ void splash_main() {
 	// Init screen stuff
 	vdp_colors(0, PAL_Sega, 16);
 	vdp_colors(16, PAL_Sym, 16);
+	// Load balrog palette for splash entity
+	for(int i=0; i<16; i++)
+		OBJ_COLORS[16*10 + i] = saturate_color(PAL_bllg[i]);
 	// Init some subsystems used
 	sheets_load_splash();
 	effects_init();

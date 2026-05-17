@@ -239,7 +239,7 @@ EWRAM_CODE void do_fadeout_sweep(uint8_t dir) {
 
     // Generate tiles and set palette (using palette bank 3, NOT overwritten by vdp_sprites_update)
     fade_generate_tiles();
-    BG_COLORS[49] = 0x1000; // Palette bank 3, index 1 = Cave Story blue #000020 for fade pixels
+    BG_COLORS[49] = saturate_color(0x1000); // Palette bank 3, index 1 = Cave Story blue #000020 for fade pixels
 
     // Init fade-out state
     memset(&gFade, 0, sizeof(gFade));
@@ -293,7 +293,7 @@ EWRAM_CODE void start_fadein_sweep(uint8_t dir) {
 
     // Generate tiles and set palette
     fade_generate_tiles();
-    BG_COLORS[49] = 0x1000; // Palette bank 3, index 1 = Cave Story blue #000020 for fade
+    BG_COLORS[49] = saturate_color(0x1000); // Palette bank 3, index 1 = Cave Story blue #000020 for fade
 
     // Init fade-in state: all cells start at max (fully blue)
     memset(&gFade, 0, sizeof(gFade));

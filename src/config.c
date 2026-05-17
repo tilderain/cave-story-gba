@@ -262,7 +262,7 @@ void press_menuitem(const MenuItem *item, uint8_t page, VDPSprite *sprCursor) {
 				if(songPlaying && !snes_ost_enabled) song_play(songPlaying);
 			}
             if(item->valptr == &saturate) {
-            //    stage_setup_palettes();
+                vdp_load_stage_palettes();
             }
             break;
         }

@@ -205,14 +205,16 @@ void ai_heavypress(Entity *e) {
 		
 		// Flicker the gray part of PAL_Sym to make the body flash.
 		// This will cause some other things to flash, but whatever.
-		static const uint16_t bright_sym[4] = { 0x888, 0xAAA, 0xCCC, 0xEEE };
 		if(e->damage_time) {
 			if((e->damage_time & 3) == 3) {
 				// Flash bright
+				uint16_t bright_sym[4] = { saturate_color(0x888), saturate_color(0xAAA), saturate_color(0xCCC), saturate_color(0xEEE) };
 				DMA_queueDma(DMA_CRAM, (uint32_t) bright_sym, 22<<1, 4, 2);
 			} else if((e->damage_time & 3) == 1) {
 				// Flash normal
-				DMA_queueDma(DMA_CRAM, (uint32_t) &PAL_Sym[6], 22<<1, 4, 2);
+				uint16_t sym_buf[4];
+				for(int i = 0; i < 4; i++) sym_buf[i] = saturate_color(PAL_Sym[6+i]);
+				DMA_queueDma(DMA_CRAM, (uint32_t) sym_buf, 22<<1, 4, 2);
 			}
 		}
 	}

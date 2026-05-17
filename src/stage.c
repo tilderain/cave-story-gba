@@ -217,6 +217,7 @@ void stage_load(uint16_t id) {
 	tsc_load_stage(id);
 	wstar_reset();
 
+	vdp_load_stage_palettes();
 	vdp_set_display(TRUE);
 }
 

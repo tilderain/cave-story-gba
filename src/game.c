@@ -81,12 +81,6 @@ IWRAM_CODE void game_main(uint8_t load) {
 		}
 		if(!paused) {
 			// Pressing start opens the item menu (unless a script is running)
-
-			if(joy_pressed(btn[cfg_btn_map]))
-			{
-				saturate ^= 1;
-				stage_setup_palettes();
-			}
 			if(joy_pressed(btn[cfg_btn_pause]) && !tscState && fadeSweepTimer <= 0) {
 				// This unloads the stage's script and loads the "ArmsItem" script in its place
 				tsc_load_stage(255);
@@ -253,18 +247,4 @@ void game_reset(uint8_t load) {
 	//vdp_colors_next(0, PAL_Main.data, 16);
 	//vdp_colors_next(16, PAL_Sym.data, 16);
 	//vdp_colors(0, PAL_FadeOut, 64);
-
-	for (int i = 0; i < 16; i++) {
-        OBJ_COLORS[80 + i] = saturate_color(PAL_armsimage[i]);
-    }
-
-    for (int i = 0; i < 16; i++) {
-        OBJ_COLORS[96 + i]  = saturate_color(PAL_itemimage[i]);   // Line 6
-    }
-
-    // Upload textbox palette to OBJ line 9 and BG line 6
-    for (int i = 0; i < 16; i++) {
-        OBJ_COLORS[144 + i] = saturate_color(PAL_textbox[i]);     // OBJ Line 9
-        BG_COLORS[96 + i]   = saturate_color(PAL_textbox[i]);     // BG  Line 6
-    }
 }

@@ -566,6 +566,78 @@ static const uint8_t GBA_SPRITE_SIZES[16] = {
     (0 << 2) | 2  // 0xF: 32x32 -> Square 32x32
 };
 
+void vdp_load_stage_palettes() {
+    u16 *bg_ptr;
+    u16 *obj_ptr;
+
+    // OBJ_COLORS + 33
+    OBJ_COLORS[33] = saturate_color(palette[0]);
+
+    obj_ptr = OBJ_COLORS + (16*8) + 1; // fade color
+    *obj_ptr = saturate_color((0 | (0 << 5) | (4 << 10)));
+
+    bg_ptr = BG_COLORS + 1;
+    if(stage_info[stageID].tileset != NULL)
+        for(int i=1; i<16; i++) { // OBJ Pal 0
+            *bg_ptr++ = saturate_color(tileset_info[stage_info[stageID].tileset].palette[i]);
+        }
+    if(background_info[stageBackground].palette != NULL && gamemode != GM_SOUNDTEST)
+        for(int i=0; i<16; i++) { // OBJ Pal 1
+            *bg_ptr++ = saturate_color(background_info[stageBackground].palette[i]);
+        }
+
+    // OBJ palettes
+    obj_ptr = OBJ_COLORS + 33;
+    if(stage_info[stageID].tileset != NULL)
+        for(int i=1; i<16; i++) { // OBJ Pal 2
+            *obj_ptr++ = saturate_color(tileset_info[stage_info[stageID].tileset].palette[i]);
+        }
+    if(stage_info[stageID].npcPalette != NULL)
+        for(int i=0; i<16; i++) { // OBJ Pal 3
+            *obj_ptr++ = saturate_color(stage_info[stageID].npcPalette[i]);
+        }
+    if(stage_info[stageID].npcPalette2 != NULL)
+        for(int i=0; i<16; i++) { // OBJ Pal 3
+            *obj_ptr++ = saturate_color(stage_info[stageID].npcPalette2[i]);
+        }
+
+    // Load balrog palette into OBJ Pal 10 for cutscene NPCs
+    obj_ptr = OBJ_COLORS + (16*10);
+    for(int i=0; i<16; i++) {
+        obj_ptr[i] = saturate_color(PAL_bllg[i]);
+    }
+
+	// Upload npcsym palette (PAL_Sym) to BG Bank 4 for breakable blocks
+	if(stage_info[stageID].tileset != NULL) {
+		bg_ptr = BG_COLORS + 64;
+		for(int i=0; i<16; i++) {
+			*bg_ptr++ = saturate_color(PAL_Sym[i]);
+		}
+	}
+
+	//temp text color
+	//BG_COLORS[16+16+0]=RGB5(31,31,31);
+	BG_COLORS[16+16+1]=saturate_color(RGB5(31,31,31));
+	//BG_COLORS[16+16+2]=RGB5(31,31,31);
+	BG_COLORS[241]=saturate_color(RGB5(17,31,31));
+
+    uint16_t blueBG = (8 << 10) | (4 << 5) | 3;
+
+    // Assuming BG3 (Window) uses Palette Bank 2 (index 32-47)
+    // Index 0 of the bank is usually transparency,
+    // but the window "fill" tile usually uses a specific index.
+    // Based on your code, we'll set index 0 of palette 2:
+    BG_COLORS[32+2] = saturate_color(blueBG);
+
+    // Game UI palettes (arms, items, textbox)
+    for (int i = 0; i < 16; i++) {
+        OBJ_COLORS[80 + i] = saturate_color(PAL_armsimage[i]);
+        OBJ_COLORS[96 + i] = saturate_color(PAL_itemimage[i]);
+        OBJ_COLORS[144 + i] = saturate_color(PAL_textbox[i]);
+        BG_COLORS[96 + i]   = saturate_color(PAL_textbox[i]);
+    }
+}
+
 IWRAM_CODE void vdp_sprites_update() {
 	if(!sprite_count) return;
 	//iprintf("%d %d\n", (&SPR_Quote)->animations[0]->frames[0]->w, (&SPR_Quote)->animations[0]->frames[0]->h);
@@ -585,89 +657,27 @@ IWRAM_CODE void vdp_sprites_update() {
 			obj_buffer[i].attr1 |= OBJ_HFLIP;
 		if(IsBitSet(sprite_table[i].attr, 12))
 			obj_buffer[i].attr1 |= OBJ_VFLIP;
-			
-		int prio = (sprite_table[i].attr & 0x8000) ? 0 : 2; 
-		
-    	int pal = sprite_table[i].size >> 4; 
+
+		int prio = (sprite_table[i].attr & 0x8000) ? 0 : 2;
+
+    	int pal = sprite_table[i].size >> 4;
     	if (pal == 0) {
     	    // Fallback to the standard Genesis 2-bit palette if none was provided
-    	    pal = (sprite_table[i].attr >> 13) & 3; 
+    	    pal = (sprite_table[i].attr >> 13) & 3;
     	}
 
-    	obj_buffer[i].attr2 = OBJ_PRIORITY(prio) 
-    	    | OBJ_CHAR((sprite_table[i].attr&0x7FF)+0) 
+    	obj_buffer[i].attr2 = OBJ_PRIORITY(prio)
+    	    | OBJ_CHAR((sprite_table[i].attr&0x7FF)+0)
     	    | OBJ_PALETTE(pal);
 	}
-	u16 *temppointer;
-	u16 *temppointer2;
 	// load the palette for the background, 7 colors
-    temppointer = BG_COLORS;
-
     if (gamemode == GM_TITLE || gamemode == GM_SAVESEL || gamemode == GM_CONFIG) {
-        *temppointer = (4 | (4 << 5) | (4 << 10));
+        BG_COLORS[0] = saturate_color((4 | (4 << 5) | (4 << 10)));
 	} else if (gamemode == GM_GAME) {
-		*temppointer = (0 | (0 << 5) | (4 << 10));
+		BG_COLORS[0] = saturate_color((0 | (0 << 5) | (4 << 10)));
 	} else {
-        *temppointer = saturate_color(palette[0]); // Default back to black
+        BG_COLORS[0] = saturate_color(palette[0]); // Default back to black
     }
-    temppointer2 = OBJ_COLORS + 33;
-    *temppointer2 = saturate_color(palette[0]);
-
-	temppointer = OBJ_COLORS + (16*8) + 1; // fade color
-    *temppointer = (0 | (0 << 5) | (4 << 10));
-
-    temppointer = BG_COLORS + 1;
-    if(stage_info[stageID].tileset != NULL)
-        for(int i=1; i<16; i++) { // OBJ Pal 0
-
-            *temppointer++ = saturate_color(tileset_info[stage_info[stageID].tileset].palette[i]);
-        }
-    if(background_info[stageBackground].palette != NULL && gamemode != GM_SOUNDTEST)
-        for(int i=0; i<16; i++) { // OBJ Pal 1
-            *temppointer++ = saturate_color(background_info[stageBackground].palette[i]);
-        }
-    if(stage_info[stageID].tileset != NULL)    
-        for(int i=1; i<16; i++) { // OBJ Pal 2
-            *temppointer2++ = saturate_color(tileset_info[stage_info[stageID].tileset].palette[i]);
-        }
-    if(stage_info[stageID].npcPalette != NULL)
-        for(int i=0; i<16; i++) { // OBJ Pal 3
-            *temppointer2++ = saturate_color(stage_info[stageID].npcPalette[i]);
-        }
-    if(stage_info[stageID].npcPalette2 != NULL)
-        for(int i=0; i<16; i++) { // OBJ Pal 3
-            *temppointer2++ = saturate_color(stage_info[stageID].npcPalette2[i]);
-        }
-
-    // Load balrog palette into OBJ Pal 10 for cutscene NPCs
-    temppointer = OBJ_COLORS + (16*10);
-    for(int i=0; i<16; i++) {
-        temppointer[i] = saturate_color(PAL_bllg[i]);
-    }
-
-	// Upload npcsym palette (PAL_Sym) to BG Bank 4 for breakable blocks
-	if(stage_info[stageID].tileset != NULL) {
-		temppointer = BG_COLORS + 64;
-		for(int i=0; i<16; i++) {
-			*temppointer++ = saturate_color(PAL_Sym[i]);
-		}
-	}
-
-	//temp text color
-	//BG_COLORS[16+16+0]=RGB5(31,31,31);
-	BG_COLORS[16+16+1]=RGB5(31,31,31);
-	//BG_COLORS[16+16+2]=RGB5(31,31,31);
-	BG_COLORS[241]=RGB5(17,31,31);
-
-
-
-    uint16_t blueBG = (8 << 10) | (4 << 5) | 3; 
-
-    // Assuming BG3 (Window) uses Palette Bank 2 (index 32-47)
-    // Index 0 of the bank is usually transparency, 
-    // but the window "fill" tile usually uses a specific index.
-    // Based on your code, we'll set index 0 of palette 2:
-    BG_COLORS[32+2] = blueBG; 
 
 	DMA3COPY(obj_buffer, OAM, ((sizeof(OBJATTR)*128)/2));
 
