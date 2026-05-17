@@ -639,6 +639,12 @@ IWRAM_CODE void vdp_sprites_update() {
             *temppointer2++ = saturate_color(stage_info[stageID].npcPalette2[i]);
         }
 
+    // Load balrog palette into OBJ Pal 10 for cutscene NPCs
+    temppointer = OBJ_COLORS + (16*10);
+    for(int i=0; i<16; i++) {
+        temppointer[i] = saturate_color(PAL_bllg[i]);
+    }
+
 	// Upload npcsym palette (PAL_Sym) to BG Bank 4 for breakable blocks
 	if(stage_info[stageID].tileset != NULL) {
 		temppointer = BG_COLORS + 64;
@@ -703,23 +709,23 @@ void vdp_font_pal(uint16_t pal) {
 #include "gba.h"
 #include "gbatext.h"
 void vdp_puts(uint16_t plan, const char *str, uint16_t x, uint16_t y) {
-    int cur_px = x * 8; 
+    int cur_px = x * 8;
     int cur_py = y * 8;
+    extern uint8_t s_canvas_is_fullscreen;
+    int stride = s_canvas_is_fullscreen ? CANVAS_TILES_W_FULL : CANVAS_TILES_W;
 
     while (*str) {
         uint8_t ascii = (uint8_t)*str++;
         if (ascii < 0x20 || ascii > 0x7F) continue;
 
         uint8_t glyph_idx = ascii - 0x20;
-        // Updated for 12 bytes per character
         const uint8_t *glyph = &thinfontTiles[glyph_idx * 12];
         int advance = thinfont_widths[glyph_idx];
 
-        // Loop through 12 rows instead of 8
         for (int row = 0; row < 12; row++) {
             uint8_t bits = glyph[row];
             if (!bits) continue;
-            
+
             for (int col = 0; col < 8; col++) {
                 if (bits & (0x80 >> col)) {
                     int final_x = cur_px + col;
@@ -728,12 +734,9 @@ void vdp_puts(uint16_t plan, const char *str, uint16_t x, uint16_t y) {
                     if (final_x >= 0 && final_x < 240 && final_y >= 0 && final_y < 160) {
                         int tile_col = final_x >> 3;
                         int tile_row = final_y >> 3;
-                        
-                        // Select correct tile based on fullscreen or windowed mode
-                        // For fullscreen (30 tiles wide):
-                        int tile_idx = CANVAS_TILE_BASE + (tile_row * CANVAS_TILES_W_FULL) + tile_col;
-                        
-                        // Draw the pixel (Color 1 is typical text color)
+
+                        int tile_idx = CANVAS_TILE_BASE + (tile_row * stride) + tile_col;
+
                         write_tile_pixel(tile_idx, final_x & 7, final_y & 7, 1);
                     }
                 }

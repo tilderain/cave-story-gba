@@ -89,7 +89,7 @@ void draw_itemmenu(uint8_t resetCursor) {
     z80_request();
     // Load the 4 tiles for the selection box. Since the menu can never be brought up
     // during scripts we overwrite the face image
-    vdp_tiles_load_from_rom(TS_ItemSel.tiles, TILE_FACEINDEX, TS_ItemSel.numTile);
+    //vdp_tiles_load_from_rom(TS_ItemSel.tiles, TILE_FACEINDEX, TS_ItemSel.numTile);
     // Load hand sprite tiles for inventory cursor
     vdp_tiles_load_from_rom(SPR_TILES(&SPR_Pointer,0,0), TILE_PROMPTINDEX, 4);
     // Redraw message box at the bottom of the screen
@@ -103,16 +103,16 @@ void draw_itemmenu(uint8_t resetCursor) {
 //#define DRAW_LETTER(in,xx,yy) (vdp_map_xy(VDP_PLAN_W,                                   \
 //							TILE_ATTR(PAL0,1,0,0,TILE_HUDINDEX+in),xx,yy))
     // Load 8x8 numbers
-    vdp_tiles_load_from_rom(TS_MsgFont.tiles+(('0'-0x20)<<3),TILE_HUDINDEX,10);
+    //vdp_tiles_load_from_rom(TS_MsgFont.tiles+(('0'-0x20)<<3),TILE_HUDINDEX,10);
     // Lv, slash for weapon display
-    LOAD_LETTER('L', 14);
-    LOAD_LETTER('v', 15);
-    LOAD_LETTER('/', 16);
-    LOAD_LETTER('-', 17);
+    //LOAD_LETTER('L', 14);
+    //LOAD_LETTER('v', 15);
+    //LOAD_LETTER('/', 16);
+    //LOAD_LETTER('-', 17);
     // ARMSITEM or ぶきもちもの
     const uint32_t *ts = cfg_language == LANG_JA ? TS_MenuTextJ.tiles : TS_MenuTextE.tiles;
-    vdp_tiles_load_from_rom(ts + (2<<3), TILE_HUDINDEX + 10, 4);
-    vdp_tiles_load_from_rom(ts + (10<<3), TILE_HUDINDEX + 18, 4);
+    //vdp_tiles_load_from_rom(ts + (2<<3), TILE_HUDINDEX + 10, 4);
+    //vdp_tiles_load_from_rom(ts + (10<<3), TILE_HUDINDEX + 18, 4);
     // Weapons
     y = top + 3;
     // --ARMS-- or --ぶき--

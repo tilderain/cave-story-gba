@@ -170,6 +170,8 @@ BIN PAL_bkRed		"../res/back/bkRed.pal.bin"
 BIN PAL_bk0		"../res/back/bk0.pal.bin"
 BIN PAL_bkBlack		"../res/back/bkBlack.pal.bin"
 
+BIN PAL_bllg		"../res/sprite/balrog.pal.bin"
+
 
 # Alternate for waterway (Green background)
 

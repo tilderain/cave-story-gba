@@ -1084,6 +1084,16 @@ Entity *entity_create_ext(int32_t x, int32_t y, uint16_t type, uint16_t flags, u
 		}
 	}
 
+	// Override palette for balrog NPCs to use PAL_bllg (OBJ palette bank 10)
+	if(type == OBJ_BALROG || type == OBJ_BALROG_DROP_IN || type == OBJ_BALROG_BUST_IN ||
+	   type == OBJ_BALROG_BOSS_FLYING || type == OBJ_BALROG_BOSS_RUNNING ||
+	   type == OBJ_BALROG_BOSS_MISSILES || type == OBJ_BALROG_MEDIC ||
+	   type == OBJ_BALROG_FLYING || type == OBJ_BALROGSPLASH) {
+		for(uint8_t i = 0; i < sprite_count; i++) {
+			e->sprite[i].size = (10 << 4) | (e->sprite[i].size & 0x0F);
+		}
+	}
+
 	/*if(type == OBJ_DOOR)
 	{
 

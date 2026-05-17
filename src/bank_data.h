@@ -126,6 +126,8 @@ extern const uint16_t PAL_bk0	[];
 extern const uint16_t PAL_bkBlack	[];
 extern const uint16_t PAL_bkRed	[];
 
+extern const uint16_t PAL_bllg	[];
+
 extern const uint8_t PXA_Almond[];
 extern const uint8_t PXA_Barr[];
 extern const uint8_t PXA_Cave[];

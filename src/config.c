@@ -24,6 +24,7 @@
 #include "window.h"
 
 #include "gamemode.h"
+#include "gbatext.h"
 
 #define ANIM_SPEED	7
 #define ANIM_FRAMES	4
@@ -150,7 +151,7 @@ void draw_menuitem(const MenuItem *item) {
 		//	kanji_draw(VDP_PLAN_A, tile_index,   c1, 30, item->y, 0, TRUE);
 		//	kanji_draw(VDP_PLAN_A, tile_index+4, c2, 32, item->y, 0, TRUE);
 		//} else {
-			vdp_puts(VDP_PLAN_A, btnName[*item->valptr], 30, item->y);
+			vdp_puts(VDP_PLAN_A, btnName[*item->valptr], 22, item->y);
 		//}
 		break;
 		case MI_TOGGLE:
@@ -159,7 +160,7 @@ void draw_menuitem(const MenuItem *item) {
 		//	kanji_draw(VDP_PLAN_A, tile_index,   jboolstr[*item->valptr][0], 32, item->y, 0, TRUE);
 		//	kanji_draw(VDP_PLAN_A, tile_index+4, jboolstr[*item->valptr][1], 34, item->y, 0, TRUE);
 		//} else {
-			vdp_puts(VDP_PLAN_A, boolstr[*item->valptr], 30, item->y);
+			vdp_puts(VDP_PLAN_A, boolstr[*item->valptr], 22, item->y);
 		//}
 		break;
 		case MI_ACTION: break;
@@ -169,7 +170,7 @@ void draw_menuitem(const MenuItem *item) {
 		//	kanji_draw(VDP_PLAN_A, tile_index,   jmodestr[*item->valptr][0], 30, item->y, 0, TRUE);
 		//	kanji_draw(VDP_PLAN_A, tile_index+4, jmodestr[*item->valptr][1], 32, item->y, 0, TRUE);
 		//} else {
-			vdp_puts(VDP_PLAN_A, modestr[*item->valptr], 30, item->y);
+			vdp_puts(VDP_PLAN_A, modestr[*item->valptr], 22, item->y);
 		//}
 		break;
 	}
@@ -177,8 +178,9 @@ void draw_menuitem(const MenuItem *item) {
 
 uint8_t set_page(uint8_t page) {
 	uint8_t numItems = 0;
-	
+
 	vdp_map_clear(VDP_PLAN_A);
+	canvas_clear();
 	
 	switch(page) {
 		case PAGE_CONTROL:
@@ -225,7 +227,7 @@ void press_menuitem(const MenuItem *item, uint8_t page, VDPSprite *sprCursor) {
 		case MI_INPUT: {
 			sound_play(SND_MENU_SELECT, 5);
 			uint8_t released = FALSE;
-			vdp_puts(VDP_PLAN_A, "Press..", 30, item->y);
+			vdp_puts(VDP_PLAN_A, "Press..", 22, item->y);
 			while(TRUE) {
 				if(!(joystate & btn[cfg_btn_jump])) released = TRUE;
 				if(joy_pressed(BUTTON_BTN)) {
@@ -269,7 +271,8 @@ extern uint8_t tpal;
 
 void config_main() {
 	gamemode = GM_CONFIG;
-	
+
+	canvas_init_fullscreen();
 	vdp_map_clear(VDP_PLAN_B);
 	
 	uint8_t sprFrame = 0;

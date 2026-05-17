@@ -12,17 +12,20 @@ Revert critter ai
 Revert bat ai
 Revert computer ai
 
+heavy press not firing
+
+air tank
+
+level caret priority
+
 Water tile animation
 
 Bruv why can i not get out of the grasstown save
 
-snack block color
+loop points on snes ost
 
 behemoth
 mannan blink frame
-
-
-moonback
 
 prtoside palette
 cent tiles
@@ -31,12 +34,8 @@ machinegun bullet
 blade bullet
 
 remaning boomflash
-fade full
-
-gun down frame on down 
 
 hp bar palette
-fix weapon slide always happening
 
 camera shake accuracy
 
@@ -50,13 +49,9 @@ hp drain animation
 HUD Status Bar
 hud number padding
 
-Prompt & GIT
-
 Credits
 
 Font spacing
-
-damage number spacing
 
 snes ost tweaks
 50 fps option
@@ -73,10 +68,6 @@ Title screen
 --Settings
 	brighter color option
 
-Textbox 
-merge upstream
-Camp 
-
 Accuracy pass - mychar
 -bullet
 -npc
@@ -88,8 +79,9 @@ Accuracy pass - mychar
 Sort OBJ Vram
 ==GFX==
 Per sheet palette ?
-fix bkred in hell
+
 fix second healthbar tile offset
+
 reverse chinfish direction
 reverse jumping frame
 original sprite palettes
@@ -103,10 +95,6 @@ ironhead
 
 
 Soft reset
-
-
-sega logo
-
 
 
 remove slz/mdt compression
@@ -123,35 +111,23 @@ fix tile mapx_y
 fix pri tileshift
 
 fix particle effects
-disable xp merging
+xp tier 2
 fix missing sounds
-	-item get sound
-
-add textbox window plane
-add fade effect
+--mannan explosions
 
 
-
-plantation enemies dont move
+plantation enemies dont move?
 
 fix spur damage
 fix <qua
 
 stop moving when dying
 
-
-
-
-
-weapon bobbing
-
-
 FON many
 map system
 
 down arrow on falling blocks
 camera in hell b1
-heavy press not firing
 
 Set quote tile index above 4
 ballos ball extension
