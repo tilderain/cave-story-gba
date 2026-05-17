@@ -1154,7 +1154,7 @@ void player_draw() {
             // GBA equivalent: WALK1(1), WALK2(2), UPWALK1(4), UPWALK2(5)
             arms_y = py + 1;
             if(player.frame == 1 || player.frame == 2 || player.frame == 4 || player.frame == 5) {
-                arms_y += 1;
+                arms_y -= 1;
             }
 
             // 2. Position Shifting (Match PutMyChar logic)

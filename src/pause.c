@@ -28,6 +28,7 @@
 
 // Item menu stuff
 VDPSprite itemSprite[MAX_ITEMS][2];
+VDPSprite weaponMenuSprite[MAX_WEAPONS];
 int8_t selectedItem = 0;
 
 // Draw window frame tiles on BG3 as the inventory background
@@ -89,6 +90,8 @@ void draw_itemmenu(uint8_t resetCursor) {
     // Load the 4 tiles for the selection box. Since the menu can never be brought up
     // during scripts we overwrite the face image
     vdp_tiles_load_from_rom(TS_ItemSel.tiles, TILE_FACEINDEX, TS_ItemSel.numTile);
+    // Load hand sprite tiles for inventory cursor
+    vdp_tiles_load_from_rom(SPR_TILES(&SPR_Pointer,0,0), TILE_PROMPTINDEX, 4);
     // Redraw message box at the bottom of the screen
     window_open(FALSE);
     // Draw window frame tiles on BG3 as inventory background
@@ -124,41 +127,22 @@ void draw_itemmenu(uint8_t resetCursor) {
     y++;
     for(uint16_t i = 0; i < MAX_WEAPONS; i++) {
         Weapon *w = &playerWeapon[i];
-        if(!w->type) continue;
+        if(!w->type) {
+            weaponMenuSprite[i] = (VDPSprite) {};
+            continue;
+        }
         // X tile pos and VRAM index to put the ArmsImage tiles
-        uint16_t x = 4 + i*6;
+        uint16_t x = 4 + i*5;
         uint16_t index = TILE_FACEINDEX + 16 + i*4;
         vdp_tiles_load_from_rom(SPR_TILES(&SPR_ArmsImage, 0, w->type), index, 4);
-        // 4 mappings for ArmsImage icon
-        //vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index),   x,   y);
-        //vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index+2), x+1, y);
-        //vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index+1), x,   y+1);
-        //vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0,1,0,0,index+3), x+1, y+1);
-        // Lv
-        //DRAW_LETTER(14,			x,	y+2);
-        //DRAW_LETTER(15,			x+1,y+2);
-        //DRAW_LETTER(w->level,	x+3,y+2);
-
-        // Ammo & Max Ammo
-        if(w->maxammo) {
-            uint8_t ammo = w->ammo;
-            //DRAW_LETTER(mod10[ammo], 		x+3, y+3);
-            //DRAW_LETTER(mod10[div10[ammo]], x+2, y+3);
-            if(ammo >= 100) //DRAW_LETTER(1, 	x+1, y+3);
-            ammo = w->maxammo;
-            //DRAW_LETTER(mod10[ammo], 		x+3, y+4);
-            //DRAW_LETTER(mod10[div10[ammo]], x+2, y+4);
-            if(ammo >= 100) ;//DRAW_LETTER(1, 	x+1, y+4);
-            //DRAW_LETTER(16,	x,	y+4);
-        } else {
-            //   --
-            //DRAW_LETTER(17,	x+2,y+3);
-            //DRAW_LETTER(17,	x+3,y+3);
-            // / --
-            //DRAW_LETTER(16,	x,	y+4);
-            //DRAW_LETTER(17,	x+2,y+4);
-            //DRAW_LETTER(17,	x+3,y+4);
-        }
+        // Draw weapon icon as VDPSprite (16x16, 2x2 tiles, palette line 5)
+        weaponMenuSprite[i] = (VDPSprite){
+            .x = x * 8 + 128,
+            .y = (top + 4) * 8 - 4 + 128,
+            .size = SPRITE_SIZE(2, 2) | (5 << 4),
+            .attr = TILE_ATTR(0,1,0,0,index)
+        };
+        // Ammo display (commented out for now, needs font rendering)
     }
     // Items
     y = top + 10;
@@ -363,12 +347,40 @@ uint8_t update_pause() {
                 }
             }
         }
+
+                // Draw hand cursor at selected item/weapon
+        VDPSprite handSpr;
+        if(selectedItem >= 0 && playerInventory[selectedItem] > 0 && itemSprite[selectedItem][0].y) {
+            handSpr = (VDPSprite){
+                .x = itemSprite[selectedItem][0].x - 15,
+                .y = itemSprite[selectedItem][0].y,
+                .size = SPRITE_SIZE(2, 2),
+                .attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX)
+            };
+        } else if(selectedItem < 0 && weaponMenuSprite[selectedItem + 6].y) {
+            handSpr = (VDPSprite){
+                .x = weaponMenuSprite[selectedItem + 6].x - 15,
+                .y = weaponMenuSprite[selectedItem + 6].y,
+                .size = SPRITE_SIZE(2, 2),
+                .attr = TILE_ATTR(PAL0,1,0,0,TILE_PROMPTINDEX)
+            };
+        } else {
+            handSpr = (VDPSprite){ .x = 0, .y = 0 };
+        }
+        if(handSpr.y) vdp_sprite_add(&handSpr);
+
         for(uint8_t i = MAX_ITEMS; i--; ) {
             if(itemSprite[i][0].y) {
                 vdp_sprite_add(&itemSprite[i][0]);
                 vdp_sprite_add(&itemSprite[i][1]);
             }
         }
+        for(uint8_t i = MAX_WEAPONS; i--; ) {
+            if(weaponMenuSprite[i].y) {
+                vdp_sprite_add(&weaponMenuSprite[i]);
+            }
+        }
+
     }
     return TRUE;
 }
