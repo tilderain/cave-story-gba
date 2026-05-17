@@ -46,7 +46,7 @@ uint8_t FPS = 0;
 // Initializes or re-initializes the game after "try again"
 void game_reset(uint8_t load);
 
-IWRAM_CODE void game_main(uint8_t load) {
+EWRAM_CODE void game_main(uint8_t load) {
 	gamemode = GM_GAME;
 
 	vdp_colors(0, PAL_FadeOut, 64);
@@ -222,6 +222,11 @@ IWRAM_CODE void game_main(uint8_t load) {
 }
 
 void game_reset(uint8_t load) {
+	// Stop continuous stream/propellor sounds that may be playing
+	sound_stop(SND_STREAM1);
+	sound_stop(SND_STREAM2);
+	sound_stop(SND_PROPELLOR);
+
 	vdp_map_clear(VDP_PLAN_B);
 	camera_init();
 	tsc_init();

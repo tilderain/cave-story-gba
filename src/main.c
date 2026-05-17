@@ -75,16 +75,16 @@ void aftervsync() {
     // Select + L = previous stage (debug)
     if((cheatEnable[0] || cheatEnable[1]) && gamemode == GM_GAME && joy_pressed(BUTTON_Y) && (joystate & BUTTON_X)) {
         if(stageID > 0) {
-            player.x = block_to_sub(12) + pixel_to_sub(8);
-            player.y = block_to_sub(12) + pixel_to_sub(8);
+            player.x = block_to_sub(8) + pixel_to_sub(8);
+            player.y = block_to_sub(8) + pixel_to_sub(8);
             stage_load(stageID - 1);
         }
     }
 
     // Select + R = next stage (debug)
     if((cheatEnable[0] || cheatEnable[1]) && gamemode == GM_GAME && joy_pressed(BUTTON_Z) && (joystate & BUTTON_X)) {
-        player.x = block_to_sub(12) + pixel_to_sub(8);
-        player.y = block_to_sub(12) + pixel_to_sub(8);
+        player.x = block_to_sub(8) + pixel_to_sub(8);
+        player.y = block_to_sub(8) + pixel_to_sub(8);
         stage_load(stageID + 1);
     }
 }

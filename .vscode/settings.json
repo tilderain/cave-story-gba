@@ -1,5 +1,7 @@
 {
 	"files.associations": {
+		"*.nut": "c",
+		"*.td": "c",
 		"common.h": "c",
 		"gba.h": "c",
 		"joy.h": "c",
@@ -22,6 +24,7 @@
 		"string.h": "c",
 		"tools.h": "c",
 		"effect.h": "c",
-		"audio.h": "c"
+		"audio.h": "c",
+		"random": "c"
 	}
 }

@@ -8,6 +8,25 @@
 
 #define savedhp		id
 #define angle		jump_time
+#define substate	hit_box.top
+
+#define NUM_ROTATORS	4
+#define NUM_BBOXES		4
+#define BB_TARGET		3
+
+// Hitbox target offsets from main core (in pixels)
+static const struct {
+	int8_t x, y;
+} core_bboxes[NUM_BBOXES] = {
+	{ 0,  -32 },	// top shield
+	{ 28,  0  },	// right shield
+	{ 4,   32 },	// bottom shield
+	{ -28, 4  },	// face target
+};
+
+// Global rotator and bbox entity arrays
+static Entity *rotator[NUM_ROTATORS];
+static Entity *bbox[NUM_BBOXES];
 
 enum CORE_STATES {
 	CR_FightBegin		= 20,		// scripted
@@ -48,6 +67,12 @@ static void RunHurtFlash(uint16_t timer);
 static uint8_t RunDefeated(Entity *e);
 static void DrawMinicoreBack(Entity *e);
 static void FadeMinicore(Entity *e);
+static void SpawnFaceSmoke(void);
+static Entity *create_rotator(int init_angle, int front_half);
+static void SetRotatorStates(int newstate);
+static void set_bbox_shootable(uint8_t enable);
+static void move_bboxes(void);
+static void CreateSpinner(int x, int y);
 
 /*
 	Main core body:
@@ -82,14 +107,18 @@ void onspawn_undead_core(Entity *e) {
 	// create rear rotators
 	//rotator[2] = create_rotator(0, 1);
 	//rotator[3] = create_rotator(0x80, 1);
-	
+
+	// create rear rotators (behind core)
+	rotator[2] = create_rotator(0, 1);
+	rotator[3] = create_rotator(0x80, 1);
+
 	// create front & back
 	pieces[CFRONT] = entity_create(0, 0, OBJ_UDCORE_FRONT, 0);
 	pieces[CFRONT]->display_box = (bounding_box) { 32, 48, 32, 48 };
-	
+
 	pieces[CBACK] = entity_create(0, 0, OBJ_UDCORE_BACK, 0);
 	pieces[CBACK]->display_box = (bounding_box) { 40, 48, 40, 48 };
-	
+
 	// create face
 	pieces[CFACE] = entity_create(0, 0, OBJ_UDCORE_FACE, 0);
 	pieces[CFACE]->state = FC_Closed;
@@ -98,9 +127,18 @@ void onspawn_undead_core(Entity *e) {
 	pieces[CFACE]->health = 1000;
 	pieces[CFACE]->hurtSound = SND_ENEMY_HURT_COOL;
 
-	// create front rotators
-	//rotator[0] = create_rotator(0, 0);
-	//rotator[1] = create_rotator(0x80, 0);
+	// create front rotators (in front of core)
+	rotator[0] = create_rotator(0, 0);
+	rotator[1] = create_rotator(0x80, 0);
+
+	// create hitbox targets
+	for(int i=0;i<NUM_BBOXES;i++) {
+		bbox[i] = entity_create(0, 0, OBJ_UD_HITBOX, 0);
+		bbox[i]->state = i;  // index used by ai_ud_hitbox
+	}
+
+	// Set up hitboxes: body zones are invulnerable, face target is not shootable yet
+	set_bbox_shootable(FALSE);
 	
 	// Upload some tile data for the minicore sprites into the background section
 	
@@ -117,9 +155,9 @@ void ai_undead_core(Entity *e) {
 		{
 			e->state = CR_FaceSkull;
 			e->dir = 0;
-			
-			//SetRotatorStates(RT_Spin_Slow_Closed);
-			//SpawnFaceSmoke();
+
+			SetRotatorStates(RT_Spin_Slow_Closed);
+			SpawnFaceSmoke();
 		}
 		break;
 		
@@ -128,14 +166,17 @@ void ai_undead_core(Entity *e) {
 		{
 			e->state++;
 			e->timer = 0;
-			
+
 			pieces[CFACE]->state = FC_Closed;
 			pieces[CFRONT]->frame = 0;		// closed
-			RunHurtFlash(0); 
-			
-			//set_bbox_shootable(FALSE);
-			//SetRotatorStates(RT_Spin_Closed);
-			//SpawnFaceSmoke();
+			RunHurtFlash(0);
+
+			set_bbox_shootable(FALSE);
+			SetRotatorStates(RT_Spin_Closed);
+			SpawnFaceSmoke();
+
+			// Close the mouth charge sound
+			// CutNoise equivalent done via sound_play
 		} /* fallthrough */
 		case CR_FaceClosed+1:
 		{
@@ -164,13 +205,13 @@ void ai_undead_core(Entity *e) {
 		{
 			e->state++;
 			e->timer = 0;
-			
+
 			pieces[CFACE]->state = FC_Skull;
 			pieces[CFRONT]->frame = 1;
-			//SpawnFaceSmoke();
-			
+			SpawnFaceSmoke();
+
 			e->savedhp = e->health;
-			//set_bbox_shootable(TRUE);
+			set_bbox_shootable(TRUE);
 		} /* fallthrough */
 		case CR_FaceSkull+1:
 		{
@@ -200,29 +241,32 @@ void ai_undead_core(Entity *e) {
 		{
 			e->state++;
 			e->timer = 0;
-			
+
 			pieces[CFACE]->state = FC_Teeth;
 			pieces[CFRONT]->frame = 1;
-			//SpawnFaceSmoke();
-			
-			//SetRotatorStates(RT_Spin_Open);
+			SpawnFaceSmoke();
+
+			SetRotatorStates(RT_Spin_Open);
 			camera_shake(100);
-			
+
 			e->savedhp = e->health;
-			//set_bbox_shootable(TRUE);
+			set_bbox_shootable(TRUE);
 		} /* fallthrough */
 		case CR_FaceTeeth+1:
 		{
 			e->timer++;
 			RunHurtFlash(e->timer);
 
-			// fire pellets from face
+			// fire spinners from rotators
 			if ((e->timer % 40) == 1) {
 				sound_play(SND_FUNNY_EXPLODE, 5);
-				SpawnPellet(1);
-				SpawnPellet(0);
+				// Pick a random rotator and spawn spinners from its position
+				uint8_t ri = random() & 3;
+				if (rotator[ri]) {
+					CreateSpinner(rotator[ri]->x - (16<<CSF), rotator[ri]->y);
+				}
 			}
-			
+
 			if (e->timer > 400 || (e->savedhp - e->health) > 150 || e->health < 200) {
 				e->state = CR_FaceClosed;
 			}
@@ -234,21 +278,21 @@ void ai_undead_core(Entity *e) {
 		{
 			e->state++;
 			e->timer = 0;
-			
+
 			pieces[CFACE]->state = FC_Mouth;
 			pieces[CFRONT]->frame = 1;
-			//SpawnFaceSmoke();
-			//SetRotatorStates(RT_Spin_Fast_Closed);
-			
+			SpawnFaceSmoke();
+			SetRotatorStates(RT_Spin_Fast_Closed);
+
 			sound_play(SND_FUNNY_EXPLODE, 5);
-			
+
 			// spawn a whole bunch of crazy spinners from the face
-			//CreateSpinner(pieces[CFACE]->x - (16<<CSF), pieces[CFACE]->y);
-			//CreateSpinner(pieces[CFACE]->x, pieces[CFACE]->y - (16<<CSF));
-			//CreateSpinner(pieces[CFACE]->x, pieces[CFACE]->y + (16<<CSF));
-			
+			CreateSpinner(pieces[CFACE]->x - (16<<CSF), pieces[CFACE]->y);
+			CreateSpinner(pieces[CFACE]->x, pieces[CFACE]->y - (16<<CSF));
+			CreateSpinner(pieces[CFACE]->x, pieces[CFACE]->y + (16<<CSF));
+
 			e->savedhp = e->health;
-			//set_bbox_shootable(TRUE);
+			set_bbox_shootable(TRUE);
 		} /* fallthrough */
 		case CR_FaceDoom+1:
 		{
@@ -314,24 +358,18 @@ void ai_undead_core(Entity *e) {
 }
 
 // spawn smoke puffs from face that come when face opens/closes
-//void UDCoreBoss::SpawnFaceSmoke()
-//{
-//	camera_shake(20);
-//	
-//	for(int i=0;i<8;i++)
-//	{
-//		int x = face->x + random(-16<<CSF, 32<<CSF);
-//		int y = main->CenterY();
-//		Entity *s = SmokePuff(x, y);
-//		s->x_speed = random(-0x200, 0x200);
-//		s->y_speed = random(-0x100, 0x100);
-//	}
-//}
+static void SpawnFaceSmoke(void)
+{
+	camera_shake(20);
+	SMOKE_AREA(pieces[CFACE]->x>>CSF, pieces[CFACE]->y>>CSF, 64, 48, 12);
+}
 
 // spit a "pellet" shot out of the face. That's what I'm calling the flaming lava-rock
 // type things that are thrown out and trail along the ceiling or floor.
+// dir=1 shoots upward (y offset -16), dir=0 shoots downward (y offset +16)
 static void SpawnPellet(uint8_t dir) {
-	entity_create(bossEntity->x - (32<<CSF), bossEntity->y, OBJ_UD_PELLET, 
+	int32_t yoff = dir ? -(16<<CSF) : (16<<CSF);
+	entity_create(bossEntity->x - (32<<CSF), bossEntity->y + yoff, OBJ_UD_PELLET,
 				  dir ? NPC_OPTION2 : 0);
 }
 
@@ -355,16 +393,18 @@ static uint8_t RunDefeated(Entity *e) {
 			e->timer = 0;
 			e->x_speed = 0;
 			e->y_speed = 0;
-			
+
 			pieces[CFACE]->state = FC_Closed;
 			pieces[CFRONT]->frame = 0;		// pieces[CFRONT] closed
-			//SetRotatorStates(RT_Spin_Slow_Closed);
-			
+			SetRotatorStates(RT_Spin_Slow_Closed);
+
 			camera_shake(20);
 			effect_smoke_burst(e->x>>CSF, e->y>>CSF, 8, 8);
-			
+
 			entities_clear_by_type(OBJ_UDMINI_PLATFORM);
-			//set_bbox_shootable(FALSE);
+			entities_clear_by_type(OBJ_UD_SPINNER);
+			entities_clear_by_type(OBJ_UD_SPINNER_TRAIL);
+			set_bbox_shootable(FALSE);
 		} /* fallthrough */
 		case CR_Defeated+1:
 		{
@@ -402,9 +442,11 @@ static uint8_t RunDefeated(Entity *e) {
 				pieces[CFRONT]->state = STATE_DELETE;
 				pieces[CBACK]->state = STATE_DELETE;
 				pieces[CFACE]->state = STATE_DELETE;
-				//for(int i=0;i<NUM_ROTATORS;i++) rotator[i]->Delete();
-				//for(int i=0;i<NUM_BBOXES;i++) bbox[i]->Delete();
-				
+				for(int i=0;i<NUM_ROTATORS;i++)
+					if (rotator[i]) rotator[i]->state = STATE_DELETE;
+				for(int i=0;i<NUM_BBOXES;i++)
+					if (bbox[i]) bbox[i]->state = STATE_DELETE;
+
 				e->state++;
 				e->timer = 0;
 			}
@@ -462,25 +504,28 @@ void ai_undead_core_face(Entity *e) {
 		case FC_Mouth+1:
 		{
 			e->flags |= NPC_SHOOTABLE;
-			
+
 			if (++e->timer > 300)
 				e->timer = 0;
-			
+
 			if (e->timer > 250) {
-				if ((e->timer & 31) == 1)
+				if ((e->timer & 0xF) == 1)
 					sound_play(SND_QUAKE, 5);
-				
-				if ((e->timer & 31) == 7) {
+
+				if ((e->timer & 0xF) == 7) {
 					entity_create(e->x, e->y, OBJ_UD_BLAST, 0);
 					sound_play(SND_LIGHTNING_STRIKE, 5);
 				}
 			}
-			
+
 			if (e->timer == 200)
 				sound_play(SND_CORE_CHARGE, 5);
-			
-			if (e->timer >= 200) { //&& (e->timer & 1))
-				e->frame = 3;	// mouth lit
+
+			if (e->timer >= 200) {
+				if (e->timer & 1)
+					e->frame = 3;	// mouth lit
+				else
+					e->frame = 2;	// mouth norm
 			} else {
 				e->frame = 2;	// mouth norm
 			}
@@ -515,134 +560,114 @@ void ai_undead_core_back(Entity *e) {
 
 // "front" refers to whether they are doing the pieces[CFRONT] (left) or rear (right)
 // half of the arc; the ones marked "pieces[CFRONT]" are actually BEHIND the core.
-//Entity *UDCoreBoss::create_rotator(int angle, int front)
-//{
-//	Entity *e = entity_create(0, 0, OBJ_UDMINI_ROTATOR);
-//	e->angle = angle;
-//	e->substate = front;
-//	
-//	return o;
-//}
-/*
-// the rotators are 4 minicores that spin around the main core during the battle
-// and have pseudo-3D effects. They also shoot the spinners during the teeth-face phase.
-//
-// instead of having the cores constantly rearranging their Z-Order as they pass
-// in pieces[CFRONT] and behind the core, an optical illusion is used. 2 cores are always
-// in pieces[CFRONT] and 2 are always behind. Each set of two cores covers only half the full
-// circle. When a core in the pieces[CFRONT] set reaches the top, it warps pieces[CBACK] to the bottom
-// just as a core in the pieces[CBACK] set reaches the bottom and warps pieces[CBACK] to the top.
-// Thus, they swap places and the core appears to continue around the circle using
-// the different z-order of the one that was just swapped-in.
-void UDCoreBoss::run_rotator(Entity *e)
+static Entity *create_rotator(int angle, int front)
 {
-	//debug("rotr s%d", e->state);
-	
-	switch(e->state)
-	{
-		case 0:
-		{
-			e->sprite = SPR_UD_ROTATOR;
-			e->eflags &= ~NPC_SHOOTABLE;
-			e->health = 1000;
-		}
-		break;
-		
-		case RT_Spin_Closed:
-		{
-			e->frame = 0;
-			e->angle += 2;
-		}
-		break;
-		
-		// used when firing spinners in Teeth face
-		// (it's easier to coordinate if spinners are actually spawned by core
-		// and just positioned next to us)
-		case RT_Spin_Open:
-		{
-			e->frame = 1;
-			e->angle += 2;
-		}
-		break;
-		
-		case RT_Spin_Slow_Closed:
-		{
-			e->frame = 0;
-			e->angle++;
-		}
-		break;
-		
-		case RT_Spin_Fast_Closed:
-		{
-			e->frame = 0;
-			e->angle += 4;
-		}
-		break;
-	}
-	
-	// each "side" covers half the rotation angle
-	int angle = (e->angle / 2);
-	
-	if (e->substate)
-	{	// pieces[CFRONT] (left) half of arc
-		angle += 0x40;
-	}
-	else
-	{	// pieces[CBACK] (right) half of arc
-		angle += 0xC0;
-	}
-	
-	e->x = (main->x - (8<<CSF)) + x_speed_from_angle(angle, (48<<CSF));
-	e->y = main->y + y_speed_from_angle(angle, (80<<CSF));
+	Entity *e = entity_create(0, 0, OBJ_UDMINI_ROTATOR, 0);
+	if (!e) return NULL;
+	e->angle = angle;
+	e->substate = front;
+	return e;
 }
 
-void UDCoreBoss::SetRotatorStates(int newstate)
+// the rotators are 4 minicores that spin around the main core during the battle
+// and have pseudo-3D effects. They also shoot the spinners during the teeth-face phase.
+static void run_rotator(Entity *e)
+{
+	// each "side" covers half the rotation angle
+	int a = (e->angle / 2);
+
+	if (e->substate)
+		a += 0x40;	// front half of arc
+	else
+		a += 0xC0;	// back half of arc
+
+	e->x = bossEntity->x + ((int32_t)cos[(uint8_t)a] * (24<<CSF) >> 8);
+	e->y = bossEntity->y + ((int32_t)sin[(uint8_t)a] * (40<<CSF) >> 8);
+}
+
+static void SetRotatorStates(int newstate)
 {
 	for(int i=0;i<NUM_ROTATORS;i++)
-		rotator[i]->state = newstate;
+		if (rotator[i]) rotator[i]->state = newstate;
 }
-*/
-/*
+
 // extra bbox puppets/shoot targets
 // only one, located at the face, is shootable, the other 3 are invulnerable shields.
-void UDCoreBoss::move_bboxes() {
+static void move_bboxes(void) {
 	for(int i=0;i<NUM_BBOXES;i++) {
-		bbox[i]->x = main->x + (core_bboxes[i].offset.x << CSF);
-		bbox[i]->y = main->y + (core_bboxes[i].offset.y << CSF);
+		if (bbox[i]) {
+			bbox[i]->x = bossEntity->x + (core_bboxes[i].x << CSF);
+			bbox[i]->y = bossEntity->y + (core_bboxes[i].y << CSF);
+		}
 	}
-	
-	transfer_damage(bbox[BB_TARGET], main);
 }
 
 // sets up bboxes for the Core entering shootable or non-shootable mode.
-void UDCoreBoss::set_bbox_shootable(bool enable) {
-uint32_t body_flags, target_flags;
-int i;
+static void set_bbox_shootable(uint8_t enable) {
+	uint16_t body_flags, target_flags;
+	int i;
 
 	// in shootable mode target can be hit and shields are up.
 	// in non-shootable mode (when face is closed) nothing can be hit.
-	if (enable)
-	{
-		body_flags = NPC_INVULNERABLE;
+	if (enable) {
+		body_flags = NPC_INVINCIBLE;
 		target_flags = NPC_SHOOTABLE;
-	}
-	else
-	{
+	} else {
 		body_flags = 0;
 		target_flags = 0;
 	}
-	
-	for(i=0;i<NUM_BBOXES;i++)
-	{
-		bbox[i]->flags &= ~(NPC_SHOOTABLE | NPC_INVULNERABLE);
-		
+
+	for(i=0;i<NUM_BBOXES;i++) {
+		if (!bbox[i]) continue;
+		bbox[i]->flags &= ~(NPC_SHOOTABLE | NPC_INVINCIBLE);
+
 		if (i == BB_TARGET)
 			bbox[i]->flags |= target_flags;
 		else
 			bbox[i]->flags |= body_flags;
 	}
 }
-*/
+
+// rotator entity onspawn
+void onspawn_udmini_rotator(Entity *e) {
+	e->alwaysActive = TRUE;
+	e->display_box = (bounding_box) { 16, 16, 16, 16 };
+	e->hit_box = (bounding_box) { 10, 10, 10, 10 };
+	e->flags &= ~NPC_SHOOTABLE;
+	e->frame = 3;
+}
+
+// rotator entity AI - spins around the core
+void ai_udmini_rotator(Entity *e) {
+	switch(e->state)
+	{
+		case RT_Spin_Closed:
+		case RT_Spin_Slow_Closed:
+		case RT_Spin_Fast_Closed:
+			e->frame = 3;
+			if (e->state == RT_Spin_Closed) e->angle += 2;
+			else if (e->state == RT_Spin_Slow_Closed) e->angle++;
+			else e->angle += 4;
+			break;
+
+		case RT_Spin_Open:
+			e->frame = 2;
+			e->angle += 2;
+			break;
+
+		default:
+			e->frame = 0;
+			break;
+	}
+
+	run_rotator(e);
+	DrawMinicoreBack(e);
+}
+
+// hitbox entity AI - invisible collision targets
+void ai_ud_hitbox(Entity *e) {
+	move_bboxes();
+}
 
 // minicores by entrance seen before fight
 void onspawn_ud_minicore(Entity *e) {
@@ -711,18 +736,29 @@ void ai_udmini_platform(Entity *e) {
 // The face of the minicores have 4 different frames for light/dark and faces, but the
 // backs just use 2 for dark/light, so we draw them separately from the engine
 static void DrawMinicoreBack(Entity *e) {
-	e->sprite[1] = (VDPSprite) { // Back
+	// Back split into 2 GBA-compatible sprites: 16×32 + 8×32
+	uint16_t back_tile = mframeindex[e->frame >> 1];
+	VDPSprite back_left = { // Back left half (16×32)
 		.x = (e->x>>CSF) - (camera.x>>CSF) + SCREEN_HALF_W + 16 + 128,
 		.y = (e->y>>CSF) - (camera.y>>CSF) + SCREEN_HALF_H - 16 + 128,
-		.size = SPRITE_SIZE(3, 4),
-		.attr = TILE_ATTR(PAL2,0,0,0,mframeindex[e->frame >> 1])
+		.size = SPRITE_SIZE(2, 4),
+		.attr = TILE_ATTR(PAL2,0,0,0,back_tile)
 	};
-	e->sprite[2] = (VDPSprite) { // Bottom
+	VDPSprite back_right = { // Back right half (8×32)
+		.x = (e->x>>CSF) - (camera.x>>CSF) + SCREEN_HALF_W + 32 + 128,
+		.y = (e->y>>CSF) - (camera.y>>CSF) + SCREEN_HALF_H - 16 + 128,
+		.size = SPRITE_SIZE(1, 4),
+		.attr = TILE_ATTR(PAL2,0,0,0,back_tile + 8)
+	};
+	VDPSprite bottom = { // Bottom bar (32×8)
 		.x = (e->x>>CSF) - (camera.x>>CSF) + SCREEN_HALF_W - 8 + 128,
 		.y = (e->y>>CSF) - (camera.y>>CSF) + SCREEN_HALF_H + 16 + 128,
 		.size = SPRITE_SIZE(4, 1),
 		.attr = TILE_ATTR(PAL2,0,0,0,mframeindex[2 + (e->frame >> 1)])
 	};
+	vdp_sprite_add(&back_left);
+	vdp_sprite_add(&back_right);
+	vdp_sprite_add(&bottom);
 }
 
 static void FadeMinicore(Entity *e) {
@@ -786,44 +822,48 @@ void ai_ud_pellet(Entity *e) {
 	e->y += e->y_speed;
 }
 
-/*
 void ai_ud_smoke(Entity *e)
 {
 	switch(e->state)
 	{
 		case 0:
 		{
-			e->x_speed = random(-4, 4) << CSF;
+			// CSE2 ActNpc287: Random(-4, 4) * 0x200
+			e->x_speed = (int16_t)(random() % 9 - 4) << CSF;
+			e->y_speed = (int16_t)(random() % 9 - 4) << CSF;
 			e->state = 1;
-		}
+		} /* fallthrough */
 		case 1:
 		{
-			e->x_speed *= 20; e->x_speed /= 21;
-			e->y_speed *= 20; e->y_speed /= 21;
-			
-			ANIMATE_FWD(1);
-			if (e->frame > sprites[e->sprite].nframes)
-				e->Delete();
+			e->x_speed -= e->x_speed >> 4;
+			e->y_speed -= e->y_speed >> 4;
+
+			e->x += e->x_speed;
+			e->y += e->y_speed;
+
+			e->frame++;
+			if (e->frame > 2)
+				e->state = STATE_DELETE;
 		}
 		break;
 	}
 }
-*/
 
-//static void CreateSpinner(int x, int y)
-//{
-//	entity_create(x, y, OBJ_UD_SPINNER);
-//	entity_create(x, y, OBJ_UD_SPINNER)->angle = 0x80;
-//}
-/*
+static void CreateSpinner(int x, int y)
+{
+	entity_create(x, y, OBJ_UD_SPINNER, 0);
+	Entity *s2 = entity_create(x, y, OBJ_UD_SPINNER, 0);
+	if (s2) s2->angle = 0x80;
+}
+
 // spinny thing shot by rotators during Teeth phase.
 // they come in pairs.
 void ai_ud_spinner(Entity *e)
 {
-	if (e->x < 0 || e->x > MAPX(map.xsize))
+	if (e->x < block_to_sub(0) || e->x > block_to_sub(stageWidth))
 	{
 		effect_create_misc(EFF_BOOMFLASH, e->x >> CSF, e->y >> CSF, FALSE);
-		e->Delete();
+		e->state = STATE_DELETE;
 		return;
 	}
 
@@ -831,22 +871,24 @@ void ai_ud_spinner(Entity *e)
 	{
 		case 0:
 		{
+			e->flags |= NPC_SHOOTABLE;
+			e->flags |= NPC_INVINCIBLE;
 			e->x_mark = e->x;
 			e->y_mark = e->y;
 			e->state = 1;
-		}
+
+		} /* fallthrough */
 		case 1:
 		{
 			e->angle += 24;
-			
-			e->speed -= 0x15;
-			e->x_mark += e->speed;
-			
-			e->x = e->x_mark + x_speed_from_angle(e->angle, (4<<CSF));
-			e->y = e->y_mark + y_speed_from_angle(e->angle, (6<<CSF));
-			
-			entity_create(e->x, e->y, OBJ_UD_SPINNER_TRAIL);
-			e->BringToFront();
+
+			e->x_speed -= 0x15;
+			e->x_mark += e->x_speed;
+
+			e->x = e->x_mark + ((int32_t)cos[(uint8_t)e->angle] * (4<<CSF) >> 8);
+			e->y = e->y_mark + ((int32_t)sin[(uint8_t)e->angle] * (6<<CSF) >> 8);
+
+			entity_create(e->x, e->y, OBJ_UD_SPINNER_TRAIL, 0);
 		}
 		break;
 	}
@@ -856,11 +898,10 @@ void ai_ud_spinner_trail(Entity *e)
 {
 	e->frame++;
 	if (e->frame > 2)
-		e->Delete();
+		e->state = STATE_DELETE;
 }
-*/
 void ai_ud_blast(Entity *e) {
-	e->x += -0xFFF;
+	e->x += -0x1000;
 	//e->frame ^= 1;
 
 	effect_smoke_burst(e->x>>CSF, e->y>>CSF, 16, 1);

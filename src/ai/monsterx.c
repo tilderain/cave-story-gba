@@ -402,21 +402,23 @@ void ai_monsterx(Entity *e) {
 		.size = SPRITE_SIZE(4, 4), 
 		.attr = TILE_ATTR(PAL3,0,0,0,sheets[e->alt_sheet].index),
 	};
-	e->sprite[1] = (VDPSprite) {
+	VDPSprite a = (VDPSprite) {
 		.x = xx + BODY_UR_X + 128, .y = yy + BODY_UR_Y + 128,
 		.size = SPRITE_SIZE(4, 4), 
 		.attr = TILE_ATTR(PAL3,0,0,1,sheets[e->alt_sheet].index),
 	};
-	e->sprite[2] = (VDPSprite) {
+	VDPSprite b = (VDPSprite) {
 		.x = xx + BODY_LL_X + 128, .y = yy + BODY_LL_Y + 128,
 		.size = SPRITE_SIZE(4, 4), 
 		.attr = TILE_ATTR(PAL3,0,1,0,sheets[e->alt_sheet].index),
 	};
-	e->sprite[3] = (VDPSprite) {
+	VDPSprite c = (VDPSprite) {
 		.x = xx + BODY_LR_X + 128, .y = yy + BODY_LR_Y + 128,
 		.size = SPRITE_SIZE(4, 4), 
 		.attr = TILE_ATTR(PAL3,0,1,1,sheets[e->alt_sheet].index),
 	};
+	vdp_sprite_add(&a);
+	vdp_sprite_add(&b); vdp_sprite_add(&c);
 }
 
 void ai_x_tread(Entity *e) {
@@ -529,10 +531,11 @@ void ai_x_tread(Entity *e) {
 		.x = xx + 128, .y = yy + 128,
 		.size = SPRITE_SIZE(4, 4), .attr = attr,
 	};
-	e->sprite[1] = (VDPSprite) {
+	VDPSprite half = (VDPSprite) {
 		.x = xx + 32 + 128, .y = yy + 128,
 		.size = SPRITE_SIZE(4, 4), .attr = attr + 16,
 	};
+	vdp_sprite_add(&half);
 }
 
 void ai_x_internals(Entity *e) {

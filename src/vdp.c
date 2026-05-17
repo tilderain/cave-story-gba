@@ -26,7 +26,7 @@ u8 saturate = false;
 // - 23 to 30: Compressed 2:1 (Gently eases into the brights)
 // - 31 to 38: Compressed 4:1 (Heavily compresses overblown colors)
 // - 39+: Caps at 28
-IWRAM_CODE static inline int apply_soft_clip(int val, int orig) {
+EWRAM_CODE static inline int apply_soft_clip(int val, int orig) {
     if (orig == 31) return 31; // Always preserve pure max-intensity channels
     if (val < 0) return 0;
     
@@ -40,7 +40,7 @@ IWRAM_CODE static inline int apply_soft_clip(int val, int orig) {
     }
 }
 
-IWRAM_CODE uint16_t saturate_color(uint16_t color) {
+EWRAM_CODE uint16_t saturate_color(uint16_t color) {
     if(!saturate) return color;
 
     // 1. Unpack 5-bit RGB
@@ -108,7 +108,7 @@ static uint8_t pal_fadecnt;
 
 // Sprite vars
 static uint16_t sprite_count;
-static VDPSprite sprite_table[80];
+static VDPSprite sprite_table[120];
 static uint16_t sprite_ymax;
 
 // Font vars
@@ -500,9 +500,9 @@ void vdp_vscroll(uint16_t plan, int16_t vscroll) {
 
 // Sprites
 
-IWRAM_CODE void vdp_sprite_add(const VDPSprite *spr) {
+__attribute__((hot)) IWRAM_CODE void vdp_sprite_add(const VDPSprite *spr) {
     // Exceeded max number of sprites
-    if(sprite_count >= 80) return;
+    if(sprite_count >= 120) return;
     // Prevent drawing off screen sprites
     if((unsigned)(spr->x-96) < 352 && (unsigned)(spr->y-96) < sprite_ymax) {
         sprite_table[sprite_count] = *spr;
@@ -511,7 +511,7 @@ IWRAM_CODE void vdp_sprite_add(const VDPSprite *spr) {
     }
 }
 
-IWRAM_CODE void vdp_sprites_add(const VDPSprite *spr, uint16_t num) {
+__attribute__((hot)) IWRAM_CODE void vdp_sprites_add(const VDPSprite *spr, uint16_t num) {
 	for(uint16_t i = num; i--;) vdp_sprite_add(&spr[i]);
 }
 
@@ -639,7 +639,7 @@ void vdp_load_stage_palettes() {
     }
 }
 
-IWRAM_CODE void vdp_sprites_update() {
+__attribute__((hot)) IWRAM_CODE void vdp_sprites_update() {
 	if(!sprite_count) return;
 	//iprintf("%d %d\n", (&SPR_Quote)->animations[0]->frames[0]->w, (&SPR_Quote)->animations[0]->frames[0]->h);
 	sprite_table[sprite_count - 1].link = 0; // Mark end of sprite list

@@ -26,8 +26,11 @@
 #include "gamemode.h"
 #include "gbatext.h"
 
-// For restarting the current track after toggling audio settings
+#include "maxmod.h"
+
+// For muting/unmuting BGM
 extern uint8_t songPlaying;
+extern uint8_t songResume;
 
 #define ANIM_SPEED	7
 #define ANIM_FRAMES	4
@@ -253,6 +256,16 @@ void press_menuitem(const MenuItem *item, uint8_t page, VDPSprite *sprCursor) {
 		case MI_TOGGLE: {
             sound_play(SND_MENU_SELECT, 5);
             *item->valptr ^= 1;
+            // Immediately stop/resume BGM when mute is toggled
+            if(item->valptr == &cfg_music_mute) {
+                if(cfg_music_mute) {
+                    songResume = songPlaying;
+                    mmStop();
+                    songPlaying = 0;
+                } else if(songResume) {
+                    song_play(songResume);
+                }
+            }
             // Immediately apply changes for GBA options
             if(item->valptr == &snes_ost_enabled) {
                 if(songPlaying) song_play(songPlaying);

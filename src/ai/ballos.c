@@ -131,7 +131,7 @@ void onspawn_ballos(Entity *e) {
 	// create body (the big rock)
 	body = entity_create(0, 0, OBJ_BALLOS_BODY, 0);
 	body->health = 1000;	// not his real HP, we're using damage transfer
-	body->flags = (NPC_SOLID | NPC_SHOOTABLE | NPC_INVINCIBLE);
+	body->flags = (NPC_SOLID | NPC_INVINCIBLE);
 	body->hit_box = (bounding_box) { 48, 20, 48, 36 };
 	body->display_box = (bounding_box) { 60, 60, 60, 60 };
 	
@@ -368,9 +368,14 @@ void ai_ballos_f2(Entity *e) {
 				rotator(rotators_left)->dir = (rotators_left & 1) ? 1 : 0;
 				rotators_left++;
 			}
+		} /* fallthrough */
+		case BS_ENTER_FORM+1:	// move body to arena floor (like CSE2)
+		{
+			// move toward floor level (ARENA_BOTTOM) for body positioning
+			e->y += (ARENA_BOTTOM - e->y) >> 3;
 		}
 		break;
-		
+
 		case BS_FIGHT_BEGIN:	// script-triggered
 		{
 			SetRotatorStates(10);	// spin CCW, work as treads
@@ -457,13 +462,13 @@ void ai_ballos_f3(Entity *e) {
 		{ 200, 1, },
 		{ 0,   0, },
 	};
-	
-	/*transfer_damage(body, e) || */
-	if(transfer_damage(eye[0], e) || transfer_damage(eye[1], e)) {
+
+	if(transfer_damage(body, e) ||
+		transfer_damage(eye[0], e) || transfer_damage(eye[1], e)) {
 		ondeath_ballos(e);
 		return;
 	}
-	
+
 	switch(e->state) {
 		// enter form 3
 		case CS_ENTER_FORM:
@@ -535,6 +540,8 @@ void ai_ballos_f3(Entity *e) {
 			
 			body->frame = 1;		// go all bloody
 			body->flags &= ~NPC_INVINCIBLE;
+			body->flags |= (NPC_SHOOTABLE | NPC_SHOWDAMAGE);
+			body->hurtSound = SND_ENEMY_HURT_COOL;
 			//shield->eflags &= ~NPC_INVINCIBLE;
 			
 			e->state = CS_SPIN_PLATFORMS;
@@ -692,7 +699,9 @@ void ai_ballos_eye(Entity *e) {
 		case 0:
 		{
 			e->frame = (e->flags & NPC_OPTION2) ? 4 : 0;
-			e->flags |= (NPC_SHOOTABLE | NPC_INVINCIBLE);
+			e->flags |= NPC_SHOOTABLE;
+			e->flags &= ~NPC_INVINCIBLE;
+			e->hurtSound = SND_ENEMY_HURT_COOL;
 			e->state = 1;
 		}
 		break;

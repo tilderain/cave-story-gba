@@ -28,6 +28,9 @@ typedef struct {
 } Effect;
 
 static Effect effDamage[MAX_DAMAGE], effSmoke[MAX_SMOKE], effMisc[MAX_MISC];
+// Sub-pixel smoke position/velocity so *20/21 friction decays gradually (CSE2 behavior)
+static int32_t smokeX[MAX_SMOKE], smokeY[MAX_SMOKE];
+static int16_t smokeXSpeed[MAX_SMOKE], smokeYSpeed[MAX_SMOKE];
 static struct {
 	Entity *e;
 	int16_t xoff, yoff;
@@ -339,7 +342,13 @@ EWRAM_CODE void update_fadein_sweep(void) {
 }
 void effects_init() {
 	for(uint8_t i = 0; i < MAX_DAMAGE; i++) effDamage[i].ttl = 0;
-	for(uint8_t i = 0; i < MAX_SMOKE; i++) effSmoke[i].ttl = 0;
+	for(uint8_t i = 0; i < MAX_SMOKE; i++) {
+		effSmoke[i].ttl = 0;
+		smokeX[i] = 0;
+		smokeY[i] = 0;
+		smokeXSpeed[i] = 0;
+		smokeYSpeed[i] = 0;
+	}
 	for(uint8_t i = 0; i < MAX_MISC; i++) effMisc[i].ttl = 0;
 	
 	// Load each frame of the small smoke sprite directly to VRAM
@@ -379,7 +388,13 @@ void effects_clear() {
 }
 
 void effects_clear_smoke() {
-	for(uint8_t i = 0; i < MAX_SMOKE; i++) effSmoke[i].ttl = 0;
+	for(uint8_t i = 0; i < MAX_SMOKE; i++) {
+		effSmoke[i].ttl = 0;
+		smokeX[i] = 0;
+		smokeY[i] = 0;
+		smokeXSpeed[i] = 0;
+		smokeYSpeed[i] = 0;
+	}
 }
 
 EWRAM_CODE void effects_update() {
@@ -423,14 +438,21 @@ EWRAM_CODE void effects_update() {
 		if(!effSmoke[i].ttl) continue;
 		effSmoke[i].ttl--;
 		// CSE2 ActNpc004 drag: xm = xm * 20 / 21
-		effSmoke[i].x_speed = (effSmoke[i].x_speed * 20) / 21;
-		effSmoke[i].y_speed = (effSmoke[i].y_speed * 20) / 21;
-		effSmoke[i].x += effSmoke[i].x_speed;
-		effSmoke[i].y += effSmoke[i].y_speed;
-		// CSE2 ActNpc004 animation: ++ani_wait > 4 → advance frame
+		smokeXSpeed[i] = (smokeXSpeed[i] * 20) / 21;
+		smokeYSpeed[i] = (smokeYSpeed[i] * 20) / 21;
+		smokeX[i] += smokeXSpeed[i];
+		smokeY[i] += smokeYSpeed[i];
+		// Convert sub-pixel to pixel for rendering
+		effSmoke[i].x = (int16_t)(smokeX[i] >> CSF);
+		effSmoke[i].y = (int16_t)(smokeY[i] >> CSF);
+		// CSE2 ActNpc004 animation: ++ani_wait > 4 → advance frame, die when past last
 		if(++effSmoke[i].timer > 4) {
 			effSmoke[i].timer = 0;
-			effSmoke[i].sprite.attr += 4;  // next 16x16 tile
+			effSmoke[i].sprite.attr += 4;
+			if((effSmoke[i].sprite.attr & 0x3FF) > TILE_SMOKEINDEX + 6*4) {
+				effSmoke[i].ttl = 0;
+				continue;
+			}
 		}
 		sprite_pos(effSmoke[i].sprite,
 			effSmoke[i].x - sub_to_pixel(camera.x) + SCREEN_HALF_W - 8,
@@ -683,29 +705,28 @@ void effect_create_damage(int16_t num, Entity *follow, int16_t xoff, int16_t yof
 void effect_create_smoke(int16_t x, int16_t y) {
 	for(uint8_t i = 0; i < MAX_SMOKE; i++) {
 		if(effSmoke[i].ttl) continue;
+		// Store in sub-pixel (CSF) units so *20/21 friction decays gradually like CSE2
+		smokeX[i] = (int32_t)x << CSF;
+		smokeY[i] = (int32_t)y << CSF;
+		// CSE2 ActNpc004: random angle, speed Random(0x200, 0x5FF)
+		{
+			uint8_t deg = random() & 0xFF;
+			int16_t speed = 0x200 + (random() % 0x400);  // 0x200-0x5FF
+			smokeXSpeed[i] = ((int32_t)cos[deg] * speed) >> 9;
+			smokeYSpeed[i] = ((int32_t)sin[deg] * speed) >> 9;
+		}
+		// Initial pixel position for first frame render
 		effSmoke[i].x = x;
 		effSmoke[i].y = y;
-		// CSE2 ActNpc004: random angle direction, speed 1-3 pixels/frame
-		{
-			int8_t spd = 1 + (random() % 3);
-			switch(random() & 7) {
-				case 0: effSmoke[i].x_speed = spd;  effSmoke[i].y_speed = 0;    break;
-				case 1: effSmoke[i].x_speed = spd;  effSmoke[i].y_speed = -spd; break;
-				case 2: effSmoke[i].x_speed = 0;    effSmoke[i].y_speed = -spd; break;
-				case 3: effSmoke[i].x_speed = -spd; effSmoke[i].y_speed = -spd; break;
-				case 4: effSmoke[i].x_speed = -spd; effSmoke[i].y_speed = 0;    break;
-				case 5: effSmoke[i].x_speed = -spd; effSmoke[i].y_speed = spd;  break;
-				case 6: effSmoke[i].x_speed = 0;    effSmoke[i].y_speed = spd;  break;
-				case 7: effSmoke[i].x_speed = spd;  effSmoke[i].y_speed = spd;  break;
-			}
-		}
 		// CSE2 ActNpc004: 8 frames × ~5 ticks = 40 frames total
 		effSmoke[i].ttl = 32;
-		effSmoke[i].timer = 0;  // animation timer
+		// CSE2 ActNpc004: ani_wait = Random(0, 3), ani_no = Random(0, 4)
+		effSmoke[i].timer = random() % 5;  // random timer offset
+		uint8_t startFrame = random() % 5;  // start at frame 0-4 (CSE2 Random(0,4))
 		// Animation frame cycles every 5 ticks (40/8=5), matching CSE2 ani_wait > 4
 		effSmoke[i].sprite = (VDPSprite) {
 			.size = SPRITE_SIZE(2, 2),
-			.attr = TILE_ATTR(PAL1, 1, 0, 0, TILE_SMOKEINDEX)
+			.attr = TILE_ATTR(PAL1, 1, 0, 0, TILE_SMOKEINDEX) + startFrame * 4
 		};
 		break;
 	}

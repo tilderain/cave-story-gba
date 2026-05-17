@@ -72,7 +72,7 @@ uint8_t moveMeToFront = FALSE;
 
 Entity *entityList = NULL, *inactiveList = NULL, *bossEntity = NULL;
 
-AnimationFrame* get_animation_frame(uint16_t type)
+IWRAM_CODE AnimationFrame* get_animation_frame(uint16_t type)
 {
 	if(npc_info[type].sheet != NOSHEET)
 	{
@@ -96,7 +96,7 @@ uint8_t entity_on_screen(Entity *e) {
 }
 
 // Move to inactive list, delete sprite
-void entity_deactivate(Entity *e) {
+IWRAM_CODE void entity_deactivate(Entity *e) {
 	LIST_MOVE(entityList, inactiveList, e);
 	// If we had tile allocation release it for future generations to use
 	if(e->tiloc != NOTILOC) {
@@ -106,7 +106,7 @@ void entity_deactivate(Entity *e) {
 }
 
 // Move into active list, recreate sprite
-void entity_reactivate(Entity *e) {
+IWRAM_CODE void entity_reactivate(Entity *e) {
 	LIST_MOVE(inactiveList, entityList, e);
 	if(e->sheet == NOSHEET && npc_info[e->type].sprite) {
 		// Try to allocate some VRAM
@@ -126,7 +126,7 @@ void entity_reactivate(Entity *e) {
 	}
 }
 
-Entity *entity_delete(Entity *e) {
+IWRAM_CODE Entity *entity_delete(Entity *e) {
 	Entity *next = e->next;
 	LIST_REMOVE(entityList, e);
 	// If we had tile allocation release it for future generations to use
@@ -138,18 +138,25 @@ Entity *entity_delete(Entity *e) {
 	return next;
 }
 
-Entity *entity_delete_inactive(Entity *e) {
+IWRAM_CODE Entity *entity_delete_inactive(Entity *e) {
 	Entity *next = e->next;
 	LIST_REMOVE(inactiveList, e);
 	free(e);
 	return next;
 }
 
-Entity *entity_destroy(Entity *e) {
+IWRAM_CODE Entity *entity_destroy(Entity *e) {
 	sound_play(e->deathSound, 5);
 	entity_drop_powerup(e);
-	effect_create_smoke(e->x >> CSF, e->y >> CSF);
-	effect_create_smoke(e->x >> CSF, e->y >> CSF);
+	// CSE2 SetDestroyNpChar: scatter smoke within entity's display width, count by size tier
+	{
+		int16_t w = e->display_box.left + e->display_box.right;
+		uint8_t count;
+		if (w > 16) count = 16;
+		else if (w > 8) count = 8;
+		else count = 4;
+		effect_smoke_burst(e->x >> CSF, e->y >> CSF, w, count);
+	}
 	effect_create_misc(EFF_BOOMFLASH, e->x >> CSF, e->y >> CSF, FALSE);
 	if(e->flags & NPC_EVENTONDEATH) tsc_call_event(e->event);
 	if(e->flags & NPC_DISABLEONFLAG) system_set_flag(e->id, TRUE);
@@ -185,7 +192,7 @@ uint16_t entities_count() {
 	return entities_count_active() + entities_count_inactive();
 }
 
-IWRAM_CODE void entities_update(uint8_t draw) {
+__attribute__((hot)) IWRAM_CODE void entities_update(uint8_t draw) {
 	uint16_t new_active_count = 0;
 	Entity *e = entityList;
 	
@@ -445,7 +452,7 @@ IWRAM_CODE void entities_update(uint8_t draw) {
 	entity_active_count = new_active_count;
 }
 
-void entity_handle_bullet(Entity *e, Bullet *b) {
+IWRAM_CODE void entity_handle_bullet(Entity *e, Bullet *b) {
 	//uint16_t flags = e->flags | e->eflags;
 	// Destroy the bullet, or if it is a missile make it explode
 	if(b->type == WEAPON_MISSILE || b->type == WEAPON_SUPERMISSILE) {
@@ -781,7 +788,7 @@ uint8_t collide_stage_ceiling(Entity *e) {
 	return result;
 }
 
-IWRAM_CODE uint8_t entity_overlapping(Entity *a, Entity *b) {
+__attribute__((hot)) IWRAM_CODE uint8_t entity_overlapping(Entity *a, Entity *b) {
 	int16_t ax1 = sub_to_pixel(a->x) - (a->dir ? a->hit_box.right : a->hit_box.left),
 		ax2 = sub_to_pixel(a->x) + (a->dir ? a->hit_box.left : a->hit_box.right),
 		ay1 = sub_to_pixel(a->y) - a->hit_box.top,
@@ -793,7 +800,7 @@ IWRAM_CODE uint8_t entity_overlapping(Entity *a, Entity *b) {
 	return (ax1 < bx2 && ax2 > bx1 && ay1 < by2 && ay2 > by1);
 }
 
-IWRAM_CODE bounding_box entity_react_to_collision(Entity *a, Entity *b) {
+__attribute__((hot)) IWRAM_CODE bounding_box entity_react_to_collision(Entity *a, Entity *b) {
 	bounding_box result = { 0, 0, 0, 0 };
 	int16_t ax1 = sub_to_pixel(a->x_next) - (a->dir ? a->hit_box.right : a->hit_box.left),
 		ax2 = sub_to_pixel(a->x_next) + (a->dir ? a->hit_box.left : a->hit_box.right),

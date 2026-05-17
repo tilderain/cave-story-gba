@@ -16,8 +16,9 @@ void onspawn_energy(Entity *e) {
 	}
 	e->left_gravity = (stageID == STAGE_WATERWAY_BOSS || stageID == STAGE_OUTER_WALL);
 	// CSE2 ActNpc001: xm = Random(-0x200, 0x200), ym = Random(-0x400, 0)
-	e->x_speed = 0x1FF - (random() & 0x3FF);
-	e->y_speed = -(random() & 0x3FF); // Random(-0x400, 0) - initial upward bounce
+	e->x_speed = (int16_t)((random() % 0x401) - 0x200);  // -0x200 to 0x200
+	e->y_speed = (int16_t)((random() % 0x401) - 0x400);  // -0x400 to 0
+	e->dir = (random() & 1) ? 0 : 2; // CSE2: Random(0,1) for animation direction
 	e->alwaysActive = TRUE;
 }
 

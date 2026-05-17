@@ -478,25 +478,31 @@ void ai_minicore(Entity *e) {
 	
 	e->x += e->x_speed;
 	e->y += e->y_speed;
-	px = (e->x>>CSF) - (camera.x>>CSF) + SCREEN_HALF_W; 
+	px = (e->x>>CSF) - (camera.x>>CSF) + SCREEN_HALF_W;
 	py = (e->y>>CSF) - (camera.y>>CSF) + SCREEN_HALF_H;
+	e->sprite_count = 5;
 	// Have to deal with sprites manually
 	e->sprite[0] = (VDPSprite) { // Face
 		.x = px - 28 + 128, .y = py - 20 + 128,
 		.size = SPRITE_SIZE(4, 4),
 		.attr = TILE_ATTR(PAL2,0,0,0,mframeindex[e->mouth_open])
 	};
-	e->sprite[1] = (VDPSprite) { // Back
+	e->sprite[1] = (VDPSprite) { // Back left (16×32)
 		.x = px + 4 + 128, .y = py - 20 + 128,
-		.size = SPRITE_SIZE(3, 4),
+		.size = SPRITE_SIZE(2, 4),
 		.attr = TILE_ATTR(PAL2,0,0,0,mframeindex[2])
 	};
-	e->sprite[2] = (VDPSprite) { // Bottom-Face
+	e->sprite[2] = (VDPSprite) { // Back right (8×32)
+		.x = px + 20 + 128, .y = py - 20 + 128,
+		.size = SPRITE_SIZE(1, 4),
+		.attr = TILE_ATTR(PAL2,0,0,0,mframeindex[2] + 8)
+	};
+	e->sprite[3] = (VDPSprite) { // Bottom-Face
 		.x = px- 28 + 128, .y = py + 12 + 128,
 		.size = SPRITE_SIZE(4, 1),
 		.attr = TILE_ATTR(PAL2,0,0,0,mframeindex[3])
 	};
-	e->sprite[3] = (VDPSprite) { // Bottom-Back
+	e->sprite[4] = (VDPSprite) { // Bottom-Back
 		.x = px + 4 + 128, .y = py + 12 + 128,
 		.size = SPRITE_SIZE(2, 1),
 		.attr = TILE_ATTR(PAL2,0,0,0,mframeindex[4])

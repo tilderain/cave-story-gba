@@ -9,7 +9,7 @@
 
 #include "tables.h"
 
-const npc_info_def npc_info[NPC_COUNT + 9 + 20 + 17] = {
+const npc_info_def npc_info[NPC_COUNT + 9 + 20 + 19] = {
 	{ NULL,				NOSHEET, 		PAL0, 0, &onspawn_op2snap, 		&ai_nothing, 		&ai_null 			,""}, // OBJ_NULL
 	{ NULL,				SHEET_ENERGY, 	PAL1, 1, &onspawn_energy, 		&ai_energy, 		&ai_null 			,""}, // OBJ_XP
 	{ NULL,				SHEET_BEHEM, 	PAL1, 1, &ai_null, 				&ai_behemoth, 		&ondeath_default 	,""}, // OBJ_BEHEMOTH
@@ -312,9 +312,9 @@ const npc_info_def npc_info[NPC_COUNT + 9 + 20 + 17] = {
 	{ NULL, 			SHEET_MUCORE, 	PAL2, 3, &onspawn_ud_minicore, 	&ai_udmini_platform,&ai_null 			,""}, // Mini Undead Core
 	{ &SPR_MizaMisery,	NOSHEET,		PAL3, 1, &onspawn_persistent, 	&ai_misery_frenzied,&ai_null 			,""}, // Misery (Transformed)
 	{ &SPR_MizaSue, 	NOSHEET, 		PAL3, 1, &onspawn_persistent, 	&ai_sue_frenzied, 	&ai_null 			,""}, // Sue (Transformed)
-	{ NULL, 			NOSHEET, 		PAL3, 1, &onspawn_persistent, 	&ai_null, 			&ondeath_nodrop 	,""}, // Orange Spinning Shot
-	{ NULL, 			NOSHEET, 		PAL3, 1, &onspawn_persistent, 	&ai_null, 			&ai_null 			,""}, // Orange Dot
-	{ NULL, 			NOSHEET, 		PAL3, 1, &onspawn_persistent, 	&ai_null, 			&ai_null 			,""}, // Orange Smoke
+	{ NULL, 			SHEET_CORES4, 	PAL1, 1, &onspawn_persistent, 	&ai_ud_spinner, 	&ondeath_nodrop 	,""}, // Orange Spinning Shot
+	{ NULL, 			SHEET_CORES4, 	PAL1, 1, &onspawn_persistent, 	&ai_ud_spinner_trail,&ai_null 			,""}, // Orange Dot
+	{ NULL, 			SHEET_CORES4, 	PAL1, 1, &onspawn_persistent, 	&ai_ud_smoke, 		&ai_null 			,""}, // Orange Smoke
 	/* 0x120 (288) */
 	{ NULL, 			SHEET_ROCK, 	PAL3, 1, &onspawn_persistent, 	&ai_ud_pellet, 		&ondeath_nodrop 	,""}, // Glowing Rock Shot
 	{ NULL, 			SHEET_CRITTER, 	PAL3, 1, &onspawn_persistent, 	&ai_misery_critter, &ondeath_default 	,""}, // Orange Critter
@@ -451,4 +451,6 @@ const npc_info_def npc_info[NPC_COUNT + 9 + 20 + 17] = {
 	{ NULL, 			NOSHEET, 		PAL2, 1, &onspawn_cloud, 		&ai_cloud, 			&ai_null 			,""}, // Cloud
     { &SPR_DoctorBlood, NOSHEET, 		PAL1, 2, &ai_null, 		        &ai_doctorm_bleed, 	&ai_null 			,""}, // Blood particles
     { &SPR_DocDie, 	    NOSHEET, 		PAL1, 2, &onspawn_persistent, 	&ai_doctorm_die, 	&ai_null    		,""}, // Muscle Doctor (Die)
+    { NULL, 			SHEET_MUCORE, 	PAL2, 3, &onspawn_udmini_rotator, &ai_udmini_rotator, &ai_null    		,""}, // Undead Core Rotator
+    { NULL, 			NOSHEET, 		PAL0, 0, &onspawn_persistent, 	&ai_ud_hitbox, 		&ai_null    		,""}, // Undead Core Hitbox
 };
