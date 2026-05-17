@@ -31,6 +31,8 @@
 #include "gba_dma.h"
 #include "gbatext.h"
 
+#include "gbaram.h"
+
 int s_scroll_timer = 0;
 
 #define HEAD_EVENT_COUNT 14 // There are exactly 14

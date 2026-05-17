@@ -38,7 +38,7 @@ void put_fade_bg3(void);
 
 // On top
 #define WINDOW_Y1_TOP 0
-#define WINDOW_Y2_TOP 6               // Top window occupies rows 0-6
+#define WINDOW_Y2_TOP 7               // Top window occupies rows 0-7 (8 rows, matching bottom window)
 #define TEXT_Y1_TOP (WINDOW_Y1_TOP + 1) // Row 1 (where top text begins)
 #define TEXT_Y2_TOP (WINDOW_Y2_TOP - 1) // Row 5
 

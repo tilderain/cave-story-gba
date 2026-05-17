@@ -233,7 +233,7 @@ void onspawn_hp_lightning(Entity *e) {
 void ai_hp_lightning(Entity *e) {
 	if(++e->frame > 2) e->frame = 0;	// advance every frame (CSE2: ani_wait > 0)
 	
-	if(e->timer > 50) {
+	if(++e->timer > 50) {
 		sound_play(SND_LIGHTNING_STRIKE, 5);
 		entity_create(e->x + pixel_to_sub(32), e->y + pixel_to_sub(72), OBJ_LIGHTNING, 0);
 		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);

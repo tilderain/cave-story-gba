@@ -851,7 +851,8 @@ void onspawn_lightning(Entity *e) {
 void ai_lightning(Entity *e) {
 	e->animtime++;
 	if(e->animtime > 5) {
-		if(e->flags & NPC_OPTION2) e->attack = 10;
+		e->attack = 10;
+		if(e->frame == 0) sound_play(SND_LIGHTNING_STRIKE, 5);
 		SMOKE_AREA((e->x >> CSF) - 16, (e->y >> CSF), 32, 16, 2);
 		e->animtime = 0;
 		e->frame++;

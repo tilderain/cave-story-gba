@@ -312,7 +312,7 @@ uint8_t saveselect_main() {
 			for(uint8_t ti = 0; ti < 8; ti++) {
 				VDPSprite hs = {
 					.attr = TILE_ATTR(0, 1, 0, 0, hb_tile + ti),
-					.size = SPRITE_SIZE(1, 1)
+					.size = SPRITE_SIZE(1, 1) | (1 << 4)
 				};
 				sprite_pos(hs, 40 + ti * 8, py);
 				vdp_sprite_add(&hs);
@@ -324,7 +324,7 @@ uint8_t saveselect_main() {
 				uint16_t wpn_tile = TILE_FACEINDEX - 40 + f * 20 + wi * 4;
 				VDPSprite ws = {
 					.attr = TILE_ATTR(0, 1, 0, 0, wpn_tile),
-					.size = SPRITE_SIZE(2, 2)
+					.size = SPRITE_SIZE(2, 2) | (5 << 4)
 				};
 				sprite_pos(ws, (15 + wi * 2) * 8, py);
 				vdp_sprite_add(&ws);

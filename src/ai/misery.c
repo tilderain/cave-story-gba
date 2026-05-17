@@ -218,7 +218,7 @@ void ai_misery_stand(Entity *e) {
 
 void ai_misery_bubble(Entity *e) {
 	// find the Toroko object we are to home in on
-	Entity *target = entity_find_by_type(0x3C);
+	Entity *target = entity_find_by_type(OBJ_TOROKO);
 	if(!target) {
 		e->state = STATE_DELETE;
 		return;
@@ -238,10 +238,13 @@ void ai_misery_bubble(Entity *e) {
 		/* fallthrough */
 		case 1:
 		{
+			// Re-aim toward Toroko's current position each frame (CSE2 freezes position,
+			// but its proximity check uses frozen coords — GBA uses live coords, so we
+			// must track live or the bubble misses a moving Toroko)
+			THROW_AT_TARGET(e, target->x, target->y, 0x400);
 			e->x += e->x_speed;
 			e->y += e->y_speed;
-			// Check proximity to target (CSE2: within 3*0x200 pixels)
-			// Also timeout after 120 frames as fallback
+			// CSE2: pop when within 3 px of target center
 			if(++e->timer > 120 ||
 			   (e->x - (3 << CSF) < target->x && e->x + (3 << CSF) > target->x &&
 			    e->y - (3 << CSF) < target->y && e->y + (3 << CSF) > target->y)) {
@@ -249,8 +252,8 @@ void ai_misery_bubble(Entity *e) {
 				e->state = 2;
 				e->x = target->x;
 				e->y = target->y;
-				e->x_speed = 0;
-				e->y_speed = 0;
+				// Keep incoming velocity — CSE2 curves by accelerating both axes -0x20
+				// from the approach speed (GetCos*2).  Zeroing it kills the arc.
 				target->state = 500;
 			}
 		}

@@ -26,6 +26,8 @@
 #include "soundbank_bin.h"
 
 
+#include "bank_data.h"
+
 volatile uint8_t ready = 0;
 volatile uint8_t vblank = 0;
 
@@ -56,7 +58,11 @@ void aftervsync() {
     if(joy_pressed(btn[cfg_btn_map])) {
         saturate ^= 1;
         vdp_load_stage_palettes();
-        stage_setup_palettes();
+		stage_setup_palettes();
+		if(gamemode == GM_TITLE || gamemode == GM_CONFIG)
+		{
+			vdp_colors(16, PAL_Main, 16);
+		}
     }
 
     // L + R + Select = hard reset (return to title)

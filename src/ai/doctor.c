@@ -290,7 +290,8 @@ void ai_doctor_shot(Entity *e) {
 			e->x = e->x_mark + (((int32_t)cos[e->angle] * (int32_t)e->timer2) >> 3);
 			e->y = e->y_mark + (((int32_t)sin[e->angle] * (int32_t)e->timer2) >> 1);
 
-			entity_create(e->x, e->y, OBJ_DOCTOR_SHOT_TRAIL, 0);
+			if(entities_count_by_type(OBJ_DOCTOR_SHOT_TRAIL) < 22)
+				entity_create(e->x, e->y, OBJ_DOCTOR_SHOT_TRAIL, 0);
 		}
 		break;
 	}
@@ -324,7 +325,8 @@ void ai_doctor_blast(Entity *e) {
 	if (e->timer & 2) e->frame ^= 1;
 
 	if (e->timer % 4 == 1)
-		entity_create(e->x, e->y, OBJ_DOCTOR_SHOT_TRAIL, 0);
+		if(entities_count_by_type(OBJ_DOCTOR_SHOT_TRAIL) < 22)
+			entity_create(e->x, e->y, OBJ_DOCTOR_SHOT_TRAIL, 0);
 
 	if (e->timer > 250) {
 		effect_create_misc(EFF_DISSIPATE, e->x >> CSF, e->y >> CSF, FALSE);

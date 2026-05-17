@@ -147,3 +147,4 @@ void generic_npc_states(Entity *e);
 uint16_t entities_count_active();
 uint16_t entities_count_inactive();
 uint16_t entities_count();
+uint16_t entities_count_by_type(uint16_t type);

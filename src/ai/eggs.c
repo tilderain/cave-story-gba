@@ -67,13 +67,13 @@ void ai_beetle(Entity *e) {
 			while(blk(e->x, e->dir ? 9 : -9, e->y, 0) != 0x41) {
 				e->x += e->dir ? 0x1000 : -0x1000;
 			}
+			TURN_AROUND(e); // Face away from the wall
 			e->alwaysActive = FALSE;
 			e->state++;
 		} /* fallthrough */
-		case 1: // wait for player on the wall
+		case 1: // wait for player on the wall, then move in current direction
 		{
 			if(++e->timer > 60 && PLAYER_DIST_Y(e, 16 << CSF)) {
-				TURN_AROUND(e);
 				MOVE_X(0x200);
 				e->state = 2;
 			}
@@ -83,7 +83,9 @@ void ai_beetle(Entity *e) {
 		{
 			ANIMATE(e, 2, 1,0);
 			e->x += e->x_speed;
-			if(blk(e->x, e->dir ? 8 : -8, e->y, 0) == 0x41) {
+			uint8_t block = blk(e->x, e->dir ? 8 : -8, e->y, 0);
+			if(block == 0x41 || block == 0x43 || block == 0x44) {
+				TURN_AROUND(e);
 				e->state = 1;
 				e->frame = 0;
 				e->timer = 0;

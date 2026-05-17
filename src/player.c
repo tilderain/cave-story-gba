@@ -69,7 +69,7 @@ uint8_t airDisplayTime;
 uint8_t blockl, blocku, blockr, blockd;
 uint8_t ledge_time;
 
-VDPSprite airTankSprite;
+VDPSprite airTankSprite[6];
 
 
 uint8_t currentWeapon = 0; // Index 0-7 of which slot in the array the currently used weapon is
@@ -168,10 +168,22 @@ void player_init() {
 	};
 	// Air Tank sprite
 	vdp_tiles_load_from_rom(SPR_TILES(&SPR_Bubble, 0, 0), TILE_AIRTANKINDEX, 9);
-	airTankSprite = (VDPSprite) {
-		.size = SPRITE_SIZE(3,3),
-		.attr = TILE_ATTR(PAL0,0,0,0,TILE_AIRTANKINDEX)
-	};
+
+	for(int i = 0; i < 3; i++) {
+		uint16_t row_tile_start = TILE_AIRTANKINDEX + (i * 3);
+		// Each row uses: One 16x8 sprite (2 tiles) + One 8x8 sprite (1 tile)
+		
+		// 16x8 Sprite (LHS)
+		airTankSprite[i*2] = (VDPSprite) {
+			.size = SPRITE_SIZE(2,1), // 16x8
+			.attr = TILE_ATTR(PAL0,0,0,0, row_tile_start)
+		};
+		// 8x8 Sprite (RHS)
+		airTankSprite[i*2+1] = (VDPSprite) {
+			.size = SPRITE_SIZE(1,1), // 8x8
+			.attr = TILE_ATTR(PAL0,0,0,0, row_tile_start + 2)
+		};
+	}
 	// Player sprite
 	playerSprite = (VDPSprite) {
 		.size = SPRITE_SIZE(2,2),
@@ -1198,10 +1210,17 @@ void player_draw() {
             vdp_sprite_add(&weaponSprite);
         }
 		if(player.underwater && (playerEquipment & EQUIP_AIRTANK)) {
-			sprite_pos(airTankSprite, 
-					(player.x>>CSF) - (camera.x>>CSF) + SCREEN_HALF_W - 12,
-					(player.y>>CSF) - (camera.y>>CSF) + SCREEN_HALF_H - 12);
-			vdp_sprite_add(&airTankSprite);
+			int16_t baseX = (player.x>>CSF) - (camera.x>>CSF) + SCREEN_HALF_W - 12;
+			int16_t baseY = (player.y>>CSF) - (camera.y>>CSF) + SCREEN_HALF_H - 12;
+
+			for(int i = 0; i < 3; i++) {
+				int16_t rowY = baseY + (i * 8);
+				// Position 16x8 part
+				sprite_pos(airTankSprite[i*2], baseX, rowY);
+				// Position 8x8 part
+				sprite_pos(airTankSprite[i*2+1], baseX + 16, rowY);
+			}
+			vdp_sprites_add(airTankSprite, 6);
 		}
 	}
 }

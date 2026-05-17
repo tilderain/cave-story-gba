@@ -23,6 +23,7 @@
 #include "ai.h"
 
 #include "gba.h"
+#include "gbaram.h"
 
 /* Linked List Macros */
 
@@ -899,6 +900,16 @@ Entity *entity_find_by_type(uint16_t type) {
 		else e = e->next;
 	}
 	return NULL;
+}
+
+uint16_t entities_count_by_type(uint16_t type) {
+	uint16_t count = 0;
+	Entity *e = entityList;
+	while(e) {
+		if(e->type == type) count++;
+		e = e->next;
+	}
+	return count;
 }
 
 void entities_clear_by_event(uint16_t event) {

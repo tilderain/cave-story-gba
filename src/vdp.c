@@ -582,10 +582,11 @@ void vdp_load_stage_palettes() {
             *bg_ptr++ = saturate_color(tileset_info[stage_info[stageID].tileset].palette[i]);
         }
     if(background_info[stageBackground].palette != NULL && gamemode != GM_SOUNDTEST)
+    {
         for(int i=0; i<16; i++) { // OBJ Pal 1
             *bg_ptr++ = saturate_color(background_info[stageBackground].palette[i]);
         }
-
+    }
     // OBJ palettes
     obj_ptr = OBJ_COLORS + 33;
     if(stage_info[stageID].tileset != NULL)

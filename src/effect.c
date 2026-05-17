@@ -73,7 +73,7 @@ EWRAM_CODE void put_fade_bg3(void) {
     int w_x1 = 1;
     int w_x2 = 29;
     int w_y1 = windowOnTop ? 0 : 12;
-    int w_y2 = windowOnTop ? 7 : 20;
+    int w_y2 = windowOnTop ? 8 : 20;
     
     for (int y = 0; y < FADE_GRID_H; y++) {
         for (int x = 0; x < FADE_GRID_W; x++) {

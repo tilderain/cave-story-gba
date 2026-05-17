@@ -262,7 +262,12 @@ void press_menuitem(const MenuItem *item, uint8_t page, VDPSprite *sprCursor) {
 				if(songPlaying && !snes_ost_enabled) song_play(songPlaying);
 			}
             if(item->valptr == &saturate) {
-                vdp_load_stage_palettes();
+        		vdp_load_stage_palettes();
+				stage_setup_palettes();
+				if(gamemode == GM_TITLE || gamemode == GM_CONFIG)
+				{
+					vdp_colors(16, PAL_Main, 16);
+				}
             }
             break;
         }
