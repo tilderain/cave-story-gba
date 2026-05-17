@@ -217,6 +217,7 @@ IWRAM_CODE void game_main(uint8_t load) {
 		vdp_vsync();
 		PF_BGCOLOR(0x00E);
 		aftervsync();
+		if(hardReset) break;
 	}
 }
 

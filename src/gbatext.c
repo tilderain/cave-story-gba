@@ -343,19 +343,22 @@ void canvas_setup_tilemap(uint8_t on_top) {
 
 void canvas_scroll_up(void) {
     // Shift the canvas VRAM up by 16 pixels (2 tile rows)
-    int shift_words = (CANVAS_TILES_W * 32 * 2) / 4; 
+    int shift_words = (CANVAS_TILES_W * 32 * 2) / 4;
     int total_words = (CANVAS_TILES_W * CANVAS_TILES_H * 32) / 4;
-    
+
     volatile uint32_t *vram = (volatile uint32_t *)(VRAM_TILE_BASE + CANVAS_TILE_BASE * 32);
-    
+
+    // Pick the background color based on mode
+    uint32_t bg_fill = s_canvas_is_fullscreen ? 0x00000000 : 0x22222222;
+
     // Move the bottom lines of text up
     for (int i = 0; i < total_words - shift_words; i++) {
         vram[i] = vram[i + shift_words];
     }
-    
+
     // Erase the bottom line so new text can be written
     for (int i = total_words - shift_words; i < total_words; i++) {
-        vram[i] = 0;
+        vram[i] = bg_fill;
     }
 }
 

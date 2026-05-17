@@ -58,6 +58,11 @@ void aftervsync() {
         vdp_load_stage_palettes();
         stage_setup_palettes();
     }
+
+    // L + R + Select = hard reset (return to title)
+    if(joy_pressed(BUTTON_X) && (joystate & (BUTTON_Y | BUTTON_Z)) == (BUTTON_Y | BUTTON_Z)) {
+        SYS_hardReset();
+    }
 }
 #include "gbaram.h"
 
