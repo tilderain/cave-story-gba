@@ -82,7 +82,7 @@ IWRAM_CODE void game_main(uint8_t load) {
 		if(!paused) {
 			// Pressing start opens the item menu (unless a script is running)
 
-			if(joy_pressed(btn[cfg_btn_lswap]))
+			if(joy_pressed(btn[cfg_btn_map]))
 			{
 				saturate ^= 1;
 				stage_setup_palettes();

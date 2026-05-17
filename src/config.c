@@ -26,6 +26,9 @@
 #include "gamemode.h"
 #include "gbatext.h"
 
+// For restarting the current track after toggling audio settings
+extern uint8_t songPlaying;
+
 #define ANIM_SPEED	7
 #define ANIM_FRAMES	4
 
@@ -33,7 +36,7 @@
 
 //static uint8_t ssf_is_working;
 
-enum { PAGE_CONTROL, /*PAGE_LANGUAGE,*/ PAGE_GAMEPLAY, PAGE_SAVEDATA, NUM_PAGES };
+enum { PAGE_GBA, /*PAGE_LANGUAGE,*/ PAGE_GAMEPLAY, PAGE_CONTROL, PAGE_SAVEDATA, NUM_PAGES };
 
 enum { MI_LABEL, MI_INPUT, /*MI_RADIO, MI_LANG,*/ MI_TOGGLE, MI_ACTION, MI_RETURN, MI_MODE };
 
@@ -61,7 +64,23 @@ typedef struct {
 //#define BKI (0xD000 >> 5)
 
 const MenuItem menu[NUM_PAGES + 1][MAX_OPTIONS] = {
-	{ // Controller
+	{ // GBA Options
+		{ 3,  MI_TOGGLE, "Saturation", &saturate },
+		{ 5,  MI_TOGGLE, "SNES Soundtrack", &snes_ost_enabled },
+		{ 7,  MI_TOGGLE, "Beta Drums (OG OST)", &alt_drums_enabled },
+	},{ // Gameplay
+		{ 3,  /*9,  AKI,    */MI_TOGGLE, "60 fps", &cfg_60fps },
+		{ 5,  /*10, AKI+60, */MI_TOGGLE, "Enable Fast Forward", &cfg_ffwd },
+		{ 7,  /*11, AKI+120,*/MI_TOGGLE, "Use Up to Interact", &cfg_updoor },
+		{ 9, /*12, AKI+180,*/MI_TOGGLE, "Screen Shake in Hell", &cfg_hellquake },
+		{ 11, /*13, AKI+240,*/MI_TOGGLE, "Vulnerable After Pause", &cfg_iframebug },
+		{ 13, /*14, AKI+300,*/MI_TOGGLE, "Message Blip Sound", &cfg_msg_blip },
+		{ 15, /*15, AKI+360,*/MI_TOGGLE, "Mute BGM", &cfg_music_mute },
+		{ 17, /*16, AKI+420,*/MI_TOGGLE, "Mute SFX", &cfg_sfx_mute },
+
+	//	{ 23, /*19, BKI,    */MI_ACTION, "Apply", (uint8_t*)1 },
+	//	{ 25, /*20, BKI+40, */MI_ACTION, "Reset to Default", (uint8_t*)0 },
+	},{ // Controller
 		{ 3,  /*1,  AKI,    */MI_INPUT, "Jump / Confirm", &cfg_btn_jump },
 		{ 5,  /*2,  AKI+60, */MI_INPUT, "Shoot / Cancel", &cfg_btn_shoot },
 		{ 7,  /*3,  AKI+120,*/MI_INPUT, "Fast Fwd Text", &cfg_btn_ffwd },
@@ -73,20 +92,8 @@ const MenuItem menu[NUM_PAGES + 1][MAX_OPTIONS] = {
 
 	//	{ 20, /*8,  AKI+420,*/MI_MODE,  "Force Button Mode", &cfg_force_btn },
 
-		{ 23, /*19, BKI,    */MI_ACTION, "Apply", (uint8_t*)1 },
-		{ 25, /*20, BKI+40, */MI_ACTION, "Reset to Default", (uint8_t*)0 },
-	},{ // Gameplay
-		{ 3,  /*9,  AKI,    */MI_TOGGLE, "60 fps", &cfg_60fps },
-		{ 5,  /*10, AKI+60, */MI_TOGGLE, "Enable Fast Forward", &cfg_ffwd },
-		{ 7,  /*11, AKI+120,*/MI_TOGGLE, "Use Up to Interact", &cfg_updoor },
-		{ 9, /*12, AKI+180,*/MI_TOGGLE, "Screen Shake in Hell", &cfg_hellquake },
-		{ 11, /*13, AKI+240,*/MI_TOGGLE, "Vulnerable After Pause", &cfg_iframebug },
-		{ 13, /*14, AKI+300,*/MI_TOGGLE, "Message Blip Sound", &cfg_msg_blip },
-		{ 15, /*15, AKI+360,*/MI_TOGGLE, "Mute BGM", &cfg_music_mute },
-		{ 17, /*16, AKI+420,*/MI_TOGGLE, "Mute SFX", &cfg_sfx_mute },
-
-		{ 23, /*19, BKI,    */MI_ACTION, "Apply", (uint8_t*)1 },
-		{ 25, /*20, BKI+40, */MI_ACTION, "Reset to Default", (uint8_t*)0 },
+	//	{ 23, /*19, BKI,    */MI_ACTION, "Apply", (uint8_t*)1 },
+	//	{ 25, /*20, BKI+40, */MI_ACTION, "Reset to Default", (uint8_t*)0 },
 	},{ // Save data
 		{ 4,  /*17, AKI,    */MI_ACTION, "Erase Counter", (uint8_t*)3 },
 		{ 6,  /*18, AKI+60, */MI_ACTION, "Erase All Save Data (!)", (uint8_t*)4 },
@@ -205,13 +212,8 @@ uint8_t set_page(uint8_t page) {
 	canvas_clear();
 	
 	switch(page) {
-		case PAGE_CONTROL:
-			//if(cfg_language == LANG_JA) {
-			//	DrawJStr(8, 1, WKI, 21);
-			//} else {
-				vdp_puts(VDP_PLAN_A, "(1) Controller Config", 8, 1);
-
-			//}
+		case PAGE_GBA:
+				vdp_puts(VDP_PLAN_A, "(1) GBA Options", 8, 1);
 			break;
 		case PAGE_GAMEPLAY:
 			//if(cfg_language == LANG_JA) {
@@ -220,11 +222,18 @@ uint8_t set_page(uint8_t page) {
 				vdp_puts(VDP_PLAN_A, "(2) Gameplay Config", 8, 1);
 			//}
 			break;
+		case PAGE_CONTROL:
+			//if(cfg_language == LANG_JA) {
+			//	DrawJStr(8, 1, WKI, 21);
+			//} else {
+				vdp_puts(VDP_PLAN_A, "(3) Controller Config", 8, 1);
+			//}
+			break;
 		case PAGE_SAVEDATA:
 			//if(cfg_language == LANG_JA) {
 			//	DrawJStr(8, 1, WKI, 24);
 			//} else {
-				vdp_puts(VDP_PLAN_A, "(3) Save Data", 8, 1);
+				vdp_puts(VDP_PLAN_A, "(4) Save Data", 8, 1);
 			//}
 			break;
 	}
@@ -244,6 +253,17 @@ void press_menuitem(const MenuItem *item, uint8_t page, VDPSprite *sprCursor) {
 		case MI_TOGGLE: {
             sound_play(SND_MENU_SELECT, 5);
             *item->valptr ^= 1;
+            // Immediately apply changes for GBA options
+            if(item->valptr == &snes_ost_enabled) {
+                if(songPlaying) song_play(songPlaying);
+            }
+			if(item->valptr == &alt_drums_enabled)
+			{
+				if(songPlaying && !snes_ost_enabled) song_play(songPlaying);
+			}
+            if(item->valptr == &saturate) {
+            //    stage_setup_palettes();
+            }
             break;
         }
 		case MI_INPUT: {
@@ -298,7 +318,7 @@ void config_main() {
 	
 	uint8_t sprFrame = 0;
 	uint8_t sprTime = ANIM_SPEED;
-	uint8_t page = PAGE_CONTROL;
+	uint8_t page = PAGE_GBA;
 	uint8_t cursor = 0;
 	uint8_t numItems = set_page(page);
 	
@@ -349,12 +369,12 @@ void config_main() {
 			if(--page >= NUM_PAGES) page = NUM_PAGES - 1;
 			cursor = 0;
             sound_play(SND_MENU_MOVE, 0);
-			set_page(page);
+			numItems = set_page(page);
 		} else if(joy_pressed(BUTTON_RIGHT)) {
 			if(++page >= NUM_PAGES) page = 0;
 			cursor = 0;
             sound_play(SND_MENU_MOVE, 0);
-			set_page(page);
+			numItems = set_page(page);
 		} else if(joy_pressed(btn[cfg_btn_jump])) {
             if(menu[page][cursor].type == MI_RETURN) {
                 system_save_config(); // Save on "Return" menu item

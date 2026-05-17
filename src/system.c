@@ -547,6 +547,9 @@ void system_load_config() {
 	cfg_music_mute= SRAM_readByte(loc++);
 	cfg_sfx_mute  = SRAM_readByte(loc++);
 	cfg_60fps     = SRAM_readByte(loc++);
+	saturate      = SRAM_readByte(loc++);
+	snes_ost_enabled = SRAM_readByte(loc++);
+	alt_drums_enabled = SRAM_readByte(loc++);
 	// Just in case
 	if(cfg_force_btn > 2) cfg_force_btn = 0;
 	if(cfg_music_mute > 1) cfg_music_mute = 0;
@@ -597,6 +600,9 @@ void system_save_config() {
 	SRAM_writeByte(loc++, cfg_music_mute);
 	SRAM_writeByte(loc++, cfg_sfx_mute);
 	SRAM_writeByte(loc++, cfg_60fps);
+	SRAM_writeByte(loc++, saturate);
+	SRAM_writeByte(loc++, snes_ost_enabled);
+	SRAM_writeByte(loc++, alt_drums_enabled);
 
 	SRAM_disable();
 	z80_release();

@@ -67,7 +67,7 @@ void song_play(uint8_t id) {
 		}
 		return;
 	}
-	if(id == songPlaying && gamemode != GM_SOUNDTEST) return;
+	if(id == songPlaying && gamemode == GM_GAME) return;
 	songResume = songPlaying;
 	songResumePos = mmGetPosition();
 	songFadeVolume = -1; // Cancel any in-progress fade
