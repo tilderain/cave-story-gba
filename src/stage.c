@@ -35,6 +35,16 @@
 // Another tile gap, fits under both Almond and Cave
 #define TILE_WATERINDEX (TILE_TSINDEX + 384)
 
+// Write 32 tilemap entries to the water background layer (BG0 / VDP_PLAN_B)
+// at the given tile-row. BG0 uses 256-wide tilemaps (BASE_BACK screen block).
+static void write_water_row(int row, const uint16_t *buf) {
+    int r = row & 31;
+    uint16_t *map = (uint16_t*)MAP_BASE_ADR(BASE_BACK);
+    for (int i = 0; i < 32; i++) {
+        map[r * 32 + i] = buf[i];
+    }
+}
+
 // Index of background in db/back.c and the effect type
 uint8_t stageBackground = 0;
 
@@ -163,8 +173,11 @@ void stage_load(uint16_t id) {
 			vdp_set_scrollmode(HSCROLL_PLANE, VSCROLL_PLANE);
 			vdp_map_clear(VDP_PLAN_B);
             backScrollTable[0] = (SCREEN_HEIGHT >> 3) + 1;
-			//	gbatodo
-			vdp_tiles_load((uint32_t*)BG_Water, TILE_WATERINDEX, 64);
+			// GBA: BG0 uses CHAR_BASE(1), so SE index 0 = absolute tile TILE_BACKINDEX.
+			// Keep a blank tile at index 0 so cleared rows are transparent,
+			// then load 64 water tiles starting at index 1.
+			vdp_tiles_load(TILE_BLANK, TILE_BACKINDEX, 1);
+			vdp_tiles_load((uint32_t*)BG_Water, TILE_BACKINDEX + 1, 64);
 		} else if(stageBackgroundType == 5) { // Fog
 			vdp_set_scrollmode(HSCROLL_TILE, VSCROLL_PLANE);
 			// Use background color from tileset
@@ -474,32 +487,32 @@ void stage_update() {
 			oldrow--;
 			uint8_t rowup = 31 - ((oldrow + rowgap) & 31);// Row that will be updated
 			if(oldrow > rowc) { // Below Screen
-				uint16_t mapBuffer[64];
-				for(uint16_t x = 0; x < 64; x++) mapBuffer[x] = 0;
-				DMA_doDma(DMA_VRAM, (uint32_t)mapBuffer, VDP_PLAN_B + (rowup << 7), 64, 2);
+				uint16_t mapBuffer[32];
+				for(uint16_t x = 0; x < 32; x++) mapBuffer[x] = 0;
+				write_water_row(rowup, mapBuffer);
 			} else { // On screen or above
-				uint16_t mapBuffer[64];
-				for(uint16_t x = 0; x < 64; x++) {
-					mapBuffer[x] = TILE_ATTR(PAL0,1,0,0,
-							TILE_WATERINDEX + (oldrow == rowc ? x&3 : 4 + (random()&15)));
+				uint16_t mapBuffer[32];
+				for(uint16_t x = 0; x < 32; x++) {
+					mapBuffer[x] = CHAR_PALETTE(1) | (1 +
+							(oldrow == rowc ? x&3 : 4 + (random()&15)));
 				}
-				DMA_doDma(DMA_VRAM, (uint32_t)mapBuffer, VDP_PLAN_B + (rowup << 7), 64, 2);
+				write_water_row(rowup, mapBuffer);
 			}
 		}
 		while(row > oldrow) { // Water is lowering (Y increasing)
 			oldrow++;
 			uint8_t rowup = 31 - (oldrow & 31); // Row that will be updated
 			if(oldrow <= 0) { // Above screen
-				uint16_t mapBuffer[64];
-				for(uint16_t x = 0; x < 64; x++) {
-					mapBuffer[x] = TILE_ATTR(PAL0,1,0,0,
-							TILE_WATERINDEX + (oldrow == 0 ? x&3 : 4 + (random()&15)));
+				uint16_t mapBuffer[32];
+				for(uint16_t x = 0; x < 32; x++) {
+					mapBuffer[x] = CHAR_PALETTE(1) | (1 +
+							(oldrow == 0 ? x&3 : 4 + (random()&15)));
 				}
-				DMA_doDma(DMA_VRAM, (uint32_t)mapBuffer, VDP_PLAN_B + (rowup << 7), 64, 2);
+				write_water_row(rowup, mapBuffer);
 			} else { // On screen or below
-				uint16_t mapBuffer[64];
-				for(uint16_t x = 0; x < 64; x++) mapBuffer[x] = 0;
-				DMA_doDma(DMA_VRAM, (uint32_t)mapBuffer, VDP_PLAN_B + (rowup << 7), 64, 2);
+				uint16_t mapBuffer[32];
+				for(uint16_t x = 0; x < 32; x++) mapBuffer[x] = 0;
+				write_water_row(rowup, mapBuffer);
 			}
 		}
 		
