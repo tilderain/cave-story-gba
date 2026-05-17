@@ -207,6 +207,8 @@ EWRAM_CODE int main() {
 			if(hardReset) {
 				//RegisterRamReset(RESET_VRAM | RESET_OAM);
 				vdp_init();
+				// BG0 uses charblock 1 — clear its first tile to blank
+				vdp_tiles_load(TILE_BLANK, 512, 1);
 				//REG_DISPCNT &= ~0x0080; // Clear Forced Blank bit (Turn screen ON)
 				hardReset = 0;
 				song_stop();
