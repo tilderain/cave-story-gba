@@ -1,5 +1,5 @@
 # Cave Story GBA
-![Picture](doc/screen01.png)
+![Picture](preview.jpg)
 
 Work in progress port of [Cave Story MD by andwn](https://github.com/andwn/cave-story-md), for the GBA.
 
@@ -32,6 +32,7 @@ Various, details [here](doc/LICENSE.md)
 
 ## Advertising:
 Check out my [Cave Story DS port](https://github.com/tilderain/CaveStoryNDS) / [SNES port](https://github.com/tilderain/cave-story-snes) tech demo NOW
+
 You can direct questions comments and death threats to our discord: https://discord.gg/sy3vAf739B
 ## Thanks
 - andwn: Took on the insane task of porting this game to a 1988 console, and so without, this project would not exist.
