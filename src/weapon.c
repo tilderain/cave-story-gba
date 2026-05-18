@@ -570,7 +570,6 @@ void weapon_fire_bubbler(Weapon *w) {
 		effect_create_misc(EFF_BUBB_POP, player.x>>CSF, (player.y>>CSF) + (b->dir == DOWN ? 10 : -10), FALSE);
 	set_extent_box(b);
 }
-
 void weapon_fire_blade(Weapon *w) {
 	// Blade is only 1 bullet at a time for every level
 	Bullet *b = &playerBullet[0];
@@ -588,14 +587,15 @@ void weapon_fire_blade(Weapon *w) {
 			b->ttl = 30;
 			b->hit_box = (bounding_box) { 6, 6, 6, 6 };
 			break;
-		case 2: // Large 24x24 Blade, hits 6 times
-			b->sprite = (VDPSprite) { .size = SPRITE_SIZE(3, 3) };
+		case 2: // Large 24x24 Blade
+			// Use 32x8 (Index 12) to simulate 24x8 row
+			b->sprite = (VDPSprite) { .size = 12 | (5 << 4) }; 
 			b->damage = 18;
 			b->ttl = 18;
 			b->hit_box = (bounding_box) { 10, 10, 10, 10 };
 			break;
-		case 3: // King's Ghost, AOE on hit
-			b->sprite = (VDPSprite) { .size = SPRITE_SIZE(3, 3) };
+		case 3: // King's Ghost
+			b->sprite = (VDPSprite) { .size = 12 | (5 << 4) };
 			b->damage = 1;
 			b->ttl = 30;
 			b->hit_box = (bounding_box) { 8, 8, 8, 8 };

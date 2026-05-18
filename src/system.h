@@ -78,6 +78,8 @@ extern uint8_t cfg_msg_blip;
 extern uint8_t cfg_music_mute;
 extern uint8_t cfg_sfx_mute;
 
+extern uint8_t cfg_compact_textbox;
+
 extern uint8_t sram_file;
 
 // Global flags are persisted to save data

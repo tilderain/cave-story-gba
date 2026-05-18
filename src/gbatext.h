@@ -95,6 +95,7 @@ void canvas_setup_tilemap(uint8_t on_top);
 void canvas_reset_scroll(void);
 
 void canvas_scroll_up(void);
+void canvas_scroll_up_1row(void);
 
 extern int textPixelX;
 

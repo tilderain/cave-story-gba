@@ -3,6 +3,7 @@
 #include "gbatext.h"
 #include <string.h>
 #include "vdp.h"
+#include "system.h"
 
 uint8_t s_canvas_is_fullscreen = 0;
 
@@ -182,13 +183,14 @@ void canvas_init(void) {
 }
 
 void canvas_fix_tilemap(uint8_t on_top) {
-    int map_row = on_top ? 1 : 13;
-    int map_col = 2; 
+    int map_col = 2;
+    int map_row = on_top ? 1 : (cfg_compact_textbox ? 14 : 13);
+    int rows_to_map = cfg_compact_textbox ? 5 : 6;
 
     // Re-point the tilemap entries to the canvas VRAM tiles
     // We do NOT call canvas_clear() here so existing text stays
-    // Only map 6 rows — the last 2 rows are a hidden scroll gutter
-    for (int row = 0; row < 6; row++) {
+    // Map visible rows; remaining rows are a hidden scroll gutter
+    for (int row = 0; row < rows_to_map; row++) {
         for (int col = 0; col < CANVAS_TILES_W; col++) {
             int tile_idx = CANVAS_TILE_BASE + (row * CANVAS_TILES_W) + col;
             BG3_MAP_BASE[(map_row + row) * 32 + (map_col + col)] = (uint16_t)(tile_idx | (2 << 12));
@@ -316,8 +318,13 @@ void canvas_reset_scroll(void) {
 #include "effect.h"
 void canvas_setup_tilemap(uint8_t on_top) {
     s_canvas_is_fullscreen = 0;
-    int map_row = on_top ? 1 : 13;
+
+    // Compact bottom text area at row 14 (WINDOW_Y1_COMPACT+1 = 14), normal at row 13
+    int map_row = on_top ? 1 : (cfg_compact_textbox ? 14 : 13);
     int map_col = 2;
+
+    // Map rows to cover the text area. Compact: 5 rows (40px) vs normal: 6 rows (48px)
+    int rows_to_map = cfg_compact_textbox ? 5 : 6;
 
     // If there is NO fade active and NO full black mask, clear the map area
     if (!gFade.bMask && gFade.mode == 0) {
@@ -330,9 +337,9 @@ void canvas_setup_tilemap(uint8_t on_top) {
                 BG3_MAP_BASE[row * 32 + col] = 0;
     }
 
-    // IMPORTANT: Only map 6 rows of tiles to the screen
-    // The canvas is 8 rows high, so the last 2 rows are a hidden "gutter"
-    for (int row = 0; row < 6; row++) {
+    // Map visible rows of tiles to the screen
+    // The remaining rows are a hidden "gutter"
+    for (int row = 0; row < rows_to_map; row++) {
         for (int col = 0; col < CANVAS_TILES_W; col++) {
             int tile_idx = CANVAS_TILE_BASE + (row * CANVAS_TILES_W) + col;
             BG3_MAP_BASE[(map_row + row) * 32 + (map_col + col)] = (uint16_t)(tile_idx | (2 << 12));
@@ -357,6 +364,26 @@ void canvas_scroll_up(void) {
     }
 
     // Erase the bottom line so new text can be written
+    for (int i = total_words - shift_words; i < total_words; i++) {
+        vram[i] = bg_fill;
+    }
+}
+
+void canvas_scroll_up_1row(void) {
+    // Shift the canvas VRAM up by 8 pixels (1 tile row)
+    int shift_words = (CANVAS_TILES_W * 32 * 1) / 4;
+    int total_words = (CANVAS_TILES_W * CANVAS_TILES_H * 32) / 4;
+
+    volatile uint32_t *vram = (volatile uint32_t *)(VRAM_TILE_BASE + CANVAS_TILE_BASE * 32);
+
+    uint32_t bg_fill = s_canvas_is_fullscreen ? 0x00000000 : 0x22222222;
+
+    // Move content up by 1 tile row
+    for (int i = 0; i < total_words - shift_words; i++) {
+        vram[i] = vram[i + shift_words];
+    }
+
+    // Erase the bottom tile row so new text can be written
     for (int i = total_words - shift_words; i < total_words; i++) {
         vram[i] = bg_fill;
     }
@@ -396,7 +423,7 @@ void canvas_shift_pixels_up_2() {
     uint32_t bg_fill = s_canvas_is_fullscreen ? 0 : 0x22222222;
 
     for (int col = 0; col < CANVAS_TILES_W; col++) {
-        for (int row = 0; row < 8; row++) {
+        for (int row = 0; row < CANVAS_TILES_H; row++) {
             int current_tile_idx = (row * CANVAS_TILES_W + col) * 8; 
             volatile uint32_t *curr_tile = &vram[current_tile_idx];
 
@@ -407,7 +434,7 @@ void canvas_shift_pixels_up_2() {
             curr_tile[4] = curr_tile[6];
             curr_tile[5] = curr_tile[7];
 
-            if (row < 7) { 
+            if (row < CANVAS_TILES_H - 1) {
                 int next_tile_idx = ((row + 1) * CANVAS_TILES_W + col) * 8;
                 volatile uint32_t *next_tile = &vram[next_tile_idx];
                 curr_tile[6] = next_tile[0];

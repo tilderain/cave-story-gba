@@ -29,6 +29,12 @@ void put_fade_bg3(void);
 #define WINDOW_Y1 12                  // Placed at row 12 (so bottom box occupies rows 12-19)
 #define WINDOW_Y2 19                  // Placed at row 19 (the very bottom of GBA screen)
 
+// Compact window — 1 tile shorter (7 tiles tall instead of 8), shifted down 1 tile
+#define WINDOW_Y1_COMPACT 13
+#define WINDOW_Y2_COMPACT 19
+#define WINDOW_Y1_TOP_COMPACT 0
+#define WINDOW_Y2_TOP_COMPACT 6
+
 // Text area location within window
 #define TEXT_X1 (WINDOW_X1 + 1)       // Col 2
 #define TEXT_X2 (WINDOW_X2 - 1)       // Col 27
@@ -46,8 +52,19 @@ void put_fade_bg3(void);
 #define PROMPT_X 22                   // Centered for GBA width
 #define PROMPT_Y 11                   // Placed perfectly above the bottom window
 
+// Text row spacing
+#define TEXT_ROW_SPACING 16
+#define TEXT_ROW_SPACING_COMPACT 12
+
 #define ITEM_Y_START	(SCREEN_HALF_H + 128) - 16
 #define ITEM_Y_END		(SCREEN_HALF_H + 12 + 128) - 16
+
+#define ROW_SPACING()   (cfg_compact_textbox ? TEXT_ROW_SPACING_COMPACT : TEXT_ROW_SPACING)
+
+#define WY1(mode)       ((mode) ? (cfg_compact_textbox ? WINDOW_Y1_TOP_COMPACT : WINDOW_Y1_TOP) : (cfg_compact_textbox ? WINDOW_Y1_COMPACT : WINDOW_Y1))
+#define WY2(mode)       ((mode) ? (cfg_compact_textbox ? WINDOW_Y2_TOP_COMPACT : WINDOW_Y2_TOP) : (cfg_compact_textbox ? WINDOW_Y2_COMPACT : WINDOW_Y2))
+#define TY1(mode)       (WY1(mode) + 1)
+#define TY2(mode)       (WY2(mode) - 1)
 
 static int s_scroll_debt = 0; // Tracks how many pixels we still need to shift up
 
@@ -92,8 +109,8 @@ void window_clear_text();
 void window_draw_face();
 
 static void window_draw_frame(uint8_t mode) {
-    uint16_t wy1 = mode ? WINDOW_Y1_TOP : WINDOW_Y1;
-    uint16_t wy2 = mode ? WINDOW_Y2_TOP : WINDOW_Y2;
+    uint16_t wy1 = WY1(mode);
+    uint16_t wy2 = WY2(mode);
     uint8_t x1 = WINDOW_X1, x2 = WINDOW_X2;
 
     // Palette bank 6 — PAL_textbox is loaded at BG_COLORS[96]
@@ -129,18 +146,13 @@ void window_open(uint8_t mode) {
     windowOnTop = mode;
     hud_hide();
 
-    uint16_t wy1 = mode ? WINDOW_Y1_TOP : WINDOW_Y1,
-        wy2 = mode ? WINDOW_Y2_TOP : WINDOW_Y2,
-        ty1 = mode ? TEXT_Y1_TOP : TEXT_Y1,
-        ty2 = mode ? TEXT_Y2_TOP : TEXT_Y2;
-    
     window_clear();
 
     windowCleared = 0;
     
     if(!paused) {
         if(showingFace > 0) window_draw_face();
-        vdp_set_window(0, mode ? 8 : 104); // Sets vertical GBA window split (104px = Row 13)
+        vdp_set_window(0, mode ? 8 : (cfg_compact_textbox ? 112 : 104)); // Row 14 for compact bottom, row 13 for normal, row 1 for top
     } else showingFace = 0;
 
     if(textMode == TM_MSG) textMode = TM_NORMAL;
@@ -234,19 +246,25 @@ void window_set_face(uint16_t face, uint8_t open) {
 int textPixelX = 0;
 
 void window_draw_char(uint8_t c) {
+    int spacing = ROW_SPACING();
     if (c == '\n') {
         textRow++;
         if (textRow > 2) {
-            // Trigger a 16-pixel scroll animation
-            s_scroll_debt += 16;
+            // Trigger scroll animation
+            s_scroll_debt += spacing;
 
-            // When fast-forwarding, debt can exceed 16 (one smooth scroll).
+            // When fast-forwarding, debt can exceed one row spacing.
             // Immediately scroll the canvas VRAM to prevent text from being
             // drawn at Y positions beyond the canvas area, which would
             // corrupt other VRAM tiles (including window frame tiles).
-            while (s_scroll_debt > 16) {
-                canvas_scroll_up();
-                s_scroll_debt -= 16;
+            while (s_scroll_debt > spacing) {
+                if (cfg_compact_textbox) {
+                    canvas_scroll_up_1row();
+                    s_scroll_debt -= 8; // 1 tile row = 8px, remainder handled by smooth scroll
+                } else {
+                    canvas_scroll_up();
+                    s_scroll_debt -= 16;
+                }
             }
 
             textRow = 2; // Stay on the bottom row
@@ -256,16 +274,11 @@ void window_draw_char(uint8_t c) {
         } else {
             textColumn = 0;
             spaceCounter = spaceOffset = 0;
-            textPixelX = showingFace ? 56 : 0; 
+            textPixelX = showingFace ? 56 : 0;
         }
     } else {
-        // THE FIX: Offset the Y position by the remaining scroll debt
-        // If we are at Row 2 (Y=32) and debt is 16, we draw at Y=48.
-        // On the next frame, debt is 14 and the buffer shifted up by 2,
-        // so the new character drawn at 32+14=46 aligns perfectly with 
-        // the previous one which moved from 48 to 46.
-        int py = (textRow * 16) + s_scroll_debt; 
-        
+        int py = (textRow * spacing) + s_scroll_debt;
+
         textPixelX += canvas_put_glyph(textPixelX, py, c, 1);
         textColumn++;
     }
@@ -281,7 +294,7 @@ void window_draw_jchar(uint8_t iskanji, uint16_t c) {
         cjk_newline();
 		if(textRow > 2) {
             uint16_t msgTextX = showingFace ? TEXT_X1_FACE : TEXT_X1;
-            uint16_t msgTextY = windowOnTop ? TEXT_Y1_TOP : TEXT_Y1;
+            uint16_t msgTextY = TY1(windowOnTop);
             uint16_t msgTextW = showingFace ? 29 : 36;
             cjk_winscroll(msgTextX, msgTextY);
             vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(4), msgTextX, msgTextY+4, msgTextW, 2, 0);
@@ -293,37 +306,34 @@ void window_draw_jchar(uint8_t iskanji, uint16_t c) {
 	// Figure out where this char is gonna go
 	uint8_t msgTextX = showingFace ? TEXT_X1_FACE : TEXT_X1;
 	msgTextX += textColumn + (textColumn >> 1); // * 1.5
-	uint8_t msgTextY = (windowOnTop ? TEXT_Y1_TOP : TEXT_Y1) + textRow * 2;
+	uint8_t msgTextY = TY1(windowOnTop) + textRow * 2;
 	// And draw it
     cjk_draw(VDP_PLAN_W, c, msgTextX, msgTextY, 2, FALSE);
     textColumn++;
 }
 
 void window_scroll_text() {
+    int spacing = ROW_SPACING();
     // Push bottom 2 rows to top
     for(uint8_t row = 0; row < 2; row++) {
         if(vblank) aftervsync();
         vblank = 0;
-        
+
         uint8_t msgTextX = showingFace ? TEXT_X1_FACE : TEXT_X1;
-        uint8_t msgTextY = (windowOnTop ? TEXT_Y1_TOP:TEXT_Y1) + row * 2;
         for(uint8_t col = 0; col < 26 - (showingFace > 0) * 7; col++) { // GBA bounds
             windowText[row][col] = windowText[row + 1][col];
             uint8_t c = windowText[row][col];
             if(c >= 0x80) {
                 uint16_t index = (VDP_PLAN_W >> 5) + 3;
                 index += (c - 0x80) << 2;
-                //vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0, 1, 0, 0, index-4), msgTextX, msgTextY);
             } else {
-                //vdp_map_xy(VDP_PLAN_W, TILE_ATTR(PAL0, 1, 0, 0,
-                //        TILE_FONTINDEX + c - 0x20), msgTextX, msgTextY);
             }
             msgTextX++;
         }
     }
     // Clear third row
     uint8_t msgTextX = showingFace ? TEXT_X1_FACE : TEXT_X1;
-    uint8_t msgTextY = (windowOnTop ? TEXT_Y1_TOP:TEXT_Y1) + 4;
+    uint8_t msgTextY = TY1(windowOnTop) + 4;
     uint8_t msgTextW = showingFace ? 19 : 26; // GBA bounds
     memset(windowText[2], ' ', 36);
     vdp_map_fill_rect(VDP_PLAN_W, WINDOW_ATTR(4), msgTextX, msgTextY, msgTextW, 1, 0);
@@ -336,7 +346,14 @@ void window_scroll_text() {
     textPixelX = showingFace ? 56 : 0;
 
     // Scroll the actual canvas graphics up!
-    canvas_scroll_up();
+    if (cfg_compact_textbox) {
+        // For compact mode, shift canvas up by spacing pixels
+        // First shift 1 tile row (8px), the rest is smooth-scrolled
+        canvas_scroll_up_1row();
+        s_scroll_debt = spacing - 8;
+    } else {
+        canvas_scroll_up();
+    }
 }
 uint8_t window_get_textmode() {
 	return textMode;
@@ -460,9 +477,9 @@ void window_draw_face() {
 
     // 4. Draw the 6x6 face into the window plane
     // We pass '4' to TILE_ATTR so the hardware knows to use the colors we just loaded
-    vdp_map_fill_rect(VDP_PLAN_W, 
-        TILE_ATTR(4, 1, 0, 0, TILE_FACEINDEX), 
-        TEXT_X1, (windowOnTop ? TEXT_Y1_TOP : TEXT_Y1), 6, 6, 1);
+    vdp_map_fill_rect(VDP_PLAN_W,
+        TILE_ATTR(4, 1, 0, 0, TILE_FACEINDEX),
+        TEXT_X1, TY1(windowOnTop), 6, 6, 1);
 }
 
 void window_show_item(uint16_t item) {
@@ -668,10 +685,11 @@ void window_update() {
         }
 
         // Resting X: (WINDOW_X1 * 8) + 4 = 12
-        // Notice we DO NOT add faceXOffset here anymore! 
+        // Notice we DO NOT add faceXOffset here anymore!
         // The sprite stays anchored while the VRAM shift creates the sliding mask effect.
-        int16_t fx = (WINDOW_X1 * 8) + 4 + 128 + 4;
-        int16_t fy = (windowOnTop ? (WINDOW_Y1_TOP * 8) : (WINDOW_Y1 * 8)) + 4 + 128 + 4;
+        // Compact mode shifts face 4px up and 4px left to fit the smaller box
+        int16_t fx = (WINDOW_X1 * 8) + 4 + 128 + 4 - (cfg_compact_textbox ? 4 : 0);
+        int16_t fy = (WY1(windowOnTop) * 8) + 4 + 128 + 4 - (cfg_compact_textbox ? 4 : 0);
 
         uint16_t tileOffset = TILE_FACEINDEX;
 
@@ -698,7 +716,7 @@ void window_update() {
     }
 	if(tscState == TSC_WAITINPUT && textMode == TM_NORMAL) {
 		uint8_t x = showingFace ? TEXT_X1_FACE : TEXT_X1;
-		uint8_t y = windowOnTop ? TEXT_Y1_TOP : TEXT_Y1;
+		uint8_t y = TY1(windowOnTop);
 		uint16_t index;
 		if(cfg_language >= LANG_JA && cfg_language <= LANG_KO) {
 			x += textColumn + ((textColumn + 1) >> 1);

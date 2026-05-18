@@ -71,6 +71,7 @@ const MenuItem menu[NUM_PAGES + 1][MAX_OPTIONS] = {
 		{ 3,  MI_TOGGLE, "Saturation", &saturate },
 		{ 5,  MI_TOGGLE, "SNES Soundtrack", &snes_ost_enabled },
 		{ 7,  MI_TOGGLE, "Beta Drums (OG OST)", &alt_drums_enabled },
+		{ 9,  MI_TOGGLE, "Compact Textbox", &cfg_compact_textbox },
 	},{ // Gameplay
 		{ 3,  /*9,  AKI,    */MI_TOGGLE, "60 fps", &cfg_60fps },
 		{ 5,  /*10, AKI+60, */MI_TOGGLE, "Enable Fast Forward", &cfg_ffwd },

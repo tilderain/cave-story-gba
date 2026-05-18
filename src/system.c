@@ -62,6 +62,8 @@ uint8_t cfg_msg_blip = TRUE;
 uint8_t cfg_music_mute = FALSE;
 uint8_t cfg_sfx_mute = FALSE;
 
+uint8_t cfg_compact_textbox = FALSE;
+
 uint8_t sram_file = 0;
 uint8_t sram_state = SRAM_UNCHECKED;
 
@@ -550,10 +552,12 @@ void system_load_config() {
 	saturate      = SRAM_readByte(loc++);
 	snes_ost_enabled = SRAM_readByte(loc++);
 	alt_drums_enabled = SRAM_readByte(loc++);
+	cfg_compact_textbox = SRAM_readByte(loc++);
 	// Just in case
 	if(cfg_force_btn > 2) cfg_force_btn = 0;
 	if(cfg_music_mute > 1) cfg_music_mute = 0;
 	if(cfg_sfx_mute > 1) cfg_sfx_mute = 0;
+	if(cfg_compact_textbox > 1) cfg_compact_textbox = 0;
 	if(cfg_60fps > 1) {
 		cfg_60fps = 0;
 		// In 0.6.0 Japanese was 1 but now it's Spanish
@@ -603,6 +607,7 @@ void system_save_config() {
 	SRAM_writeByte(loc++, saturate);
 	SRAM_writeByte(loc++, snes_ost_enabled);
 	SRAM_writeByte(loc++, alt_drums_enabled);
+	SRAM_writeByte(loc++, cfg_compact_textbox);
 
 	SRAM_disable();
 	z80_release();
