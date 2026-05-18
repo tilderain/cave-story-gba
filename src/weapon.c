@@ -371,8 +371,7 @@ void weapon_fire_machinegun(Weapon *w) {
 	if(b->dir == UP) {
 		b->sprite.attr = TILE_ATTR(PAL0,0,0,0,sheets[w->sheet].index+8);
 		if(!player.grounded && w->level == 3) {
-			player.y_speed += 0x240;
-			if(player.y_speed > 0x600) player.y_speed = 0x600;
+			player.y_speed += 0x100;
 		}
 		b->x = player.x;
 		b->y = player.y - pixel_to_sub(12);
@@ -381,11 +380,12 @@ void weapon_fire_machinegun(Weapon *w) {
 	} else if(b->dir == DOWN) {
 		b->sprite.attr = TILE_ATTR(PAL0,0,1,0,sheets[w->sheet].index+8);
 		if(w->level == 3) {
-			if(joy_down(btn[cfg_btn_jump]) || player.y_speed > 0) {
-				player.y_speed -= 0x3FF;
-			} else {
-				player.y_speed -= 0x350;
-				if(player.y_speed < -0x47F) player.y_speed = -0x47F;
+			if(player.y_speed > 0)
+				player.y_speed >>= 1;
+			if(player.y_speed > -0x400) {
+				player.y_speed -= 0x200;
+				if(player.y_speed < -0x400)
+					player.y_speed = -0x400;
 			}
 		}
 		b->x = player.x;

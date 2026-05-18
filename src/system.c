@@ -62,7 +62,7 @@ uint8_t cfg_msg_blip = TRUE;
 uint8_t cfg_music_mute = FALSE;
 uint8_t cfg_sfx_mute = FALSE;
 
-uint8_t cfg_compact_textbox = FALSE;
+uint8_t cfg_compact_textbox = TRUE;
 
 uint8_t sram_file = 0;
 uint8_t sram_state = SRAM_UNCHECKED;

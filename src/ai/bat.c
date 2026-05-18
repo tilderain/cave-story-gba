@@ -27,7 +27,7 @@ void ai_batVertical(Entity *e) {
 		}
 		break;
 	}
-	ANIMATE(e, 2, 0,1,2);
+	ANIMATE(e, 4, 0,1,2);
 	FACE_PLAYER(e);
 	e->y += e->y_speed;
 }

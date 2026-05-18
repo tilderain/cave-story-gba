@@ -443,7 +443,7 @@ void ai_player(Entity *e) {
 }
 
 void ai_computer(Entity *e) {
-	if((++e->animtime & 3) == 0) if(++e->frame > 2) e->frame = 0;
+	if((++e->animtime & 3) == 0) if(++e->frame > 2) e->frame = 1;
 }
 
 void ai_savepoint(Entity *e) {

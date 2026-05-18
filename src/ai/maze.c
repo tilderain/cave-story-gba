@@ -523,6 +523,7 @@ void ai_gaudiArmor(Entity *e) {
 }
 
 void ai_gaudiArmorShot(Entity *e) {
+	e->flags |= NPC_SHOOTABLE;
 	ANIMATE(e, 4, 0,1,2);
 	e->x_next = e->x + e->x_speed;
 	e->y_next = e->y + e->y_speed;
