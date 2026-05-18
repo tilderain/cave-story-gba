@@ -19,6 +19,7 @@
 
 #include "stage.h"
 #include "window.h"
+#include "system.h"
 typedef struct {
 	VDPSprite sprite;
 	uint8_t type, ttl, timer, timer2;
@@ -72,11 +73,12 @@ EWRAM_CODE void put_fade_bg3(void) {
     volatile uint16_t* map = (volatile uint16_t*)0x0600E800;
     
     // Define the boundaries of the window tilemap (in tile coordinates)
-    // Window frame occupies tile columns 1-28 and rows 12-19 (bottom) or 0-6 (top)
+    // Window frame occupies tile columns 1-28 and rows 12-19 (bottom) or 0-7 (top)
+    // Compact mode shifts the bottom window down 1 tile (rows 13-19) and shrinks top to 0-6
     int w_x1 = 1;
     int w_x2 = 29;
-    int w_y1 = windowOnTop ? 0 : 12;
-    int w_y2 = windowOnTop ? 8 : 20;
+    int w_y1 = windowOnTop ? 0 : (cfg_compact_textbox ? 13 : 12);
+    int w_y2 = windowOnTop ? (cfg_compact_textbox ? 7 : 8) : 20;
     
     for (int y = 0; y < FADE_GRID_H; y++) {
         for (int x = 0; x < FADE_GRID_W; x++) {
