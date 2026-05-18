@@ -55,7 +55,7 @@
 #define TILE_NUMBERSIZE       24
 
 #define TILE_BRUHINDEX       (TILE_NUMBERINDEX + TILE_NUMBERSIZE) // Map name / weapon icon conflict
-#define TILE_BRUHSIZE        24
+#define TILE_BRUHSIZE        0
 
 #define TILE_AIRINDEX         (TILE_BRUHINDEX + TILE_BRUHSIZE)
 #define TILE_AIRSIZE          8

@@ -82,14 +82,18 @@ void ai_energy(Entity *e) {
 			if(e->y_speed > 0x5FF) e->y_speed = 0x5FF;
 			if(e->y_speed < -0x5FF) e->y_speed = -0x5FF;
 
-			// CSE2: floor bounce (flag & 8)
+			// CSE2: floor bounce (flag & 8 = one-shot collision event)
 			uint8_t block_below = blk(e->x, 0, e->y, e->display_box.top);
 			uint8_t block_above = blk(e->x, 0, e->y, -e->display_box.top);
 			if(block_below == 0x41 || block_below == 0x43) {
-				// CSE2: ym = -0x280, xm = 2*xm/3
-				e->y_speed = -0x280;
-				e->x_speed = 2 * e->x_speed / 3;
-				sound_play(SND_XP_BOUNCE, 0);
+				// CSE2: bounce only when falling (ym >= 0), not while already bouncing up.
+				//       flag & 8 in CSE2 is a one-shot edge event set by the collision engine.
+				if(e->y_speed >= 0) {
+					// CSE2: ym = -0x280, xm = 2*xm/3
+					e->y_speed = -0x280;
+					e->x_speed = 2 * e->x_speed / 3;
+					sound_play(SND_XP_BOUNCE, 0);
+				}
 			} else if(block_below & BLOCK_SLOPE) {
 				uint8_t index = block_below & 0xF;
 				if(index >= 4) {
@@ -98,9 +102,12 @@ void ai_energy(Entity *e) {
 					int8_t overlap = (yy & 15) - heightmap[index & 3][xx & 15];
 					if(overlap >= 0) {
 						e->y -= overlap;
-						if(e->y_speed >= 0x200) sound_play(SND_XP_BOUNCE, 0);
-						e->y_speed = -e->y_speed;
-						if(e->y_speed > -0x3FF) e->y_speed = -0x3FF;
+						// CSE2: bounce only when falling (ym >= 0)
+						if(e->y_speed >= 0) {
+							e->y_speed = -0x280;
+							e->x_speed = 2 * e->x_speed / 3;
+							sound_play(SND_XP_BOUNCE, 0);
+						}
 					}
 				}
 			} else if(block_above == 0x41 || block_above == 0x43) {
@@ -115,10 +122,9 @@ void ai_energy(Entity *e) {
 				e->x_speed = -e->x_speed;
 
 			// CSE2: stuck-in-surface handling (flag & 0xD = left|right|floor)
-			if(block_below == 0x41 || block_below == 0x43 ||
+			if((block_below == 0x41 || block_below == 0x43 || (block_below & BLOCK_SLOPE)) ||
 			   blk(e->x, -4, e->y, -1) == 0x41 || blk(e->x, -4, e->y, -1) == 0x43 ||
 			   blk(e->x, 4, e->y, -1) == 0x41 || blk(e->x, 4, e->y, -1) == 0x43) {
-				sound_play(SND_XP_BOUNCE, 0);
 				if(++e->timer2 > 2)
 					e->y -= 1 << CSF;
 			} else {
